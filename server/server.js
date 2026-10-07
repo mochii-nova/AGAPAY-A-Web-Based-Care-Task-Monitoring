@@ -10,6 +10,9 @@ app.use(express.json());
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
+const taskRoutes = require('./routes/taskRoutes');
+app.use('/api/tasks', taskRoutes);
+
 app.get('/', (req, res) => {
   res.send('AGAPAY server is running');
 });
