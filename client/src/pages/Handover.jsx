@@ -26,16 +26,37 @@ export default function Handover() {
   }, []);
 
   const submitHandover = async (e) => {
-    e.preventDefault();
-    setError('');
-    try {
-      await api.post('/handovers', { shift, notes });
-      setNotes('');
-      load();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Could not submit handover');
-    }
-  };
+  e.preventDefault();
+  setError('');
+
+  console.log('Submitting handover...');
+  console.log('Shift:', shift);
+  console.log('Notes:', notes);
+  console.log('Token:', localStorage.getItem('token'));
+
+  try {
+    const response = await api.post('/handovers', {
+      shift,
+      notes
+    });
+
+    console.log('Handover submitted successfully:', response.data);
+
+    setNotes('');
+    await load();
+  } catch (err) {
+    console.error('HANDOVER ERROR:', err);
+    console.error('Response:', err.response);
+    console.error('Response data:', err.response?.data);
+    console.error('Status:', err.response?.status);
+
+    setError(
+      err.response?.data?.message ||
+      err.message ||
+      'Could not submit handover'
+    );
+  }
+};
 
   const acknowledge = async (id) => {
     setError('');
