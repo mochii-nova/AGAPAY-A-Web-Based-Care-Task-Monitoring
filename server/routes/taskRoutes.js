@@ -42,4 +42,13 @@ router.patch('/:id/done', protect, async (req, res) => {
   res.json(withStatus(t));
 });
 
+router.delete('/:id', protect, async (req, res) => {
+  const t = await Task.findById(req.params.id);
+  if (!t) return res.status(404).json({ message: 'Task not found' });
+  if (!t.done) return res.status(400).json({ message: 'Only done tasks can be deleted' });
+
+  await t.deleteOne();
+  res.json({ message: 'Task deleted' });
+});
+
 module.exports = router;

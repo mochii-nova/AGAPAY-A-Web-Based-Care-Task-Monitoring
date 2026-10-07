@@ -29,6 +29,12 @@ export default function Tasks() {
     loadTasks();
   };
 
+  const deleteTask = async (id) => {
+    if (!confirm('Delete this task?')) return;
+    await api.delete(`/tasks/${id}`);
+    loadTasks();
+  };
+
   return (
     <div>
       <Navbar />
@@ -46,6 +52,7 @@ export default function Tasks() {
           <li key={t._id}>
             {t.resident} - {t.task} (due {new Date(t.dueAt).toLocaleString()}) - <b>{t.status.toUpperCase()}</b>{' '}
             {!t.done && <button onClick={() => markDone(t._id)}>Mark done</button>}
+            {t.done && <button onClick={() => deleteTask(t._id)}>Delete</button>}
           </li>
         ))}
       </ul>
