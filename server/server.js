@@ -13,6 +13,11 @@ app.use('/api/auth', authRoutes);
 const taskRoutes = require('./routes/taskRoutes');
 app.use('/api/tasks', taskRoutes);
 
+const handoverRoutes = require('./routes/handoverRoutes');
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/handovers', handoverRoutes);
+app.use('/api/users', userRoutes);
+
 app.get('/', (req, res) => {
   res.send('AGAPAY server is running');
 });

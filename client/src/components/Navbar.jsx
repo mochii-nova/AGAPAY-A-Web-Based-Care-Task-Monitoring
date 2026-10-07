@@ -16,6 +16,7 @@ export default function Navbar() {
       <button onClick={() => navigate('/dashboard')}>Dashboard</button>
       <button onClick={() => navigate('/tasks')}>Tasks</button>
       <button onClick={() => navigate('/handover')}>Handover</button>
+      {user?.role === 'admin' && <button onClick={() => navigate('/staff')}>Staff</button>}
       <button onClick={handleLogout}>Log out</button>
     </nav>
   );
