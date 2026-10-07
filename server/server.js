@@ -7,20 +7,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
-
-const taskRoutes = require('./routes/taskRoutes');
-app.use('/api/tasks', taskRoutes);
-
-const handoverRoutes = require('./routes/handoverRoutes');
-const userRoutes = require('./routes/userRoutes');
-app.use('/api/handovers', handoverRoutes);
-app.use('/api/users', userRoutes);
-
+// Test route
 app.get('/', (req, res) => {
   res.send('AGAPAY server is running');
 });
+
+// API routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/tasks', require('./routes/taskRoutes'));
+app.use('/api/handovers', require('./routes/handoverRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 mongoose
   .connect(process.env.MONGO_URI)

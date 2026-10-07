@@ -4,7 +4,7 @@ const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// done / pending / overdue
+// Adds a status to each task
 const withStatus = (t) => {
   const obj = t.toObject();
   if (obj.done) obj.status = 'done';
@@ -42,6 +42,7 @@ router.patch('/:id/done', protect, async (req, res) => {
   res.json(withStatus(t));
 });
 
+// Delete a task 
 router.delete('/:id', protect, async (req, res) => {
   const t = await Task.findById(req.params.id);
   if (!t) return res.status(404).json({ message: 'Task not found' });

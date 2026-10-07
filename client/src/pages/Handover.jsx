@@ -12,9 +12,13 @@ export default function Handover() {
   const [error, setError] = useState('');
 
   const load = async () => {
-    const [h, t] = await Promise.all([api.get('/handovers'), api.get('/tasks')]);
-    setHandovers(h.data);
-    setTasks(t.data);
+    try {
+      const [h, t] = await Promise.all([api.get('/handovers'), api.get('/tasks')]);
+      setHandovers(h.data);
+      setTasks(t.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not load data. Is the server running?');
+    }
   };
 
   useEffect(() => {
@@ -23,9 +27,14 @@ export default function Handover() {
 
   const submitHandover = async (e) => {
     e.preventDefault();
-    await api.post('/handovers', { shift, notes });
-    setNotes('');
-    load();
+    setError('');
+    try {
+      await api.post('/handovers', { shift, notes });
+      setNotes('');
+      load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not submit handover');
+    }
   };
 
   const acknowledge = async (id) => {

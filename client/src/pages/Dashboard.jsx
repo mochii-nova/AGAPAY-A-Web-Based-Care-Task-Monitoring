@@ -10,6 +10,7 @@ export default function Dashboard() {
   }, []);
 
   const count = (status) => tasks.filter((t) => t.status === status).length;
+  const overdue = tasks.filter((t) => t.status === 'overdue');
 
   return (
     <div>
@@ -18,11 +19,11 @@ export default function Dashboard() {
       <p>Pending: {count('pending')} | Done: {count('done')} | Overdue: {count('overdue')}</p>
 
       <h2>Tasks needing attention</h2>
-      {tasks.filter((t) => t.status === 'overdue').length === 0 ? (
+      {overdue.length === 0 ? (
         <p>No overdue tasks.</p>
       ) : (
         <ul>
-          {tasks.filter((t) => t.status === 'overdue').map((t) => (
+          {overdue.map((t) => (
             <li key={t._id}>
               {t.resident} - {t.task} (was due {new Date(t.dueAt).toLocaleString()})
             </li>
