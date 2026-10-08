@@ -16,7 +16,11 @@ export default function Dashboard() {
     <div>
       <Navbar />
       <h1>Dashboard</h1>
-      <p>Pending: {count('pending')} | Done: {count('done')} | Overdue: {count('overdue')}</p>
+      <div className="stats">
+        <div className="stat pending"><span>{count('pending')}</span><small>Pending</small></div>
+        <div className="stat done"><span>{count('done')}</span><small>Done</small></div>
+        <div className="stat overdue"><span>{count('overdue')}</span><small>Overdue</small></div>
+      </div>
 
       <h2>Tasks needing attention</h2>
       {overdue.length === 0 ? (

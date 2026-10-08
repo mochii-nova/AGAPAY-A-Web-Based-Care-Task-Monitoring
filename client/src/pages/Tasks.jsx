@@ -40,7 +40,7 @@ export default function Tasks() {
       <Navbar />
       <h1>Care Tasks</h1>
 
-      <form onSubmit={addTask}>
+      <form className="task-form" onSubmit={addTask}>
         <input placeholder="Resident" value={resident} onChange={(e) => setResident(e.target.value)} required />
         <input placeholder="Task" value={task} onChange={(e) => setTask(e.target.value)} required />
         <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} required />
@@ -49,8 +49,8 @@ export default function Tasks() {
 
       <ul>
         {tasks.map((t) => (
-          <li key={t._id}>
-            {t.resident} - {t.task} (due {new Date(t.dueAt).toLocaleString()}) - <b>{t.status.toUpperCase()}</b>{' '}
+          <li key={t._id} className="task-item">
+            {t.resident} - {t.task} (due {new Date(t.dueAt).toLocaleString()}) - <b className={`status ${t.status}`}>{t.status.toUpperCase()}</b>{' '}
             {!t.done && <button onClick={() => markDone(t._id)}>Mark done</button>}
             {t.done && <button onClick={() => deleteTask(t._id)}>Delete</button>}
           </li>

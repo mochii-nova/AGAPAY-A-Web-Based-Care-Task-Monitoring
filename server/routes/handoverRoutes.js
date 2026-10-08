@@ -1,11 +1,11 @@
 const express = require('express');
 const Handover = require('../models/Handover');
-require('../models/User');
+require('../models/User'); // makes sure the User model is registered for populate()
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Get all handovers
+// Get all handovers, newest first
 router.get('/', protect, async (req, res) => {
   try {
     const list = await Handover.find()
@@ -18,7 +18,7 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// Submit a handover 
+// Submit a handover (outgoing shift)
 router.post('/', protect, async (req, res) => {
   try {
     const { shift, notes } = req.body;
@@ -29,7 +29,7 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// Acknowledge a handover
+// Acknowledge a handover (incoming shift)
 router.patch('/:id/acknowledge', protect, async (req, res) => {
   try {
     const h = await Handover.findById(req.params.id);

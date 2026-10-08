@@ -26,37 +26,16 @@ export default function Handover() {
   }, []);
 
   const submitHandover = async (e) => {
-  e.preventDefault();
-  setError('');
-
-  console.log('Submitting handover...');
-  console.log('Shift:', shift);
-  console.log('Notes:', notes);
-  console.log('Token:', localStorage.getItem('token'));
-
-  try {
-    const response = await api.post('/handovers', {
-      shift,
-      notes
-    });
-
-    console.log('Handover submitted successfully:', response.data);
-
-    setNotes('');
-    await load();
-  } catch (err) {
-    console.error('HANDOVER ERROR:', err);
-    console.error('Response:', err.response);
-    console.error('Response data:', err.response?.data);
-    console.error('Status:', err.response?.status);
-
-    setError(
-      err.response?.data?.message ||
-      err.message ||
-      'Could not submit handover'
-    );
-  }
-};
+    e.preventDefault();
+    setError('');
+    try {
+      await api.post('/handovers', { shift, notes });
+      setNotes('');
+      load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not submit handover');
+    }
+  };
 
   const acknowledge = async (id) => {
     setError('');
@@ -77,7 +56,10 @@ export default function Handover() {
       <h1>Shift Handover</h1>
 
       <h2>Summary of tasks</h2>
-      <p>Completed: {doneCount} | Pending/Overdue: {openCount}</p>
+      <div className="stats">
+        <div className="stat done"><span>{doneCount}</span><small>Completed</small></div>
+        <div className="stat pending"><span>{openCount}</span><small>Pending / Overdue</small></div>
+      </div>
 
       <h2>Write handover</h2>
       <form onSubmit={submitHandover}>
@@ -91,14 +73,14 @@ export default function Handover() {
       </form>
 
       <h2>Handovers</h2>
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
       <ul>
         {handovers.map((h) => (
-          <li key={h._id}>
+          <li key={h._id} className="handover-item">
             [{h.shift}] by {h.author?.name} on {new Date(h.createdAt).toLocaleString()}<br />
             {h.notes}<br />
             {h.acknowledgedBy
-              ? `Acknowledged by ${h.acknowledgedBy.name}`
+              ? <span className="ack">Acknowledged by {h.acknowledgedBy.name}</span>
               : h.author?._id !== user.id && <button onClick={() => acknowledge(h._id)}>Acknowledge</button>}
           </li>
         ))}

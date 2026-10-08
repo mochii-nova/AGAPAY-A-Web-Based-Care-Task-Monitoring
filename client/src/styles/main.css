@@ -1,0 +1,191 @@
+/* AGAPAY - simple design */
+:root {
+  --primary: #7b4b94;
+  --primary-dark: #603a74;
+  --primary-light: #efe6f4;
+  --bg: #f6f2f8;
+  --card: #ffffff;
+  --text: #2b2433;
+  --muted: #7a7285;
+  --border: #e2d9e8;
+  --ok: #2e7d4f;
+  --warn: #b7791f;
+  --danger: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ---------- Page container (all pages) ---------- */
+#root > div {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+h1 { color: var(--primary-dark); margin: 24px 0 8px; }
+h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+p { margin: 8px 0; }
+.error { color: var(--danger); font-size: .9rem; }
+
+/* ---------- Navbar (Dashboard, Tasks, Handover, Staff) ---------- */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+nav b { margin-right: auto; font-size: 1.1rem; letter-spacing: 1px; }
+nav button { background: rgba(255,255,255,.15); margin: 0; }
+nav button:hover { background: rgba(255,255,255,.3); }
+
+/* ---------- Buttons ---------- */
+button {
+  background: var(--primary);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: .95rem;
+  cursor: pointer;
+  margin: 4px 4px 4px 0;
+}
+button:hover { background: var(--primary-dark); }
+
+/* ---------- Forms ---------- */
+form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+}
+label { font-size: .9rem; color: var(--muted); }
+input, select, textarea {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px 10px;
+  margin: 4px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--primary);
+  border-color: transparent;
+}
+textarea { max-width: 100%; }
+
+/* ---------- Landing page ---------- */
+#root > .landing {
+  max-width: 640px;
+  margin-top: 10vh;
+  text-align: center;
+  background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 48px 24px;
+}
+.landing h1 { color: #fff; font-size: 3rem; letter-spacing: 4px; margin: 0 0 12px; }
+.landing p { opacity: .9; margin-bottom: 28px; }
+.landing button { background: #fff; color: var(--primary-dark); font-weight: 600; padding: 10px 22px; margin: 4px; }
+.landing button:hover { background: var(--primary-light); }
+
+/* ---------- Login & Register ---------- */
+#root > .auth-card {
+  max-width: 420px;
+  margin-top: 8vh;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 6px 20px rgba(96, 58, 116, .08);
+}
+.auth-card h1 { margin-top: 0; text-align: center; }
+.auth-card form { border: 0; padding: 0; margin: 0 0 12px; }
+.auth-card input, .auth-card select { max-width: 100%; }
+.auth-card form button { width: 100%; padding: 10px; margin: 8px 0 0; }
+.auth-card > button {
+  width: 100%;
+  background: none;
+  color: var(--primary);
+  margin: 4px 0 0;
+}
+.auth-card > button:hover { background: var(--primary-light); }
+
+/* ---------- Dashboard / Handover summary cards ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.stat span { display: block; font-size: 2rem; font-weight: 700; }
+.stat small { color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.stat.pending { border-top-color: var(--warn); }
+.stat.done { border-top-color: var(--ok); }
+.stat.overdue { border-top-color: var(--danger); }
+
+/* ---------- Task & handover lists ---------- */
+ul { list-style: none; padding: 0; margin: 12px 0; }
+li {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.task-form input { max-width: 200px; display: inline-block; margin-right: 6px; }
+.handover-item { border-left: 4px solid var(--primary); }
+.ack { color: var(--ok); font-size: .9rem; font-weight: 600; }
+
+/* Status badges */
+.status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+  color: #fff;
+}
+.status.done { background: var(--ok); }
+.status.pending { background: var(--warn); }
+.status.overdue { background: var(--danger); }
+
+/* ---------- Table (Manage Staff) ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+th { background: var(--primary-light); }
+
+/* ---------- Phones ---------- */
+@media (max-width: 600px) {
+  nav b { width: 100%; }
+  input, select { max-width: 100%; }
+  .task-form input { max-width: 100%; display: block; }
+  .landing h1 { font-size: 2.2rem; }
+}

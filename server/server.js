@@ -18,6 +18,7 @@ app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/handovers', require('./routes/handoverRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
+// Connect to MongoDB, then start the server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {

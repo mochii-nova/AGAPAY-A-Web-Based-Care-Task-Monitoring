@@ -21,7 +21,7 @@ export default function Register() {
   };
 
   return (
-    <div>
+    <div className="auth-card">
       <h1>Register</h1>
       <form onSubmit={handleSubmit}>
         <label>Full name</label><br />
@@ -39,7 +39,7 @@ export default function Register() {
           <option value="admin">Admin</option>
         </select><br />
 
-        {error && <p>{error}</p>}
+        {error && <p className="error">{error}</p>}
         <button type="submit">Register</button>
       </form>
       <button onClick={() => navigate('/login')}>Already have an account? Log in</button>

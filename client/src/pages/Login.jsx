@@ -22,14 +22,14 @@ export default function Login() {
   };
 
   return (
-    <div>
+    <div className="auth-card">
       <h1>Log in</h1>
       <form onSubmit={handleSubmit}>
         <label>Username</label><br />
         <input value={username} onChange={(e) => setUsername(e.target.value)} required /><br />
         <label>Password</label><br />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /><br />
-        {error && <p>{error}</p>}
+        {error && <p className="error">{error}</p>}
         <button type="submit">Log in</button>
       </form>
       <button onClick={() => navigate('/register')}>No account? Register</button>

@@ -5,8 +5,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Handover from './pages/Handover';
-import ProtectedRoute from './components/ProtectedRoute';
 import Staff from './pages/Staff';
+import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
   return (
