@@ -1,0 +1,92 @@
+/* =====================================================================
+   My Profile (Profile.jsx) and the photo / Edit profile pop-ups
+   Colours come only from the variables in main.css.
+   Loaded by ProfileContext, because the pop-ups can open on any page.
+   ===================================================================== */
+.profile-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
+.profile-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+
+/* Left card: photo + admin details */
+.profile-id { position: sticky; top: 84px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.profile-id__photo { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.profile-id__photo:hover .avatar { opacity: 0.9; }
+.profile-id__camera {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--text);
+}
+.profile-id__name { margin: 14px 0 0; font-size: 1.25rem; font-weight: var(--fw-bold); }
+.profile-id__role { margin: 2px 0 12px; color: var(--muted); }
+.profile-id__admin { width: 100%; padding-top: 18px; margin-top: 20px; border-top: 1px solid var(--border); text-align: left; }
+.profile-id__admin .small-label { margin-bottom: 8px; }
+
+.info-list { margin: 0 0 10px; }
+.info-list div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.info-list div:last-child { border-bottom: 0; }
+.info-list dt { color: var(--muted); }
+.info-list dd { margin: 0; text-align: right; }
+.info-list dd small { display: block; color: var(--muted); font-size: 0.85rem; }
+
+/* Right cards */
+.info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.info-grid div { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--tint); }
+.info-grid dt { color: var(--muted); font-size: 0.82rem; }
+.info-grid dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.profile-note { margin-top: 12px; }
+
+.profile-emergency { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--border); }
+.profile-emergency .small-label { margin-bottom: 8px; }
+.emergency-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.emergency-row p { margin: 0; }
+.emergency-row__rel { color: var(--muted); font-size: 0.88rem; }
+
+.password-form__actions { display: flex; justify-content: flex-end; margin-top: 4px; }
+
+.saved-table { width: 100%; border-collapse: collapse; }
+.saved-table th {
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--label);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.6px;
+  text-align: left;
+  text-transform: uppercase;
+}
+.saved-table td { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.saved-table tr:last-child td { border-bottom: 0; }
+.saved-table__note { color: var(--muted); font-size: 0.88rem; }
+
+/* Photo pop-up */
+.photo-form__preview { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
+.photo-form__caption { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.photo-form__choose { width: 100%; cursor: pointer; }
+.photo-form__choose:has(input:focus-visible) { outline: 2px solid var(--indigo); outline-offset: 2px; }
+.photo-form__hint { margin: 6px 0 12px; text-align: center; }
+.photo-form__remove { margin-right: auto; }
+
+/* Edit profile pop-up */
+.edit-profile__photo { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.edit-profile__group { margin: 0 0 6px; padding: 0; border: 0; }
+.edit-profile__group legend { margin-bottom: 10px; padding: 0; }
+
+/* Smaller screens */
+@media (max-width: 1000px) {
+  .profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .profile-id { position: static; }
+}
+@media (max-width: 600px) {
+  .info-grid { grid-template-columns: minmax(0, 1fr); }
+  .saved-table thead { display: none; }
+  .saved-table tr { display: grid; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .saved-table td { padding: 0; border: 0; }
+}

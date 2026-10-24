@@ -801,7 +801,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   margin-bottom: 10px;
   border-bottom: 1px solid var(--on-navy-line);
 }
-.sidebar__avatar-btn { position: relative; border-radius: 50%; }
+.sidebar__avatar-btn { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+.sidebar__avatar-btn:hover .avatar { opacity: 0.9; }
 .sidebar__avatar-btn .avatar { box-shadow: 0 0 0 2px var(--on-navy-line); }
 .sidebar__avatar-edit {
   position: absolute;
@@ -818,25 +819,28 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   box-shadow: var(--shadow-sm);
 }
 .sidebar__menu { position: relative; width: 100%; margin-top: 8px; }
+/* Name + arrow on one centred line, role centred underneath; the whole area is one button */
 .sidebar__name-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 1px;
   width: 100%;
   min-height: var(--tap);
-  padding: 4px 10px;
+  padding: 6px 10px;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--on-navy);
   text-align: center;
 }
-.sidebar__name-btn:hover { background: var(--on-navy-hover); }
-.sidebar__name-btn span { display: flex; flex-direction: column; }
-.sidebar__name-btn strong { font-size: 0.95rem; }
+.sidebar__name-btn:hover,
+.sidebar__name-btn[aria-expanded='true'] { background: var(--on-navy-hover); }
+.sidebar__name-row { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; }
+.sidebar__name-row strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__name-btn small { color: var(--on-navy-muted); font-size: 0.8rem; }
-.sidebar__name-btn svg { transition: transform 0.15s; }
+.sidebar__name-btn svg { flex-shrink: 0; transition: transform 0.15s; }
 .sidebar__name-btn .is-flipped { transform: rotate(180deg); }
 .sidebar__dropdown { left: 0; right: 0; }
 

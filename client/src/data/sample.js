@@ -12,18 +12,21 @@ import { getShift, shiftTime } from '../constants';
 const minutesAgo = (n) => new Date(Date.now() - n * 60000).toISOString();
 const hoursFromNow = (h) => new Date(Date.now() + h * 3600000).toISOString();
 
-// Extra account details the backend's users table doesn't store yet.
-// Real values from the logged-in user (name, username, role) always win.
+// Default account details the backend's users table doesn't store yet.
+// context/ProfileContext.jsx combines these with the logged-in user and anything saved in the browser.
 export const sampleProfile = {
   name: 'Claire River',
   email: 'claire.river@example.com',
   employeeId: 'CGV-2026-017',
   phone: '0917 555 0123',
+  emergencyContact: { name: 'Mark River', relationship: 'Spouse', phone: '0918 555 0456' },
+  // Set by the administrator (not in the database yet)
   shift: 'Morning',
+  dateHired: '2024-06-03',
+  accountStatus: 'Active',
   photo: null,
 };
 
-export const getProfile = (user) => ({ ...sampleProfile, ...user });
 
 // Sample work roster: which shift I work on a day, as the backend value
 // ('Morning' | 'Afternoon' | 'Night'), or null for a day off.

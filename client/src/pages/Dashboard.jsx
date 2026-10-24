@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { AlarmClock, HeartHandshake, Info } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
-import { getProfile, sampleResidents, sampleShiftOn } from '../data/sample';
+import { sampleResidents, sampleShiftOn } from '../data/sample';
+import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { findMyShiftHandover } from '../utils/handover';
 import { SHIFTS } from '../constants';
@@ -43,8 +43,7 @@ function handoverStatus(phase, submitted, shift) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const profile = getProfile(user);
+  const { profile } = useProfile();
   const now = useNow();
   const tasksQuery = useTasks();
   const handoversQuery = useHandovers();

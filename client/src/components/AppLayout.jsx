@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { HandoverProvider } from '../context/HandoverContext';
+import { ProfileProvider } from '../context/ProfileContext';
 
 const isSmallScreen = () => window.matchMedia('(max-width: 900px)').matches;
 
@@ -15,18 +16,20 @@ export default function AppLayout() {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <HandoverProvider>
-      <div className={`app-layout ${collapsed ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
-        <Sidebar onClose={closeMobile} />
-        {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
+    <ProfileProvider>
+      <HandoverProvider>
+        <div className={`app-layout ${collapsed ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
+          <Sidebar onClose={closeMobile} />
+          {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
 
-        <div className="app-body">
-          <Navbar onMenuClick={toggleMenu} />
-          <main className="app-main">
-            <Outlet />
-          </main>
+          <div className="app-body">
+            <Navbar onMenuClick={toggleMenu} />
+            <main className="app-main">
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    </HandoverProvider>
+      </HandoverProvider>
+    </ProfileProvider>
   );
 }

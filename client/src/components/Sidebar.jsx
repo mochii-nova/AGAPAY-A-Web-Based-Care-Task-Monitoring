@@ -1,12 +1,12 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Users, FileText,
-  Bell, Mail, LogOut, ChevronDown, UserPen, Camera, X,
+  Bell, Mail, LogOut, ChevronDown, UserPen, Camera, X, IdCard,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useHandovers } from '../context/HandoverContext';
-import { getProfile } from '../data/sample';
+import { useProfile } from '../context/ProfileContext';
 import usePopover from '../hooks/usePopover';
 import ImageSlot from './ImageSlot';
 import Avatar from './Avatar';
@@ -34,10 +34,10 @@ const NAV_GROUPS = [
 // Left navigation shared by every page inside the app
 export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { unreadCount } = useNotifications();
   const { handovers } = useHandovers();
-  const profile = getProfile(user);
+  const { profile, openPhoto, openEditProfile } = useProfile();
   const { ref: menuRef, ...menu } = usePopover();
 
   // Handovers from other caregivers that nobody has marked as read yet
@@ -63,13 +63,13 @@ export default function Sidebar({ onClose }) {
       </div>
 
       <div className="sidebar__profile">
-        {/* Phase 8: this opens the photo upload */}
-        <Link to="/profile" className="sidebar__avatar-btn" onClick={onClose} aria-label="Change profile photo">
+        <button type="button" className="sidebar__avatar-btn" onClick={openPhoto} aria-label="Change profile photo">
           <Avatar name={profile.name} photo={profile.photo} size={72} />
           <span className="sidebar__avatar-edit" aria-hidden="true"><Camera size={14} /></span>
-        </Link>
+        </button>
 
         <div className="sidebar__menu" ref={menuRef}>
+          {/* Name + arrow on one centred line, role underneath; the whole area opens the menu */}
           <button
             type="button"
             className="sidebar__name-btn"
@@ -77,18 +77,20 @@ export default function Sidebar({ onClose }) {
             aria-expanded={menu.open}
             aria-haspopup="menu"
           >
-            <span>
+            <span className="sidebar__name-row">
               <strong>{profile.name}</strong>
-              <small>{roleLabel}</small>
+              <ChevronDown size={16} aria-hidden="true" className={menu.open ? 'is-flipped' : ''} />
             </span>
-            <ChevronDown size={18} className={menu.open ? 'is-flipped' : ''} />
+            <small>{roleLabel}</small>
           </button>
 
           {menu.open && (
             <div className="popover sidebar__dropdown" role="menu">
-              {/* Phase 8: this opens the Edit Profile form */}
-              <Link to="/profile" className="popover__item" role="menuitem" onClick={onClose}>
+              <button type="button" className="popover__item" role="menuitem" onClick={() => { menu.setOpen(false); openEditProfile(); }}>
                 <UserPen size={18} /> Edit profile
+              </button>
+              <Link to="/profile" className="popover__item" role="menuitem" onClick={() => { menu.setOpen(false); onClose(); }}>
+                <IdCard size={18} /> View my profile
               </Link>
               <button type="button" className="popover__item" role="menuitem" onClick={handleLogout}>
                 <LogOut size={18} /> Sign out

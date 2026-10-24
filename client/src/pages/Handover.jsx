@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CalendarOff, Inbox, History, CircleCheck } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
 import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
-import { getProfile, sampleResidents, sampleShiftOn } from '../data/sample';
+import { sampleResidents, sampleShiftOn } from '../data/sample';
+import { useProfile } from '../context/ProfileContext';
 import { draftKeyFor, loadDraft } from '../data/handoverDraft';
 import { SHIFTS, shiftLabel, shiftTime } from '../constants';
 import { shiftWindow, shiftPhase } from '../utils/shift';
@@ -48,8 +48,7 @@ function HandoverHead({ handover, isMine }) {
 }
 
 export default function Handover() {
-  const { user } = useAuth();
-  const profile = getProfile(user);
+  const { profile } = useProfile();
   const now = useNow();
   const showToast = useToast();
   const { tasks, status: tasksStatus, error: tasksError, reload: reloadTasks, updateTask } = useTasks();

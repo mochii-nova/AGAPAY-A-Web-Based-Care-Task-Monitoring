@@ -1,19 +1,19 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard } from 'lucide-react';
+import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { getProfile } from '../data/sample';
+import { useProfile } from '../context/ProfileContext';
 import { timeAgo } from '../utils/format';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationIcon from './NotificationIcon';
 
-// Lavender top bar: menu button, notifications, messages and the small profile menu
+// Top bar: menu button, notifications, messages and the small profile menu
 export default function Navbar({ onMenuClick }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
-  const profile = getProfile(user);
+  const { profile } = useProfile();
   const { ref: bellRef, ...bell } = usePopover();
   const { ref: accountRef, ...account } = usePopover();
 
@@ -114,6 +114,9 @@ export default function Navbar({ onMenuClick }) {
               <p className="account-popover__id">
                 <IdCard size={16} aria-hidden="true" /> Employee ID: <strong>{profile.employeeId}</strong>
               </p>
+              <Link to="/profile" className="popover__item" onClick={() => account.setOpen(false)}>
+                <UserRound size={18} /> My profile
+              </Link>
               <button type="button" className="popover__item popover__item--danger" onClick={handleLogout}>
                 <LogOut size={18} /> Sign out
               </button>
