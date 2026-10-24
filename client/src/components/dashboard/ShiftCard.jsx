@@ -8,9 +8,10 @@ const PHASE_TEXT = {
   upcoming: { label: 'Starts soon', tone: 'skipped' },
   on: { label: 'On shift now', tone: 'completed' },
   ended: { label: 'Shift ended', tone: 'skipped' },
+  off: { label: 'Day off', tone: 'skipped' },
 };
 
-// My shift for today and the next task coming up
+// My shift for today (or a day off) and the next task coming up
 export default function ShiftCard({ shift, phase, nextTask }) {
   const { label, tone } = PHASE_TEXT[phase];
 
@@ -20,8 +21,8 @@ export default function ShiftCard({ shift, phase, nextTask }) {
 
       <div className="shift-box">
         <div>
-          <p className="small-label">{shift.label} Shift</p>
-          <p className="shift-box__time">{shiftTime(shift)}</p>
+          <p className="small-label">{shift ? `${shift.label} Shift` : 'No shift today'}</p>
+          <p className="shift-box__time">{shift ? shiftTime(shift) : 'Enjoy your rest day'}</p>
         </div>
         <span className={`status-pill status-pill--${tone}`}>{label}</span>
       </div>

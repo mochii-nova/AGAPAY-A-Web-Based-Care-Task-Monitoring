@@ -25,6 +25,18 @@ export const sampleProfile = {
 
 export const getProfile = (user) => ({ ...sampleProfile, ...user });
 
+// Sample work roster: which shift I work on a day, as the backend value
+// ('Morning' | 'Afternoon' | 'Night'), or null for a day off.
+// Morning shift, Wednesdays off, and next Saturday moved to Noon
+// (matches the "Your Saturday shift changed" sample notification).
+export function sampleShiftOn(date) {
+  const day = new Date(date);
+  if (day.getDay() === 3) return null;
+  const daysAway = Math.round((new Date(day).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+  if (day.getDay() === 6 && daysAway > 0 && daysAway <= 7) return 'Afternoon';
+  return 'Morning';
+}
+
 export const sampleResidents = [
   {
     id: 'RP-2020-001',

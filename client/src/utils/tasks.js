@@ -30,6 +30,13 @@ export const normalizeTasks = (tasks) => tasks.map(normalizeTask);
 
 export const isToday = (date, now = new Date()) => new Date(date).toDateString() === now.toDateString();
 
+// Toast text after saving: `${task.task} ${SAVED_TEXT[status]}.`
+export const SAVED_TEXT = {
+  completed: 'marked as completed',
+  pending: 'kept as pending',
+  skipped: 'marked as skipped',
+};
+
 // Overdue first, then the earliest due time
 export const byUrgency = (a, b) =>
   (b.status === 'overdue') - (a.status === 'overdue') || new Date(a.dueAt) - new Date(b.dueAt);

@@ -38,8 +38,9 @@ export default function useApiData(path, { sample, transform = (data) => data } 
     };
   }, [path, reloadKey, sample, transform]);
 
-  const reload = () => {
-    setState((s) => ({ ...s, status: 'loading' }));
+  // reload() shows "Loading…" again; reload({ silent: true }) refreshes quietly in the background
+  const reload = ({ silent = false } = {}) => {
+    if (!silent) setState((s) => ({ ...s, status: 'loading' }));
     setReloadKey((k) => k + 1);
   };
 

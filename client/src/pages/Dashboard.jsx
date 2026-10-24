@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import useApiData from '../hooks/useApiData';
 import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
-import { getProfile, sampleResidents, sampleHandovers } from '../data/sample';
+import { getProfile, sampleResidents, sampleHandovers, sampleShiftOn } from '../data/sample';
 import { SHIFTS } from '../constants';
 import { formatLongDate } from '../utils/format';
 import { isToday } from '../utils/tasks';
@@ -36,6 +36,7 @@ function greeting(now) {
 // What to show next to "Handover" in the summary card
 function handoverStatus(phase, submitted, shift) {
   if (submitted) return { label: 'Submitted', tone: 'completed' };
+  if (phase === 'off') return { label: 'Day off', tone: 'skipped' };
   if (phase === 'ended') return { label: 'Not submitted', tone: 'overdue' };
   return { label: `Due at ${shift.end}`, tone: phase === 'on' ? 'pending' : 'skipped' };
 }
@@ -47,10 +48,10 @@ export default function Dashboard() {
   const tasksQuery = useTasks();
   const handoversQuery = useApiData('/handovers', { sample: sampleHandovers });
 
-  // My shift (sample until the backend stores each caregiver's shift)
-  const shift = SHIFTS.find((s) => s.apiValue === profile.shift) ?? SHIFTS[0];
-  const shiftTimes = shiftWindow(shift, now);
-  const phase = shiftPhase(shiftTimes, now);
+  // My shift today (sample roster until the backend has shifts). null = day off.
+  const shift = SHIFTS.find((s) => s.apiValue === sampleShiftOn(now)) ?? null;
+  const shiftTimes = shift ? shiftWindow(shift, now) : { start: now, end: now };
+  const phase = shift ? shiftPhase(shiftTimes, now) : 'off';
   const minutesLeft = (shiftTimes.end - now) / 60000;
 
   // TODO: only show tasks assigned to me once the backend has an assigned caregiver

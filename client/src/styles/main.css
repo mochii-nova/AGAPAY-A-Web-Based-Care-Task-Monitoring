@@ -171,7 +171,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 /* Two or three buttons joined together (only one is "on") */
 .segmented { display: inline-flex; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
 .segmented__btn {
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0 18px;
   border: 0;
   border-radius: 999px;
@@ -181,6 +181,9 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 }
 .segmented__btn:hover { background: var(--lavender); }
 .segmented__btn[aria-pressed='true'] { background: var(--navy); color: #fff; }
+/* Full-width version: every button gets an equal share of one row */
+.segmented--fill { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
+.segmented--fill .segmented__btn { padding: 0 4px; font-size: 0.92rem; white-space: nowrap; }
 
 /* Big radio buttons (e.g. Completed / Pending / Skipped) */
 .choice-group { border: 0; margin: 0 0 16px; padding: 0; }
@@ -875,7 +878,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   margin: 12px 0;
 }
 .app-main label:not([class]) { font-size: 0.9rem; color: var(--muted); }
-.app-main :is(input, select, textarea):not([class]) {
+.app-main :is(input:not([type='checkbox'], [type='radio']), select, textarea):not([class]) {
   width: 100%;
   max-width: 420px;
   min-height: var(--tap);

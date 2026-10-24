@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, ClipboardList, Info, StickyNote } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
-import api from '../api';
 import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES } from '../constants';
 import { sampleResidents } from '../data/sample';
 import { formatTime } from '../utils/format';
-import { isToday } from '../utils/tasks';
+import { isToday, SAVED_TEXT } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../components/StatusPill';
 import TaskCategoryIcon from '../components/TaskCategoryIcon';
@@ -38,7 +37,7 @@ const roomOf = (name) => sampleResidents.find((r) => r.name === name)?.room;
 const shortDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 export default function Tasks() {
-  const { tasks, status, error, usingSample, reload, saveExtra } = useTasks();
+  const { tasks, status, error, usingSample, reload, updateTask } = useTasks();
   const showToast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [scope, setScope] = useState('today');
@@ -63,16 +62,10 @@ export default function Tasks() {
   const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
   const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
 
-  const handleSave = async (task, { status: newStatus, reason, note }) => {
-    if (newStatus === 'completed' && task.status !== 'completed') {
-      await api.patch(`/tasks/${task._id}/done`);
-      reload();
-    }
-    saveExtra(task._id, newStatus === 'skipped' ? { skipped: true, reason, note } : note ? { note } : null);
+  const handleSave = async (task, changes) => {
+    await updateTask(task, changes);
     closeTask();
-
-    const verb = { completed: 'marked as completed', pending: 'kept as pending', skipped: 'marked as skipped' }[newStatus];
-    showToast(`${task.task} ${verb}.`);
+    showToast(`${task.task} ${SAVED_TEXT[changes.status]}.`);
   };
 
   return (
