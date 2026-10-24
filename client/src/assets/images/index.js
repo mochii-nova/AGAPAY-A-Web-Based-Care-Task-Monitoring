@@ -6,21 +6,23 @@
 //   2. Add an import at the top:       import logo from './logo.png';
 //   3. Set it as the src below:         logo: { src: logo, ... }
 // The box keeps the same size, so the layout won't move.
+// `size` = the file to make (2× the size on screen, so it's sharp on phones).
+// The full list with details is in design-reference/IMAGE-PLACEHOLDERS.md.
 
 export const images = {
   logo: {
     src: null,
     label: 'LOGO',
     file: 'logo.png',
-    page: 'Website header, sidebar',
-    size: '400 × 120 px, transparent PNG',
+    page: 'Website header',
+    size: '360 × 104 px, transparent PNG',
   },
   logoWhite: {
     src: null,
     label: 'LOGO (white)',
     file: 'logo-white.png',
-    page: 'Footer, Sign In / Register side panel',
-    size: '400 × 120 px, transparent PNG',
+    page: 'App sidebar, website footer',
+    size: '400 × 112 px, transparent PNG',
   },
   hero: {
     src: null,
@@ -55,6 +57,6 @@ export const images = {
     label: 'LOGIN SIDE PANEL LOGO',
     file: 'login-logo.png',
     page: 'Sign In and Register side panel',
-    size: '520 × 140 px, transparent PNG',
+    size: '480 × 128 px, transparent PNG',
   },
 };

@@ -408,10 +408,10 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 36px;
+  min-height: var(--tap);
   padding: 0 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: none;
   color: var(--label);
   font-size: 0.85rem;
