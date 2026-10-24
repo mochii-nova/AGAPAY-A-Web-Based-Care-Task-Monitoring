@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { CheckCheck } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import NotificationIcon from '../components/NotificationIcon';
+import CardHeader from '../components/CardHeader';
+import PushToggle from '../components/PushToggle';
 import { useNotifications } from '../context/NotificationContext';
 import { timeAgo } from '../utils/format';
 
@@ -20,6 +22,11 @@ export default function Notifications() {
           <CheckCheck size={18} /> Mark all as read
         </button>
       </PageHeader>
+
+      <section className="card notif-settings">
+        <CardHeader title="Pop-up notifications" />
+        <PushToggle />
+      </section>
 
       <div className="tabs" role="tablist">
         <button type="button" role="tab" aria-selected={filter === 'all'} className="tab" onClick={() => setFilter('all')}>

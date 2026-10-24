@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { HandoverProvider } from '../context/HandoverContext';
 import { ProfileProvider } from '../context/ProfileContext';
+import { PushProvider } from '../context/PushContext';
 
 const isSmallScreen = () => window.matchMedia('(max-width: 900px)').matches;
 
@@ -18,17 +19,19 @@ export default function AppLayout() {
   return (
     <ProfileProvider>
       <HandoverProvider>
-        <div className={`app-layout ${collapsed ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
-          <Sidebar onClose={closeMobile} />
-          {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
+        <PushProvider>
+          <div className={`app-layout ${collapsed ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
+            <Sidebar onClose={closeMobile} />
+            {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
 
-          <div className="app-body">
-            <Navbar onMenuClick={toggleMenu} />
-            <main className="app-main">
-              <Outlet />
-            </main>
+            <div className="app-body">
+              <Navbar onMenuClick={toggleMenu} />
+              <main className="app-main">
+                <Outlet />
+              </main>
+            </div>
           </div>
-        </div>
+        </PushProvider>
       </HandoverProvider>
     </ProfileProvider>
   );

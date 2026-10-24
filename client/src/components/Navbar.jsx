@@ -7,6 +7,7 @@ import { timeAgo } from '../utils/format';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationIcon from './NotificationIcon';
+import PushToggle from './PushToggle';
 
 // Top bar: menu button, notifications, messages and the small profile menu
 export default function Navbar({ onMenuClick }) {
@@ -57,6 +58,8 @@ export default function Navbar({ onMenuClick }) {
                   </Link>
                 </div>
               </div>
+
+              <PushToggle compact />
 
               <ul className="notif-list">
                 {notifications.slice(0, 5).map((n) => (

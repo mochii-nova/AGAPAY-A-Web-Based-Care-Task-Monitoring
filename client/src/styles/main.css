@@ -692,7 +692,64 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .popover__footer:hover { background: var(--tint); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
 
+/* On/off switch (a button with role="switch"; the button itself is the 44px tap area) */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 52px;
+  min-height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.switch__track {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--faint);
+  transition: background 0.15s;
+}
+.switch__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+}
+.switch[aria-checked='true'] .switch__track { background: var(--indigo); }
+.switch[aria-checked='true'] .switch__track::after { transform: translateX(18px); }
+.switch:focus-visible { outline: none; }
+.switch:focus-visible .switch__track { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+/* "Allow notifications" (PushToggle.jsx): bell dropdown + Notifications page */
+.push-toggle { display: flex; flex-direction: column; gap: 12px; }
+.push-toggle .alert { margin: 0; }
+.push-toggle__row { display: flex; align-items: center; gap: 12px; }
+.push-toggle__icon { flex-shrink: 0; color: var(--label); }
+.push-toggle__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.push-toggle__label { font-weight: var(--fw-medium); }
+.push-toggle__status { color: var(--muted); font-size: 0.85rem; }
+.push-toggle__status--success { color: var(--completed-text); }
+.push-toggle__status--info { color: var(--label); }
+.push-toggle__status--warning,
+.push-toggle__status--error { color: var(--pending-text); }
+.push-toggle__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.push-toggle__actions .field__hint { flex: 1 1 260px; }
+.push-toggle--compact { padding: 6px 8px 8px 10px; border-bottom: 1px solid var(--border); }
+.push-toggle--compact .push-toggle__row { align-items: flex-start; }
+.push-toggle--compact .push-toggle__icon { margin-top: 2px; }
+.push-toggle--compact .switch { margin-top: -10px; margin-bottom: -10px; }
+
 /* Notifications (bell dropdown + page) */
+.notif-settings { margin-bottom: 20px; }
 .notif-popover { width: 350px; max-width: calc(100vw - 24px); }
 .notif-list { list-style: none; margin: 0; padding: 4px 0; }
 .notif-item {
