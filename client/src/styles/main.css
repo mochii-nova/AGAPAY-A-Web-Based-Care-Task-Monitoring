@@ -4,59 +4,59 @@
    use var(--name). Dark mode (Phase 12) will only redefine these values.
    ===================================================================== */
 :root {
+  /* One colour family: every grey and white is slightly lavender-tinted.
+     Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
+
   /* Brand */
-  --navy: #1c2153;
-  --navy-hover: #2a3170;
-  --topbar: #a79bd0;
-  --accent: #8577bd;            /* big decorative lavender words */
-  --label: #5e5296;             /* small purple labels (readable contrast) */
+  --navy: #1c1f4a;              /* sidebar, footer: the only strong colour block */
+  --indigo: #4f46a5;            /* THE accent: links, selected tabs, checkboxes, focus, main button (7.6:1 on white) */
+  --indigo-hover: #433b8f;
+  --indigo-soft: #ecebf8;       /* background of selected tabs */
+  --display-lavender: #736ab6;  /* big lavender words on the website (4.7:1 on white) */
+  --label: #55588a;             /* small uppercase labels (6.7:1) */
 
-  /* Lavender fills, lightest to strongest */
-  --tint: #f7f5fd;              /* faint hover / row background */
-  --lavender: #eeeafa;          /* soft buttons, selected items */
-  --lavender-strong: #ddd5f2;   /* hover on soft items, table header */
-  --lavender-line: #c9bfe8;     /* dashed placeholder borders */
-
-  /* Surfaces and lines */
-  --bg: #f5f3fb;
+  /* Lavender-tinted surfaces, lightest to strongest */
+  --bg: #f7f6fb;                /* page background */
   --card: #ffffff;
-  --border: #e9e5f4;
-  --border-strong: #d3cde6;     /* inputs and outline buttons */
+  --tint: #f1eff8;              /* hover and soft backgrounds */
+  --lavender: #e9e6f5;          /* soft buttons, selected menu item */
+  --lavender-strong: #dedaef;   /* hover on soft buttons */
+  --lavender-line: #cfcae3;     /* dashed placeholder borders, quiet icons */
+  --border: #e6e3f0;
+  --border-strong: #d3cfe2;     /* inputs and outline buttons */
+  --topbar: #ffffff;            /* white top bar with a thin bottom border */
 
-  /* Text */
-  --text: #1c2153;
-  --muted: #5f5a78;
-  --faint: #8e89a6;             /* placeholders, days outside the month */
+  /* Navy-tinted text */
+  --text: #1e2140;              /* main text (15:1 on white) */
+  --muted: #5d6080;             /* secondary text (6.1:1 on white, 5.3:1 on --tint) */
+  --faint: #686a8a;             /* placeholders, days outside the month (5.2:1 on white, 4.6:1 on --tint) */
 
   /* On the navy sidebar / footer */
   --on-navy: #ffffff;
-  --on-navy-muted: #c4bee3;
-  --on-navy-hover: rgba(255, 255, 255, 0.1);
-  --on-navy-line: rgba(255, 255, 255, 0.14);
-  --on-topbar-hover: rgba(255, 255, 255, 0.35);
+  --on-navy-muted: #c4bee3;     /* 8.9:1 on navy */
+  --on-navy-hover: rgba(255, 255, 255, 0.08);
+  --on-navy-line: rgba(255, 255, 255, 0.12);
+  --on-topbar-hover: var(--tint);
 
   /* Status (always paired with a text label) */
-  --completed-bg: #ddf3e3;  --completed-text: #1e6b34;  --completed-dot: #4fb56f;
-  --pending-bg: #fdf3cf;    --pending-text: #6b4f00;    --pending-dot: #e6be35;
-  --overdue-bg: #fbdede;    --overdue-text: #8e1b1b;    --overdue-dot: #e46a6a;
-  --skipped-bg: #ebe9f1;    --skipped-text: #3f3a5c;    --skipped-dot: #a29dba;
-  --overdue-tint: #fdf6f6;      /* light red row background */
+  --completed-bg: #e3f2e8;  --completed-text: #2f6b45;  --completed-dot: #5ba777;
+  --pending-bg: #fbf1d9;    --pending-text: #7a5b12;    --pending-dot: #d9a93a;
+  --overdue-bg: #f9e1e1;    --overdue-text: #9a2c2c;    --overdue-dot: #d86a6a;
+  --skipped-bg: #eceaf2;    --skipped-text: #4f4d63;    --skipped-dot: #a3a0b8;
+  --overdue-tint: #fcf5f5;      /* light red row background */
 
   /* Other colours */
   --danger: #b42318;
-  --badge: #d92d20;             /* red notification counts */
-  --info-bg: #e4ebfb;  --info-text: #1f3f86;
-  --success-solid: #2e9e55;     /* solid icon circles (website) */
-  --alert-solid: #e5606b;
-  --heart: #f26b5e;
-  --overlay: rgba(28, 33, 83, 0.45);
+  --badge: #c8372d;             /* red notification counts */
+  --overlay: rgba(30, 33, 64, 0.4);
 
-  /* Shape and depth */
-  --radius: 14px;
-  --radius-sm: 10px;
-  --shadow-sm: 0 1px 2px rgba(28, 33, 83, 0.05);
-  --shadow: 0 1px 3px rgba(28, 33, 83, 0.04), 0 6px 18px rgba(28, 33, 83, 0.04);
-  --shadow-lg: 0 12px 32px rgba(28, 33, 83, 0.12);
+  /* Shape and depth (no glows, no coloured shadows) */
+  --radius: 12px;               /* cards */
+  --radius-sm: 8px;             /* inputs, buttons, tabs */
+  --radius-pill: 999px;         /* ONLY status labels and tags */
+  --shadow-sm: 0 1px 2px rgba(30, 33, 64, 0.05);
+  --shadow: 0 1px 2px rgba(30, 33, 64, 0.04);
+  --shadow-lg: 0 8px 24px rgba(30, 33, 64, 0.1);
 
   /* Type: 400 body and menus, 500 buttons and labels, 700 titles and big numbers */
   --fw-regular: 400;
@@ -98,7 +98,7 @@ img { max-width: 100%; }
 button { font: inherit; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
 
-:focus-visible { outline: 2px solid var(--label); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 
 .error { color: var(--danger); font-size: 0.9rem; }
 
@@ -140,7 +140,7 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 .field__input::placeholder { color: var(--faint); }
 .field__input:hover { border-color: var(--lavender-line); }
-.field__input:focus { outline: none; border-color: var(--label); box-shadow: 0 0 0 3px var(--lavender); }
+.field__input:focus { outline: none; border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-soft); }
 .field__input[aria-invalid='true'] { border-color: var(--danger); }
 textarea.field__input { resize: vertical; min-height: 96px; }
 .field__error { margin: 0; color: var(--danger); font-size: 0.85rem; }
@@ -172,7 +172,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 
 /* Checkbox with its label (whole row is at least 44px tall) */
 .checkbox-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--tap); }
-.checkbox-row input[type='checkbox'] { width: 18px; height: 18px; margin: 0; accent-color: var(--navy); cursor: pointer; }
+.checkbox-row input[type='checkbox'] { width: 18px; height: 18px; margin: 0; accent-color: var(--indigo); cursor: pointer; }
 .checkbox-row label { cursor: pointer; }
 .checkbox-row input[aria-invalid='true'] { outline: 2px solid var(--danger); outline-offset: 2px; }
 
@@ -184,13 +184,13 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   padding: 0 4px;
   border: 0;
   background: none;
-  color: var(--navy);
+  color: var(--indigo);
   font-weight: var(--fw-medium);
   text-decoration: underline;
   text-decoration-color: var(--lavender-line);
   text-underline-offset: 3px;
 }
-.link-btn:hover { color: var(--label); text-decoration-color: currentColor; }
+.link-btn:hover { color: var(--indigo-hover); text-decoration-color: currentColor; }
 
 /* Dropdown that matches the inputs (the arrow is drawn with two gradients) */
 .select {
@@ -216,20 +216,20 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--tint);
 }
 .segmented__btn {
   min-height: var(--tap);
   padding: 0 18px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   font-weight: var(--fw-medium);
 }
 .segmented__btn:hover { color: var(--text); }
-.segmented__btn[aria-pressed='true'] { background: var(--card); color: var(--navy); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
+.segmented__btn[aria-pressed='true'] { background: var(--card); color: var(--indigo); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
 /* Full-width version: every button gets an equal share of one row */
 .segmented--fill { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
 .segmented--fill .segmented__btn { padding: 0 4px; font-size: 0.9rem; white-space: nowrap; }
@@ -255,7 +255,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .choice input { position: absolute; opacity: 0; pointer-events: none; }
 .choice:hover { border-color: var(--lavender-line); color: var(--text); }
-.choice:has(input:focus-visible) { outline: 2px solid var(--label); outline-offset: 2px; }
+.choice:has(input:focus-visible) { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .choice--completed:has(input:checked) { border-color: var(--completed-dot); background: var(--completed-bg); color: var(--completed-text); }
 .choice--pending:has(input:checked) { border-color: var(--pending-dot); background: var(--pending-bg); color: var(--pending-text); }
 .choice--skipped:has(input:checked) { border-color: var(--skipped-dot); background: var(--skipped-bg); color: var(--skipped-text); }
@@ -268,13 +268,13 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   min-height: var(--tap);
   padding: 0 14px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--text);
   font-size: 0.9rem;
 }
 .chip:hover { background: var(--tint); border-color: var(--border-strong); }
-.chip.is-active { border-color: var(--lavender-strong); background: var(--lavender); color: var(--navy); font-weight: var(--fw-medium); }
+.chip.is-active { border-color: var(--indigo); background: var(--indigo-soft); color: var(--indigo); font-weight: var(--fw-medium); }
 
 /* Small grey line explaining a temporary limitation */
 .local-note { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 4px; color: var(--muted); font-size: 0.82rem; }
@@ -337,14 +337,14 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   min-height: var(--tap);
   padding: 0 20px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-weight: var(--fw-medium);
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.btn--primary { background: var(--navy); color: var(--on-navy); }
-.btn--primary:hover:not(:disabled) { background: var(--navy-hover); }
+.btn--primary { background: var(--indigo); color: var(--on-navy); }
+.btn--primary:hover:not(:disabled) { background: var(--indigo-hover); }
 .btn--soft { background: var(--lavender); color: var(--navy); }
 .btn--soft:hover:not(:disabled) { background: var(--lavender-strong); }
 .btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--navy); }
@@ -375,9 +375,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   width: var(--tap);
   height: var(--tap);
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--navy);
+  color: var(--text);
   text-decoration: none;
 }
 .icon-btn:hover { background: var(--on-topbar-hover); }
@@ -409,7 +409,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   font-size: 1rem;
   font-weight: var(--fw-medium);
 }
-.card__title svg { color: var(--label); }
+.card__title svg { color: var(--muted); }
 .card__meta { color: var(--muted); font-size: 0.85rem; }
 .card__link {
   display: inline-flex;
@@ -419,12 +419,12 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   padding: 0 8px;
   margin: -12px -8px -12px 0;
   border-radius: var(--radius-sm);
-  color: var(--label);
+  color: var(--indigo);
   font-size: 0.875rem;
   font-weight: var(--fw-medium);
   text-decoration: none;
 }
-.card__link:hover { background: var(--lavender); }
+.card__link:hover { background: var(--tint); }
 
 /* Small uppercase purple label */
 .small-label {
@@ -440,7 +440,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sample-tag {
   padding: 1px 9px;
   border: 1px dashed var(--lavender-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--label);
   font-size: 0.72rem;
 }
@@ -452,9 +452,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background: var(--lavender);
-  color: var(--label);
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  color: var(--muted);
   flex-shrink: 0;
 }
 
@@ -478,7 +478,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .status-pill {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: var(--fw-medium);
   white-space: nowrap;
@@ -532,7 +532,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   margin-left: auto;
   min-width: 20px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--badge);
   color: var(--on-navy);
   font-size: 0.72rem;
@@ -557,26 +557,26 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   padding: 3px;
   margin-bottom: 20px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--card);
 }
 .tab {
   min-height: var(--tap);
   padding: 0 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   font-weight: var(--fw-medium);
 }
 .tab:hover { color: var(--text); background: var(--tint); }
-.tab[aria-selected='true'] { background: var(--lavender); color: var(--navy); }
+.tab[aria-selected='true'] { background: var(--indigo-soft); color: var(--indigo); }
 .tab__count {
   display: inline-block;
   min-width: 22px;
   margin-left: 4px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--tint);
   color: var(--label);
   font-size: 0.75rem;
@@ -722,16 +722,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
-  background: var(--lavender);
-  color: var(--label);
+  background: var(--tint);
+  color: var(--muted);
 }
-.notif-icon--overdue  { background: var(--overdue-bg);   color: var(--overdue-text); }
-.notif-icon--task     { background: var(--pending-bg);   color: var(--pending-text); }
-.notif-icon--handover { background: var(--lavender);     color: var(--label); }
-.notif-icon--schedule { background: var(--completed-bg); color: var(--completed-text); }
-.notif-icon--message  { background: var(--info-bg);      color: var(--info-text); }
 
 /* Account dropdown (top-right avatar) */
 .account-popover { width: 280px; max-width: calc(100vw - 24px); }
@@ -773,10 +768,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   justify-content: space-between;
   height: 60px;
   padding: 0 16px;
+  border-bottom: 1px solid var(--border);
   background: var(--topbar);
 }
 .topbar__actions { display: flex; align-items: center; gap: 4px; }
-.topbar__avatar .avatar { box-shadow: 0 0 0 2px var(--card); }
+.topbar__avatar .avatar { box-shadow: 0 0 0 1px var(--border); }
 
 .app-main { flex: 1; padding: 32px 36px 64px; }
 
@@ -916,7 +912,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   padding: 0 18px;
   margin: 4px 4px 4px 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   background: var(--lavender);
   color: var(--navy);
   font-weight: var(--fw-medium);
@@ -947,37 +943,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .app-main > div > h1 { margin-bottom: 12px; }
 .app-main > div > h2 { margin-top: 24px; }
 
-/* Handover summary (rebuilt in Phase 7) */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin: 16px 0;
-}
-.stat {
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
-  text-align: center;
-}
-.stat span { display: block; font-size: 1.8rem; font-weight: var(--fw-bold); }
-.stat small { color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.stat.pending { background: var(--pending-bg); }
-.stat.done { background: var(--completed-bg); }
-.stat.overdue { background: var(--overdue-bg); }
-
-/* Handover and staff lists (rebuilt in Phase 7 and the Admin side) */
-.app-main ul:not([class]) { list-style: none; padding: 0; margin: 12px 0; }
-.app-main ul:not([class]) > li {
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--card);
-}
-.ack { color: var(--completed-text); font-size: 0.9rem; font-weight: var(--fw-medium); }
-
+/* Staff table (rebuilt with the Admin side) */
 .app-main table:not([class]) {
   width: 100%;
   overflow: hidden;

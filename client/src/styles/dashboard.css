@@ -25,11 +25,11 @@
   margin-bottom: 28px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(100deg, var(--card) 55%, var(--lavender) 100%);
+  background: var(--card);
 }
 .quote-banner__quote { margin: 0; font-size: 1.05rem; }
 .quote-banner__sub { margin: 2px 0 0; color: var(--muted); font-size: 0.88rem; }
-.quote-banner__icon { flex-shrink: 0; color: var(--accent); }
+.quote-banner__icon { flex-shrink: 0; color: var(--lavender-line); }
 
 /* Two columns of cards */
 .dash-grid {

@@ -28,7 +28,7 @@
   transition: border-color 0.15s, background 0.15s;
 }
 .resident-card:hover { border-color: var(--lavender-line); }
-.resident-card[aria-pressed='true'] { border-color: var(--label); background: var(--tint); }
+.resident-card[aria-pressed='true'] { border-color: var(--indigo); background: var(--indigo-soft); }
 .resident-card__body { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
 .resident-card__line { display: flex; align-items: center; gap: 10px; min-height: 22px; white-space: nowrap; }
 .resident-card__name { overflow: hidden; font-size: 1.05rem; text-overflow: ellipsis; }
@@ -45,7 +45,7 @@
   min-width: 0;
   padding: 2px 10px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--tint);
   color: var(--muted);
   font-size: 0.78rem;

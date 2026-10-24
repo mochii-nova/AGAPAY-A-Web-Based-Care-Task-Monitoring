@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { AlarmClock, HeartHandshake, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import useApiData from '../hooks/useApiData';
 import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
-import { getProfile, sampleResidents, sampleHandovers, sampleShiftOn } from '../data/sample';
+import { getProfile, sampleResidents, sampleShiftOn } from '../data/sample';
+import { useHandovers } from '../context/HandoverContext';
+import { findMyShiftHandover } from '../utils/handover';
 import { SHIFTS } from '../constants';
 import { formatLongDate } from '../utils/format';
 import { isToday } from '../utils/tasks';
@@ -46,7 +47,7 @@ export default function Dashboard() {
   const profile = getProfile(user);
   const now = useNow();
   const tasksQuery = useTasks();
-  const handoversQuery = useApiData('/handovers', { sample: sampleHandovers });
+  const handoversQuery = useHandovers();
 
   // My shift today (sample roster until the backend has shifts). null = day off.
   const shift = SHIFTS.find((s) => s.apiValue === sampleShiftOn(now)) ?? null;
@@ -60,9 +61,9 @@ export default function Dashboard() {
     .filter((t) => t.status === 'pending')
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))[0];
 
-  const handovers = handoversQuery.data ?? [];
+  const { handovers } = handoversQuery;
   const latestHandover = handovers.find((h) => h.author?._id !== profile.id);
-  const submitted = handovers.some((h) => h.author?._id === profile.id && new Date(h.createdAt) >= shiftTimes.start);
+  const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes);
   const showReminder = phase === 'on' && minutesLeft <= REMIND_BEFORE_MIN && !submitted;
 
   const quote = QUOTES[now.getDate() % QUOTES.length];

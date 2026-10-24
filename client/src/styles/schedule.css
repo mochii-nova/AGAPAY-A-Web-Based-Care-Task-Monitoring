@@ -34,7 +34,7 @@
   cursor: pointer;
 }
 .status-filter:hover { background: var(--tint); }
-.status-filter input { width: 16px; height: 16px; margin: 0; accent-color: var(--navy); cursor: pointer; }
+.status-filter input { width: 16px; height: 16px; margin: 0; accent-color: var(--indigo); cursor: pointer; }
 .status-filter:has(input:not(:checked)) { color: var(--faint); }
 .status-filter:has(input:not(:checked)) .dot { opacity: 0.35; }
 
@@ -64,7 +64,7 @@
 }
 .month__day:hover { background: var(--tint); }
 .month__day.is-outside { background: var(--tint); color: var(--faint); }
-.month__day[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 0 0 1.5px var(--label); }
+.month__day[aria-pressed='true'] { background: var(--indigo-soft); box-shadow: inset 0 0 0 1.5px var(--indigo); }
 .month__date {
   display: inline-flex;
   align-items: center;
@@ -96,7 +96,7 @@
   color: var(--text);
 }
 .week__head:hover { background: var(--lavender); }
-.week__head[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 -2px 0 var(--navy); }
+.week__head[aria-pressed='true'] { background: var(--indigo-soft); box-shadow: inset 0 -2px 0 var(--indigo); }
 .week__weekday { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); text-transform: uppercase; }
 .week__date {
   display: inline-flex;
@@ -120,8 +120,7 @@
   min-height: var(--tap);
   padding: 6px 8px;
   border: 0;
-  border-left: 3px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--tint);
   color: var(--text);
   font-size: 0.8rem;
@@ -132,10 +131,10 @@
 .week__task > span:last-child { min-width: 0; overflow-wrap: break-word; }
 .week__task small { display: block; color: var(--muted); font-weight: var(--fw-regular); }
 .week__task:hover { filter: brightness(0.97); }
-.week__task--pending { background: var(--pending-bg); border-left-color: var(--pending-dot); }
-.week__task--completed { background: var(--completed-bg); border-left-color: var(--completed-dot); }
-.week__task--overdue { background: var(--overdue-bg); border-left-color: var(--overdue-dot); }
-.week__task--skipped { background: var(--skipped-bg); border-left-color: var(--skipped-dot); }
+.week__task--pending { background: var(--pending-bg); }
+.week__task--completed { background: var(--completed-bg); }
+.week__task--overdue { background: var(--overdue-bg); }
+.week__task--skipped { background: var(--skipped-bg); }
 
 /* Side panel */
 .day-panel { position: sticky; top: 84px; }
@@ -198,7 +197,7 @@
   .week { grid-template-columns: minmax(0, 1fr); }
   .week__day { flex-direction: row; align-items: stretch; min-height: 0; }
   .week__head { flex-shrink: 0; width: 84px; border-bottom: 0; border-right: 1px solid var(--border); }
-  .week__head[aria-pressed='true'] { box-shadow: inset -2px 0 0 var(--navy); }
+  .week__head[aria-pressed='true'] { box-shadow: inset -2px 0 0 var(--indigo); }
   .week__tasks, .week__empty { flex: 1; }
   .week__empty { align-self: center; }
 }

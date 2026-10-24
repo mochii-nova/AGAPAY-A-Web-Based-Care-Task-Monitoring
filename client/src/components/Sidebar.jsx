@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useHandovers } from '../context/HandoverContext';
 import { getProfile } from '../data/sample';
 import usePopover from '../hooks/usePopover';
 import ImageSlot from './ImageSlot';
@@ -35,8 +36,13 @@ export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { handovers } = useHandovers();
   const profile = getProfile(user);
   const { ref: menuRef, ...menu } = usePopover();
+
+  // Handovers from other caregivers that nobody has marked as read yet
+  const newHandovers = handovers.filter((h) => h.author?._id !== profile.id && !h.acknowledgedBy).length;
+  const badges = { '/handover': newHandovers > 0 ? `${newHandovers} new` : null };
 
   const handleLogout = () => {
     logout();
@@ -99,6 +105,7 @@ export default function Sidebar({ onClose }) {
             {group.items.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} className="sidebar__link" onClick={onClose}>
                 <Icon size={18} aria-hidden="true" /> {label}
+                {badges[to] && <span className="count-badge">{badges[to]}</span>}
               </NavLink>
             ))}
           </div>

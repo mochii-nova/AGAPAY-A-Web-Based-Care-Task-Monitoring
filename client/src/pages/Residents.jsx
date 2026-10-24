@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Users } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
-import useApiData from '../hooks/useApiData';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES, shiftLabel } from '../constants';
-import { sampleResidents, sampleHandovers } from '../data/sample';
+import { sampleResidents } from '../data/sample';
+import { useHandovers } from '../context/HandoverContext';
+import { RESIDENT_STATUS } from '../utils/handover';
 import { isToday, SAVED_TEXT } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import Modal from '../components/Modal';
@@ -19,13 +20,20 @@ import '../styles/residents.css';
 // TODO: residents come from sample data until the backend has a residents table
 const residents = sampleResidents;
 
-// Notes that mention this resident: from handovers (by first name) and from task notes / skip reasons.
-// TODO: Phase 7 handovers will link resident updates by ID instead of searching the text.
+// Notes about this resident: their update in each handover (or, for older plain-text handovers,
+// any handover that mentions their first name), plus task notes and skip reasons.
+// TODO: match by resident ID once the backend stores residents.
 function notesFor(resident, handovers, tasks) {
   const firstName = resident.name.split(' ')[0].toLowerCase();
-  const fromHandovers = handovers
-    .filter((h) => h.notes.toLowerCase().includes(firstName))
-    .map((h) => ({ id: `h${h._id}`, source: `${shiftLabel(h.shift)} shift handover`, author: h.author?.name, time: h.createdAt, text: h.notes }));
+  const fromHandovers = handovers.flatMap((h) => {
+    const base = { id: `h${h._id}`, source: `${shiftLabel(h.shift)} shift handover`, author: h.author?.name, time: h.createdAt };
+    if (h.data) {
+      const update = h.data.residents.find((r) => r.name === resident.name);
+      if (!update || update.status === 'normal') return [];
+      return [{ ...base, text: `${RESIDENT_STATUS[update.status].label}. ${update.note}` }];
+    }
+    return h.text.toLowerCase().includes(firstName) ? [{ ...base, text: h.text }] : [];
+  });
   const fromTasks = tasks
     .filter((t) => t.resident === resident.name && (t.note || t.skipReason))
     .map((t) => ({
@@ -39,7 +47,7 @@ function notesFor(resident, handovers, tasks) {
 
 export default function Residents() {
   const { tasks, status: tasksStatus, updateTask } = useTasks();
-  const handoversQuery = useApiData('/handovers', { sample: sampleHandovers });
+  const { handovers } = useHandovers();
   const showToast = useToast();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 600px)');
@@ -68,7 +76,7 @@ export default function Residents() {
       resident={selected}
       tasks={tasksOf(selected)}
       tasksLoading={tasksStatus === 'loading'}
-      notes={notesFor(selected, handoversQuery.data ?? [], tasks)}
+      notes={notesFor(selected, handovers, tasks)}
       onOpenTask={(t) => setOpenTaskId(t._id)}
       showName={!isNarrow}
     />
