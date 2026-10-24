@@ -86,7 +86,7 @@ export default function Schedule() {
 
       {usingSample && (
         <div className="alert alert--info" role="status">
-          <Info size={20} aria-hidden="true" />
+          <Info size={18} aria-hidden="true" />
           <span>Preview mode: the server isn't running, so these are sample tasks.</span>
         </div>
       )}
@@ -94,13 +94,13 @@ export default function Schedule() {
       <div className="card schedule-toolbar">
         <div className="date-nav">
           <button type="button" className="icon-btn icon-btn--sm" onClick={() => move(-1)} aria-label={view === 'month' ? 'Previous month' : 'Previous week'}>
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
           <button type="button" className="btn btn--outline btn--sm" onClick={() => setSelected(new Date())} disabled={sameDay(selected, today)}>
             Today
           </button>
           <button type="button" className="icon-btn icon-btn--sm" onClick={() => move(1)} aria-label={view === 'month' ? 'Next month' : 'Next week'}>
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
         </div>
 

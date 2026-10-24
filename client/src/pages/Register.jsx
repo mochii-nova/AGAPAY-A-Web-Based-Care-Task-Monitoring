@@ -112,7 +112,7 @@ export default function Register() {
         <ul className="auth__perks">
           {PERKS.map((perk) => (
             <li key={perk.title}>
-              <CircleCheck size={24} aria-hidden="true" />
+              <CircleCheck size={20} aria-hidden="true" />
               <div>
                 <strong>{perk.title}</strong>
                 <span>{perk.text}</span>
@@ -127,7 +127,7 @@ export default function Register() {
 
       {error && (
         <div className="alert alert--error" role="alert">
-          <CircleAlert size={20} aria-hidden="true" />
+          <CircleAlert size={18} aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}

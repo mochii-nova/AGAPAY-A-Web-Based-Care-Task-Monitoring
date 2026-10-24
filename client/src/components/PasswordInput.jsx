@@ -15,7 +15,7 @@ export default function PasswordInput(props) {
         aria-label={visible ? 'Hide password' : 'Show password'}
         aria-pressed={visible}
       >
-        {visible ? <EyeOff size={20} /> : <Eye size={20} />}
+        {visible ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
     </div>
   );

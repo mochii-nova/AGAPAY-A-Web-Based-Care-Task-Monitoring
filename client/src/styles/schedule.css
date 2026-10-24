@@ -1,29 +1,27 @@
 /* =====================================================================
    My Schedule (Schedule.jsx + components/schedule/)
+   Colours come only from the variables in main.css.
    ===================================================================== */
 
 /* Coloured status dots (always shown next to text or a count) */
-.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.dot--pending { background: #f2cf4a; }
-.dot--completed { background: #5cc27a; }
-.dot--overdue { background: #ef7373; }
-.dot--skipped { background: #a29dba; }
+.dot { display: inline-block; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; }
+.dot--pending { background: var(--pending-dot); }
+.dot--completed { background: var(--completed-dot); }
+.dot--overdue { background: var(--overdue-dot); }
+.dot--skipped { background: var(--skipped-dot); }
 
-/* Toolbar */
 /* One row on laptops: arrows + Today | 4 checkboxes | search + category */
 .schedule-toolbar {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
-  margin-bottom: 16px;
+  padding: 8px 14px;
+  margin-bottom: 20px;
 }
-.date-nav { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.date-nav .icon-btn--sm { width: var(--tap); height: var(--tap); }
-.date-nav .btn--sm { min-height: var(--tap); }
+.date-nav { display: flex; flex-shrink: 0; align-items: center; gap: 2px; }
 
-.status-filters { display: flex; flex-wrap: nowrap; gap: 2px; margin: 0; padding: 0; border: 0; flex-shrink: 0; }
+.status-filters { display: flex; flex-shrink: 0; flex-wrap: nowrap; gap: 0; margin: 0; padding: 0; border: 0; }
 .status-filter {
   display: inline-flex;
   align-items: center;
@@ -31,72 +29,61 @@
   min-height: var(--tap);
   padding: 0 9px;
   border-radius: var(--radius-sm);
-  font-weight: 500;
+  font-size: 0.93rem;
   white-space: nowrap;
   cursor: pointer;
 }
-.status-filter:hover { background: var(--lavender); }
-.status-filter input { width: 18px; height: 18px; margin: 0; accent-color: var(--navy); cursor: pointer; }
-.status-filter:has(input:not(:checked)) { color: var(--muted); }
+.status-filter:hover { background: var(--tint); }
+.status-filter input { width: 16px; height: 16px; margin: 0; accent-color: var(--navy); cursor: pointer; }
+.status-filter:has(input:not(:checked)) { color: var(--faint); }
 .status-filter:has(input:not(:checked)) .dot { opacity: 0.35; }
 
-.schedule-toolbar__filters { display: flex; gap: 10px; flex: 1 1 auto; justify-content: flex-end; min-width: 0; }
-.schedule-toolbar .search-box { flex: 0 1 200px; min-width: 130px; }
-.schedule-toolbar .select { flex: 0 0 168px; width: 168px; }
-.schedule-toolbar .field__input { min-height: var(--tap); }
+.schedule-toolbar__filters { display: flex; flex: 1 1 auto; justify-content: flex-end; gap: 8px; min-width: 0; }
+.schedule-toolbar .search-box { flex: 0 1 190px; min-width: 120px; }
+.schedule-toolbar .select { flex: 0 0 165px; width: 165px; }
 
 /* Calendar + side panel */
-.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
-.schedule-calendar { padding: 0; overflow: hidden; }
+.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 24px; align-items: start; }
+.schedule-calendar { overflow: hidden; padding: 0; }
 
 /* Month view */
-.month__head {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  background: var(--lavender-strong);
-}
-.month__head span { padding: 12px 0; text-align: center; font-weight: 600; color: var(--text); }
-.month__grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--border);
-}
+.month__head { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-bottom: 1px solid var(--border); background: var(--tint); }
+.month__head span { padding: 10px 0; color: var(--muted); font-size: 0.82rem; font-weight: var(--fw-medium); text-align: center; }
+.month__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--border); }
 .month__day {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  min-height: 104px;
+  gap: 3px;
+  min-height: 96px;
   padding: 8px;
   border: 0;
-  background: #fff;
+  background: var(--card);
   color: var(--text);
   text-align: left;
 }
-.month__day:hover { background: #f6f3fd; }
-.month__day.is-outside { background: #faf9fd; color: #9993b3; }
-.month__day[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 0 0 2px var(--navy); }
+.month__day:hover { background: var(--tint); }
+.month__day.is-outside { background: var(--tint); color: var(--faint); }
+.month__day[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 0 0 1.5px var(--label); }
 .month__date {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 28px;
+  min-width: 26px;
+  height: 26px;
   border-radius: 50%;
-  font-weight: 600;
+  font-size: 0.92rem;
 }
-.month__day.is-today .month__date { background: var(--navy); color: #fff; }
-.month__shift { color: var(--label); font-size: 0.72rem; font-weight: 600; }
-.month__day.is-outside .month__shift { color: inherit; }
+.month__day.is-today .month__date { background: var(--navy); color: var(--on-navy); font-weight: var(--fw-medium); }
+.month__shift { color: var(--faint); font-size: 0.7rem; }
 .month__tasks { display: flex; flex-direction: column; gap: 3px; margin-top: auto; }
 .dots { display: flex; gap: 3px; }
-.month__count { font-size: 0.78rem; font-weight: 600; }
+.month__count { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); }
 
 /* Week view */
 .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--border); }
-.week__day { display: flex; flex-direction: column; min-height: 420px; background: #fff; }
-.week__day.is-selected { background: #f8f6fd; }
+.week__day { display: flex; flex-direction: column; min-height: 420px; background: var(--card); }
+.week__day.is-selected { background: var(--tint); }
 .week__head {
   display: flex;
   flex-direction: column;
@@ -109,22 +96,22 @@
   color: var(--text);
 }
 .week__head:hover { background: var(--lavender); }
-.week__head[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 -3px 0 var(--navy); }
-.week__weekday { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+.week__head[aria-pressed='true'] { background: var(--lavender); box-shadow: inset 0 -2px 0 var(--navy); }
+.week__weekday { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); text-transform: uppercase; }
 .week__date {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: var(--fw-medium);
 }
-.week__head.is-today .week__date { background: var(--navy); color: #fff; }
-.week__shift { font-size: 0.72rem; font-weight: 600; color: var(--label); }
-.week__empty { margin: 12px 0; text-align: center; color: #9993b3; font-size: 0.85rem; }
-.week__tasks { list-style: none; margin: 0; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+.week__head.is-today .week__date { background: var(--navy); color: var(--on-navy); }
+.week__shift { color: var(--faint); font-size: 0.7rem; }
+.week__empty { margin: 12px 0; color: var(--faint); font-size: 0.82rem; text-align: center; }
+.week__tasks { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 6px; }
 .week__task {
   display: flex;
   align-items: flex-start;
@@ -135,45 +122,39 @@
   border: 0;
   border-left: 3px solid transparent;
   border-radius: 8px;
-  background: #f6f3fd;
+  background: var(--tint);
   color: var(--text);
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: var(--fw-medium);
   text-align: left;
 }
 .week__task .dot { margin-top: 5px; }
 .week__task > span:last-child { min-width: 0; overflow-wrap: break-word; }
-
-/* Week view needs the full width for its 7 columns, so the day panel moves below it */
-@media (max-width: 1400px) {
-  .schedule-layout--week { grid-template-columns: minmax(0, 1fr); }
-  .schedule-layout--week .day-panel { position: static; }
-}
-.week__task small { display: block; color: var(--muted); font-weight: 500; }
+.week__task small { display: block; color: var(--muted); font-weight: var(--fw-regular); }
 .week__task:hover { filter: brightness(0.97); }
-.week__task--pending { background: var(--pending-bg); border-left-color: #e0b400; }
-.week__task--completed { background: var(--completed-bg); border-left-color: #3fa65f; }
-.week__task--overdue { background: var(--overdue-bg); border-left-color: #d94b4b; }
-.week__task--skipped { background: var(--skipped-bg); border-left-color: #8d88a6; }
+.week__task--pending { background: var(--pending-bg); border-left-color: var(--pending-dot); }
+.week__task--completed { background: var(--completed-bg); border-left-color: var(--completed-dot); }
+.week__task--overdue { background: var(--overdue-bg); border-left-color: var(--overdue-dot); }
+.week__task--skipped { background: var(--skipped-bg); border-left-color: var(--skipped-dot); }
 
 /* Side panel */
 .day-panel { position: sticky; top: 84px; }
-.day-panel__title { font-size: 1.25rem; margin: 0 0 12px; }
+.day-panel__title { margin: 0 0 14px; font-size: 1.1rem; font-weight: var(--fw-bold); }
 .day-panel__shift {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
   padding: 12px 14px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   border-radius: var(--radius-sm);
-  background: #f6f3fd;
+  background: var(--tint);
 }
 .day-panel__shift p { margin: 0; }
-.day-panel__shift-time { font-weight: 700; }
-.day-panel__gcal { width: 100%; padding: 0 12px; font-size: 0.95rem; }
-.day-panel__off { display: flex; align-items: center; gap: 8px; min-height: var(--tap); color: var(--muted); font-weight: 600; }
-.day-panel__filter { margin-bottom: 8px; }
+.day-panel__shift-time { font-weight: var(--fw-medium); }
+.day-panel__gcal { width: 100%; padding: 0 12px; font-size: 0.92rem; }
+.day-panel__off { display: flex; align-items: center; gap: 8px; min-height: var(--tap); color: var(--muted); }
+.day-panel__filter { margin-bottom: 10px; }
 .day-panel__list { list-style: none; margin: 0; padding: 0; }
 .day-panel__list li + li { border-top: 1px solid var(--border); }
 .day-task {
@@ -181,7 +162,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 60px;
+  min-height: 56px;
   padding: 10px 6px;
   border: 0;
   border-radius: var(--radius-sm);
@@ -189,14 +170,18 @@
   color: var(--text);
   text-align: left;
 }
-.day-task:hover { background: #f6f3fd; }
+.day-task:hover { background: var(--tint); }
 .day-task__main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-.day-task__main strong { font-weight: 600; }
 .day-task__main small { color: var(--muted); font-size: 0.82rem; }
 .day-task__note { display: inline-flex; align-items: center; gap: 4px; color: var(--label) !important; }
-.day-panel__hint { margin-top: 12px; }
+.day-panel__hint { margin-top: 14px; }
 
-/* Smaller screens */
+/* Week view needs the full width for its 7 columns, so the day panel moves below it */
+@media (max-width: 1400px) {
+  .schedule-layout--week { grid-template-columns: minmax(0, 1fr); }
+  .schedule-layout--week .day-panel { position: static; }
+}
+
 /* Tablets: two rows (arrows + checkboxes, then search + category) */
 @media (max-width: 1280px) {
   .schedule-toolbar { flex-wrap: wrap; }
@@ -211,17 +196,17 @@
 @media (max-width: 900px) {
   /* Week view becomes a list of days */
   .week { grid-template-columns: minmax(0, 1fr); }
-  .week__day { min-height: 0; flex-direction: row; align-items: stretch; }
-  .week__head { width: 84px; flex-shrink: 0; border-bottom: 0; border-right: 1px solid var(--border); }
-  .week__head[aria-pressed='true'] { box-shadow: inset -3px 0 0 var(--navy); }
+  .week__day { flex-direction: row; align-items: stretch; min-height: 0; }
+  .week__head { flex-shrink: 0; width: 84px; border-bottom: 0; border-right: 1px solid var(--border); }
+  .week__head[aria-pressed='true'] { box-shadow: inset -2px 0 0 var(--navy); }
   .week__tasks, .week__empty { flex: 1; }
   .week__empty { align-self: center; }
 }
 @media (max-width: 600px) {
-  .month__day { min-height: 60px; padding: 4px; align-items: center; }
+  .month__day { align-items: center; min-height: 56px; padding: 4px; }
   .month__shift, .month__count { display: none; }
   .month__tasks { margin-top: 2px; }
-  .month__head span { font-size: 0.8rem; }
+  .month__head span { font-size: 0.75rem; }
   /* Phones: checkboxes in a 2 × 2 grid, search and category stacked */
   .status-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .schedule-toolbar__filters { flex-direction: column; }

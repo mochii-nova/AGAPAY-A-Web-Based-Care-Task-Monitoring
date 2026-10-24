@@ -1,40 +1,41 @@
 /* =====================================================================
    Sign In and Register (AuthLayout.jsx)
+   Colours come only from the variables in main.css.
    ===================================================================== */
 .auth {
   display: grid;
-  grid-template-columns: minmax(320px, 39%) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 38%) minmax(0, 1fr);
   min-height: 100vh;
-  background: #fff;
+  background: var(--card);
 }
 
 /* Navy panel on the left */
 .auth__panel {
   position: sticky;
   top: 0;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 100vh;
   padding: 48px 40px 28px;
   background: var(--navy);
-  color: #fff;
+  color: var(--on-navy);
   text-align: center;
 }
 .auth__panel-inner { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.auth__logo { width: 260px; height: 70px; }
-.auth__panel .image-slot--empty { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
-.auth__panel-title { color: #fff; font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 700; margin: 40px 0 20px; line-height: 1.15; }
-.auth__panel-text { max-width: 380px; color: #dcd7f2; font-size: 1.1rem; margin: 0; }
-.auth__made-with { margin: 24px 0 0; color: #b9b1e0; font-size: 0.95rem; }
-.auth__heart { color: #f97066; vertical-align: -3px; }
+.auth__logo { width: 240px; height: 64px; }
+.auth__panel .image-slot--empty { background: var(--on-navy-hover); border-color: var(--on-navy-line); color: var(--on-navy); }
+.auth__panel-title { margin: 36px 0 18px; color: var(--on-navy); font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: var(--fw-bold); line-height: 1.15; }
+.auth__panel-text { max-width: 360px; margin: 0; color: var(--on-navy-muted); font-size: 1.05rem; }
+.auth__made-with { margin: 24px 0 0; color: var(--on-navy-muted); font-size: 0.9rem; }
+.auth__heart { color: var(--heart); vertical-align: -3px; }
 
-.auth__perks { list-style: none; margin: 0; padding: 0; text-align: left; max-width: 360px; }
+.auth__perks { list-style: none; margin: 0; padding: 0; max-width: 340px; text-align: left; }
 .auth__perks li { display: flex; gap: 12px; margin-bottom: 20px; }
-.auth__perks svg { flex-shrink: 0; color: #fff; }
+.auth__perks svg { flex-shrink: 0; color: var(--on-navy); }
 .auth__perks div { display: flex; flex-direction: column; }
-.auth__perks strong { font-size: 1.1rem; font-weight: 500; }
-.auth__perks span { color: #cfc8ec; font-size: 0.9rem; }
+.auth__perks strong { font-size: 1.02rem; }
+.auth__perks span { color: var(--on-navy-muted); font-size: 0.88rem; }
 
 /* Form side */
 .auth__main { display: flex; flex-direction: column; padding: 24px 48px 40px; }
@@ -48,24 +49,24 @@
   margin-left: -12px;
   border-radius: var(--radius-sm);
   color: var(--label);
-  font-weight: 600;
+  font-weight: var(--fw-medium);
   text-decoration: none;
 }
 .auth__back:hover { background: var(--lavender); }
-.auth__form-area { flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 680px; margin: 0 auto; padding: 16px 0; }
+.auth__form-area { flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 620px; margin: 0 auto; padding: 16px 0; }
 
-.auth__title { font-size: clamp(1.9rem, 3.2vw, 2.8rem); text-align: center; }
-.auth__subtitle { text-align: center; color: var(--muted); font-size: 1.1rem; margin: 10px 0 28px; }
+.auth__title { font-size: clamp(1.7rem, 2.8vw, 2.3rem); text-align: center; }
+.auth__subtitle { margin: 8px 0 32px; color: var(--muted); font-size: 1.02rem; text-align: center; }
 .auth__form { width: 100%; }
 .auth__row-end { display: flex; justify-content: flex-end; margin: -8px 0 8px; }
-.auth__submit { width: 100%; min-height: 52px; font-size: 1.1rem; margin-top: 4px; }
-.auth__switch { text-align: center; margin-top: 18px; color: var(--muted); }
-.auth__switch a { color: var(--navy); font-weight: 700; }
+.auth__submit { width: 100%; min-height: 48px; margin-top: 4px; font-size: 1rem; }
+.auth__switch { margin-top: 18px; color: var(--muted); text-align: center; }
+.auth__switch a { color: var(--navy); font-weight: var(--fw-medium); }
 
 /* Text inside the Forgot password and Terms pop-ups */
 .contact-lines { list-style: none; margin: 12px 0 0; padding: 0; }
 .contact-lines li { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
-.contact-lines a { color: var(--navy); font-weight: 600; }
+.contact-lines a { color: var(--navy); font-weight: var(--fw-medium); }
 .terms-list { margin: 0; padding-left: 20px; }
 .terms-list li { margin-bottom: 10px; }
 
@@ -74,8 +75,8 @@
   .auth { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
   .auth__panel { position: static; height: auto; padding: 24px 16px; }
   .auth__form-area { justify-content: flex-start; }
-  .auth__logo { width: 200px; height: 54px; }
-  .auth__panel-title { font-size: 1.6rem; margin: 16px 0 0; }
+  .auth__logo { width: 190px; height: 50px; }
+  .auth__panel-title { margin: 14px 0 0; font-size: 1.45rem; }
   .auth__panel-content,
   .auth__made-with { display: none; }
   .auth__main { padding: 12px 16px 32px; }

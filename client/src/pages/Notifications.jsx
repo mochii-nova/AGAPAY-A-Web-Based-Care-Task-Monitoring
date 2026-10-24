@@ -16,7 +16,7 @@ export default function Notifications() {
   return (
     <div>
       <PageHeader title="Notifications" subtitle="Task reminders, handovers, schedule changes and messages.">
-        <button type="button" className="btn btn--outline" onClick={markAllRead} disabled={unreadCount === 0}>
+        <button type="button" className="btn btn--soft" onClick={markAllRead} disabled={unreadCount === 0}>
           <CheckCheck size={18} /> Mark all as read
         </button>
       </PageHeader>

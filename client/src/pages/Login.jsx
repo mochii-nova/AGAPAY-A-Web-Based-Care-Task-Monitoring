@@ -66,21 +66,21 @@ export default function Login() {
 
       {justRegistered && !error && (
         <div className="alert alert--success" role="status">
-          <CircleCheck size={20} aria-hidden="true" />
+          <CircleCheck size={18} aria-hidden="true" />
           <span>Your account was created. You can now sign in.</span>
         </div>
       )}
 
       {sessionExpired && !justRegistered && !error && (
         <div className="alert alert--info" role="status">
-          <CircleAlert size={20} aria-hidden="true" />
+          <CircleAlert size={18} aria-hidden="true" />
           <span>Your session has ended. Please sign in again.</span>
         </div>
       )}
 
       {error && (
         <div className="alert alert--error" role="alert">
-          <CircleAlert size={20} aria-hidden="true" />
+          <CircleAlert size={18} aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}

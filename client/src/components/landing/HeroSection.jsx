@@ -10,8 +10,8 @@ export default function HeroSection() {
   return (
     <section id="home" className="hero">
       <svg className="hero__waves" viewBox="0 0 1440 420" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M0 170 C 320 40, 640 300, 1000 190 S 1440 120, 1440 120 V 420 H 0 Z" fill="#ebe5fa" />
-        <path d="M0 300 C 300 220, 620 380, 980 300 S 1440 250, 1440 250 V 420 H 0 Z" fill="#ddd3f5" />
+        <path className="hero__wave--back" d="M0 170 C 320 40, 640 300, 1000 190 S 1440 120, 1440 120 V 420 H 0 Z" />
+        <path className="hero__wave--front" d="M0 300 C 300 220, 620 380, 980 300 S 1440 250, 1440 250 V 420 H 0 Z" />
       </svg>
 
       <div className="container hero__inner">

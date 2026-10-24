@@ -4,7 +4,7 @@ import { LoaderCircle, CircleAlert, RefreshCw } from 'lucide-react';
 export function LoadingState({ label = 'Loading…' }) {
   return (
     <div className="state-msg" role="status">
-      <LoaderCircle size={24} className="spin" aria-hidden="true" />
+      <LoaderCircle size={20} className="spin" aria-hidden="true" />
       <span>{label}</span>
     </div>
   );
@@ -14,7 +14,7 @@ export function LoadingState({ label = 'Loading…' }) {
 export function ErrorState({ message, onRetry }) {
   return (
     <div className="state-msg state-msg--error" role="alert">
-      <CircleAlert size={24} aria-hidden="true" />
+      <CircleAlert size={20} aria-hidden="true" />
       <span>{message}</span>
       {onRetry && (
         <button type="button" className="btn btn--outline btn--sm" onClick={onRetry}>
@@ -29,7 +29,7 @@ export function ErrorState({ message, onRetry }) {
 export function EmptyState({ icon: Icon, children }) {
   return (
     <div className="state-msg">
-      {Icon && <Icon size={24} aria-hidden="true" />}
+      {Icon && <Icon size={20} aria-hidden="true" />}
       <span>{children}</span>
     </div>
   );

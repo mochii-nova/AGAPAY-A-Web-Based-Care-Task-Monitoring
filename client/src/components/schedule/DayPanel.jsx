@@ -23,7 +23,7 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
               </p>
             </div>
             <a
-              className="btn btn--outline day-panel__gcal"
+              className="btn btn--soft day-panel__gcal"
               href={googleCalendarLink(shift, date)}
               target="_blank"
               rel="noopener noreferrer"

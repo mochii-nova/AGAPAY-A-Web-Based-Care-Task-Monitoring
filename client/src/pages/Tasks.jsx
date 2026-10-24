@@ -79,7 +79,7 @@ export default function Tasks() {
 
       {usingSample && (
         <div className="alert alert--info" role="status">
-          <Info size={20} aria-hidden="true" />
+          <Info size={18} aria-hidden="true" />
           <span>Preview mode: the server isn't running, so these are sample tasks. Saving won't work.</span>
         </div>
       )}
@@ -186,7 +186,7 @@ export default function Tasks() {
                     <td className="task-table__action">
                       <button
                         type="button"
-                        className="btn btn--outline btn--sm"
+                        className="btn btn--soft btn--sm"
                         onClick={() => openTaskById(t._id)}
                         aria-label={`View task: ${t.task} for ${t.resident}`}
                       >

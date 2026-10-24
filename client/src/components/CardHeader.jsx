@@ -6,7 +6,7 @@ export default function CardHeader({ icon: Icon, title, linkTo, linkLabel = 'Vie
   return (
     <header className="card__header">
       <h2 className="card__title">
-        {Icon && <Icon size={20} aria-hidden="true" />}
+        {Icon && <Icon size={18} aria-hidden="true" />}
         {title}
       </h2>
       {children}

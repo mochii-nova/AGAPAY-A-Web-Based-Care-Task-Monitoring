@@ -52,14 +52,14 @@ export default function Sidebar({ onClose }) {
           <ImageSlot image={images.logoWhite} alt="AGAPAY" style={{ width: 150, height: 44 }} />
         </Link>
         <button type="button" className="icon-btn sidebar__close" onClick={onClose} aria-label="Close menu">
-          <X size={22} />
+          <X size={20} />
         </button>
       </div>
 
       <div className="sidebar__profile">
         {/* Phase 8: this opens the photo upload */}
         <Link to="/profile" className="sidebar__avatar-btn" onClick={onClose} aria-label="Change profile photo">
-          <Avatar name={profile.name} photo={profile.photo} size={84} />
+          <Avatar name={profile.name} photo={profile.photo} size={72} />
           <span className="sidebar__avatar-edit" aria-hidden="true"><Camera size={14} /></span>
         </Link>
 
@@ -98,7 +98,7 @@ export default function Sidebar({ onClose }) {
             {group.title && <p className="sidebar__group-title">{group.title}</p>}
             {group.items.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} className="sidebar__link" onClick={onClose}>
-                <Icon size={20} aria-hidden="true" /> {label}
+                <Icon size={18} aria-hidden="true" /> {label}
               </NavLink>
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function Sidebar({ onClose }) {
           <div className="sidebar__group">
             <p className="sidebar__group-title">Admin</p>
             <NavLink to="/staff" className="sidebar__link" onClick={onClose}>
-              <Users size={20} aria-hidden="true" /> Manage Staff
+              <Users size={18} aria-hidden="true" /> Manage Staff
             </NavLink>
           </div>
         )}
@@ -117,14 +117,14 @@ export default function Sidebar({ onClose }) {
 
       <div className="sidebar__bottom">
         <NavLink to="/notifications" className="sidebar__link" onClick={onClose}>
-          <Bell size={20} aria-hidden="true" /> Notifications
+          <Bell size={18} aria-hidden="true" /> Notifications
           {unreadCount > 0 && <span className="count-badge">{unreadCount}</span>}
         </NavLink>
         <NavLink to="/messages" className="sidebar__link" onClick={onClose}>
-          <Mail size={20} aria-hidden="true" /> Messages
+          <Mail size={18} aria-hidden="true" /> Messages
         </NavLink>
         <button type="button" className="sidebar__link" onClick={handleLogout}>
-          <LogOut size={20} aria-hidden="true" /> Sign out
+          <LogOut size={18} aria-hidden="true" /> Sign out
         </button>
       </div>
     </aside>

@@ -36,7 +36,7 @@ export default function NextTasksCard({ tasks }) {
               </div>
               <span className="task-row__time">Due {formatTime(t.dueAt)}</span>
               <StatusPill status={t.status} />
-              <Link to={`/tasks?open=${t._id}`} className="btn btn--outline btn--sm" aria-label={`View task: ${t.task}`}>
+              <Link to={`/tasks?open=${t._id}`} className="btn btn--soft btn--sm" aria-label={`View task: ${t.task}`}>
                 View
               </Link>
             </li>

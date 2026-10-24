@@ -26,7 +26,7 @@ export default function SiteHeader({ sections, active }) {
           aria-controls="site-menu"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
         >
-          {menuOpen ? <X size={26} /> : <Menu size={26} />}
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
         <div id="site-menu" className={`site-header__menu ${menuOpen ? 'is-open' : ''}`}>
@@ -49,11 +49,11 @@ export default function SiteHeader({ sections, active }) {
 
           <div className="site-header__cta">
             {user ? (
-              <Link to="/dashboard" className="btn btn--primary">Open Dashboard</Link>
+              <Link to="/dashboard" className="btn btn--soft">Open Dashboard</Link>
             ) : (
               <>
                 <Link to="/login" className="btn btn--outline">Sign in</Link>
-                <Link to="/register" className="btn btn--primary">Get Started</Link>
+                <Link to="/register" className="btn btn--soft">Get Started</Link>
               </>
             )}
           </div>

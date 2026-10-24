@@ -77,14 +77,14 @@ export default function Dashboard() {
 
       {usingSample && (
         <div className="alert alert--info" role="status">
-          <Info size={20} aria-hidden="true" />
+          <Info size={18} aria-hidden="true" />
           <span>Preview mode: the server isn't running, so you're seeing sample tasks and handovers.</span>
         </div>
       )}
 
       {showReminder && (
         <div className="alert alert--warning dash-reminder" role="status">
-          <AlarmClock size={20} aria-hidden="true" />
+          <AlarmClock size={18} aria-hidden="true" />
           <span>
             Your handover is due at <strong>{shift.end}</strong>, in {minutesToText(minutesLeft)}.
           </span>
@@ -97,7 +97,7 @@ export default function Dashboard() {
           <p className="quote-banner__quote">“{quote}”</p>
           <p className="quote-banner__sub">Your care makes a difference. Thank you for all that you do!</p>
         </div>
-        <HeartHandshake size={40} className="quote-banner__icon" aria-hidden="true" />
+        <HeartHandshake size={32} className="quote-banner__icon" aria-hidden="true" />
       </section>
 
       <div className="dash-grid">

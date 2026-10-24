@@ -25,7 +25,7 @@ export default function Navbar({ onMenuClick }) {
   return (
     <header className="topbar">
       <button type="button" className="icon-btn" onClick={onMenuClick} aria-label="Show or hide menu">
-        <Menu size={24} />
+        <Menu size={20} />
       </button>
 
       <div className="topbar__actions">
@@ -38,7 +38,7 @@ export default function Navbar({ onMenuClick }) {
             aria-expanded={bell.open}
             aria-label={`Notifications, ${unreadCount} unread`}
           >
-            <Bell size={22} />
+            <Bell size={20} />
             {unreadCount > 0 && <span className="dot-badge" aria-hidden="true" />}
           </button>
 
@@ -87,7 +87,7 @@ export default function Navbar({ onMenuClick }) {
 
         {/* Messages to the admin (built in Phase 9) */}
         <Link to="/messages" className="icon-btn" aria-label="Messages">
-          <Mail size={22} />
+          <Mail size={20} />
         </Link>
 
         {/* Small account menu */}

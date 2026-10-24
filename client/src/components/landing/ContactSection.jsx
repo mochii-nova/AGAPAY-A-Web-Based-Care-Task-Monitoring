@@ -107,7 +107,7 @@ export default function ContactSection() {
             {field('email', 'Your email', { type: 'email', placeholder: 'Enter your email', autoComplete: 'email' })}
             {field('subject', 'Subject', { placeholder: 'What is your message about?' })}
             {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here…' })}
-            <button type="submit" className="btn btn--primary">Send Message</button>
+            <button type="submit" className="btn btn--soft">Send Message</button>
           </form>
         )}
       </div>

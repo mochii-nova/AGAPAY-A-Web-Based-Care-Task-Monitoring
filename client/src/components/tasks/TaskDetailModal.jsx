@@ -50,7 +50,7 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
   return (
     <form id="task-form" className="task-form" onSubmit={handleSubmit} noValidate>
       <div className="task-detail">
-        <TaskCategoryIcon category={task.category} size={22} />
+        <TaskCategoryIcon category={task.category} size={20} />
         <div className="task-detail__main">
           <p className="small-label">{getCategory(task.category)?.label ?? 'Care task'}</p>
           <p className="task-detail__resident">
@@ -69,7 +69,7 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
 
       {error && (
         <div className="alert alert--error" role="alert">
-          <CircleAlert size={20} aria-hidden="true" />
+          <CircleAlert size={18} aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
@@ -89,7 +89,7 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
                   disabled={disabled}
                   onChange={() => setStatus(value)}
                 />
-                <Icon size={20} aria-hidden="true" />
+                <Icon size={18} aria-hidden="true" />
                 {label}
               </label>
             );
