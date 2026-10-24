@@ -1,13 +1,13 @@
-import { CalendarPlus, CalendarOff, StickyNote, ClipboardList } from 'lucide-react';
+import { CalendarOff, StickyNote, ClipboardList } from 'lucide-react';
 import TaskCategoryIcon from '../TaskCategoryIcon';
 import StatusPill from '../StatusPill';
 import { EmptyState } from '../StateMessage';
+import GoogleCalendarBox from './GoogleCalendarBox';
 import { SHIFTS, shiftTime } from '../../constants';
 import { dayTitle } from '../../utils/calendar';
 import { formatTime } from '../../utils/format';
-import { googleCalendarLink } from '../../utils/shift';
 
-// Side panel for the selected day: my shift, Google Calendar button, and that day's tasks
+// Side panel for the selected day: my shift, Google Calendar, and that day's tasks
 export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilter, roomOf, onOpenTask }) {
   return (
     <aside className="card day-panel" aria-label={`Schedule for ${dayTitle(date)}`}>
@@ -22,21 +22,13 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
                 {shift.label} · {shiftTime(shift)}
               </p>
             </div>
-            <a
-              className="btn btn--soft day-panel__gcal"
-              href={googleCalendarLink(shift, date)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <CalendarPlus size={16} aria-hidden="true" /> Add to Google Calendar
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
           </>
         ) : (
           <p className="day-panel__off">
             <CalendarOff size={18} aria-hidden="true" /> Day off
           </p>
         )}
+        <GoogleCalendarBox shift={shift} date={date} />
       </div>
 
       <div className="segmented segmented--fill day-panel__filter" role="group" aria-label="Show tasks for which shift">
@@ -82,10 +74,6 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
           })}
         </ul>
       )}
-
-      <p className="local-note day-panel__hint">
-        The button opens Google Calendar with your shift filled in. Automatic syncing needs the backend.
-      </p>
     </aside>
   );
 }

@@ -49,19 +49,50 @@ export function shiftOfTime(shifts, date) {
   });
 }
 
+// Orchid Carehome is in the Philippines, so shift times are always Manila clock times
+export const CAREHOME_TZ = 'Asia/Manila';
+
+const pad = (n) => String(n).padStart(2, '0');
+
+// The shift as Manila clock times, e.g. { start: '2026-10-25T06:00:00', end: '2026-10-25T14:00:00' }.
+// Built from the day picked on the calendar, so it doesn't depend on this computer's time zone.
+// The Night shift ends the next morning.
+export function shiftManilaTimes(shift, date) {
+  const d = new Date(date);
+  const day = (plus) => {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + plus);
+    return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
+  };
+  const clock = (label) => {
+    const [, h, m, ampm] = label.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    return `${pad((Number(h) % 12) + (ampm.toUpperCase() === 'PM' ? 12 : 0))}:${m}:00`;
+  };
+  const start = clock(shift.start);
+  const end = clock(shift.end);
+  return { start: `${day(0)}T${start}`, end: `${day(end <= start ? 1 : 0)}T${end}` };
+}
+
+// What a shift looks like in Google Calendar. Only the shift is shared, never resident details.
+// The Manila time is in the title too, so it's clear even in a calendar set to another time zone.
+export const shiftEventText = (shift) => ({
+  title: `AGAPAY – ${shift.label} Shift (${shift.start} – ${shift.end} PH time)`,
+  details: `${shift.label} shift, ${shift.start} – ${shift.end} Philippine time (Asia/Manila).\nCaregiver shift at Orchid Carehome Inc. (from AGAPAY)`,
+  location: 'Orchid Carehome Inc., Bolosan Old Road, Dagupan City',
+});
+
 // Link that opens Google Calendar with this shift filled in, ready to save.
-// Only the shift is shared, never resident details.
+// Used only when the Google connection isn't set up (no Client ID in client/.env).
 export function googleCalendarLink(shift, date) {
-  const { start, end } = shiftOnDate(shift, date);
-  const pad = (n) => String(n).padStart(2, '0');
-  const stamp = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const { start, end } = shiftManilaTimes(shift, date);
+  const { title, details, location } = shiftEventText(shift);
+  const stamp = (iso) => iso.replace(/[-:]/g, ''); // '2026-10-25T06:00:00' -> '20261025T060000'
   const params = new URLSearchParams({
     action: 'TEMPLATE',
-    text: `AGAPAY – ${shift.label} Shift`,
+    text: title,
     dates: `${stamp(start)}/${stamp(end)}`,
-    details: 'Caregiver shift at Orchid Carehome Inc. (from AGAPAY)',
-    location: 'Orchid Carehome Inc., Bolosan Old Road, Dagupan City',
-    ctz: 'Asia/Manila',
+    details,
+    location,
+    ctz: CAREHOME_TZ,
   });
   return `https://calendar.google.com/calendar/render?${params}`;
 }

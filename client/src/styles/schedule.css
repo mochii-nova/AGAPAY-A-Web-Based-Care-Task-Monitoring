@@ -151,7 +151,18 @@
 }
 .day-panel__shift p { margin: 0; }
 .day-panel__shift-time { font-weight: var(--fw-medium); }
-.day-panel__gcal { width: 100%; padding: 0 12px; font-size: 0.92rem; }
+/* Google Calendar (GoogleCalendarBox.jsx) */
+.gcal { display: flex; flex-direction: column; gap: 8px; }
+.gcal__btn { width: 100%; padding: 0 12px; font-size: 0.92rem; }
+.gcal__added { display: flex; align-items: center; gap: 6px; color: var(--completed-text); font-weight: var(--fw-medium); }
+.gcal__error { display: flex; align-items: flex-start; gap: 6px; color: var(--danger); font-size: 0.88rem; }
+.gcal__error svg { flex-shrink: 0; margin-top: 2px; }
+.gcal__tz { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); font-size: 0.85rem; }
+.gcal__tz svg { flex-shrink: 0; margin-top: 2px; }
+.gcal__tz strong { color: var(--text); font-weight: var(--fw-medium); }
+.gcal__status { color: var(--muted); font-size: 0.85rem; overflow-wrap: anywhere; }
+.gcal__status strong { color: var(--text); font-weight: var(--fw-medium); }
+.gcal__status .link-btn { min-height: var(--tap); margin: -12px 0; padding: 0 2px; vertical-align: middle; }
 .day-panel__off { display: flex; align-items: center; gap: 8px; min-height: var(--tap); color: var(--muted); }
 .day-panel__filter { margin-bottom: 10px; }
 .day-panel__list { list-style: none; margin: 0; padding: 0; }
@@ -173,7 +184,6 @@
 .day-task__main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .day-task__main small { color: var(--muted); font-size: 0.82rem; }
 .day-task__note { display: inline-flex; align-items: center; gap: 4px; color: var(--label) !important; }
-.day-panel__hint { margin-top: 14px; }
 
 /* Week view needs the full width for its 7 columns, so the day panel moves below it */
 @media (max-width: 1400px) {
