@@ -61,12 +61,12 @@
 .auth__row-end { display: flex; justify-content: flex-end; margin: -8px 0 8px; }
 .auth__submit { width: 100%; min-height: 48px; margin-top: 4px; font-size: 1rem; }
 .auth__switch { margin-top: 18px; color: var(--muted); text-align: center; }
-.auth__switch a { color: var(--navy); font-weight: var(--fw-medium); }
+.auth__switch a { color: var(--ink); font-weight: var(--fw-medium); }
 
 /* Text inside the Forgot password and Terms pop-ups */
 .contact-lines { list-style: none; margin: 12px 0 0; padding: 0; }
 .contact-lines li { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
-.contact-lines a { color: var(--navy); font-weight: var(--fw-medium); }
+.contact-lines a { color: var(--ink); font-weight: var(--fw-medium); }
 .terms-list { margin: 0; padding-left: 20px; }
 .terms-list li { margin-bottom: 10px; }
 

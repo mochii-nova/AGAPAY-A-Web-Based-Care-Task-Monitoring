@@ -49,7 +49,7 @@
   bottom: 4px;
   height: 2px;
   border-radius: 2px;
-  background: var(--navy);
+  background: var(--ink);
 }
 
 /* ---------- Home (hero) ---------- */
@@ -144,7 +144,7 @@
   z-index: 0;
   margin: 0;
   transform: translateX(-50%);
-  color: var(--navy);
+  color: var(--ink);
   font-size: clamp(6rem, 20vw, 15rem);
   font-weight: var(--fw-bold);
   line-height: 1;
@@ -171,12 +171,12 @@
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  color: var(--navy);
+  color: var(--ink);
   font-family: 'Gochi Hand', cursive;
   font-size: clamp(1.35rem, 2vw, 1.8rem);
   line-height: 1.15;
 }
-.claim__arrow { width: 100px; height: 42px; color: var(--navy); }
+.claim__arrow { width: 100px; height: 42px; color: var(--ink); }
 .claim--tl { grid-area: tl; align-items: flex-end; text-align: right; }
 .claim--tl .claim__arrow { transform: rotate(14deg); }
 .claim--bl { grid-area: bl; flex-direction: column-reverse; align-items: flex-end; text-align: right; }

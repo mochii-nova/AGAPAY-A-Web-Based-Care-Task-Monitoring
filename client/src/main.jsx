@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import './styles/main.css';
+import './utils/theme'; // light / dark mode, also follows the computer's setting on every page
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>

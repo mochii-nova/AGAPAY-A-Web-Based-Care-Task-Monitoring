@@ -8,9 +8,11 @@
      Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
 
   /* Brand */
-  --navy: #1c1f4a;              /* sidebar, footer: the only strong colour block */
+  --navy: #1c1f4a;              /* sidebar, footer: the only strong colour block (backgrounds only) */
+  --ink: #1c1f4a;               /* strongest text: soft/outline buttons, active menu item (navy in light mode) */
   --indigo: #4f46a5;            /* THE accent: links, selected tabs, checkboxes, focus, main button (7.6:1 on white) */
   --indigo-hover: #433b8f;
+  --on-indigo: #ffffff;         /* text on the main button */
   --indigo-soft: #ecebf8;       /* background of selected tabs */
   --display-lavender: #736ab6;  /* big lavender words on the website (4.7:1 on white) */
   --label: #55588a;             /* small uppercase labels (6.7:1) */
@@ -65,6 +67,56 @@
 
   --tap: 44px;                  /* minimum height of anything clickable */
   --sidebar-w: 232px;
+
+  color-scheme: light;
+}
+
+/* Dark mode: the same names with dark values. utils/theme.js sets data-theme="dark" on <html>
+   (from the Appearance choice, or the computer's setting when "System" is chosen).
+   Still one lavender-tinted family; the navy sidebar stays the strongest block. */
+:root[data-theme='dark'] {
+  --navy: #1b1d45;
+  --ink: #eeedfb;
+  --indigo: #a9a2f2;            /* lighter so links read on dark cards (7.4:1 on --card) */
+  --indigo-hover: #bcb6f6;
+  --on-indigo: #171833;         /* dark text on the light main button (8.6:1) */
+  --indigo-soft: #2e2b5c;
+  --display-lavender: #ada6ec;
+  --label: #b0b1dc;
+
+  --bg: #121327;
+  --card: #1a1c35;
+  --tint: #222442;
+  --lavender: #2b2d52;
+  --lavender-strong: #36385f;
+  --lavender-line: #4a4c76;
+  --border: #2c2e4b;
+  --border-strong: #3d4065;
+  --topbar: #1a1c35;
+
+  --text: #e8e7f6;
+  --muted: #aeadcb;
+  --faint: #9f9ebe;
+
+  --on-navy-muted: #c4bee3;
+  --on-navy-hover: rgba(255, 255, 255, 0.07);
+  --on-navy-line: rgba(255, 255, 255, 0.1);
+
+  --completed-bg: #1c3527;  --completed-text: #93d6aa;  --completed-dot: #5ba777;
+  --pending-bg: #3a3014;    --pending-text: #ebcb73;    --pending-dot: #d9a93a;
+  --overdue-bg: #3f1f25;    --overdue-text: #f4a8a8;    --overdue-dot: #d86a6a;
+  --skipped-bg: #2a2a3e;    --skipped-text: #c7c5da;    --skipped-dot: #8d8aa6;
+  --overdue-tint: #251a2a;
+
+  --danger: #f28b82;
+  --badge: #d0443a;
+  --overlay: rgba(5, 6, 16, 0.65);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;            /* dark scrollbars, date pickers and dropdown lists */
 }
 
 * { box-sizing: border-box; }
@@ -168,7 +220,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   background: none;
   color: var(--muted);
 }
-.password-input__toggle:hover { background: var(--lavender); color: var(--navy); }
+.password-input__toggle:hover { background: var(--lavender); color: var(--ink); }
 
 /* Checkbox with its label (whole row is at least 44px tall) */
 .checkbox-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--tap); }
@@ -301,8 +353,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   animation: toast-in 0.2s ease-out;
 }
 .toast span { flex: 1; }
-.toast--success { background: var(--navy); color: var(--on-navy); }
-.toast--success .icon-btn { color: var(--on-navy); }
+.toast--success { background: var(--ink); color: var(--card); }
+.toast--success .icon-btn { color: var(--card); }
 .toast--success .icon-btn:hover { background: var(--on-navy-hover); }
 .toast--error { background: var(--overdue-bg); color: var(--overdue-text); }
 .toast--error .icon-btn { color: var(--overdue-text); }
@@ -343,11 +395,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   white-space: nowrap;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.btn--primary { background: var(--indigo); color: var(--on-navy); }
+.btn--primary { background: var(--indigo); color: var(--on-indigo); }
 .btn--primary:hover:not(:disabled) { background: var(--indigo-hover); }
-.btn--soft { background: var(--lavender); color: var(--navy); }
+.btn--soft { background: var(--lavender); color: var(--ink); }
 .btn--soft:hover:not(:disabled) { background: var(--lavender-strong); }
-.btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--navy); }
+.btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--ink); }
 .btn--outline:hover:not(:disabled) { background: var(--tint); border-color: var(--lavender-line); }
 .btn--sm { padding: 0 14px; font-size: 0.875rem; }
 .btn--lg { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
@@ -803,6 +855,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .account-popover__id strong { color: var(--text); }
 
+/* Light / Dark / System (ThemeSwitcher.jsx) */
+.theme-switcher { padding: 2px 8px 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+.theme-switcher .small-label { margin: 0 0 6px; }
+.theme-switcher .segmented__btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+
 /* =====================================================================
    App layout: sidebar + top bar + page
    ===================================================================== */
@@ -872,7 +929,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   height: 24px;
   border-radius: 50%;
   background: var(--card);
-  color: var(--navy);
+  color: var(--ink);
   box-shadow: var(--shadow-sm);
 }
 .sidebar__menu { position: relative; width: 100%; margin-top: 8px; }
@@ -929,7 +986,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .sidebar__link svg { opacity: 0.85; }
 .sidebar__link:hover { background: var(--on-navy-hover); }
-.sidebar__link.active { background: var(--lavender); color: var(--navy); font-weight: var(--fw-medium); }
+.sidebar__link.active { background: var(--lavender); color: var(--ink); font-weight: var(--fw-medium); }
 .sidebar__link.active svg { opacity: 1; }
 .sidebar__bottom { padding-top: 10px; border-top: 1px solid var(--on-navy-line); }
 
@@ -975,7 +1032,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--lavender);
-  color: var(--navy);
+  color: var(--ink);
   font-weight: var(--fw-medium);
 }
 .app-main button:not([class]):hover { background: var(--lavender-strong); }

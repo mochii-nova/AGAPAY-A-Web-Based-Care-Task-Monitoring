@@ -8,6 +8,7 @@ import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationIcon from './NotificationIcon';
 import PushToggle from './PushToggle';
+import ThemeSwitcher from './ThemeSwitcher';
 
 // Top bar: menu button, notifications, messages and the small profile menu
 export default function Navbar({ onMenuClick }) {
@@ -117,6 +118,7 @@ export default function Navbar({ onMenuClick }) {
               <p className="account-popover__id">
                 <IdCard size={16} aria-hidden="true" /> Employee ID: <strong>{profile.employeeId}</strong>
               </p>
+              <ThemeSwitcher />
               <Link to="/profile" className="popover__item" onClick={() => account.setOpen(false)}>
                 <UserRound size={18} /> My profile
               </Link>
