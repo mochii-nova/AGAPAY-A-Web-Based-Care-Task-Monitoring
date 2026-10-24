@@ -594,6 +594,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   gap: 16px;
   margin-bottom: 24px;
 }
+.page-header__title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
 .page-header__subtitle { color: var(--muted); margin: 4px 0 0; }
 .page-header__actions { display: flex; flex-wrap: wrap; gap: 8px; }
 

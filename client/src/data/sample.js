@@ -45,6 +45,7 @@ export const sampleResidents = [
     age: 72,
     gender: 'Female',
     careNeeds: ['hygiene', 'mobility', 'meal', 'recreation'],
+    careNote: 'Uses a walker. Likes a warm bath in the morning.',
     emergencyContact: { name: 'Ana Santos', relationship: 'Daughter', phone: '0919 775 2779' },
   },
   {
@@ -54,6 +55,7 @@ export const sampleResidents = [
     age: 80,
     gender: 'Male',
     careNeeds: ['meal', 'medical'],
+    careNote: 'Needs help cutting food. Check blood pressure before lunch.',
     emergencyContact: { name: 'Pedro Cruz', relationship: 'Son', phone: '0918 234 5678' },
   },
   {
@@ -63,6 +65,7 @@ export const sampleResidents = [
     age: 85,
     gender: 'Female',
     careNeeds: ['rest', 'meal', 'recreation'],
+    careNote: 'Enjoys video calls with family in the afternoon.',
     emergencyContact: { name: 'Liza Garcia', relationship: 'Niece', phone: '0927 345 6789' },
   },
   {
@@ -72,6 +75,7 @@ export const sampleResidents = [
     age: 77,
     gender: 'Male',
     careNeeds: ['mobility', 'rest'],
+    careNote: 'Needs two people to transfer from bed to wheelchair.',
     emergencyContact: { name: 'Carmen Reyes', relationship: 'Wife', phone: '0915 456 7890' },
   },
 ];

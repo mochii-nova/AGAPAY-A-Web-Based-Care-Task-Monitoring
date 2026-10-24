@@ -42,7 +42,8 @@ export default function Tasks() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [scope, setScope] = useState('today');
   const [tab, setTab] = useState('all');
-  const [search, setSearch] = useState('');
+  // ?q=<name> fills the search box (used by "View all" on a resident's profile)
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [category, setCategory] = useState('');
 
   // ?open=<id> in the address opens that task (used by the Dashboard's "View" buttons)

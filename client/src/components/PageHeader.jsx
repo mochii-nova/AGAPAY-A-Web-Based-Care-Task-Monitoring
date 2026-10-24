@@ -1,9 +1,13 @@
-// Title row at the top of every page inside the app
-export default function PageHeader({ title, subtitle, children }) {
+// Title row at the top of every page inside the app.
+// `titleExtra` sits right next to the title (e.g. a "Sample data" tag); `children` go on the right.
+export default function PageHeader({ title, titleExtra, subtitle, children }) {
   return (
     <header className="page-header">
       <div>
-        <h1>{title}</h1>
+        <div className="page-header__title-row">
+          <h1>{title}</h1>
+          {titleExtra}
+        </div>
         {subtitle && <p className="page-header__subtitle">{subtitle}</p>}
       </div>
       {children && <div className="page-header__actions">{children}</div>}

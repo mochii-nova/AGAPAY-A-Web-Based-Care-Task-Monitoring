@@ -1,0 +1,118 @@
+/* =====================================================================
+   My Residents (Residents.jsx + components/residents/)
+   Colours come only from the variables in main.css.
+   ===================================================================== */
+/* Laptops: list column on the left, profile always on the right */
+.residents-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.residents-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* Search row: no box around it, so it lines up with the title and the cards */
+.residents-toolbar { display: flex; gap: 10px; }
+.residents-toolbar .search-box { flex: 1 1 auto; min-width: 0; }
+.residents-toolbar .select { flex: 0 0 200px; width: 200px; }
+
+/* Resident cards: one column, all the same height and layout */
+.resident-list { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.resident-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.resident-card:hover { border-color: var(--lavender-line); }
+.resident-card[aria-pressed='true'] { border-color: var(--label); background: var(--tint); }
+.resident-card__body { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.resident-card__line { display: flex; align-items: center; gap: 10px; min-height: 22px; white-space: nowrap; }
+.resident-card__name { overflow: hidden; font-size: 1.05rem; text-overflow: ellipsis; }
+.resident-card__id { flex-shrink: 0; color: var(--label); font-size: 0.8rem; letter-spacing: 0.3px; }
+.resident-card__meta { gap: 8px; color: var(--muted); font-size: 0.88rem; }
+
+/* Care need labels */
+.care-needs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; }
+.care-need {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.care-need svg { flex-shrink: 0; color: var(--label); }
+.care-need span { overflow: hidden; text-overflow: ellipsis; }
+.care-need--more { flex-shrink: 0; background: transparent; border-style: dashed; }
+
+/* Profile side panel (laptops) */
+.resident-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+.resident-panel__label { margin-bottom: 14px; }
+
+/* Profile content (panel and pop-up) */
+.resident-profile__identity { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.resident-profile__name { margin: 0; font-size: 1.3rem; font-weight: var(--fw-bold); }
+.resident-profile__sub { margin: 2px 0 0; color: var(--muted); }
+
+.resident-profile__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 4px; }
+.resident-profile__facts div { padding: 10px 12px; border-radius: var(--radius-sm); background: var(--tint); }
+.resident-profile__facts dt { color: var(--muted); font-size: 0.8rem; }
+.resident-profile__facts dd { margin: 0; }
+
+.profile-section { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--border); }
+.profile-section .small-label { margin-bottom: 10px; }
+.profile-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.profile-section__head .small-label { margin-bottom: 0; }
+
+.emergency-box { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.emergency-box p { margin: 0; }
+.emergency-box__rel { color: var(--muted); font-size: 0.88rem; }
+
+.resident-profile__note { margin: 10px 0 0; color: var(--muted); font-size: 0.92rem; }
+
+.profile-tasks { list-style: none; margin: 0; padding: 0; }
+.profile-tasks li + li { border-top: 1px solid var(--border); }
+.profile-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+.profile-task:hover { background: var(--tint); }
+.profile-task__main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.profile-task__main small { color: var(--muted); font-size: 0.82rem; }
+
+.profile-notes { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.profile-note { padding: 10px 12px; border-radius: var(--radius-sm); background: var(--lavender); }
+.profile-note p { margin: 0; }
+.profile-note__meta { color: var(--label); font-size: 0.8rem; }
+.profile-note__text { margin-top: 4px !important; font-size: 0.92rem; }
+
+.resident-profile .state-msg { padding: 16px; }
+
+/* Tablets and phones: the list takes the full width; the profile opens as a pop-up */
+@media (max-width: 1100px) {
+  .residents-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .residents-toolbar { flex-direction: column; }
+  .residents-toolbar .select { flex: none; width: 100%; }
+  .resident-card { gap: 12px; padding: 14px; }
+}

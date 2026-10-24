@@ -21,6 +21,12 @@ export function formatLongDate(date) {
   return new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
+// "0919 775 2779" -> "tel:+639197752779" (for tap-to-call links)
+export function telHref(phone = '') {
+  const digits = phone.replace(/\D/g, '');
+  return `tel:${digits.startsWith('0') ? `+63${digits.slice(1)}` : digits}`;
+}
+
 // "Claire River" -> "CR"
 export function initials(name = '') {
   return name
