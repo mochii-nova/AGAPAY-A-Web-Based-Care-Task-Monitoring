@@ -155,6 +155,108 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 }
 .link-btn:hover { color: var(--label); }
 
+/* Dropdown that matches the inputs */
+.select {
+  appearance: none;
+  padding-right: 40px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%231c2153' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+  cursor: pointer;
+}
+
+/* Search input with a magnifier icon */
+.search-box { position: relative; }
+.search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.search-box .field__input { padding-left: 42px; }
+
+/* Two or three buttons joined together (only one is "on") */
+.segmented { display: inline-flex; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+.segmented__btn {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+}
+.segmented__btn:hover { background: var(--lavender); }
+.segmented__btn[aria-pressed='true'] { background: var(--navy); color: #fff; }
+
+/* Big radio buttons (e.g. Completed / Pending / Skipped) */
+.choice-group { border: 0; margin: 0 0 16px; padding: 0; }
+.choice-group legend { margin-bottom: 8px; padding: 0; }
+.choice-group__options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice:hover { border-color: var(--lavender-strong); }
+.choice:has(input:focus-visible) { outline: 3px solid var(--label); outline-offset: 2px; }
+.choice--completed:has(input:checked) { border-color: var(--completed-text); background: var(--completed-bg); color: var(--completed-text); }
+.choice--pending:has(input:checked) { border-color: var(--pending-text); background: var(--pending-bg); color: var(--pending-text); }
+.choice--skipped:has(input:checked) { border-color: var(--skipped-text); background: var(--skipped-bg); color: var(--skipped-text); }
+.choice.is-disabled { opacity: 0.45; cursor: not-allowed; }
+@media (max-width: 480px) { .choice-group__options { grid-template-columns: minmax(0, 1fr); } }
+
+/* Small pill buttons for quick picks */
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f6f3fd;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.chip:hover { background: var(--lavender); }
+.chip.is-active { border-color: var(--navy); background: var(--navy); color: #fff; }
+
+/* Small grey line explaining a temporary limitation */
+.local-note { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 4px; color: var(--muted); font-size: 0.85rem; }
+.local-note svg { flex-shrink: 0; margin-top: 2px; }
+
+/* Toast messages (bottom-right) */
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(420px, calc(100vw - 32px));
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px 10px 16px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-weight: 500;
+  animation: toast-in 0.2s ease-out;
+}
+.toast span { flex: 1; }
+.toast--success { background: var(--navy); color: #fff; }
+.toast--success .icon-btn { color: #fff; }
+.toast--success .icon-btn:hover { background: rgba(255, 255, 255, 0.15); }
+.toast--error { background: var(--overdue-bg); color: var(--overdue-text); }
+.toast--error .icon-btn { color: var(--overdue-text); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@media (max-width: 600px) { .toasts { left: 16px; right: 16px; bottom: 16px; max-width: none; } }
+
 /* Message boxes */
 .alert {
   display: flex;
@@ -413,6 +515,20 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 }
 .tab:hover { background: var(--lavender); }
 .tab[aria-selected='true'] { background: var(--navy); color: #fff; }
+.tab__count {
+  display: inline-block;
+  min-width: 24px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--lavender);
+  color: var(--label);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.tab[aria-selected='true'] .tab__count { background: rgba(255, 255, 255, 0.2); color: #fff; }
+/* Tabs inside a card (no outer pill border) */
+.tabs--flat { border: 0; padding: 0; margin: 0; background: transparent; }
 
 /* Page header */
 .page-header {
@@ -464,6 +580,8 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   padding: 14px 24px 20px;
   border-top: 1px solid var(--border);
 }
+/* Footer placed inside a form in the modal body */
+.modal__footer--inline { margin: 16px -24px -20px; }
 
 /* Popovers (small dropdown boxes) */
 .popover-anchor { position: relative; }
@@ -749,7 +867,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 .app-main button:not([class]):hover { background: var(--navy-hover); }
 
 .app-main form:not([class]),
-.app-main .task-form {
+.app-main .legacy-form {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -802,12 +920,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   padding: 12px 14px;
   margin-bottom: 8px;
 }
-.task-form input { max-width: 200px !important; display: inline-block; margin-right: 6px; }
 .ack { color: var(--completed-text); font-size: 0.9rem; font-weight: 600; }
-.status { padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; }
-.status.done { background: var(--completed-bg); color: var(--completed-text); }
-.status.pending { background: var(--pending-bg); color: var(--pending-text); }
-.status.overdue { background: var(--overdue-bg); color: var(--overdue-text); }
 
 .app-main table:not([class]) {
   width: 100%;
@@ -820,6 +933,3 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 .app-main table:not([class]) :is(th, td) { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
 .app-main table:not([class]) th { background: var(--lavender); }
 
-@media (max-width: 600px) {
-  .task-form input { max-width: 100% !important; display: block; }
-}

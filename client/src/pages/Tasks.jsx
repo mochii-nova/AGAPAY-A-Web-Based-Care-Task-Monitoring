@@ -1,59 +1,219 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, ClipboardList, Info, StickyNote } from 'lucide-react';
+import useTasks from '../hooks/useTasks';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
+import { TASK_CATEGORIES } from '../constants';
+import { sampleResidents } from '../data/sample';
+import { formatTime } from '../utils/format';
+import { isToday } from '../utils/tasks';
+import PageHeader from '../components/PageHeader';
+import StatusPill from '../components/StatusPill';
+import TaskCategoryIcon from '../components/TaskCategoryIcon';
+import Avatar from '../components/Avatar';
+import TaskDetailModal from '../components/tasks/TaskDetailModal';
+import { LoadingState, ErrorState, EmptyState } from '../components/StateMessage';
+import '../styles/tasks.css';
+
+const TABS = [
+  { id: 'all', label: 'All', match: () => true },
+  { id: 'upcoming', label: 'Upcoming', match: (t) => t.status === 'pending' },
+  { id: 'completed', label: 'Completed', match: (t) => t.status === 'completed' },
+  { id: 'skipped', label: 'Skipped', match: (t) => t.status === 'skipped' },
+  { id: 'overdue', label: 'Overdue', match: (t) => t.status === 'overdue' },
+];
+
+const EMPTY_TEXT = {
+  all: 'No tasks match your search.',
+  upcoming: 'No upcoming tasks. You’re all caught up!',
+  completed: 'No completed tasks yet.',
+  skipped: 'No skipped tasks.',
+  overdue: 'No overdue tasks. Nice work!',
+};
+
+// TODO: residents come from sample data until the backend has a residents table
+const roomOf = (name) => sampleResidents.find((r) => r.name === name)?.room;
+
+const shortDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState([]);
-  const [resident, setResident] = useState('');
-  const [task, setTask] = useState('');
-  const [dueAt, setDueAt] = useState('');
+  const { tasks, status, error, usingSample, reload, saveExtra } = useTasks();
+  const showToast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [scope, setScope] = useState('today');
+  const [tab, setTab] = useState('all');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
 
-  const loadTasks = async () => {
-    const { data } = await api.get('/tasks');
-    setTasks(data);
-  };
+  // ?open=<id> in the address opens that task (used by the Dashboard's "View" buttons)
+  const openId = searchParams.get('open');
+  const openTask = tasks.find((t) => String(t._id) === openId) ?? null;
+  const openTaskById = (id) => setSearchParams({ open: id });
+  const closeTask = () => setSearchParams({}, { replace: true });
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
+  // Date, search and category filters first; the tabs then split what's left
+  const query = search.trim().toLowerCase();
+  const filtered = tasks
+    .filter((t) => scope === 'all' || isToday(t.dueAt))
+    .filter((t) => !category || t.category === category)
+    .filter((t) => !query || t.task.toLowerCase().includes(query) || t.resident.toLowerCase().includes(query))
+    .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
-  const addTask = async (e) => {
-    e.preventDefault();
-    await api.post('/tasks', { resident, task, dueAt });
-    setResident(''); setTask(''); setDueAt('');
-    loadTasks();
-  };
+  const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
+  const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
 
-  const markDone = async (id) => {
-    await api.patch(`/tasks/${id}/done`);
-    loadTasks();
-  };
+  const handleSave = async (task, { status: newStatus, reason, note }) => {
+    if (newStatus === 'completed' && task.status !== 'completed') {
+      await api.patch(`/tasks/${task._id}/done`);
+      reload();
+    }
+    saveExtra(task._id, newStatus === 'skipped' ? { skipped: true, reason, note } : note ? { note } : null);
+    closeTask();
 
-  const deleteTask = async (id) => {
-    if (!confirm('Delete this task?')) return;
-    await api.delete(`/tasks/${id}`);
-    loadTasks();
+    const verb = { completed: 'marked as completed', pending: 'kept as pending', skipped: 'marked as skipped' }[newStatus];
+    showToast(`${task.task} ${verb}.`);
   };
 
   return (
     <div>
-      <h1>Care Tasks</h1>
+      <PageHeader title="My Tasks" subtitle="Open a task to mark it completed or skipped.">
+        <div className="segmented" role="group" aria-label="Which days to show">
+          <button type="button" className="segmented__btn" aria-pressed={scope === 'today'} onClick={() => setScope('today')}>Today</button>
+          <button type="button" className="segmented__btn" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>All dates</button>
+        </div>
+      </PageHeader>
 
-      <form className="task-form" onSubmit={addTask}>
-        <input placeholder="Resident" value={resident} onChange={(e) => setResident(e.target.value)} required />
-        <input placeholder="Task" value={task} onChange={(e) => setTask(e.target.value)} required />
-        <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} required />
-        <button type="submit">Add task</button>
-      </form>
+      {usingSample && (
+        <div className="alert alert--info" role="status">
+          <Info size={20} aria-hidden="true" />
+          <span>Preview mode: the server isn't running, so these are sample tasks. Saving won't work.</span>
+        </div>
+      )}
 
-      <ul>
-        {tasks.map((t) => (
-          <li key={t._id} className="task-item">
-            {t.resident} - {t.task} (due {new Date(t.dueAt).toLocaleString()}) - <b className={`status ${t.status}`}>{t.status.toUpperCase()}</b>{' '}
-            {!t.done && <button onClick={() => markDone(t._id)}>Mark done</button>}
-            {t.done && <button onClick={() => deleteTask(t._id)}>Delete</button>}
-          </li>
-        ))}
-      </ul>
+      <div className="tasks-toolbar card">
+        <div className="tabs tabs--flat" role="tablist" aria-label="Filter by status">
+          {TABS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={`tab-${id}`}
+              aria-selected={tab === id}
+              aria-controls="tasks-panel"
+              className="tab"
+              onClick={() => setTab(id)}
+            >
+              {label} <span className="tab__count">{counts[id]}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="tasks-toolbar__filters">
+          <div className="search-box">
+            <Search size={18} aria-hidden="true" />
+            <label htmlFor="task-search" className="sr-only">Search task or resident</label>
+            <input
+              id="task-search"
+              type="search"
+              className="field__input"
+              placeholder="Search task or resident"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <label htmlFor="task-category" className="sr-only">Filter by category</label>
+          <select id="task-category" className="field__input select" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">All categories</option>
+            {TASK_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <section id="tasks-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="card tasks-panel">
+        {status === 'loading' && <LoadingState label="Loading your tasks…" />}
+        {status === 'error' && <ErrorState message={error} onRetry={reload} />}
+        {status === 'ready' && shown.length === 0 && (
+          <EmptyState icon={ClipboardList}>
+            {scope === 'today' && tasks.length > 0 && filtered.length === 0 && !query && !category
+              ? 'No tasks for today. Switch to “All dates” to see other days.'
+              : EMPTY_TEXT[tab]}
+          </EmptyState>
+        )}
+
+        {status === 'ready' && shown.length > 0 && (
+          <table className="task-table">
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Resident</th>
+                <th scope="col">Time</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span className="sr-only">Notes</span></th>
+                <th scope="col"><span className="sr-only">Open</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((t) => {
+                const room = roomOf(t.resident);
+                return (
+                  <tr key={t._id} className={`task-table__row task-table__row--${t.status}`}>
+                    <td className="task-table__task">
+                      <div className="cell-flex">
+                        <TaskCategoryIcon category={t.category} />
+                        <span>
+                          <strong>{t.task}</strong>
+                          {t.skipReason && <small>Reason: {t.skipReason}</small>}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="task-table__resident">
+                      <div className="cell-flex">
+                        <Avatar name={t.resident} size={34} />
+                        <span>
+                          {t.resident}
+                          {room && <small>Room {room}</small>}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="task-table__time">
+                      {scope === 'all' && !isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
+                      Due {formatTime(t.dueAt)}
+                    </td>
+                    <td><StatusPill status={t.status} /></td>
+                    <td className="task-table__note">
+                      {t.note && (
+                        <span className="note-flag" title={t.note}>
+                          <StickyNote size={16} aria-hidden="true" /> Note
+                        </span>
+                      )}
+                    </td>
+                    <td className="task-table__action">
+                      <button
+                        type="button"
+                        className="btn btn--outline btn--sm"
+                        onClick={() => openTaskById(t._id)}
+                        aria-label={`View task: ${t.task} for ${t.resident}`}
+                      >
+                        View task
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <TaskDetailModal
+        task={openTask}
+        residentRoom={openTask && roomOf(openTask.resident)}
+        onSave={handleSave}
+        onClose={closeTask}
+      />
     </div>
   );
 }

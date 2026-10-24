@@ -12,7 +12,7 @@ const SHOW = 3;
 // The next few unfinished tasks (overdue first). Titled "Next tasks" so it never
 // looks like it disagrees with the total in the summary card.
 export default function NextTasksCard({ tasks }) {
-  const open = tasks.filter((t) => t.status !== 'completed').sort(byUrgency);
+  const open = tasks.filter((t) => t.status === 'pending' || t.status === 'overdue').sort(byUrgency);
   const next = open.slice(0, SHOW);
 
   return (

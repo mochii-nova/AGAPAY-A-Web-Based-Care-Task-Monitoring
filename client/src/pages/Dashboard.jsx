@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { AlarmClock, HeartHandshake, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import useApiData from '../hooks/useApiData';
+import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
-import { getProfile, sampleResidents, sampleTasks, sampleHandovers } from '../data/sample';
+import { getProfile, sampleResidents, sampleHandovers } from '../data/sample';
 import { SHIFTS } from '../constants';
 import { formatLongDate } from '../utils/format';
-import { normalizeTasks, isToday } from '../utils/tasks';
+import { isToday } from '../utils/tasks';
 import { shiftWindow, shiftPhase, minutesToText } from '../utils/shift';
 import { LoadingState, ErrorState } from '../components/StateMessage';
 import CareSummaryCard from '../components/dashboard/CareSummaryCard';
@@ -43,7 +44,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const profile = getProfile(user);
   const now = useNow();
-  const tasksQuery = useApiData('/tasks', { sample: sampleTasks, transform: normalizeTasks });
+  const tasksQuery = useTasks();
   const handoversQuery = useApiData('/handovers', { sample: sampleHandovers });
 
   // My shift (sample until the backend stores each caregiver's shift)
@@ -53,7 +54,7 @@ export default function Dashboard() {
   const minutesLeft = (shiftTimes.end - now) / 60000;
 
   // TODO: only show tasks assigned to me once the backend has an assigned caregiver
-  const todayTasks = (tasksQuery.data ?? []).filter((t) => isToday(t.dueAt, now));
+  const todayTasks = tasksQuery.tasks.filter((t) => isToday(t.dueAt, now));
   const nextTask = todayTasks
     .filter((t) => t.status === 'pending')
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))[0];

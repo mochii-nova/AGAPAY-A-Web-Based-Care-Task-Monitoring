@@ -5,6 +5,7 @@ const PARTS = [
   { key: 'pending', label: 'Pending' },
   { key: 'completed', label: 'Completed' },
   { key: 'overdue', label: 'Overdue' },
+  { key: 'skipped', label: 'Skipped' },
 ];
 
 // Today's numbers: total tasks, a coloured progress bar, residents and handover status
@@ -21,7 +22,7 @@ export default function CareSummaryCard({ tasks, residentCount, handover }) {
           <strong>{total}</strong> {total === 1 ? 'task' : 'tasks'} today
         </p>
         <ul className="legend">
-          {PARTS.map(({ key, label }) => (
+          {PARTS.filter(({ key }) => key !== 'skipped' || counts.skipped > 0).map(({ key, label }) => (
             <li key={key}>
               <span className={`legend__dot legend__dot--${key}`} aria-hidden="true" />
               {label} <strong>{counts[key]}</strong>

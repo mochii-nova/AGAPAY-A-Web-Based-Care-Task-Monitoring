@@ -61,6 +61,7 @@
 .legend__dot--pending { background: #f2cf4a; }
 .legend__dot--completed { background: #5cc27a; }
 .legend__dot--overdue { background: #ef7373; }
+.legend__dot--skipped { background: #a29dba; }
 
 .progress-bar { display: flex; gap: 6px; margin: 12px 0 16px; }
 .progress-bar__part {
@@ -74,6 +75,7 @@
 .progress-bar__part--pending { background: var(--pending-bg); color: var(--pending-text); }
 .progress-bar__part--completed { background: var(--completed-bg); color: var(--completed-text); }
 .progress-bar__part--overdue { background: var(--overdue-bg); color: var(--overdue-text); }
+.progress-bar__part--skipped { background: var(--skipped-bg); color: var(--skipped-text); }
 
 .dash-summary__facts { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin: 0; }
 .dash-summary__facts div { display: flex; align-items: center; gap: 10px; }
