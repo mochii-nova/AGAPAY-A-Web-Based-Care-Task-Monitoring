@@ -3,6 +3,7 @@ import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard, UserRound } fr
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
+import { useMessages } from '../context/MessagesContext';
 import { timeAgo } from '../utils/format';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
@@ -16,6 +17,7 @@ export default function Navbar({ onMenuClick }) {
   const { logout } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const { profile } = useProfile();
+  const { unreadCount: unreadMessages } = useMessages();
   const { ref: bellRef, ...bell } = usePopover();
   const { ref: accountRef, ...account } = usePopover();
 
@@ -89,9 +91,10 @@ export default function Navbar({ onMenuClick }) {
           )}
         </div>
 
-        {/* Messages to the admin (built in Phase 9) */}
-        <Link to="/messages" className="icon-btn" aria-label="Messages">
+        {/* Messages with the administrators */}
+        <Link to="/messages" className="icon-btn" aria-label={unreadMessages ? `Messages, ${unreadMessages} unread` : 'Messages'}>
           <Mail size={20} />
+          {unreadMessages > 0 && <span className="icon-count" aria-hidden="true">{unreadMessages}</span>}
         </Link>
 
         {/* Small account menu */}

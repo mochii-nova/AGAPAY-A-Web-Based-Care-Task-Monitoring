@@ -580,6 +580,23 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   background: var(--badge);
   box-shadow: 0 0 0 2px var(--topbar);
 }
+/* Number on a top bar icon (e.g. unread messages on ✉) */
+.icon-count {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--badge);
+  box-shadow: 0 0 0 2px var(--topbar);
+  color: var(--on-navy);
+  font-size: 0.7rem;
+  font-weight: var(--fw-medium);
+  line-height: 18px;
+  text-align: center;
+}
 .count-badge {
   margin-left: auto;
   min-width: 20px;

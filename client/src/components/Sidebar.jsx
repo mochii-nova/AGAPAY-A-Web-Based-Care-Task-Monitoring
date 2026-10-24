@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useProfile } from '../context/ProfileContext';
+import { useMessages } from '../context/MessagesContext';
 import usePopover from '../hooks/usePopover';
 import ImageSlot from './ImageSlot';
 import Avatar from './Avatar';
@@ -36,6 +37,7 @@ export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { unreadCount: unreadMessages } = useMessages();
   const { handovers } = useHandovers();
   const { profile, openPhoto, openEditProfile } = useProfile();
   const { ref: menuRef, ...menu } = usePopover();
@@ -131,6 +133,7 @@ export default function Sidebar({ onClose }) {
         </NavLink>
         <NavLink to="/messages" className="sidebar__link" onClick={onClose}>
           <Mail size={18} aria-hidden="true" /> Messages
+          {unreadMessages > 0 && <span className="count-badge" aria-label={`${unreadMessages} unread`}>{unreadMessages}</span>}
         </NavLink>
         <button type="button" className="sidebar__link" onClick={handleLogout}>
           <LogOut size={18} aria-hidden="true" /> Sign out
