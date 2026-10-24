@@ -1,13 +1,52 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import SiteHeader from '../components/landing/SiteHeader';
+import HeroSection from '../components/landing/HeroSection';
+import AboutSection from '../components/landing/AboutSection';
+import FeaturesSection from '../components/landing/FeaturesSection';
+import ContactSection from '../components/landing/ContactSection';
+import SiteFooter from '../components/landing/SiteFooter';
+import '../styles/landing.css';
 
+const SECTIONS = [
+  { id: 'home', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'features', label: 'Features' },
+  { id: 'contact', label: 'Contact' },
+];
+
+// Which section is in the middle of the screen, so the menu can underline it
+function useActiveSection() {
+  const [active, setActive] = useState(SECTIONS[0].id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => entry.isIntersecting && setActive(entry.target.id)),
+      { rootMargin: '-45% 0px -50% 0px' }
+    );
+    SECTIONS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return active;
+}
+
+// The public website: one long page with Home, About, Features and Contact
 export default function Landing() {
-  const navigate = useNavigate();
+  const active = useActiveSection();
+
   return (
-    <div className="landing">
-      <h1>AGAPAY</h1>
-      <p>Care Task Monitoring and Shift Handover System for Orchid Care Home, Inc.</p>
-      <button onClick={() => navigate('/login')}>Log in</button>
-      <button onClick={() => navigate('/register')}>Register</button>
+    <div className="site">
+      <SiteHeader sections={SECTIONS} active={active} />
+      <main>
+        <HeroSection />
+        <AboutSection />
+        <FeaturesSection />
+        <ContactSection />
+      </main>
+      <SiteFooter />
     </div>
   );
 }

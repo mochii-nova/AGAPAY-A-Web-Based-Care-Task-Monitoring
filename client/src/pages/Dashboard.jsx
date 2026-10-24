@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import api from '../api';
 
 export default function Dashboard() {
@@ -14,7 +13,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Navbar />
       <h1>Dashboard</h1>
       <div className="stats">
         <div className="stat pending"><span>{count('pending')}</span><small>Pending</small></div>

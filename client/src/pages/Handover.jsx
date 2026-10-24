@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { SHIFTS, shiftLabel } from '../constants';
 
 export default function Handover() {
   const { user } = useAuth();
@@ -52,7 +52,6 @@ export default function Handover() {
 
   return (
     <div>
-      <Navbar />
       <h1>Shift Handover</h1>
 
       <h2>Summary of tasks</h2>
@@ -64,9 +63,7 @@ export default function Handover() {
       <h2>Write handover</h2>
       <form onSubmit={submitHandover}>
         <select value={shift} onChange={(e) => setShift(e.target.value)}>
-          <option>Morning</option>
-          <option>Afternoon</option>
-          <option>Night</option>
+          {SHIFTS.map((s) => <option key={s.id} value={s.apiValue}>{s.label}</option>)}
         </select><br />
         <textarea rows="5" placeholder="Handover notes" value={notes} onChange={(e) => setNotes(e.target.value)} required /><br />
         <button type="submit">Submit handover</button>
@@ -77,7 +74,7 @@ export default function Handover() {
       <ul>
         {handovers.map((h) => (
           <li key={h._id} className="handover-item">
-            [{h.shift}] by {h.author?.name} on {new Date(h.createdAt).toLocaleString()}<br />
+            [{shiftLabel(h.shift)}] by {h.author?.name} on {new Date(h.createdAt).toLocaleString()}<br />
             {h.notes}<br />
             {h.acknowledgedBy
               ? <span className="ack">Acknowledged by {h.acknowledgedBy.name}</span>

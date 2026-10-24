@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import api from '../api';
 
 export default function Staff() {
@@ -26,7 +25,6 @@ export default function Staff() {
 
   return (
     <div>
-      <Navbar />
       <h1>Manage Staff</h1>
       <table>
         <thead>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import api from '../api';
 
 export default function Tasks() {
@@ -37,7 +36,6 @@ export default function Tasks() {
 
   return (
     <div>
-      <Navbar />
       <h1>Care Tasks</h1>
 
       <form className="task-form" onSubmit={addTask}>
