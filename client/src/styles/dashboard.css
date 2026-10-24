@@ -1,0 +1,170 @@
+/* =====================================================================
+   Caregiver Dashboard (Dashboard.jsx + components/dashboard/)
+   ===================================================================== */
+.dash-greeting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 18px;
+}
+.dash-greeting__date { margin: 0; font-weight: 600; color: var(--muted); }
+
+.dash-reminder { align-items: center; flex-wrap: wrap; }
+.dash-reminder span { flex: 1; }
+
+/* Quote banner (kept small) */
+.quote-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(100deg, #fff 55%, #e7e0f8 100%);
+}
+.quote-banner__quote { margin: 0; font-size: 1.15rem; font-weight: 500; }
+.quote-banner__sub { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+.quote-banner__icon { color: var(--label); flex-shrink: 0; }
+
+/* Two columns of cards */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.dash-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* Today's Care Summary */
+.dash-summary__progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: #f6f3fd;
+}
+.dash-summary__total { margin: 0; }
+.dash-summary__total strong { font-size: 1.8rem; margin-right: 2px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; margin: 0; padding: 0; font-size: 0.92rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend__dot { width: 12px; height: 12px; border-radius: 50%; }
+.legend__dot--pending { background: #f2cf4a; }
+.legend__dot--completed { background: #5cc27a; }
+.legend__dot--overdue { background: #ef7373; }
+
+.progress-bar { display: flex; gap: 6px; margin: 12px 0 16px; }
+.progress-bar__part {
+  min-width: 40px;
+  padding: 4px 0;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.progress-bar__part--pending { background: var(--pending-bg); color: var(--pending-text); }
+.progress-bar__part--completed { background: var(--completed-bg); color: var(--completed-text); }
+.progress-bar__part--overdue { background: var(--overdue-bg); color: var(--overdue-text); }
+
+.dash-summary__facts { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin: 0; }
+.dash-summary__facts div { display: flex; align-items: center; gap: 10px; }
+.dash-summary__facts dt { color: var(--muted); }
+.dash-summary__facts dd { margin: 0; font-weight: 700; font-size: 1.1rem; }
+
+/* Next tasks */
+.task-rows { list-style: none; margin: 0; padding: 0; }
+.task-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border-radius: var(--radius-sm);
+}
+.task-row + .task-row { border-top: 1px solid var(--border); }
+.task-row--overdue { background: #fdf3f3; }
+.task-row__main { display: flex; flex-direction: column; min-width: 0; }
+.task-row__main strong { font-weight: 600; }
+.task-row__main span { color: var(--muted); font-size: 0.88rem; }
+.task-row__time { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+
+/* Today's Shift */
+.shift-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.shift-box__time { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; }
+.upcoming-box { padding: 12px 14px; border-radius: var(--radius-sm); background: #f6f3fd; }
+.upcoming-box__task { display: flex; align-items: center; gap: 10px; margin: 6px 0 0; }
+.upcoming-box__task small { display: block; color: var(--muted); }
+.upcoming-box__none { margin: 6px 0 0; color: var(--muted); }
+
+/* Latest handover */
+.handover-preview {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.handover-preview:hover { background: #f6f3fd; }
+.handover-preview__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.handover-preview__meta { margin: 2px 0 6px; color: var(--muted); font-size: 0.85rem; }
+.handover-preview__notes {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* My Residents */
+.resident-rows { list-style: none; margin: 0; padding: 0; }
+.resident-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.resident-row:hover { background: #f6f3fd; }
+.resident-row__main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.resident-row__main small { color: var(--muted); }
+.resident-row__room { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+.resident-row svg { color: var(--label); flex-shrink: 0; }
+
+/* Smaller screens */
+@media (max-width: 1100px) {
+  .dash-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .task-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'icon main pill'
+      'icon time view';
+    row-gap: 6px;
+  }
+  .task-row .task-icon { grid-area: icon; }
+  .task-row__main { grid-area: main; }
+  .task-row .status-pill { grid-area: pill; justify-self: end; }
+  .task-row__time { grid-area: time; }
+  .task-row .btn { grid-area: view; justify-self: end; }
+  .quote-banner__icon { display: none; }
+}

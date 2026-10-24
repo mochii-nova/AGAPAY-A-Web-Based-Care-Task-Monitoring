@@ -108,6 +108,68 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .field__input[aria-invalid='true'] { border-color: var(--danger); }
 textarea.field__input { resize: vertical; min-height: 110px; }
 .field__error { margin: 0; color: var(--danger); font-size: 0.85rem; font-weight: 500; }
+.field__hint { margin: 0; color: var(--muted); font-size: 0.85rem; }
+
+/* Two fields side by side (stack on phones) */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Password box with the eye button inside */
+.password-input { position: relative; }
+.password-input .field__input { padding-right: 52px; }
+.password-input__toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+}
+.password-input__toggle:hover { background: var(--lavender); color: var(--navy); }
+
+/* Checkbox with its label (whole row is at least 44px tall) */
+.checkbox-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--tap); }
+.checkbox-row input[type='checkbox'] { width: 22px; height: 22px; margin: 0; accent-color: var(--navy); cursor: pointer; }
+.checkbox-row label { cursor: pointer; }
+.checkbox-row input[aria-invalid='true'] { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+/* Button that looks like a link */
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--label); }
+
+/* Message boxes */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+.alert svg { flex-shrink: 0; margin-top: 2px; }
+.alert--error { background: var(--overdue-bg); color: var(--overdue-text); }
+.alert--success { background: var(--completed-bg); color: var(--completed-text); }
+.alert--info { background: var(--lavender); color: var(--label); }
+.alert--warning { background: var(--pending-bg); color: var(--pending-text); }
 
 /* Buttons */
 .btn {
@@ -168,6 +230,91 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   padding: 20px;
   box-shadow: var(--shadow);
 }
+
+.btn--sm { min-height: 40px; padding: 0 16px; font-size: 0.9rem; border-width: 1.5px; }
+
+/* Card title row */
+.card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 14px;
+}
+.card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  margin-right: auto;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.card__title svg { color: var(--label); }
+.card__meta { color: var(--muted); font-size: 0.85rem; }
+.card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--tap);
+  padding: 0 8px;
+  margin: -10px -8px -10px 0;
+  border-radius: var(--radius-sm);
+  color: var(--label);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.card__link:hover { background: var(--lavender); }
+
+/* Small uppercase purple label */
+.small-label {
+  margin: 0;
+  color: var(--label);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Marks parts of the screen that use sample data */
+.sample-tag {
+  padding: 2px 10px;
+  border: 1px dashed #b9addf;
+  border-radius: 999px;
+  color: var(--label);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Round icon in front of a task, by category */
+.task-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--lavender);
+  color: var(--label);
+  flex-shrink: 0;
+}
+
+/* Loading / error / empty messages */
+.state-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  color: var(--muted);
+  text-align: center;
+}
+.state-msg svg { color: var(--label); }
+.state-msg--error { color: var(--overdue-text); }
+.state-msg--error svg { color: var(--overdue-text); }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Status pills */
 .status-pill {
@@ -283,6 +430,40 @@ textarea.field__input { resize: vertical; min-height: 110px; }
 .empty-state { text-align: center; color: var(--muted); padding: 48px 20px; }
 .empty-state svg { color: var(--label); }
 .empty-text { color: var(--muted); text-align: center; margin: 24px 0; }
+
+/* Modal (pop-up window) */
+.modal {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+.modal--sm { width: min(440px, calc(100vw - 32px)); }
+.modal--lg { width: min(820px, calc(100vw - 32px)); }
+.modal::backdrop { background: rgba(28, 33, 83, 0.5); }
+.modal__box { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.modal__header h2 { margin: 0; font-size: 1.25rem; }
+.modal__body { padding: 20px 24px; overflow-y: auto; }
+.modal__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--border);
+}
 
 /* Popovers (small dropdown boxes) */
 .popover-anchor { position: relative; }
@@ -439,7 +620,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   padding: 20px 14px;
 }
 .sidebar__top { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
-.sidebar__logo { display: inline-block; border-radius: 8px; }
+.sidebar__logo { display: inline-block; border-radius: 8px; text-decoration: none; }
 .sidebar .image-slot--empty { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
 .sidebar__close { display: none; color: #fff; }
 
@@ -555,7 +736,7 @@ textarea.field__input { resize: vertical; min-height: 110px; }
    Each block is removed when its page is rebuilt in a later phase.
    (They only touch plain elements without a class.)
    ===================================================================== */
-:where(.app-main, .auth-card) button:not([class]) {
+.app-main button:not([class]) {
   min-height: var(--tap);
   padding: 0 18px;
   margin: 4px 4px 4px 0;
@@ -565,9 +746,9 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   color: #fff;
   font-weight: 600;
 }
-:where(.app-main, .auth-card) button:not([class]):hover { background: var(--navy-hover); }
+.app-main button:not([class]):hover { background: var(--navy-hover); }
 
-:where(.app-main, .auth-card) form:not([class]),
+.app-main form:not([class]),
 .app-main .task-form {
   background: var(--card);
   border: 1px solid var(--border);
@@ -575,8 +756,8 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   padding: 16px;
   margin: 12px 0;
 }
-:where(.app-main, .auth-card) label:not([class]) { font-size: 0.9rem; color: var(--muted); }
-:where(.app-main, .auth-card) :is(input, select, textarea):not([class]) {
+.app-main label:not([class]) { font-size: 0.9rem; color: var(--muted); }
+.app-main :is(input, select, textarea):not([class]) {
   width: 100%;
   max-width: 420px;
   min-height: var(--tap);
@@ -587,27 +768,10 @@ textarea.field__input { resize: vertical; min-height: 110px; }
   font: inherit;
   background: #fff;
 }
-:where(.app-main, .auth-card) textarea:not([class]) { max-width: 100%; }
+.app-main textarea:not([class]) { max-width: 100%; }
 
 .app-main > div > h1 { margin-bottom: 12px; }
 .app-main > div > h2 { margin-top: 24px; }
-
-/* Login & Register (rebuilt in Phase 2) */
-.auth-card {
-  max-width: 420px;
-  margin: 8vh auto 0;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px 28px;
-  box-shadow: var(--shadow);
-}
-.auth-card h1 { text-align: center; margin-bottom: 12px; }
-.auth-card form:not([class]) { border: 0; padding: 0; margin: 0 0 12px; }
-.auth-card :is(input, select):not([class]) { max-width: 100%; }
-.auth-card form button:not([class]) { width: 100%; margin: 8px 0 0; }
-.auth-card > button:not([class]) { width: 100%; background: none; color: var(--label); margin: 4px 0 0; }
-.auth-card > button:not([class]):hover { background: var(--lavender); }
 
 /* Dashboard / Handover summary (rebuilt in Phases 3 and 7) */
 .stats {

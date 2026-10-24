@@ -9,7 +9,8 @@
 
 import { getShift, shiftTime } from '../constants';
 
-const minutesAgo =(n) => new Date(Date.now() - n * 60000).toISOString();
+const minutesAgo = (n) => new Date(Date.now() - n * 60000).toISOString();
+const hoursFromNow = (h) => new Date(Date.now() + h * 3600000).toISOString();
 
 // Extra account details the backend's users table doesn't store yet.
 // Real values from the logged-in user (name, username, role) always win.
@@ -60,6 +61,46 @@ export const sampleResidents = [
     gender: 'Male',
     careNeeds: ['mobility', 'rest'],
     emergencyContact: { name: 'Carmen Reyes', relationship: 'Wife', phone: '0915 456 7890' },
+  },
+];
+
+// ---------------------------------------------------------------------
+//  PREVIEW ONLY: shown by useApiData when `npm run dev` can't reach the
+//  backend. Same shape as GET /api/tasks and GET /api/handovers.
+//  These are functions so the times are always around "now".
+// ---------------------------------------------------------------------
+const taskStatus = (t) => (t.done ? 'done' : new Date(t.dueAt) < new Date() ? 'overdue' : 'pending');
+
+export const sampleTasks = () =>
+  [
+    { id: 101, task: 'Sponge Bath', resident: 'Maria Santos', dueAt: hoursFromNow(-3), done: true, doneAt: hoursFromNow(-2.8) },
+    { id: 102, task: 'Morning Walk', resident: 'Maria Santos', dueAt: hoursFromNow(-1), done: false },
+    { id: 103, task: 'Medication: Blood Pressure Pill', resident: 'Juan Cruz', dueAt: hoursFromNow(-0.5), done: true, doneAt: hoursFromNow(-0.4) },
+    { id: 104, task: 'Lunch Feeding', resident: 'Juan Cruz', dueAt: hoursFromNow(0.75), done: false },
+    { id: 105, task: 'Post-Lunch Nap', resident: 'Remedios Garcia', dueAt: hoursFromNow(1.5), done: false },
+    { id: 106, task: 'Family Video Call', resident: 'Remedios Garcia', dueAt: hoursFromNow(2.5), done: false },
+  ].map((t) => ({ ...t, _id: t.id, status: taskStatus(t) }));
+
+export const sampleHandovers = () => [
+  {
+    _id: 201,
+    id: 201,
+    shift: 'Night',
+    notes: 'Maria slept later than usual and ate a light dinner. Please watch her closely today. Hallway light near Room 106 is flickering.',
+    createdAt: minutesAgo(600),
+    author: { _id: 901, name: 'Rosa Lim', role: 'caregiver' },
+    acknowledgedBy: null,
+    acknowledgedAt: null,
+  },
+  {
+    _id: 200,
+    id: 200,
+    shift: 'Afternoon',
+    notes: 'All tasks done. Juan had a good appetite at dinner.',
+    createdAt: minutesAgo(1080),
+    author: { _id: 902, name: 'Mark Dela Cruz', role: 'caregiver' },
+    acknowledgedBy: { _id: 903, name: 'Rosa Lim' },
+    acknowledgedAt: minutesAgo(1000),
   },
 ];
 
