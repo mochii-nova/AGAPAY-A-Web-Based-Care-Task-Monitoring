@@ -1,9 +1,8 @@
 import Avatar from '../Avatar';
 import CareNeeds from './CareNeeds';
 
-// One resident in the list: avatar on the left, then three lines
-// (name + ID, room + tasks today, care-need tags in one row).
-// The whole card is a button that opens the profile.
+// One resident in the list: avatar on the left, then name + ID, room + tasks today,
+// and a few care-need tags. The whole card is a button that opens the profile.
 export default function ResidentCard({ resident, todayTasks, selected, maxNeeds, onSelect }) {
   const overdue = todayTasks.filter((t) => t.status === 'overdue').length;
 
@@ -15,7 +14,7 @@ export default function ResidentCard({ resident, todayTasks, selected, maxNeeds,
       aria-label={`${resident.name}, room ${resident.room}. Open profile`}
       onClick={() => onSelect(resident.id)}
     >
-      <Avatar name={resident.name} photo={resident.photo} size={52} />
+      <Avatar name={resident.name} photo={resident.photo} size={44} />
       <span className="resident-card__body">
         <span className="resident-card__line">
           <strong className="resident-card__name">{resident.name}</strong>

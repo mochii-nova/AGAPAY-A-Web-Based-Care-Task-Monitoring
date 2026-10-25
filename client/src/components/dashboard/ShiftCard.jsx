@@ -1,46 +1,31 @@
-import { CalendarDays } from 'lucide-react';
-import CardHeader from '../CardHeader';
-import TaskCategoryIcon from '../TaskCategoryIcon';
+import { Link } from 'react-router-dom';
 import { shiftTime } from '../../constants';
-import { formatTime } from '../../utils/format';
+import { minutesToText } from '../../utils/shift';
 
-const PHASE_TEXT = {
-  upcoming: { label: 'Starts soon', tone: 'skipped' },
-  on: { label: 'On shift now', tone: 'completed' },
-  ended: { label: 'Shift ended', tone: 'skipped' },
-  off: { label: 'Day off', tone: 'skipped' },
-};
+// What to say about today's handover, depending on where we are in the shift
+function handoverNote(phase, submitted, shift, minutesLeft) {
+  if (submitted) return { text: 'Handover submitted', tone: 'completed' };
+  if (phase === 'on') return { text: `Handover due in ${minutesToText(minutesLeft)}`, tone: 'pending', write: true };
+  if (phase === 'ended') return { text: 'Handover not submitted yet', tone: 'overdue', write: true };
+  return { text: `Handover due at ${shift.end}`, tone: 'neutral' };
+}
 
-// My shift for today (or a day off) and the next task coming up
-export default function ShiftCard({ shift, phase, nextTask }) {
-  const { label, tone } = PHASE_TEXT[phase];
+// My shift today (or a day off), with the handover reminder
+export default function ShiftCard({ shift, phase, submitted, minutesLeft }) {
+  const note = shift && handoverNote(phase, submitted, shift, minutesLeft);
 
   return (
-    <section className="card">
-      <CardHeader icon={CalendarDays} title="Today's Shift" linkTo="/schedule" />
+    <section className="card shift-card">
+      <p className="small-label">Your shift</p>
+      <p className="shift-card__name">{shift ? shift.label : 'Day off'}</p>
+      <p className="shift-card__time">{shift ? shiftTime(shift) : 'Enjoy your rest day.'}</p>
 
-      <div className="shift-box">
-        <div>
-          <p className="small-label">{shift ? `${shift.label} Shift` : 'No shift today'}</p>
-          <p className="shift-box__time">{shift ? shiftTime(shift) : 'Enjoy your rest day'}</p>
+      {note && (
+        <div className={`shift-card__note shift-card__note--${note.tone}`} role={note.tone === 'pending' ? 'status' : undefined}>
+          <span>{note.text}</span>
+          {note.write && <Link to="/handover">Write</Link>}
         </div>
-        <span className={`status-pill status-pill--${tone}`}>{label}</span>
-      </div>
-
-      <div className="upcoming-box">
-        <p className="small-label">Coming up</p>
-        {nextTask ? (
-          <p className="upcoming-box__task">
-            <TaskCategoryIcon category={nextTask.category} size={16} />
-            <span>
-              <strong>{nextTask.task}</strong> at {formatTime(nextTask.dueAt)}
-              <small>{nextTask.resident}</small>
-            </span>
-          </p>
-        ) : (
-          <p className="upcoming-box__none">No more tasks scheduled today.</p>
-        )}
-      </div>
+      )}
     </section>
   );
 }

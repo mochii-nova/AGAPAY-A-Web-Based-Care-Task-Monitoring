@@ -1,13 +1,11 @@
-import { Heart } from 'lucide-react';
-import ImageSlot from '../ImageSlot';
-import { images } from '../../assets/images';
+import Logo from '../Logo';
 
 const TEAM = [
   'Aeron Supremido',
   'Veronica Abalos',
   'Gianem Austria',
   'Princess Joy Cruz',
-  'Alodia Yssa Belle De Guzman',
+  'Alodia De Guzman',
   'Charissa Panotes',
 ];
 
@@ -16,8 +14,8 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="container site-footer__top">
         <div className="site-footer__brand">
-          <ImageSlot image={images.logoWhite} alt="AGAPAY" style={{ width: 200, height: 56 }} />
-          <p>Care is better when it's shared.</p>
+          <Logo tone="white" height={34} />
+          <p>Care is better when it’s shared.</p>
         </div>
 
         <div>
@@ -29,7 +27,7 @@ export default function SiteFooter() {
         <div>
           <h3>Developed by</h3>
           <p>CTRL + SIA + PRAY</p>
-          <p>BSIT 3 · Universidad de Dagupan</p>
+          <p>BSIT III · Universidad de Dagupan</p>
         </div>
 
         <div>
@@ -41,11 +39,8 @@ export default function SiteFooter() {
       </div>
 
       <div className="container site-footer__bottom">
-        <p>© 2026 AGAPAY. All Rights Reserved.</p>
-        <p>
-          Made with <Heart size={16} className="site-footer__heart" fill="currentColor" aria-hidden="true" />
-          <span className="sr-only">love</span> for Caregivers
-        </p>
+        <p>© 2026 AGAPAY. All rights reserved.</p>
+        <p>Made with care for caregivers</p>
       </div>
     </footer>
   );

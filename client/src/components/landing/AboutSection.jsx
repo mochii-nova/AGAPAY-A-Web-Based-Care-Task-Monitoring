@@ -2,34 +2,35 @@ import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
 
 const CARDS = [
-  { number: '01', title: 'Care Tasks', text: 'Track assigned, completed, pending, and skipped activities.' },
-  { number: '02', title: 'Shift Handovers', text: 'Pass important notes and unfinished tasks to the next caregiver.' },
-  { number: '03', title: 'Care Schedules', text: 'View assigned shifts and scheduled care activities.' },
-  { number: '04', title: 'Alerts & Calendar', text: 'Get push notifications for tasks and handovers, and sync your shifts with Google Calendar.' },
+  { title: 'Care tasks', text: 'See what was assigned, what is done, and what still needs doing.' },
+  { title: 'Shift handovers', text: 'Leave clear notes so the next caregiver knows where you stopped.' },
+  { title: 'Care schedules', text: 'Check your shift and the day’s activities at a glance.' },
+  { title: 'Alerts and calendar', text: 'Get reminders for tasks and add your shifts to Google Calendar.' },
 ];
 
 export default function AboutSection() {
   return (
     <section id="about" className="section about">
       <div className="container">
-        <h2 className="section-title">Comprehensive Care Platform</h2>
+        <div className="about__head">
+          <div>
+            <p className="eyebrow">About AGAPAY</p>
+            <h2 className="section-title">Care is better when it’s shared.</h2>
+          </div>
+          <p className="about__body">
+            <strong>Agapay</strong> means to walk alongside someone. Our app helps caregivers organize the day,
+            record each task, and pass on what matters, so no resident’s care falls through the cracks between
+            shifts.
+          </p>
+        </div>
 
         <div className="about__grid">
-          <div className="about__intro">
-            <p className="about__tagline">Care is better when it's shared.</p>
-            <p className="about__body">
-              AGAPAY helps caregivers organize daily responsibilities, track care activities, and share important
-              updates across shifts. So the next caregiver knows what has been done and what still needs attention.
-            </p>
-            <ImageSlot image={images.about} className="about__photo" />
-          </div>
-
+          <ImageSlot image={images.about} className="about__photo" />
           <ul className="about__cards">
-            {CARDS.map((card) => (
-              <li key={card.number} className="about-card">
-                <span className="about-card__number" aria-hidden="true">{card.number}</span>
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
+            {CARDS.map(({ title, text }) => (
+              <li key={title} className="about-card">
+                <h3>{title}</h3>
+                <p>{text}</p>
               </li>
             ))}
           </ul>

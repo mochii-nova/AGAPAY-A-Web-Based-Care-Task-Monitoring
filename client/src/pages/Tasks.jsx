@@ -9,7 +9,6 @@ import { formatTime } from '../utils/format';
 import { isToday, SAVED_TEXT } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../components/StatusPill';
-import TaskCategoryIcon from '../components/TaskCategoryIcon';
 import Avatar from '../components/Avatar';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import { LoadingState, ErrorState, EmptyState } from '../components/StateMessage';
@@ -85,122 +84,117 @@ export default function Tasks() {
         </div>
       )}
 
-      <div className="tasks-toolbar card">
-        <div className="tabs tabs--flat" role="tablist" aria-label="Filter by status">
-          {TABS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              id={`tab-${id}`}
-              aria-selected={tab === id}
-              aria-controls="tasks-panel"
-              className="tab"
-              onClick={() => setTab(id)}
-            >
-              {label} <span className="tab__count">{counts[id]}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="tasks-toolbar__filters">
-          <div className="search-box">
-            <Search size={18} aria-hidden="true" />
-            <label htmlFor="task-search" className="sr-only">Search task or resident</label>
-            <input
-              id="task-search"
-              type="search"
-              className="field__input"
-              placeholder="Search task or resident"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <label htmlFor="task-category" className="sr-only">Filter by category</label>
-          <select id="task-category" className="field__input select" value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">All categories</option>
-            {TASK_CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id}>{c.label}</option>
+      {/* One card: status tabs and filters on top, the table underneath */}
+      <div className="card tasks-card">
+        <div className="tasks-toolbar">
+          <div className="tabs tabs--flat" role="tablist" aria-label="Filter by status">
+            {TABS.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`tab-${id}`}
+                aria-selected={tab === id}
+                aria-controls="tasks-panel"
+                className="tab"
+                onClick={() => setTab(id)}
+              >
+                {label} <span className="tab__count">{counts[id]}</span>
+              </button>
             ))}
-          </select>
+          </div>
+
+          <div className="tasks-toolbar__filters">
+            <div className="search-box">
+              <Search size={18} aria-hidden="true" />
+              <label htmlFor="task-search" className="sr-only">Search task or resident</label>
+              <input
+                id="task-search"
+                type="search"
+                className="field__input"
+                placeholder="Search task or resident"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <label htmlFor="task-category" className="sr-only">Filter by category</label>
+            <select id="task-category" className="field__input select" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">All categories</option>
+              {TASK_CATEGORIES.map((c) => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
+
+        <section id="tasks-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="tasks-panel">
+          {status === 'loading' && <LoadingState label="Loading your tasks…" />}
+          {status === 'error' && <ErrorState message={error} onRetry={reload} />}
+          {status === 'ready' && shown.length === 0 && (
+            <EmptyState icon={ClipboardList}>
+              {scope === 'today' && tasks.length > 0 && filtered.length === 0 && !query && !category
+                ? 'No tasks for today. Switch to “All dates” to see other days.'
+                : EMPTY_TEXT[tab]}
+            </EmptyState>
+          )}
+
+          {status === 'ready' && shown.length > 0 && (
+            <table className="task-table">
+              <thead>
+                <tr>
+                  <th scope="col">Time</th>
+                  <th scope="col">Task</th>
+                  <th scope="col">Resident</th>
+                  <th scope="col">Status</th>
+                  <th scope="col"><span className="sr-only">Open</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {shown.map((t) => {
+                  const room = roomOf(t.resident);
+                  return (
+                    <tr key={t._id} className="task-table__row">
+                      <td className="task-table__time">
+                        {scope === 'all' && !isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
+                        {formatTime(t.dueAt)}
+                      </td>
+                      <td className="task-table__task">
+                        <strong>{t.task}</strong>
+                        {t.skipReason && <small>Reason: {t.skipReason}</small>}
+                        {t.note && (
+                          <small className="note-flag" title={t.note}>
+                            <StickyNote size={13} aria-hidden="true" /> Has a note
+                          </small>
+                        )}
+                      </td>
+                      <td className="task-table__resident">
+                        <div className="cell-flex">
+                          <Avatar name={t.resident} size={30} />
+                          <span>
+                            {t.resident}
+                            {room && <small> · Rm {room}</small>}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="task-table__status"><StatusPill status={t.status} /></td>
+                      <td className="task-table__action">
+                        <button
+                          type="button"
+                          className="btn btn--outline btn--sm"
+                          onClick={() => openTaskById(t._id)}
+                          aria-label={`View task: ${t.task} for ${t.resident}`}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
       </div>
-
-      <section id="tasks-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="card tasks-panel">
-        {status === 'loading' && <LoadingState label="Loading your tasks…" />}
-        {status === 'error' && <ErrorState message={error} onRetry={reload} />}
-        {status === 'ready' && shown.length === 0 && (
-          <EmptyState icon={ClipboardList}>
-            {scope === 'today' && tasks.length > 0 && filtered.length === 0 && !query && !category
-              ? 'No tasks for today. Switch to “All dates” to see other days.'
-              : EMPTY_TEXT[tab]}
-          </EmptyState>
-        )}
-
-        {status === 'ready' && shown.length > 0 && (
-          <table className="task-table">
-            <thead>
-              <tr>
-                <th scope="col">Task</th>
-                <th scope="col">Resident</th>
-                <th scope="col">Time</th>
-                <th scope="col">Status</th>
-                <th scope="col"><span className="sr-only">Notes</span></th>
-                <th scope="col"><span className="sr-only">Open</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((t) => {
-                const room = roomOf(t.resident);
-                return (
-                  <tr key={t._id} className={`task-table__row task-table__row--${t.status}`}>
-                    <td className="task-table__task">
-                      <div className="cell-flex">
-                        <TaskCategoryIcon category={t.category} />
-                        <span>
-                          <strong>{t.task}</strong>
-                          {t.skipReason && <small>Reason: {t.skipReason}</small>}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="task-table__resident">
-                      <div className="cell-flex">
-                        <Avatar name={t.resident} size={34} />
-                        <span>
-                          {t.resident}
-                          {room && <small>Room {room}</small>}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="task-table__time">
-                      {scope === 'all' && !isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
-                      Due {formatTime(t.dueAt)}
-                    </td>
-                    <td><StatusPill status={t.status} /></td>
-                    <td className="task-table__note">
-                      {t.note && (
-                        <span className="note-flag" title={t.note}>
-                          <StickyNote size={16} aria-hidden="true" /> Note
-                        </span>
-                      )}
-                    </td>
-                    <td className="task-table__action">
-                      <button
-                        type="button"
-                        className="btn btn--soft btn--sm"
-                        onClick={() => openTaskById(t._id)}
-                        aria-label={`View task: ${t.task} for ${t.resident}`}
-                      >
-                        View task
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </section>
 
       <TaskDetailModal
         task={openTask}

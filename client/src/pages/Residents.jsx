@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES, shiftLabel } from '../constants';
 import { sampleResidents } from '../data/sample';
 import { useHandovers } from '../context/HandoverContext';
+import { useProfile } from '../context/ProfileContext';
 import { RESIDENT_STATUS } from '../utils/handover';
 import { isToday, SAVED_TEXT } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
@@ -48,6 +49,7 @@ function notesFor(resident, handovers, tasks) {
 export default function Residents() {
   const { tasks, status: tasksStatus, updateTask } = useTasks();
   const { handovers } = useHandovers();
+  const { profile: { id: profileId } } = useProfile();
   const showToast = useToast();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 600px)');
@@ -71,9 +73,13 @@ export default function Residents() {
   const closePopup = () => setSearchParams({}, { replace: true });
 
   const tasksOf = (r) => tasks.filter((t) => t.resident === r.name && isToday(t.dueAt));
+  // "Watch closely" / "Urgent" from the latest handover another caregiver wrote
+  const latestReceived = handovers.find((h) => h.author?._id !== profileId);
+  const statusOf = (r) => latestReceived?.data?.residents.find((u) => u.name === r.name)?.status;
   const profile = selected && (
     <ResidentProfile
       resident={selected}
+      status={statusOf(selected)}
       tasks={tasksOf(selected)}
       tasksLoading={tasksStatus === 'loading'}
       notes={notesFor(selected, handovers, tasks)}
@@ -92,9 +98,9 @@ export default function Residents() {
   return (
     <div>
       <PageHeader
-        title="My Residents"
+        title="My residents"
         titleExtra={<span className="sample-tag" title="Residents aren't in the database yet">Sample residents</span>}
-        subtitle="Click a resident to see their profile, tasks and notes."
+        subtitle="Choose a resident to see their care needs, tasks and notes."
       />
 
       <div className="residents-layout">
@@ -140,7 +146,6 @@ export default function Residents() {
 
         {!isNarrow && (
           <aside className="card resident-panel" aria-label={selected ? `Profile of ${selected.name}` : 'Resident profile'}>
-            <p className="small-label resident-panel__label">Resident profile</p>
             {profile ?? <EmptyState icon={Users}>No resident selected.</EmptyState>}
           </aside>
         )}

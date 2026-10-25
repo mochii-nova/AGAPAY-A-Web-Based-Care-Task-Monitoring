@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { CircleAlert, CircleCheck } from 'lucide-react';
+import { CircleAlert } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
@@ -17,12 +17,6 @@ const EMPTY = {
   confirm: '',
   agree: false,
 };
-
-const PERKS = [
-  { title: 'Real-Time Shift Tracking', text: 'Instantly view care schedules and log daily activities as they happen.' },
-  { title: 'Seamless Handover Logs', text: 'Pass notes and pending tasks to the next caregiver in a few clicks.' },
-  { title: 'Centralized Resident Updates', text: 'Access shift histories and important updates in one secure place.' },
-];
 
 // Returns an error message for each field that is filled in wrong
 function validate(form) {
@@ -107,23 +101,11 @@ export default function Register() {
 
   return (
     <AuthLayout
-      panelTitle="Your Role in Better Care Starts Here"
-      panelContent={
-        <ul className="auth__perks">
-          {PERKS.map((perk) => (
-            <li key={perk.title}>
-              <CircleCheck size={20} aria-hidden="true" />
-              <div>
-                <strong>{perk.title}</strong>
-                <span>{perk.text}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      }
+      panelTitle="Your role in better care starts here."
+      panelText="Make your caregiver account, then sign in to see your shift and tasks."
     >
       <h1 className="auth__title">Create your account</h1>
-      <p className="auth__subtitle">For Orchid Carehome caregivers</p>
+      <p className="auth__subtitle">For Orchid Carehome caregivers.</p>
 
       {error && (
         <div className="alert alert--error" role="alert">
@@ -134,26 +116,25 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} noValidate className="auth__form">
         <div className="form-grid">
-          {field('firstName', 'First name', { placeholder: 'Enter your first name', autoComplete: 'given-name' })}
-          {field('lastName', 'Last name', { placeholder: 'Enter your last name', autoComplete: 'family-name' })}
+          {field('firstName', 'First name', { placeholder: 'e.g. Juan', autoComplete: 'given-name' })}
+          {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'family-name' })}
         </div>
-        {field('email', 'Email address', { type: 'email', placeholder: 'Enter your email', autoComplete: 'email' })}
         <div className="form-grid">
-          {field('phone', 'Phone number', { type: 'tel', placeholder: '09XX XXX XXXX', autoComplete: 'tel' })}
-          {field('employeeId', 'Employee ID', {
-            placeholder: 'e.g., CGV-2026-017',
-            hint: "You'll use this to sign in.",
-            autoComplete: 'username',
-          })}
+          {field('email', 'Email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email' })}
+          {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel' })}
         </div>
+        {field('employeeId', 'Employee ID', {
+          placeholder: 'e.g. CGV-2026-017',
+          hint: 'You’ll use this to sign in.',
+          autoComplete: 'username',
+        })}
         <div className="form-grid">
           {field('password', 'Password', {
             type: 'password',
-            placeholder: 'Enter your password',
-            hint: 'At least 8 characters, with a letter and a number.',
+            placeholder: 'At least 8 characters',
             autoComplete: 'new-password',
           })}
-          {field('confirm', 'Confirm password', { type: 'password', placeholder: 'Repeat your password', autoComplete: 'new-password' })}
+          {field('confirm', 'Confirm password', { type: 'password', placeholder: 'Type it again', autoComplete: 'new-password' })}
         </div>
 
         <div className="field">
@@ -176,7 +157,7 @@ export default function Register() {
         </div>
 
         <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
-          {loading ? 'Creating account…' : 'Create Account'}
+          {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 

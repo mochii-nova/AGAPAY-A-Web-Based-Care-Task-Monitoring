@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, MapPin, Mail, CircleCheck } from 'lucide-react';
+import { CircleCheck, Send } from 'lucide-react';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
 
@@ -39,12 +39,10 @@ export default function ContactSection() {
     setForm(EMPTY);
   };
 
-  // One labelled input with its error message underneath
+  // One labelled input with its error message underneath (all fields are required)
   const field = (name, label, props) => (
-    <div className="field">
-      <label htmlFor={`contact-${name}`} className="field__label">
-        {label} <span className="field__required" aria-hidden="true">*</span>
-      </label>
+    <div className={`field ${props.className ?? ''}`}>
+      <label htmlFor={`contact-${name}`} className="field__label">{label}</label>
       {props.as === 'textarea' ? (
         <textarea
           id={`contact-${name}`} name={name} rows={4} className="field__input"
@@ -63,53 +61,58 @@ export default function ContactSection() {
   );
 
   return (
-    <section id="contact" className="contact">
-      <div className="contact__panel">
-        <div className="contact__info">
-          <h2 className="contact__title">Contact Us</h2>
-          <ul className="contact__list">
-            <li>
-              <span className="contact__icon" aria-hidden="true"><Phone size={18} /></span>
-              <div><small>Phone</small><a href="tel:+63755290256">(075) 529 0256</a></div>
-            </li>
-            <li>
-              <span className="contact__icon" aria-hidden="true"><MapPin size={18} /></span>
-              <div>
-                <small>Address</small>
-                <address>
-                  <span>301 Bolosan Old Rd,</span> <span>Dagupan City,</span> <span>Pangasinan, Philippines</span>
-                </address>
-              </div>
-            </li>
-            <li>
-              <span className="contact__icon" aria-hidden="true"><Mail size={18} /></span>
-              <div><small>Email</small><a href="mailto:ctrlsiapray@gmail.com">ctrlsiapray@gmail.com</a></div>
-            </li>
-          </ul>
+    <section id="contact" className="section contact">
+      <div className="container contact__grid">
+        {/* Left: contact details, then the photo */}
+        <div className="contact__panel">
+          <p className="eyebrow">Contact</p>
+          <h2 className="contact__title">Get in touch</h2>
+          <p className="contact__intro">Questions about AGAPAY or Orchid Carehome? Send us a message.</p>
+          <dl className="contact__list">
+            <div>
+              <dt>Phone</dt>
+              <dd><a href="tel:+63755290256">(075) 529 0256</a></dd>
+            </div>
+            <div>
+              <dt>Address</dt>
+              <dd><address>301 Bolosan Old Road, Dagupan City, Pangasinan</address></dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd><a href="mailto:ctrlsiapray@gmail.com">ctrlsiapray@gmail.com</a></dd>
+            </div>
+          </dl>
+          <ImageSlot image={images.contact} className="contact__photo" />
         </div>
-        <ImageSlot image={images.contact} className="contact__photo" />
-      </div>
 
-      <div className="contact__form-wrap">
-        {sentTo ? (
-          <div className="contact__success" role="status">
-            <CircleCheck size={48} aria-hidden="true" />
-            <h3>Thank you, {sentTo.name}!</h3>
-            <p>Your message has been sent. We'll reply to <strong>{sentTo.email}</strong> as soon as we can.</p>
-            <button type="button" className="btn btn--outline" onClick={() => setSentTo(null)}>
-              Send another message
-            </button>
-          </div>
-        ) : (
-          <form className="contact__form" onSubmit={handleSubmit} noValidate>
-            <p className="contact__hint">Fields marked * are required.</p>
-            {field('name', 'Your name', { placeholder: 'Enter your name', autoComplete: 'name' })}
-            {field('email', 'Your email', { type: 'email', placeholder: 'Enter your email', autoComplete: 'email' })}
-            {field('subject', 'Subject', { placeholder: 'What is your message about?' })}
-            {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here…' })}
-            <button type="submit" className="btn btn--soft">Send Message</button>
-          </form>
-        )}
+        {/* Right: the form */}
+        <div className="contact__form-wrap">
+          {sentTo ? (
+            <div className="contact__success" role="status">
+              <CircleCheck size={48} aria-hidden="true" />
+              <h3>Thank you, {sentTo.name}!</h3>
+              <p>Your message has been sent. We'll reply to <strong>{sentTo.email}</strong> as soon as we can.</p>
+              <button type="button" className="btn btn--outline" onClick={() => setSentTo(null)}>
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <form className="contact__form" onSubmit={handleSubmit} noValidate>
+              <div className="form-grid">
+                {field('name', 'Your name', { placeholder: 'e.g. Juan Dela Cruz', autoComplete: 'name' })}
+                {field('email', 'Your email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email' })}
+              </div>
+              {field('subject', 'Subject', { placeholder: 'e.g. Question about visiting hours' })}
+              {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here', className: 'contact__message' })}
+              <div className="contact__actions">
+                <p className="contact__hint">All fields are required.</p>
+                <button type="submit" className="btn btn--primary">
+                  <Send size={16} aria-hidden="true" /> Send message
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </section>
   );

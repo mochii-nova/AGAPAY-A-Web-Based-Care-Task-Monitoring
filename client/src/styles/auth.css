@@ -4,64 +4,60 @@
    ===================================================================== */
 .auth {
   display: grid;
-  grid-template-columns: minmax(320px, 38%) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 46%) minmax(0, 1fr);
   min-height: 100vh;
   background: var(--card);
 }
 
-/* Navy panel on the left */
+/* Navy panel on the left: logo, photo, a short warm line */
 .auth__panel {
   position: sticky;
   top: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 24px;
   height: 100vh;
-  padding: 48px 40px 28px;
+  padding: 32px 44px 36px;
   background: var(--navy);
   color: var(--on-navy);
-  text-align: center;
 }
-.auth__panel-inner { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.auth__logo { width: 240px; height: 64px; }
-.auth__panel .image-slot--empty { background: var(--on-navy-hover); border-color: var(--on-navy-line); color: var(--on-navy); }
-.auth__panel-title { margin: 36px 0 18px; color: var(--on-navy); font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: var(--fw-bold); line-height: 1.15; }
-.auth__panel-text { max-width: 360px; margin: 0; color: var(--on-navy-muted); font-size: 1.05rem; }
-.auth__made-with { margin: 24px 0 0; color: var(--on-navy-muted); font-size: 0.9rem; }
-.auth__heart { vertical-align: -3px; }
-
-.auth__perks { list-style: none; margin: 0; padding: 0; max-width: 340px; text-align: left; }
-.auth__perks li { display: flex; gap: 12px; margin-bottom: 20px; }
-.auth__perks svg { flex-shrink: 0; color: var(--on-navy); }
-.auth__perks div { display: flex; flex-direction: column; }
-.auth__perks strong { font-size: 1.02rem; }
-.auth__perks span { color: var(--on-navy-muted); font-size: 0.88rem; }
+.auth__logo-link { align-self: center; border-radius: var(--radius-sm); }
+.auth__logo { width: auto; }
+.auth .auth__photo { flex: 1; width: 100%; min-height: 0; border-radius: 20px; }
+.auth__panel .image-slot--empty {
+  background-color: var(--on-navy-hover);
+  background-image: repeating-linear-gradient(135deg, transparent 0 26px, var(--on-navy-line) 26px 27px);
+}
+.auth__panel-title { margin: 0 0 8px; color: var(--on-navy); font-size: clamp(1.4rem, 2.2vw, 1.85rem); font-weight: var(--fw-bold); line-height: 1.2; }
+.auth__panel-text p { margin: 0; color: var(--on-navy-muted); }
 
 /* Form side */
-.auth__main { display: flex; flex-direction: column; padding: 24px 48px 40px; }
+.auth__main { display: flex; align-items: center; justify-content: center; padding: 32px 48px; }
+.auth__form-area { width: 100%; max-width: 520px; }
 .auth__back {
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: var(--tap);
-  padding: 0 12px;
-  margin-left: -12px;
+  padding: 0 10px;
+  margin: 0 0 4px -10px;
   border-radius: var(--radius-sm);
-  color: var(--label);
-  font-weight: var(--fw-medium);
+  color: var(--indigo);
+  font-size: 0.93rem;
   text-decoration: none;
 }
-.auth__back:hover { background: var(--lavender); }
-.auth__form-area { flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 620px; margin: 0 auto; padding: 16px 0; }
+.auth__back:hover { background: var(--indigo-soft); }
 
-.auth__title { font-size: clamp(1.7rem, 2.8vw, 2.3rem); text-align: center; }
-.auth__subtitle { margin: 8px 0 32px; color: var(--muted); font-size: 1.02rem; text-align: center; }
+.auth__title { font-size: var(--fs-page-title); }
+.auth__subtitle { margin: 6px 0 22px; color: var(--muted); }
 .auth__form { width: 100%; }
-.auth__row-end { display: flex; justify-content: flex-end; margin: -8px 0 8px; }
-.auth__submit { width: 100%; min-height: 48px; margin-top: 4px; font-size: 1rem; }
-.auth__switch { margin-top: 18px; color: var(--muted); text-align: center; }
-.auth__switch a { color: var(--ink); font-weight: var(--fw-medium); }
+/* Every field here is required, so the * marks are left out (the boxes still say "required" to screen readers) */
+.auth .field__required { display: none; }
+.auth .field { margin-bottom: 14px; }
+.auth__row-end { display: flex; justify-content: flex-end; margin: -6px 0 8px; }
+.auth__submit { width: 100%; min-height: 48px; margin-top: 4px; }
+.auth__switch { margin: 16px 0 0; color: var(--muted); text-align: center; }
+.auth__switch a { color: var(--indigo); font-weight: var(--fw-medium); }
 
 /* Text inside the Forgot password and Terms pop-ups */
 .contact-lines { list-style: none; margin: 12px 0 0; padding: 0; }
@@ -70,15 +66,32 @@
 .terms-list { margin: 0; padding-left: 20px; }
 .terms-list li { margin-bottom: 10px; }
 
-/* Tablets and phones: the navy panel becomes a short band on top */
+/* Short laptop screens (e.g. 1366 × 768): keep Register's button in view */
+@media (max-height: 800px) and (min-width: 901px) {
+  .auth__main { padding: 20px 48px; }
+  .auth__subtitle { margin-bottom: 16px; }
+  .auth .field { margin-bottom: 10px; }
+}
+
+/* A 1366 × 768 laptop leaves about 650px for the page once the browser bars and taskbar are counted */
+@media (max-height: 700px) and (min-width: 901px) {
+  .auth__main { padding: 12px 48px; }
+  .auth__back { margin-bottom: 0; }
+  .auth__title { font-size: 1.6rem; }
+  .auth__subtitle { margin: 2px 0 12px; }
+  .auth .field { gap: 4px; margin-bottom: 8px; }
+  .auth .field__hint { font-size: 0.8rem; }
+  .auth__switch { margin-top: 10px; }
+  .auth__panel { gap: 18px; padding: 24px 40px 28px; }
+}
+
+/* Tablets and phones: the navy panel becomes a short band on top (logo + line) */
 @media (max-width: 900px) {
   .auth { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
-  .auth__panel { position: static; height: auto; padding: 24px 16px; }
-  .auth__form-area { justify-content: flex-start; }
-  .auth__logo { width: 190px; height: 50px; }
-  .auth__panel-title { margin: 14px 0 0; font-size: 1.45rem; }
-  .auth__panel-content,
-  .auth__made-with { display: none; }
-  .auth__main { padding: 12px 16px 32px; }
-  .auth__back { margin-left: -8px; }
+  .auth__panel { position: static; gap: 10px; height: auto; padding: 20px 16px; text-align: center; }
+  .auth__logo { height: 34px !important; }
+  .auth .auth__photo,
+  .auth__panel-text p { display: none; }
+  .auth__panel-title { margin: 0; font-size: 1.15rem; }
+  .auth__main { align-items: flex-start; padding: 16px 16px 32px; }
 }

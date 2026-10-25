@@ -45,3 +45,6 @@ const subscribe = (fn) => {
 
 // The current choice ('light' | 'dark' | 'system'), and re-renders when it changes
 export const useTheme = () => useSyncExternalStore(subscribe, () => choice);
+
+// What is showing right now ('light' | 'dark'), also when "system" follows the computer
+export const useShownTheme = () => useSyncExternalStore(subscribe, () => document.documentElement.dataset.theme);

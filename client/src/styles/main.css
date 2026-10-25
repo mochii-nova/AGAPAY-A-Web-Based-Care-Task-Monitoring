@@ -1,11 +1,12 @@
 /* =====================================================================
    AGAPAY design system
    ALL colours live here as variables. Never write a colour anywhere else;
-   use var(--name). Dark mode (Phase 12) will only redefine these values.
+   use var(--name). Dark mode only redefines these values.
+   Look: "warm minimalism" (AGAPAY-REDESIGN-BRIEF): warm paper background, white cards,
+   navy sidebar, one indigo accent, a tiny apricot accent. No gradients, glass or glows.
    ===================================================================== */
 :root {
-  /* One colour family: every grey and white is slightly lavender-tinted.
-     Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
+  /* Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
 
   /* Brand */
   --navy: #1c1f4a;              /* sidebar, footer: the only strong colour block (backgrounds only) */
@@ -13,25 +14,41 @@
   --indigo: #4f46a5;            /* THE accent: links, selected tabs, checkboxes, focus, main button (7.6:1 on white) */
   --indigo-hover: #433b8f;
   --on-indigo: #ffffff;         /* text on the main button */
-  --indigo-soft: #ecebf8;       /* background of selected tabs */
+  --indigo-soft: #eeebf8;       /* "lavender mist": selected tabs, today's highlight (indigo text 6.5:1) */
   --display-lavender: #736ab6;  /* big lavender words on the website (4.7:1 on white) */
-  --label: #55588a;             /* small uppercase labels (6.7:1) */
+  --lavender-deep: #9d93d6;     /* decoration only (illustrations, the logo's elder): never for text */
+  --label: #5b5878;             /* small uppercase labels (6.4:1 on the page) */
+  --apricot: #e08c6a;           /* tiny warm accent: "new" badges and hearts only (never for text) */
+  --apricot-text: #a4502f;      /* apricot words, e.g. "1 new" (5.0:1 on --apricot-soft) */
+  --apricot-soft: #fdf1ea;      /* warm card background (quote card) */
+  --apricot-line: #f6dccf;
 
-  /* Lavender-tinted surfaces, lightest to strongest */
-  --bg: #f7f6fb;                /* page background */
+  /* Warm surfaces, lightest to strongest */
+  --bg: #faf8f5;                /* page background: warm paper */
   --card: #ffffff;
-  --tint: #f1eff8;              /* hover and soft backgrounds */
-  --lavender: #e9e6f5;          /* soft buttons, selected menu item */
-  --lavender-strong: #dedaef;   /* hover on soft buttons */
-  --lavender-line: #cfcae3;     /* dashed placeholder borders, quiet icons */
-  --border: #e6e3f0;
-  --border-strong: #d3cfe2;     /* inputs and outline buttons */
-  --topbar: #ffffff;            /* white top bar with a thin bottom border */
+  --tint: #f6f3f7;              /* hover and soft backgrounds */
+  --lavender: #eeebf8;          /* soft buttons, selected menu item */
+  --lavender-strong: #e4e0f4;   /* hover on soft buttons */
+  --lavender-line: #d3cce6;     /* dashed placeholder borders, quiet icons */
+  --border: #ece7ef;
+  --border-strong: #dcd6e2;     /* inputs and outline buttons */
+  --topbar: #faf8f5;            /* top bar sits on the paper, with a thin bottom border */
+  --photo-bg: #e9e3de;          /* photo placeholders (warm) */
+  --photo-stripe: rgba(255, 255, 255, 0.45);
 
-  /* Navy-tinted text */
-  --text: #1e2140;              /* main text (15:1 on white) */
-  --muted: #5d6080;             /* secondary text (6.1:1 on white, 5.3:1 on --tint) */
-  --faint: #686a8a;             /* placeholders, days outside the month (5.2:1 on white, 4.6:1 on --tint) */
+  /* Text */
+  --text: #23223a;              /* main text (15:1 on white) */
+  --muted: #68667e;             /* secondary text (5.5:1 on white, 5.0:1 on --tint) */
+  --faint: #6b6981;             /* days outside the month, quiet text (5.3:1 on white, 4.8:1 on --tint) */
+  --placeholder: #a9a6b8;       /* example text inside empty input boxes (kept light on purpose) */
+
+  /* Fonts: Lexend for everything (same family as the logo), Caveat for rare hand-written notes */
+  --font-sans: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-hand: 'Caveat', 'Segoe Print', cursive;
+  --fs-small: 0.867rem;         /* 13px labels */
+  --fs-card-title: 1.133rem;    /* 17px */
+  --fs-page-title: 1.867rem;    /* 28px */
+  --fs-hero: 3.467rem;          /* 52px max */
 
   /* On the navy sidebar / footer */
   --on-navy: #ffffff;
@@ -44,7 +61,7 @@
   --completed-bg: #e3f2e8;  --completed-text: #2f6b45;  --completed-dot: #5ba777;
   --pending-bg: #fbf1d9;    --pending-text: #7a5b12;    --pending-dot: #d9a93a;
   --overdue-bg: #f9e1e1;    --overdue-text: #9a2c2c;    --overdue-dot: #d86a6a;
-  --skipped-bg: #eceaf2;    --skipped-text: #4f4d63;    --skipped-dot: #a3a0b8;
+  --skipped-bg: #eeebf0;    --skipped-text: #4f4d63;    --skipped-dot: #a3a0b8;
   --overdue-tint: #fcf5f5;      /* light red row background */
 
   /* Other colours */
@@ -52,21 +69,26 @@
   --badge: #c8372d;             /* red notification counts */
   --overlay: rgba(30, 33, 64, 0.4);
 
-  /* Shape and depth (no glows, no coloured shadows) */
-  --radius: 12px;               /* cards */
-  --radius-sm: 8px;             /* inputs, buttons, tabs */
+  /* Shape and depth (soft navy shadows only; no glows, no coloured shadows) */
+  --radius: 14px;               /* cards */
+  --radius-sm: 10px;            /* inputs, buttons, tabs */
   --radius-pill: 999px;         /* ONLY status labels and tags */
-  --shadow-sm: 0 1px 2px rgba(30, 33, 64, 0.05);
-  --shadow: 0 1px 2px rgba(30, 33, 64, 0.04);
-  --shadow-lg: 0 8px 24px rgba(30, 33, 64, 0.1);
+  --shadow-sm: 0 1px 2px rgba(28, 31, 74, 0.04);
+  --shadow: 0 1px 3px rgba(28, 31, 74, 0.04);
+  --shadow-float: 0 4px 16px rgba(28, 31, 74, 0.06);  /* floating header, raised cards */
+  --shadow-lg: 0 8px 24px rgba(28, 31, 74, 0.09);
 
-  /* Type: 400 body and menus, 500 buttons and labels, 700 titles and big numbers */
+  /* Type: 400 body and menus, 500 buttons and labels, 600 (Lexend SemiBold) titles and big numbers */
   --fw-regular: 400;
   --fw-medium: 500;
-  --fw-bold: 700;
+  --fw-bold: 600;
+
+  /* Motion: subtle, and switched off for "reduce motion" (see below) */
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 
   --tap: 44px;                  /* minimum height of anything clickable */
-  --sidebar-w: 232px;
+  --sidebar-w: 240px;           /* full sidebar */
+  --rail-w: 72px;               /* collapsed icon rail */
 
   color-scheme: light;
 }
@@ -82,7 +104,12 @@
   --on-indigo: #171833;         /* dark text on the light main button (8.6:1) */
   --indigo-soft: #2e2b5c;
   --display-lavender: #ada6ec;
+  --lavender-deep: #b3aae6;
   --label: #b0b1dc;
+  --apricot: #f0a98a;
+  --apricot-text: #f3b89f;
+  --apricot-soft: #2a2230;
+  --apricot-line: #463644;
 
   --bg: #121327;
   --card: #1a1c35;
@@ -92,11 +119,14 @@
   --lavender-line: #4a4c76;
   --border: #2c2e4b;
   --border-strong: #3d4065;
-  --topbar: #1a1c35;
+  --topbar: #121327;
+  --photo-bg: #262842;
+  --photo-stripe: rgba(255, 255, 255, 0.04);
 
   --text: #e8e7f6;
   --muted: #aeadcb;
   --faint: #9f9ebe;
+  --placeholder: #6f6e8e;
 
   --on-navy-muted: #c4bee3;
   --on-navy-hover: rgba(255, 255, 255, 0.07);
@@ -114,6 +144,7 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
 
   color-scheme: dark;            /* dark scrollbars, date pickers and dropdown lists */
@@ -128,9 +159,26 @@ html { font-size: 15px; scroll-behavior: smooth; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 
+/* Motion: when a page opens, its header and cards fade in and rise 8px, one after another (40ms apart).
+   Turned off by the rule above when the computer asks for reduced motion. */
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } }
+.app-main .page-header,
+.app-main .card { animation: rise-in 0.2s var(--ease) both; }
+.app-main .card:nth-child(2) { animation-delay: 40ms; }
+.app-main .card:nth-child(3) { animation-delay: 80ms; }
+.app-main .card:nth-child(4) { animation-delay: 120ms; }
+.app-main .card:nth-child(5) { animation-delay: 160ms; }
+.app-main .card:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Soft hover on buttons and rows */
+.popover__item, .sidebar__link, .notif-item, .icon-btn, .text-btn, .link-btn,
+.tab, .segmented__btn, .chip, .convo, .day-task, .profile-task, .resident-card {
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
 body {
   margin: 0;
-  font-family: 'Fira Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-weight: var(--fw-regular);
   background: var(--bg);
   color: var(--text);
@@ -138,8 +186,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { line-height: 1.25; color: var(--text); }
-h1 { font-size: clamp(1.45rem, 2.2vw, 1.75rem); font-weight: var(--fw-bold); margin: 0; }
+h1, h2, h3 { line-height: 1.25; color: var(--text); letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.55rem, 2.4vw, var(--fs-page-title)); font-weight: var(--fw-bold); margin: 0; }
 h2 { font-size: 1.05rem; font-weight: var(--fw-medium); margin: 0 0 8px; }
 h3 { font-weight: var(--fw-medium); }
 strong, b { font-weight: var(--fw-medium); }
@@ -148,6 +196,7 @@ a { color: inherit; }
 img { max-width: 100%; }
 
 button { font: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
 
 :focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
@@ -190,7 +239,8 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
   font: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.field__input::placeholder { color: var(--faint); }
+/* Example text inside empty boxes: lighter than labels and typed text, so it doesn't compete with them */
+.field__input::placeholder { color: var(--placeholder); opacity: 1; }
 .field__input:hover { border-color: var(--lavender-line); }
 .field__input:focus { outline: none; border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-soft); }
 .field__input[aria-invalid='true'] { border-color: var(--danger); }
@@ -350,7 +400,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   padding: 6px 6px 6px 16px;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
-  animation: toast-in 0.2s ease-out;
+  animation: toast-in 0.25s var(--ease);
 }
 .toast span { flex: 1; }
 .toast--success { background: var(--ink); color: var(--card); }
@@ -358,7 +408,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .toast--success .icon-btn:hover { background: var(--on-navy-hover); }
 .toast--error { background: var(--overdue-bg); color: var(--overdue-text); }
 .toast--error .icon-btn { color: var(--overdue-text); }
-@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-in { from { opacity: 0; transform: translateX(24px); } }
 @media (max-width: 600px) { .toasts { left: 16px; right: 16px; bottom: 16px; max-width: none; } }
 
 /* Message boxes */
@@ -458,25 +508,26 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   gap: 8px;
   margin: 0;
   margin-right: auto;
-  font-size: 1rem;
+  font-size: var(--fs-card-title);
   font-weight: var(--fw-medium);
 }
-.card__title svg { color: var(--muted); }
 .card__meta { color: var(--muted); font-size: 0.85rem; }
+/* One quiet link per card, top-right ("All 9 tasks", "See all") */
 .card__link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   min-height: var(--tap);
-  padding: 0 8px;
-  margin: -12px -8px -12px 0;
+  padding: 0 4px;
+  margin: -12px -4px -12px 0;
   border-radius: var(--radius-sm);
   color: var(--indigo);
   font-size: 0.875rem;
   font-weight: var(--fw-medium);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: var(--lavender-line);
+  text-underline-offset: 3px;
 }
-.card__link:hover { background: var(--tint); }
+.card__link:hover { text-decoration-color: currentColor; }
 
 /* Small uppercase purple label */
 .small-label {
@@ -487,6 +538,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
+
+/* Hand-written signature on handover notes (Caveat), e.g. "— Rosa, 5:52 AM" */
+.signature { margin: 8px 0 0; color: var(--indigo); font-family: var(--font-hand); font-size: 1.35rem; font-weight: var(--fw-medium); line-height: 1.2; }
 
 /* Marks parts of the screen that use sample data */
 .sample-tag {
@@ -526,34 +580,50 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Status pills */
+/* Status labels: a small coloured dot + the word (never colour alone, no filled pill) */
 .status-pill {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
   font-weight: var(--fw-medium);
   white-space: nowrap;
 }
-.status-pill--completed { background: var(--completed-bg); color: var(--completed-text); }
-.status-pill--pending   { background: var(--pending-bg);   color: var(--pending-text); }
-.status-pill--overdue   { background: var(--overdue-bg);   color: var(--overdue-text); }
-.status-pill--skipped   { background: var(--skipped-bg);   color: var(--skipped-text); }
+.status-pill::before { content: ''; flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.status-pill--completed { color: var(--completed-text); }
+.status-pill--pending   { color: var(--pending-text); }
+.status-pill--overdue   { color: var(--overdue-text); }
+.status-pill--skipped   { color: var(--skipped-text); }
+.status-pill--new       { color: var(--apricot-text); }
+.status-pill--new::before { background: var(--apricot); }
 
 /* Image placeholders (until real pictures are added) */
+/* The AGAPAY logo (Logo.jsx): the white version replaces the dark one in dark mode */
+.logo { display: block; width: auto; max-width: 100%; }
+.logo--auto { display: inline-flex; }
+.logo__dark { display: none; }
+:root[data-theme='dark'] .logo__light { display: none; }
+:root[data-theme='dark'] .logo__dark { display: block; }
+
 .image-slot { display: block; object-fit: cover; border-radius: var(--radius-sm); }
+/* Photo placeholder until the real picture is added: warm box with faint stripes
+   and a small caption tag in the corner describing the photo to take */
 .image-slot--empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border: 1px dashed var(--lavender-line);
-  background: var(--lavender);
-  color: var(--label);
-  font-size: 0.72rem;
-  font-weight: var(--fw-medium);
-  letter-spacing: 0.3px;
-  text-align: center;
+  position: relative;
+  background-color: var(--photo-bg);
+  background-image: repeating-linear-gradient(135deg, transparent 0 26px, var(--photo-stripe) 26px 27px);
+}
+.image-slot--empty span {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 /* Avatar */
@@ -581,22 +651,25 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   box-shadow: 0 0 0 2px var(--topbar);
 }
 /* Number on a top bar icon (e.g. unread messages on ✉) */
+/* Sits on the icon's top-right corner, with a 2px ring in the top bar colour so it never blends into the icon */
 .icon-count {
   position: absolute;
-  top: 4px;
-  right: 2px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  top: 5px;
+  left: 26px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   border-radius: var(--radius-pill);
   background: var(--badge);
   box-shadow: 0 0 0 2px var(--topbar);
   color: var(--on-navy);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: var(--fw-medium);
-  line-height: 18px;
+  line-height: 17px;
   text-align: center;
 }
+/* "1 new" badges use the warm apricot accent */
+.count-badge.count-badge--new { background: var(--apricot); color: var(--navy); }
 .count-badge {
   margin-left: auto;
   min-width: 20px;
@@ -872,21 +945,36 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .account-popover__id strong { color: var(--text); }
 
-/* Light / Dark / System (ThemeSwitcher.jsx) */
-.theme-switcher { padding: 2px 8px 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
-.theme-switcher .small-label { margin: 0 0 6px; }
-.theme-switcher .segmented__btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.popover__check { margin-left: auto; color: var(--indigo); }
+
+/* Light / Dark switch in the top bar (ThemeToggle.jsx): a soft pill with a white circle on the chosen one.
+   Each button is 44px; the visible circle is smaller (padding + content-box background). */
+.theme-toggle { display: inline-flex; margin-right: 8px; border-radius: var(--radius-pill); background: var(--tint); }
+.theme-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  background-clip: content-box;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.theme-toggle__btn:hover { color: var(--text); }
+.theme-toggle__btn[aria-pressed='true'] { background-color: var(--card); color: var(--ink); box-shadow: inset 0 0 0 5px var(--tint), inset 0 0 0 6px var(--border); }
 
 /* =====================================================================
    App layout: sidebar + top bar + page
    ===================================================================== */
 .app-layout {
   display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 100vh;
 }
-.app-layout.is-collapsed { grid-template-columns: minmax(0, 1fr); }
-.app-layout.is-collapsed .sidebar { display: none; }
 
 .app-body { display: flex; flex-direction: column; min-width: 0; }
 
@@ -907,85 +995,62 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 
 .app-main { flex: 1; padding: 32px 36px 64px; }
 
-/* Sidebar */
+/* Sidebar (Sidebar.jsx): 240px wide, or a 72px icon rail when collapsed (laptops) */
 .sidebar {
   position: sticky;
   top: 0;
-  height: 100vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  width: var(--sidebar-w);
+  height: 100vh;
   padding: 18px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--navy);
   color: var(--on-navy);
+  transition: width 0.2s var(--ease);
 }
-.sidebar__top { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
-.sidebar__logo { display: inline-block; border-radius: 8px; text-decoration: none; }
-.sidebar .image-slot--empty { background: var(--on-navy-hover); border-color: var(--on-navy-line); color: var(--on-navy); }
+.sidebar__top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 6px; }
+.sidebar__logo { display: inline-flex; align-items: center; border-radius: var(--radius-sm); text-decoration: none; }
+.sidebar__mark { display: block; height: 34px; width: auto; }
 .sidebar__close { display: none; color: var(--on-navy); }
 
+/* Profile card: photo + name + role · shift; the whole card opens the profile menu */
+.sidebar__menu { position: relative; margin: 18px 0 6px; }
 .sidebar__profile {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 20px 0 14px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--on-navy-line);
-}
-.sidebar__avatar-btn { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
-.sidebar__avatar-btn:hover .avatar { opacity: 0.9; }
-.sidebar__avatar-btn .avatar { box-shadow: 0 0 0 2px var(--on-navy-line); }
-.sidebar__avatar-edit {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--card);
-  color: var(--ink);
-  box-shadow: var(--shadow-sm);
-}
-.sidebar__menu { position: relative; width: 100%; margin-top: 8px; }
-/* Name + arrow on one centred line, role centred underneath; the whole area is one button */
-.sidebar__name-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
+  gap: 12px;
   width: 100%;
-  min-height: var(--tap);
-  padding: 6px 10px;
+  min-height: 64px;
+  padding: 12px;
   border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
+  border-radius: var(--radius);
+  background: var(--on-navy-hover);
   color: var(--on-navy);
-  text-align: center;
+  text-align: left;
+  transition: background-color 0.15s;
 }
-.sidebar__name-btn:hover,
-.sidebar__name-btn[aria-expanded='true'] { background: var(--on-navy-hover); }
-.sidebar__name-row { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; }
-.sidebar__name-row strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar__name-btn small { color: var(--on-navy-muted); font-size: 0.8rem; }
-.sidebar__name-btn svg { flex-shrink: 0; transition: transform 0.15s; }
-.sidebar__name-btn .is-flipped { transform: rotate(180deg); }
+.sidebar__profile:hover,
+.sidebar__profile[aria-expanded='true'] { background: var(--on-navy-line); }
+.sidebar__who { display: flex; flex-direction: column; min-width: 0; }
+.sidebar__who strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__who small { overflow: hidden; color: var(--on-navy-muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__dropdown { left: 0; right: 0; }
 
 .sidebar__nav { flex: 1; }
-.sidebar__group { margin-bottom: 8px; }
+.sidebar__group { margin-bottom: 6px; }
 .sidebar__group-title {
-  margin: 14px 12px 4px;
+  margin: 16px 12px 6px;
   color: var(--on-navy-muted);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: var(--fw-medium);
   letter-spacing: 1px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .sidebar__link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1000,21 +1065,71 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   font-size: 0.95rem;
   text-align: left;
   text-decoration: none;
+  white-space: nowrap;
 }
-.sidebar__link svg { opacity: 0.85; }
+.sidebar__link svg { flex-shrink: 0; opacity: 0.85; }
 .sidebar__link:hover { background: var(--on-navy-hover); }
 .sidebar__link.active { background: var(--lavender); color: var(--ink); font-weight: var(--fw-medium); }
 .sidebar__link.active svg { opacity: 1; }
 .sidebar__bottom { padding-top: 10px; border-top: 1px solid var(--on-navy-line); }
 
+/* Collapsed icon rail (laptops only; the phone drawer always shows the full menu) */
+@media (min-width: 901px) {
+  .sidebar.is-rail { width: var(--rail-w); padding: 18px 14px; overflow: visible; }
+  .sidebar.is-rail .sidebar__top { justify-content: center; padding: 0; }
+  .sidebar.is-rail .sidebar__menu { margin: 16px 0 10px; }
+  .sidebar.is-rail .sidebar__profile { justify-content: center; min-height: var(--tap); padding: 4px; background: transparent; }
+  .sidebar.is-rail .sidebar__profile:hover,
+  .sidebar.is-rail .sidebar__profile[aria-expanded='true'] { background: var(--on-navy-hover); }
+  .sidebar.is-rail .sidebar__who,
+  .sidebar.is-rail .sidebar__group-title { display: none; }
+  .sidebar.is-rail .sidebar__group { margin: 0 0 14px; }
+  .sidebar.is-rail .sidebar__dropdown { left: calc(100% + 10px); right: auto; top: 0; width: 220px; }
+  .sidebar.is-rail .sidebar__link { justify-content: center; padding: 0; }
+
+  /* The label becomes a tooltip next to the icon (on hover and keyboard focus) */
+  .sidebar.is-rail .sidebar__label {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    z-index: 80;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--card);
+    font-size: 0.82rem;
+    font-weight: var(--fw-medium);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .sidebar.is-rail .sidebar__link:hover .sidebar__label,
+  .sidebar.is-rail .sidebar__link:focus-visible .sidebar__label { opacity: 1; transform: translate(0, -50%); }
+
+  /* Badges shrink to a small dot on the icon */
+  .sidebar.is-rail .count-badge {
+    position: absolute;
+    top: 9px;
+    left: 26px;
+    min-width: 0;
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--navy);
+    font-size: 0;
+  }
+  .sidebar.is-rail .sidebar__link.active .count-badge { box-shadow: 0 0 0 2px var(--lavender); }
+}
+
 .sidebar-backdrop { display: none; }
 
 /* Tablets and phones: the sidebar slides in from the left */
 @media (max-width: 900px) {
-  .app-layout,
-  .app-layout.is-collapsed { grid-template-columns: minmax(0, 1fr); }
-  .app-layout .sidebar,
-  .app-layout.is-collapsed .sidebar {
+  .app-layout { grid-template-columns: minmax(0, 1fr); }
+  .app-layout .sidebar {
     display: flex;
     position: fixed;
     left: 0;

@@ -2,7 +2,11 @@
    Shift Handover (Handover.jsx + components/handover/)
    Colours come only from the variables in main.css.
    ===================================================================== */
-.tabs--header { margin-bottom: 0; }
+/* Write / Received · 1 / History, shown like the other page switches */
+.tabs.tabs--header { gap: 2px; margin-bottom: 0; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
+.tabs--header .tab { min-height: var(--tap); padding: 0 16px; border-radius: 7px; }
+.tabs--header .tab[aria-selected='true'] { background: var(--card); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
+.tabs__new { color: var(--apricot-text); }
 
 /* Shift strip under the title */
 .shift-strip {
@@ -24,18 +28,13 @@
 
 /* Form sections */
 .handover-section__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 14px; }
-.handover-section__head h2 { margin: 0; font-size: 1.05rem; font-weight: var(--fw-medium); }
-.step { color: var(--indigo); }
+.handover-section__head h2 { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-medium); }
+.step { color: var(--muted); }
 .optional { color: var(--muted); font-size: 0.9rem; font-weight: var(--fw-regular); }
 .section-help { margin: -6px 0 14px; color: var(--muted); font-size: 0.92rem; }
 
-/* 1. Task summary */
-.summary-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
-.summary-tile { display: flex; flex-direction: column; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 0.9rem; }
-.summary-tile strong { font-size: 1.6rem; font-weight: var(--fw-bold); line-height: 1.2; }
-.summary-tile--completed { background: var(--completed-bg); color: var(--completed-text); }
-.summary-tile--pending { background: var(--pending-bg); color: var(--pending-text); }
-.summary-tile--skipped { background: var(--skipped-bg); color: var(--skipped-text); }
+/* 1. Task summary: a short dot legend, then the list */
+.summary-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: -4px 0 12px; padding: 0; }
 
 .summary-list { list-style: none; margin: 0; padding: 0; }
 .summary-list li {
@@ -52,7 +51,7 @@
 
 /* 2. Pass on */
 .passon-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
-.passon { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
+.passon { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); }
 .passon--overdue { background: var(--overdue-tint); border-color: var(--overdue-bg); }
 .passon__top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
 .passon__time { color: var(--muted); font-size: 0.88rem; }
@@ -77,14 +76,15 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap);
-  padding: 0 14px;
+  padding: 0 16px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: var(--card);
   color: var(--muted);
   font-size: 0.9rem;
   font-weight: var(--fw-medium);
   cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .status-choice__opt input { position: absolute; opacity: 0; pointer-events: none; }
 .status-choice__opt:hover { border-color: var(--lavender-line); color: var(--text); }
@@ -97,8 +97,9 @@
 .handover-other { margin: 12px 0 0; }
 
 /* Submit */
-.handover-submit { display: flex; flex-direction: column; gap: 12px; }
-.handover-submit .alert { margin: 0; }
+/* Submit: the check box on the left, the two buttons on the right (no extra card) */
+.handover-submit { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; padding: 4px 2px 0; }
+.handover-submit .alert { order: 3; flex-basis: 100%; margin: 0; }
 .handover-submit__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .alert__title { margin: 0 0 4px; font-weight: var(--fw-medium); }
 .alert__list { margin: 0; padding-left: 18px; }
@@ -137,9 +138,6 @@
 .timing { color: var(--completed-text); font-size: 0.85rem; font-weight: var(--fw-medium); white-space: nowrap; }
 .timing--late { color: var(--overdue-text); }
 
-.handover-tip { padding: 14px 16px; border-radius: var(--radius); background: var(--tint); color: var(--muted); font-size: 0.9rem; }
-.handover-tip p { margin: 0; }
-.handover-tip__title { margin-bottom: 4px !important; color: var(--text); font-weight: var(--fw-medium); }
 
 /* Received and History */
 /* Cards use the full width (so they line up with the tabs); only the text is kept to a reading width */
@@ -180,7 +178,6 @@
 @media (max-width: 1200px) {
   .handover-layout { grid-template-columns: minmax(0, 1fr); }
   .handover-aside { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .handover-tip { grid-column: 1 / -1; }
 }
 @media (max-width: 900px) {
   .shift-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -200,6 +197,4 @@
 }
 @media (max-width: 480px) {
   .shift-strip { grid-template-columns: minmax(0, 1fr); }
-  .summary-tiles { gap: 6px; }
-  .summary-tile { padding: 10px; }
 }

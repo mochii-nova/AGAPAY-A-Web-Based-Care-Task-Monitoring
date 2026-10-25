@@ -1,30 +1,33 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Heart } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Logo from './Logo';
 import ImageSlot from './ImageSlot';
 import { images } from '../assets/images';
 import '../styles/auth.css';
 
-// Two-column frame for Sign In and Register: navy panel on the left, form on the right
-export default function AuthLayout({ panelTitle, panelContent, children }) {
+// Two-column frame for Sign In and Register: navy panel on the left (logo, photo, a short warm line),
+// form on the right. The same panel on both pages.
+export default function AuthLayout({ panelTitle, panelText, children }) {
   return (
     <div className="auth">
       <aside className="auth__panel">
-        <div className="auth__panel-inner">
-          <ImageSlot image={images.loginPanelLogo} alt="AGAPAY" className="auth__logo" />
+        <Link to="/" className="auth__logo-link" aria-label="AGAPAY home">
+          <Logo tone="white" height={40} className="auth__logo" />
+        </Link>
+        <ImageSlot image={images.authPanel} className="auth__photo" />
+        <div className="auth__panel-text">
           <h2 className="auth__panel-title">{panelTitle}</h2>
-          <div className="auth__panel-content">{panelContent}</div>
+          <p>{panelText}</p>
         </div>
-        <p className="auth__made-with">
-          Made with <Heart size={16} fill="currentColor" className="auth__heart" aria-hidden="true" />
-          <span className="sr-only">love</span> for Caregivers
-        </p>
       </aside>
 
       <main className="auth__main">
-        <Link to="/" className="auth__back">
-          <ArrowLeft size={18} aria-hidden="true" /> Back to home
-        </Link>
-        <div className="auth__form-area">{children}</div>
+        <div className="auth__form-area">
+          <Link to="/" className="auth__back">
+            <ArrowLeft size={16} aria-hidden="true" /> Back to home
+          </Link>
+          {children}
+        </div>
       </main>
     </div>
   );

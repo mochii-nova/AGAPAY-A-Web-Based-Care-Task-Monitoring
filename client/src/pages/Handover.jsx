@@ -34,13 +34,13 @@ function HandoverHead({ handover, isMine }) {
   return (
     <div className="received__head">
       <div>
-        <h3>From {shiftLabel(handover.shift)} shift{isMine && ' (you)'}</h3>
+        <h3>From the {shiftLabel(handover.shift).toLowerCase()} shift{isMine && ' (you)'}</h3>
         <p className="received__meta">
           {handover.author?.name} · submitted {when(handover.createdAt)}
           {timing && <> · <span className={`timing ${timing.late ? 'timing--late' : ''}`}>{timing.label}</span></>}
         </p>
       </div>
-      <span className={`status-pill status-pill--${handover.acknowledgedBy ? 'completed' : 'overdue'}`}>
+      <span className={`status-pill status-pill--${handover.acknowledgedBy ? 'completed' : 'new'}`}>
         {handover.acknowledgedBy ? 'Read' : 'Not yet read'}
       </span>
     </div>
@@ -107,8 +107,8 @@ export default function Handover() {
   };
 
   const TABS = [
-    { id: 'write', label: 'Write Handover' },
-    { id: 'received', label: unread.length ? `Received (${unread.length})` : 'Received' },
+    { id: 'write', label: 'Write' },
+    { id: 'received', label: 'Received', count: unread.length },
     { id: 'history', label: 'History' },
   ];
 
@@ -117,9 +117,9 @@ export default function Handover() {
 
   return (
     <div>
-      <PageHeader title="Shift Handover" subtitle="Tell the next caregiver what happened and what still needs attention.">
+      <PageHeader title="Shift handover" subtitle="Tell the next caregiver what happened and what still needs care.">
         <div className="tabs tabs--header" role="tablist" aria-label="Handover sections">
-          {TABS.map(({ id, label }) => (
+          {TABS.map(({ id, label, count }) => (
             <button
               key={id}
               type="button"
@@ -131,6 +131,7 @@ export default function Handover() {
               onClick={() => setTab(id)}
             >
               {label}
+              {count > 0 && <span className="tabs__new"> · {count}<span className="sr-only"> unread</span></span>}
             </button>
           ))}
         </div>
@@ -196,10 +197,6 @@ export default function Handover() {
                     <RecentHandovers handovers={handovers} myId={profile.id} onViewAll={() => setTab('history')} />
                   </>
                 )}
-                <div className="handover-tip">
-                  <p className="handover-tip__title">Before you submit</p>
-                  <p>Overdue tasks must be marked Completed or Skipped (with a reason). Submitting does not mark anything as done.</p>
-                </div>
               </aside>
             </div>
           </>
@@ -216,9 +213,10 @@ export default function Handover() {
                 <article key={h._id} className="card received">
                   <HandoverHead handover={h} />
                   <HandoverView handover={h} />
+                  <p className="signature">— {h.author?.name?.split(' ')[0]}, {formatTime(h.createdAt)}</p>
                   {!h.acknowledgedBy && (
                     <div className="received__actions">
-                      <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as Read</button>
+                      <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as read</button>
                     </div>
                   )}
                 </article>

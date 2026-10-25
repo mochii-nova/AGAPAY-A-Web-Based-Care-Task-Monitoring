@@ -113,7 +113,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
       setSendError(
         err.response
           ? err.response.data?.message || "Couldn't submit the handover. Please try again."
-          : "Can't reach the server. Your handover is not lost: press Save Draft, then try again later."
+          : "Can't reach the server. Your handover is not lost: press Save draft, then try again later."
       );
     } finally {
       setSending(false);
@@ -138,15 +138,15 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
         {/* 1. Task summary */}
         <section className="card handover-section" aria-labelledby="hs-tasks">
           <header className="handover-section__head">
-            <h2 id="hs-tasks"><span className="step">1.</span> Task summary</h2>
-            <p className="card__meta">Filled in automatically from My Tasks</p>
+            <h2 id="hs-tasks"><span className="step">1 ·</span> Task summary</h2>
+            <p className="card__meta">Filled in from My Tasks</p>
           </header>
 
-          <div className="summary-tiles">
-            <div className="summary-tile summary-tile--completed"><strong>{completed.length}</strong>Completed</div>
-            <div className="summary-tile summary-tile--pending"><strong>{unfinished.length}</strong>Not finished</div>
-            <div className="summary-tile summary-tile--skipped"><strong>{skipped.length}</strong>Skipped</div>
-          </div>
+          <ul className="summary-legend">
+            <li className="status-pill status-pill--completed">{completed.length} completed</li>
+            <li className="status-pill status-pill--pending">{unfinished.length} not finished</li>
+            <li className="status-pill status-pill--skipped">{skipped.length} skipped</li>
+          </ul>
 
           {shiftTasks.length === 0 ? (
             <EmptyState icon={ClipboardList}>You have no tasks in this shift.</EmptyState>
@@ -171,7 +171,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
         {/* 2. Pass on */}
         <section className="card handover-section" aria-labelledby="hs-passon">
           <header className="handover-section__head">
-            <h2 id="hs-passon"><span className="step">2.</span> Pass on to next shift</h2>
+            <h2 id="hs-passon"><span className="step">2 ·</span> Pass on to the next shift</h2>
           </header>
           <p className="section-help">
             Unfinished tasks stay Pending and move to the next caregiver. Add a short note so they know where you stopped.
@@ -231,7 +231,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
         {/* 3. Resident updates */}
         <section className="card handover-section" aria-labelledby="hs-residents">
           <header className="handover-section__head">
-            <h2 id="hs-residents"><span className="step">3.</span> Resident updates</h2>
+            <h2 id="hs-residents"><span className="step">3 ·</span> Resident updates</h2>
           </header>
           <p className="section-help">Pick a status for each resident you cared for. Only write a note if something changed.</p>
 
@@ -298,7 +298,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
         {/* 4. Other notes */}
         <section className="card handover-section" aria-labelledby="hs-other">
           <header className="handover-section__head">
-            <h2 id="hs-other"><span className="step">4.</span> Other notes <span className="optional">(optional)</span></h2>
+            <h2 id="hs-other"><span className="step">4 ·</span> Other notes <span className="optional">(optional)</span></h2>
           </header>
           <div className="chip-row" role="group" aria-label="Quick tags">
             {QUICK_TAGS.map((tag) => (
@@ -319,7 +319,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
         </section>
 
         {/* Confirm and submit */}
-        <section className="card handover-submit" aria-label="Submit handover">
+        <section className="handover-submit" aria-label="Submit handover">
           <div className="checkbox-row">
             <input
               type="checkbox"
@@ -342,8 +342,8 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
           )}
 
           <div className="handover-submit__actions">
-            <button type="button" className="btn btn--outline" onClick={handleSaveDraft}>Save Draft</button>
-            <button type="submit" className="btn btn--primary">Submit Handover</button>
+            <button type="button" className="btn btn--outline" onClick={handleSaveDraft}>Save draft</button>
+            <button type="submit" className="btn btn--primary">Submit handover</button>
           </div>
         </section>
       </form>

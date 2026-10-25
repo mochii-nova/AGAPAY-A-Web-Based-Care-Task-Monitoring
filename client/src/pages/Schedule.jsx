@@ -79,8 +79,8 @@ export default function Schedule() {
     <div>
       <PageHeader title={view === 'month' ? monthTitle(selected) : weekTitle(selected)} subtitle="Your shifts and care tasks.">
         <div className="segmented" role="group" aria-label="Calendar view">
-          <button type="button" className="segmented__btn" aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
           <button type="button" className="segmented__btn" aria-pressed={view === 'month'} onClick={() => setView('month')}>Month</button>
+          <button type="button" className="segmented__btn" aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
         </div>
       </PageHeader>
 
@@ -154,6 +154,12 @@ export default function Schedule() {
                 onOpenTask={(t) => setOpenTaskId(t._id)}
               />
             )}
+            {/* What the coloured bars mean */}
+            <ul className="shift-legend" aria-label="Shift colours">
+              {SHIFTS.map((s) => (
+                <li key={s.id}><span className={`shift-bar shift-bar--${s.id}`} aria-hidden="true" /> {s.label} shift</li>
+              ))}
+            </ul>
           </div>
 
           <DayPanel

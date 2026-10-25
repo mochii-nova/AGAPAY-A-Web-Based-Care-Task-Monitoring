@@ -1,62 +1,58 @@
 import { Link } from 'react-router-dom';
-import { Phone, ClipboardList, MessageSquareText, ArrowRight } from 'lucide-react';
+import { Phone, ClipboardList, MessageSquareText } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
-import TaskCategoryIcon from '../TaskCategoryIcon';
 import CareNeeds from './CareNeeds';
 import { LoadingState, EmptyState } from '../StateMessage';
+import { getCategory } from '../../constants';
+import { RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime, telHref } from '../../utils/format';
 
-const noteDate = (date) =>
-  `${formatTime(date)}, ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+// "Personal Hygiene" -> "Personal hygiene"
+const sentence = (label) => label.charAt(0) + label.slice(1).toLowerCase();
 
-// Everything about one resident: details, emergency contact, today's tasks and recent notes.
+// Everything about one resident: details, care needs, emergency contact, today's tasks and recent notes.
 // Used in the side panel (laptop) and in a pop-up (tablet / phone).
-export default function ResidentProfile({ resident, tasks, tasksLoading, notes, onOpenTask, showName = true }) {
+// `status` = "watch" / "urgent" from the latest handover (if any).
+export default function ResidentProfile({ resident, status, tasks, tasksLoading, notes, onOpenTask, showName = true }) {
   const firstName = resident.name.split(' ')[0];
+  const flag = status && status !== 'normal' ? RESIDENT_STATUS[status] : null;
 
   return (
     <div className="resident-profile">
       <div className="resident-profile__identity">
-        <Avatar name={resident.name} photo={resident.photo} size={60} />
-        <div>
+        <Avatar name={resident.name} photo={resident.photo} size={68} />
+        <div className="resident-profile__who">
           {showName && <h2 className="resident-profile__name">{resident.name}</h2>}
           <p className="resident-profile__sub">
-            Room {resident.room} · <span className="resident-card__id">{resident.id}</span>
+            Room {resident.room} · {resident.id} · {resident.age} years old · {resident.gender}
           </p>
         </div>
+        {flag && <span className={`status-pill status-pill--${flag.tone}`}>{flag.label}</span>}
       </div>
 
-      <dl className="resident-profile__facts">
-        <div><dt>Age</dt><dd>{resident.age} years old</dd></div>
-        <div><dt>Gender</dt><dd>{resident.gender}</dd></div>
-      </dl>
+      <div className="resident-profile__columns">
+        <section>
+          <h3 className="small-label">Care needs</h3>
+          <CareNeeds needs={resident.careNeeds} />
+          {resident.careNote && <p className="resident-profile__note">{resident.careNote}</p>}
+        </section>
 
-      <section className="profile-section">
-        <h3 className="small-label">Emergency contact</h3>
-        <div className="emergency-box">
-          <div>
-            <p className="emergency-box__name">{resident.emergencyContact.name}</p>
-            <p className="emergency-box__rel">{resident.emergencyContact.relationship}</p>
-          </div>
-          <a className="btn btn--soft btn--sm" href={telHref(resident.emergencyContact.phone)}>
+        <section>
+          <h3 className="small-label">Emergency contact</h3>
+          <p className="resident-profile__contact">
+            <strong>{resident.emergencyContact.name}</strong> · {resident.emergencyContact.relationship}
+          </p>
+          <a className="btn btn--outline btn--sm" href={telHref(resident.emergencyContact.phone)}>
             <Phone size={16} aria-hidden="true" /> {resident.emergencyContact.phone}
           </a>
-        </div>
-      </section>
-
-      <section className="profile-section">
-        <h3 className="small-label">Care needs</h3>
-        <CareNeeds needs={resident.careNeeds} />
-        {resident.careNote && <p className="resident-profile__note">{resident.careNote}</p>}
-      </section>
+        </section>
+      </div>
 
       <section className="profile-section">
         <div className="profile-section__head">
-          <h3 className="small-label">Today's tasks</h3>
-          <Link to={`/tasks?q=${encodeURIComponent(resident.name)}`} className="card__link">
-            View all <ArrowRight size={16} aria-hidden="true" />
-          </Link>
+          <h3 className="small-label">Today’s tasks</h3>
+          <Link to={`/tasks?q=${encodeURIComponent(resident.name)}`} className="card__link">Open in My Tasks</Link>
         </div>
         {tasksLoading ? (
           <LoadingState label="Loading tasks…" />
@@ -65,14 +61,20 @@ export default function ResidentProfile({ resident, tasks, tasksLoading, notes, 
         ) : (
           <ul className="profile-tasks">
             {tasks.map((t) => (
-              <li key={t._id}>
-                <button type="button" className="profile-task" onClick={() => onOpenTask(t)}>
-                  <TaskCategoryIcon category={t.category} size={16} />
-                  <span className="profile-task__main">
-                    <span>{t.task}</span>
-                    <small>Due {formatTime(t.dueAt)}</small>
-                  </span>
-                  <StatusPill status={t.status} />
+              <li key={t._id} className="profile-task">
+                <span className="profile-task__time">{formatTime(t.dueAt)}</span>
+                <span className="profile-task__main">
+                  <strong>{t.task}</strong>
+                  {getCategory(t.category) && <small>{sentence(getCategory(t.category).label)}</small>}
+                </span>
+                <StatusPill status={t.status} />
+                <button
+                  type="button"
+                  className="btn btn--outline btn--sm"
+                  onClick={() => onOpenTask(t)}
+                  aria-label={`View task: ${t.task}`}
+                >
+                  View
                 </button>
               </li>
             ))}
@@ -81,18 +83,20 @@ export default function ResidentProfile({ resident, tasks, tasksLoading, notes, 
       </section>
 
       <section className="profile-section">
-        <h3 className="small-label">Recent notes</h3>
         {notes.length === 0 ? (
-          <EmptyState icon={MessageSquareText}>No recent notes about {firstName}.</EmptyState>
+          <>
+            <h3 className="small-label">Latest notes</h3>
+            <EmptyState icon={MessageSquareText}>No recent notes about {firstName}.</EmptyState>
+          </>
         ) : (
           <ul className="profile-notes">
-            {notes.map((n) => (
+            {notes.map((n, i) => (
               <li key={n.id} className="profile-note">
-                <p className="profile-note__meta">
-                  {n.source}
-                  {n.author && ` · ${n.author}`} · {noteDate(n.time)}
-                </p>
+                <p className="small-label">{i === 0 ? `Latest note · ${n.source}` : n.source}</p>
                 <p className="profile-note__text">{n.text}</p>
+                <p className="signature profile-note__sign">
+                  — {n.author ? `${n.author.split(' ')[0]}, ` : ''}{formatTime(n.time)}
+                </p>
               </li>
             ))}
           </ul>

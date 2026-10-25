@@ -8,55 +8,42 @@
 // The box keeps the same size, so the layout won't move.
 // `size` = the file to make (2× the size on screen, so it's sharp on phones).
 // The full list with details is in design-reference/IMAGE-PLACEHOLDERS.md.
+// (The logo is real now: agapay-logo*.svg in this folder, shown by components/Logo.jsx.)
 
 export const images = {
-  logo: {
-    src: null,
-    label: 'LOGO',
-    file: 'logo.png',
-    page: 'Website header',
-    size: '360 × 104 px, transparent PNG',
-  },
-  logoWhite: {
-    src: null,
-    label: 'LOGO (white)',
-    file: 'logo-white.png',
-    page: 'App sidebar, website footer',
-    size: '400 × 112 px, transparent PNG',
-  },
   hero: {
     src: null,
-    label: 'HERO PHOTO – caregiver with resident',
-    file: 'hero.png',
+    label: 'Photo: a caregiver smiling while helping an elderly resident walk',
+    file: 'hero.jpg',
     page: 'Home section',
-    size: '900 × 1000 px, transparent PNG',
+    size: '1100 × 1100 px (square), JPG',
   },
   about: {
     src: null,
-    label: 'ABOUT PHOTO – holding hands',
+    label: 'Photo: two hands holding, a caregiver and an elderly resident',
     file: 'about.jpg',
-    page: 'About section',
-    size: '1200 × 460 px',
+    page: 'About section (same height as the 4 cards)',
+    size: '1100 × 760 px, JPG',
   },
   featuresLaptop: {
     src: null,
-    label: 'FEATURES LAPTOP SCREENSHOT',
-    file: 'features-laptop.png',
-    page: 'Features section',
-    size: '1200 × 800 px, transparent PNG',
+    label: 'Screenshot: the AGAPAY dashboard',
+    file: 'features-dashboard.png',
+    page: 'Features section (inside the browser window)',
+    size: '1400 × 875 px (16 : 10), PNG',
+  },
+  authPanel: {
+    src: null,
+    label: 'Photo: a caregiver gently holding an elderly woman’s hands',
+    file: 'sign-in.jpg',
+    page: 'Sign In and Register, navy side panel',
+    size: '1150 × 1200 px, JPG',
   },
   contact: {
     src: null,
-    label: 'CONTACT PHOTO',
-    file: 'contact.png',
-    page: 'Contact section',
-    size: '700 × 900 px, transparent PNG',
-  },
-  loginPanelLogo: {
-    src: null,
-    label: 'LOGIN SIDE PANEL LOGO',
-    file: 'login-logo.png',
-    page: 'Sign In and Register side panel',
-    size: '480 × 128 px, transparent PNG',
+    label: 'Photo: a caregiver and a resident laughing together',
+    file: 'contact.jpg',
+    page: 'Contact section (under the contact details)',
+    size: '820 × 410 px (2 : 1), JPG',
   },
 };

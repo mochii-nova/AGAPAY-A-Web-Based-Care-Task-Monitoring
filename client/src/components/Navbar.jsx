@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard, UserRound } from 'lucide-react';
+import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard, UserRound, Monitor, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -9,11 +9,14 @@ import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationIcon from './NotificationIcon';
 import PushToggle from './PushToggle';
-import ThemeSwitcher from './ThemeSwitcher';
+import ThemeToggle from './ThemeToggle';
+import { setTheme, useShownTheme, useTheme } from '../utils/theme';
 
-// Top bar: menu button, notifications, messages and the small profile menu
-export default function Navbar({ onMenuClick }) {
+// Top bar: menu button, then light/dark switch, notifications, messages and the small profile menu
+export default function Navbar({ onMenuClick, menuExpanded }) {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const shownTheme = useShownTheme();
   const { logout } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const { profile } = useProfile();
@@ -28,11 +31,12 @@ export default function Navbar({ onMenuClick }) {
 
   return (
     <header className="topbar">
-      <button type="button" className="icon-btn" onClick={onMenuClick} aria-label="Show or hide menu">
+      <button type="button" className="icon-btn" onClick={onMenuClick} aria-label="Show or hide menu" aria-expanded={menuExpanded}>
         <Menu size={20} />
       </button>
 
       <div className="topbar__actions">
+        <ThemeToggle />
         {/* Notifications */}
         <div className="popover-anchor" ref={bellRef}>
           <button
@@ -121,7 +125,15 @@ export default function Navbar({ onMenuClick }) {
               <p className="account-popover__id">
                 <IdCard size={16} aria-hidden="true" /> Employee ID: <strong>{profile.employeeId}</strong>
               </p>
-              <ThemeSwitcher />
+              <button
+                type="button"
+                className="popover__item"
+                aria-pressed={theme === 'system'}
+                onClick={() => setTheme(theme === 'system' ? shownTheme : 'system')}
+              >
+                <Monitor size={18} /> Match my computer’s theme
+                {theme === 'system' && <Check size={16} className="popover__check" aria-hidden="true" />}
+              </button>
               <Link to="/profile" className="popover__item" onClick={() => account.setOpen(false)}>
                 <UserRound size={18} /> My profile
               </Link>

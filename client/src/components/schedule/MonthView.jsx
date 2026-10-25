@@ -12,7 +12,8 @@ function describe(list) {
   return `${list.length} ${list.length === 1 ? 'task' : 'tasks'}: ${parts.join(', ')}`;
 }
 
-// Month grid. Each day shows coloured dots and "3 tasks" instead of cut-off task names.
+// Month grid. Days with a shift get a small coloured bar (one colour per shift, see the legend);
+// tasks show as coloured dots. The full details are read out to screen readers.
 export default function MonthView({ selected, today, tasksByDay, shiftOn, onSelect }) {
   const days = monthGrid(selected);
 
@@ -42,13 +43,10 @@ export default function MonthView({ selected, today, tasksByDay, shiftOn, onSele
               onClick={() => onSelect(day)}
             >
               <span className="month__date">{day.getDate()}</span>
-              {shift && <span className="month__shift">{shift.label}</span>}
+              {shift && <span className={`shift-bar shift-bar--${shift.id}`} aria-hidden="true" />}
               {list.length > 0 && (
-                <span className="month__tasks">
-                  <span className="dots">
-                    {list.slice(0, 4).map((t) => <span key={t._id} className={`dot dot--${t.status}`} />)}
-                  </span>
-                  <span className="month__count">{list.length} {list.length === 1 ? 'task' : 'tasks'}</span>
+                <span className="dots" aria-hidden="true">
+                  {list.slice(0, 5).map((t) => <span key={t._id} className={`dot dot--${t.status}`} />)}
                 </span>
               )}
             </button>

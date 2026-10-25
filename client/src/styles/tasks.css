@@ -2,22 +2,25 @@
    My Tasks (Tasks.jsx + components/tasks/)
    Colours come only from the variables in main.css.
    ===================================================================== */
+/* One card: status tabs and filters on one row, then the table */
+.card.tasks-card { padding: 0; overflow: hidden; }
 .tasks-toolbar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
 }
-.tasks-toolbar__filters { display: flex; flex-wrap: wrap; gap: 10px; }
+.tasks-toolbar .tabs { flex-wrap: nowrap; }
+.tasks-toolbar .tab { white-space: nowrap; }
+.tasks-toolbar__filters { display: flex; flex-shrink: 0; gap: 10px; }
 .tasks-toolbar .search-box { width: 240px; }
 .tasks-toolbar .select { width: 190px; }
 
-.tasks-panel { padding: 6px 8px; }
+.tasks-panel { padding: 0 8px 4px; }
 
-/* Table */
+/* Table: white rows, a soft hover, status as a dot + word */
 .task-table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .task-table th {
   padding: 12px 14px;
@@ -25,33 +28,25 @@
   color: var(--label);
   font-size: 0.72rem;
   font-weight: var(--fw-medium);
-  letter-spacing: 0.6px;
+  letter-spacing: 0.08em;
   text-align: left;
   text-transform: uppercase;
 }
-.task-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.task-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background-color 0.15s; }
 .task-table tr:last-child td { border-bottom: 0; }
 .task-table__row:hover td { background: var(--tint); }
-.task-table__row--overdue td { background: var(--overdue-tint); }
-.task-table__row--completed strong { color: var(--muted); }
 
-.cell-flex { display: flex; align-items: center; gap: 12px; }
-.cell-flex > span { display: flex; flex-direction: column; min-width: 0; }
-.task-table td small { color: var(--muted); font-size: 0.82rem; }
-.task-table__time { color: var(--muted); white-space: nowrap; }
+.cell-flex { display: flex; align-items: center; gap: 10px; }
+.task-table small { color: var(--muted); font-size: 0.82rem; }
+.task-table__time { width: 110px; color: var(--muted); white-space: nowrap; }
 .task-table__time small { display: block; }
-.task-table__action { text-align: right; }
+.task-table__task strong { display: block; font-weight: var(--fw-medium); }
+.task-table__task small { display: block; }
+.task-table__resident .avatar { font-size: 0.72rem; }
+.task-table__status { width: 140px; }
+.task-table__action { width: 1%; text-align: right; }
 
-.note-flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--lavender);
-  color: var(--label);
-  font-size: 0.75rem;
-}
+.note-flag { display: inline-flex !important; align-items: center; gap: 4px; color: var(--label) !important; }
 
 /* Task pop-up */
 .task-detail {
@@ -70,36 +65,40 @@
 .task-detail__time { color: var(--muted); }
 .task-detail__done { color: var(--completed-text); }
 
-/* Tablets */
-@media (max-width: 1100px) {
+/* Smaller laptops and tablets: filters go under the tabs */
+@media (max-width: 1240px) {
+  .tasks-toolbar { flex-wrap: wrap; }
+  .tasks-toolbar .tabs { overflow-x: auto; }
   .tasks-toolbar__filters { width: 100%; }
   .tasks-toolbar .search-box { flex: 1; width: auto; min-width: 200px; }
 }
 
-/* Phones: each row becomes a card */
+/* Phones: each row becomes a small card */
 @media (max-width: 760px) {
-  .tasks-panel { padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .card.tasks-card { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+  .tasks-toolbar { padding: 0 0 14px; border: 0; }
+  .tasks-panel { padding: 0; }
   .task-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .task-table,
   .task-table tbody { display: block; }
   .task-table__row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px 12px;
+    gap: 8px 12px;
     padding: 14px;
     margin-bottom: 12px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--card);
-    box-shadow: var(--shadow);
   }
-  .task-table__row--overdue { background: var(--overdue-tint); }
-  .task-table td { display: block; padding: 0; border: 0; background: transparent !important; }
-  .task-table__task { grid-column: 1 / -1; }
+  .task-table td { display: block; width: auto; padding: 0; border: 0; background: transparent !important; }
+  .task-table__task { grid-column: 1 / -1; grid-row: 1; }
+  .task-table__resident { grid-column: 1 / -1; }
   .task-table__time { align-self: center; }
-  .task-table__note:empty { display: none; }
+  .task-table__status { justify-self: end; align-self: center; }
   .task-table__action { grid-column: 1 / -1; text-align: left; }
   .task-table__action .btn { width: 100%; }
   .tasks-toolbar .select,
   .tasks-toolbar .search-box { width: 100%; }
+  .tasks-toolbar__filters { flex-direction: column; }
 }

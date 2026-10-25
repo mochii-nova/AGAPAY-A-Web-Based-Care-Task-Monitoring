@@ -2,9 +2,9 @@
    My Residents (Residents.jsx + components/residents/)
    Colours come only from the variables in main.css.
    ===================================================================== */
-/* Laptops: list column on the left, profile always on the right */
-.residents-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
-.residents-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+/* Laptops: compact list on the left, profile on the right (it stays in view while you scroll) */
+.residents-layout { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+.residents-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
 /* Search row: no box around it, so it lines up with the title and the cards */
 .residents-toolbar { display: flex; gap: 10px; }
@@ -12,13 +12,13 @@
 .residents-toolbar .select { flex: 0 0 200px; width: 200px; }
 
 /* Resident cards: one column, all the same height and layout */
-.resident-list { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.resident-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
 .resident-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  padding: 16px 18px;
+  padding: 12px 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
@@ -29,81 +29,66 @@
 }
 .resident-card:hover { border-color: var(--lavender-line); }
 .resident-card[aria-pressed='true'] { border-color: var(--indigo); background: var(--indigo-soft); }
-.resident-card__body { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.resident-card__body { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
 .resident-card__line { display: flex; align-items: center; gap: 10px; min-height: 22px; white-space: nowrap; }
-.resident-card__name { overflow: hidden; font-size: 1.05rem; text-overflow: ellipsis; }
-.resident-card__id { flex-shrink: 0; color: var(--label); font-size: 0.8rem; letter-spacing: 0.3px; }
+.resident-card__name { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; }
+.resident-card__id { flex-shrink: 0; margin-left: auto; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.3px; }
 .resident-card__meta { gap: 8px; color: var(--muted); font-size: 0.88rem; }
 
-/* Care need labels */
+/* Care need tags (text only) */
 .care-needs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; }
+.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; margin-top: 2px; }
 .care-need {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
   min-width: 0;
   padding: 2px 10px;
-  border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   background: var(--tint);
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
-.care-need svg { flex-shrink: 0; color: var(--label); }
-.care-need span { overflow: hidden; text-overflow: ellipsis; }
-.care-need--more { flex-shrink: 0; background: transparent; border-style: dashed; }
+.care-need--more { flex-shrink: 0; background: transparent; }
 
-/* Profile side panel (laptops) */
-.resident-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
-.resident-panel__label { margin-bottom: 14px; }
+/* Profile side panel (laptops): stays in view while scrolling */
+.card.resident-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
 
 /* Profile content (panel and pop-up) */
-.resident-profile__identity { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-.resident-profile__name { margin: 0; font-size: 1.3rem; font-weight: var(--fw-bold); }
+.resident-profile__identity { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.resident-profile__who { flex: 1; min-width: 0; }
+.resident-profile__identity .status-pill { align-self: flex-start; margin-top: 6px; }
+.resident-profile__name { margin: 0; font-size: 1.35rem; font-weight: var(--fw-bold); }
 .resident-profile__sub { margin: 2px 0 0; color: var(--muted); }
 
-.resident-profile__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 4px; }
-.resident-profile__facts div { padding: 10px 12px; border-radius: var(--radius-sm); background: var(--tint); }
-.resident-profile__facts dt { color: var(--muted); font-size: 0.8rem; }
-.resident-profile__facts dd { margin: 0; }
+/* Care needs next to the emergency contact */
+.resident-profile__columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+.resident-profile__columns .small-label { margin-bottom: 8px; }
+.resident-profile__contact { margin: 0 0 10px; color: var(--muted); }
+.resident-profile__contact strong { color: var(--text); font-weight: var(--fw-medium); }
+.resident-profile__note { margin: 10px 0 0; font-size: 0.93rem; }
 
 .profile-section { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--border); }
 .profile-section .small-label { margin-bottom: 10px; }
-.profile-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.profile-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .profile-section__head .small-label { margin-bottom: 0; }
 
-.emergency-box { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
-.emergency-box p { margin: 0; }
-.emergency-box__rel { color: var(--muted); font-size: 0.88rem; }
-
-.resident-profile__note { margin: 10px 0 0; color: var(--muted); font-size: 0.92rem; }
-
+/* Today's tasks: time | task + category | status | View */
 .profile-tasks { list-style: none; margin: 0; padding: 0; }
 .profile-tasks li + li { border-top: 1px solid var(--border); }
-.profile-task {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 52px;
-  padding: 6px 4px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text);
-  text-align: left;
-}
-.profile-task:hover { background: var(--tint); }
-.profile-task__main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.profile-task { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; }
+.profile-task__time { color: var(--muted); font-size: 0.9rem; }
+.profile-task__main { display: flex; flex-direction: column; min-width: 0; }
+.profile-task__main strong { font-weight: var(--fw-medium); }
 .profile-task__main small { color: var(--muted); font-size: 0.82rem; }
 
+/* Latest notes, signed by hand */
 .profile-notes { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
-.profile-note { padding: 10px 12px; border-radius: var(--radius-sm); background: var(--lavender); }
+.profile-note { padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); }
 .profile-note p { margin: 0; }
-.profile-note__meta { color: var(--label); font-size: 0.8rem; }
-.profile-note__text { margin-top: 4px !important; font-size: 0.92rem; }
+.profile-note .small-label { margin-bottom: 6px; }
+.profile-note__text { line-height: 1.55; }
+.profile-note__sign { margin-top: 6px !important; font-size: 1.25rem; }
 
 .resident-profile .state-msg { padding: 16px; }
 
@@ -114,5 +99,11 @@
 @media (max-width: 600px) {
   .residents-toolbar { flex-direction: column; }
   .residents-toolbar .select { flex: none; width: 100%; }
-  .resident-card { gap: 12px; padding: 14px; }
+  .resident-card { gap: 12px; padding: 12px; }
+  .resident-profile__columns { grid-template-columns: minmax(0, 1fr); }
+  .profile-task { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main view' 'meta view'; row-gap: 2px; }
+  .profile-task__main { grid-area: main; }
+  .profile-task__time { grid-area: meta; }
+  .profile-task .status-pill { grid-area: meta; justify-self: end; margin-right: 8px; }
+  .profile-task .btn { grid-area: view; }
 }

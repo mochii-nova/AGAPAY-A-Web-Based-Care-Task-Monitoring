@@ -54,15 +54,11 @@ export default function Login() {
 
   return (
     <AuthLayout
-      panelTitle="Welcome back"
-      panelContent={
-        <p className="auth__panel-text">
-          Log in to access today's care schedules, handover logs, and resident updates for Orchid Carehome Inc.
-        </p>
-      }
+      panelTitle="Welcome back. Today’s care is waiting."
+      panelText="See your shift, your tasks, and the latest handover."
     >
-      <h1 className="auth__title">Sign in to AGAPAY</h1>
-      <p className="auth__subtitle">Enter your facility credentials to continue</p>
+      <h1 className="auth__title">Sign in</h1>
+      <p className="auth__subtitle">Sign in with your Employee ID and password.</p>
 
       {justRegistered && !error && (
         <div className="alert alert--success" role="status">
@@ -89,7 +85,7 @@ export default function Login() {
         <FormField
           id="login-username"
           label="Employee ID"
-          placeholder="e.g., CGV-2026-017"
+          placeholder="e.g. CGV-2026-017"
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -99,7 +95,7 @@ export default function Login() {
           id="login-password"
           label="Password"
           type="password"
-          placeholder="Enter your password"
+          placeholder="Your password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -113,7 +109,7 @@ export default function Login() {
         </div>
 
         <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign In'}
+          {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 

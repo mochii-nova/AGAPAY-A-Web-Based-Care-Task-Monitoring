@@ -1,5 +1,4 @@
-import { CalendarOff, StickyNote, ClipboardList } from 'lucide-react';
-import TaskCategoryIcon from '../TaskCategoryIcon';
+import { StickyNote, ClipboardList } from 'lucide-react';
 import StatusPill from '../StatusPill';
 import { EmptyState } from '../StateMessage';
 import GoogleCalendarBox from './GoogleCalendarBox';
@@ -12,22 +11,9 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
   return (
     <aside className="card day-panel" aria-label={`Schedule for ${dayTitle(date)}`}>
       <h2 className="day-panel__title">{dayTitle(date)}</h2>
+      <p className="day-panel__shift-line">{shift ? `${shift.label} · ${shiftTime(shift)}` : 'Day off'}</p>
 
-      <div className="day-panel__shift">
-        {shift ? (
-          <>
-            <div>
-              <p className="small-label">Your shift</p>
-              <p className="day-panel__shift-time">
-                {shift.label} · {shiftTime(shift)}
-              </p>
-            </div>
-          </>
-        ) : (
-          <p className="day-panel__off">
-            <CalendarOff size={18} aria-hidden="true" /> Day off
-          </p>
-        )}
+      <div className="day-panel__gcal">
         <GoogleCalendarBox shift={shift} date={date} />
       </div>
 
@@ -52,22 +38,25 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
           {tasks.map((t) => {
             const room = roomOf(t.resident);
             return (
-              <li key={t._id}>
-                <button type="button" className="day-task" onClick={() => onOpenTask(t)}>
-                  <TaskCategoryIcon category={t.category} />
-                  <span className="day-task__main">
-                    <strong>{t.task}</strong>
-                    <small>
-                      {formatTime(t.dueAt)} · {t.resident}
-                      {room && ` · Room ${room}`}
+              <li key={t._id} className="day-task">
+                <span className="day-task__time">{formatTime(t.dueAt)}</span>
+                <span className="day-task__main">
+                  <strong>{t.task}</strong>
+                  <small>{t.resident}{room && ` · Room ${room}`}</small>
+                  {t.note && (
+                    <small className="day-task__note">
+                      <StickyNote size={13} aria-hidden="true" /> Has a note
                     </small>
-                    {t.note && (
-                      <small className="day-task__note">
-                        <StickyNote size={14} aria-hidden="true" /> Has a note
-                      </small>
-                    )}
-                  </span>
-                  <StatusPill status={t.status} />
+                  )}
+                </span>
+                <StatusPill status={t.status} />
+                <button
+                  type="button"
+                  className="btn btn--outline btn--sm"
+                  onClick={() => onOpenTask(t)}
+                  aria-label={`View task: ${t.task} for ${t.resident}`}
+                >
+                  View
                 </button>
               </li>
             );

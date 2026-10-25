@@ -1,29 +1,33 @@
 import { Link } from 'react-router-dom';
-import { Users, ChevronRight } from 'lucide-react';
-import CardHeader from '../CardHeader';
 import Avatar from '../Avatar';
+import { RESIDENT_STATUS } from '../../utils/handover';
 
-// Residents I care for, with how many tasks each has today. Click a row to open the profile.
-export default function ResidentsCard({ residents, tasks }) {
+// A row of small resident cards. "Watch" / "Urgent" comes from the latest handover.
+export default function ResidentsCard({ residents, statusOf }) {
   return (
-    <section className="card">
-      <CardHeader icon={Users} title="My Residents" linkTo="/residents">
+    <section className="dash-residents" aria-labelledby="dash-residents-title">
+      <header className="dash-residents__head">
+        <h2 id="dash-residents-title">My residents</h2>
         <span className="sample-tag" title="Residents aren't in the database yet">Sample data</span>
-      </CardHeader>
+        <Link to="/residents" className="card__link">See all</Link>
+      </header>
 
-      <ul className="resident-rows">
+      <ul className="resident-tiles">
         {residents.map((r) => {
-          const count = tasks.filter((t) => t.resident === r.name).length;
+          const status = statusOf(r.name);
           return (
             <li key={r.id}>
-              <Link to={`/residents?open=${r.id}`} className="resident-row">
-                <Avatar name={r.name} photo={r.photo} size={42} />
-                <span className="resident-row__main">
+              <Link to={`/residents?open=${r.id}`} className="resident-tile">
+                <Avatar name={r.name} photo={r.photo} size={40} />
+                <span className="resident-tile__main">
                   <strong>{r.name}</strong>
-                  <small>{count} {count === 1 ? 'task' : 'tasks'} today</small>
+                  <small>Room {r.room}</small>
                 </span>
-                <span className="resident-row__room">Room {r.room}</span>
-                <ChevronRight size={18} aria-hidden="true" />
+                {status && status !== 'normal' && (
+                  <span className={`status-pill status-pill--${RESIDENT_STATUS[status].tone}`}>
+                    {status === 'watch' ? 'Watch' : RESIDENT_STATUS[status].label}
+                  </span>
+                )}
               </Link>
             </li>
           );

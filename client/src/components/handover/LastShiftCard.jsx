@@ -37,12 +37,12 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
 
   return (
     <section className={`card last-shift ${read ? '' : 'is-unread'}`}>
-      <CardHeader title="From last shift">
-        <span className={`status-pill status-pill--${read ? 'completed' : 'overdue'}`}>{read ? 'Read' : 'Not yet read'}</span>
+      <CardHeader title={`From the ${shiftLabel(handover.shift).toLowerCase()} shift`}>
+        <span className={`status-pill status-pill--${read ? 'completed' : 'new'}`}>{read ? 'Read' : 'Unread'}</span>
       </CardHeader>
 
       <p className="last-shift__meta">
-        {shiftLabel(handover.shift)} shift · {handover.author?.name} · submitted {when(handover.createdAt)}
+        {handover.author?.name} · submitted {when(handover.createdAt)}
       </p>
 
       {flagged.map((r) => (
@@ -60,6 +60,7 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
       ) : (
         <p className="last-shift__text">{handover.text}</p>
       )}
+      <p className="signature">— {handover.author?.name?.split(' ')[0]}, {formatTime(handover.createdAt)}</p>
 
       {read ? (
         <p className="last-shift__read">
@@ -68,7 +69,7 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
         </p>
       ) : (
         <button type="button" className="btn btn--soft last-shift__btn" onClick={markRead} disabled={busy}>
-          {busy ? 'Saving…' : 'Mark as Read'}
+          {busy ? 'Saving…' : 'Mark as read'}
         </button>
       )}
     </section>
