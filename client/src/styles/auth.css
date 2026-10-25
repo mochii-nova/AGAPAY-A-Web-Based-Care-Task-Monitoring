@@ -21,7 +21,7 @@
   background: var(--navy);
   color: var(--on-navy);
 }
-.auth__logo-link { align-self: center; border-radius: var(--radius-sm); }
+.auth__logo-link { display: inline-flex; align-self: center; align-items: center; min-height: var(--tap); margin-block: -5px; border-radius: var(--radius-sm); }
 .auth__logo { width: auto; }
 .auth .auth__photo { flex: 1; width: 100%; min-height: 0; border-radius: 20px; }
 .auth__panel .image-slot--empty {

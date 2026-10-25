@@ -80,14 +80,18 @@ export default function ChangePasswordForm({ employeeId }) {
       <form onSubmit={handleSubmit} noValidate className="password-form">
         {/* Hidden, so password managers know which account this password belongs to */}
         <input type="text" name="username" autoComplete="username" value={employeeId} readOnly hidden />
-        {field('current', 'Current password', { autoComplete: 'current-password' })}
+        {field('current', 'Current password', { autoComplete: 'current-password', placeholder: 'Your current password' })}
         <div className="form-grid">
-          {field('next', 'New password', { autoComplete: 'new-password', hint: 'At least 8 characters, with a letter and a number.' })}
-          {field('confirm', 'Confirm new password', { autoComplete: 'new-password' })}
+          {field('next', 'New password', {
+            autoComplete: 'new-password',
+            placeholder: 'At least 8 characters',
+            hint: 'Use at least one letter and one number.',
+          })}
+          {field('confirm', 'Confirm new password', { autoComplete: 'new-password', placeholder: 'Type it again' })}
         </div>
         <div className="password-form__actions">
-          <button type="submit" className="btn btn--soft" disabled={busy}>
-            {busy ? 'Checking…' : 'Change password'}
+          <button type="submit" className="btn btn--primary" disabled={busy}>
+            {busy ? 'Checking…' : 'Update password'}
           </button>
         </div>
       </form>

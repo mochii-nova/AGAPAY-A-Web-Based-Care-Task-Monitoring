@@ -1,4 +1,4 @@
-import { Camera, Pencil, Phone } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { getShift, SHIFTS, shiftTime } from '../constants';
 import { telHref } from '../utils/format';
@@ -22,78 +22,69 @@ export default function Profile() {
   const shift = SHIFTS.find((s) => s.apiValue === profile.shift) ?? getShift('morning');
   const roleLabel = profile.role === 'admin' ? 'Administrator' : 'Caregiver';
   const nameChanged = profile.name !== profile.registeredName;
+  const contact = profile.emergencyContact;
 
   return (
     <div>
-      <PageHeader title="My Profile" subtitle="Your account details, photo and password." />
+      <PageHeader title="My profile" subtitle="Your details, photo and password.">
+        <button type="button" className="btn btn--outline" onClick={openEditProfile}>Edit profile</button>
+      </PageHeader>
 
       <div className="profile-layout">
         {/* Left: photo and details set by the administrator */}
         <aside className="card profile-id">
-          <button type="button" className="profile-id__photo" onClick={openPhoto} aria-label="Change profile photo">
-            <Avatar name={profile.name} photo={profile.photo} size={112} />
+          <button
+            type="button"
+            className="profile-id__photo"
+            onClick={openPhoto}
+            aria-label={profile.photo ? 'Change profile photo' : 'Add profile photo'}
+          >
+            <Avatar name={profile.name} photo={profile.photo} size={120} />
             <span className="profile-id__camera" aria-hidden="true"><Camera size={16} /></span>
           </button>
           <h2 className="profile-id__name">{profile.name}</h2>
-          <p className="profile-id__role">{roleLabel}</p>
-          <button type="button" className="btn btn--soft btn--sm" onClick={openPhoto}>
-            <Camera size={16} aria-hidden="true" /> {profile.photo ? 'Change photo' : 'Add photo'}
-          </button>
+          <p className="profile-id__role">{roleLabel} · {shift.label} shift</p>
 
           <div className="profile-id__admin">
             <p className="small-label">Set by the administrator</p>
             <dl className="info-list">
               <div><dt>Employee ID</dt><dd>{profile.employeeId}</dd></div>
-              <div><dt>Role</dt><dd>{roleLabel}</dd></div>
-              <div><dt>Assigned shift</dt><dd>{shift.label}<small>{shiftTime(shift)}</small></dd></div>
+              <div><dt>Shift</dt><dd>{shiftTime(shift)}</dd></div>
               <div><dt>Date hired</dt><dd>{longDate(profile.dateHired)}</dd></div>
               <div>
-                <dt>Account status</dt>
+                <dt>Status</dt>
                 <dd><span className="status-pill status-pill--completed">{profile.accountStatus}</span></dd>
               </div>
             </dl>
-            <p className="field__hint">To change these, please ask the administrator.</p>
           </div>
         </aside>
 
-        {/* Right: editable details, password, and where things are saved */}
+        {/* Right: personal details (read-only here, changed with "Edit profile"), password, where things are saved */}
         <div className="profile-main">
           <section className="card">
-            <CardHeader title="Personal details">
-              <button type="button" className="btn btn--soft btn--sm" onClick={openEditProfile}>
-                <Pencil size={16} aria-hidden="true" /> Edit profile
-              </button>
-            </CardHeader>
-            <dl className="info-grid">
+            <CardHeader title="Personal details" />
+            <dl className="detail-rows">
               <div><dt>First name</dt><dd>{profile.firstName}</dd></div>
               <div><dt>Last name</dt><dd>{profile.lastName}</dd></div>
               <div><dt>Email</dt><dd>{profile.email}</dd></div>
-              <div><dt>Phone number</dt><dd>{profile.phone}</dd></div>
+              <div><dt>Phone</dt><dd>{profile.phone}</dd></div>
+              <div><dt>Emergency contact</dt><dd>{contact.name} · {contact.relationship}</dd></div>
+              <div>
+                <dt>Their phone</dt>
+                <dd><a href={telHref(contact.phone)} aria-label={`Call ${contact.name}, ${contact.phone}`}>{contact.phone}</a></dd>
+              </div>
             </dl>
             {nameChanged && (
               <p className="field__hint profile-note">
                 Handovers still show the name you registered with ({profile.registeredName}) until the backend can save name changes.
               </p>
             )}
-
-            <div className="profile-emergency">
-              <p className="small-label">Emergency contact</p>
-              <div className="emergency-row">
-                <div>
-                  <p className="emergency-row__name">{profile.emergencyContact.name}</p>
-                  <p className="emergency-row__rel">{profile.emergencyContact.relationship}</p>
-                </div>
-                <a className="btn btn--outline btn--sm" href={telHref(profile.emergencyContact.phone)}>
-                  <Phone size={16} aria-hidden="true" /> {profile.emergencyContact.phone}
-                </a>
-              </div>
-            </div>
           </section>
 
           <ChangePasswordForm employeeId={profile.employeeId} />
 
-          <section className="card">
-            <CardHeader title="Where your details are saved" />
+          <details className="card saved-where">
+            <summary>Where your details are saved</summary>
             <table className="saved-table">
               <thead>
                 <tr><th scope="col">Details</th><th scope="col">Saved in</th><th scope="col">Note</th></tr>
@@ -108,7 +99,7 @@ export default function Profile() {
                 ))}
               </tbody>
             </table>
-          </section>
+          </details>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { BellRing, CircleAlert, CircleCheck, Info, Send } from 'lucide-react';
+import { Bell, BellRing, CircleAlert, CircleCheck, Info } from 'lucide-react';
 import { usePush } from '../context/PushContext';
 
 const ICONS = { success: CircleCheck, info: Info, warning: CircleAlert, error: CircleAlert };
@@ -15,7 +15,8 @@ function Message({ tone, text }) {
 }
 
 // "Allow notifications" switch. `compact` = the small version in the bell dropdown.
-// The full version (Notifications page) also has the test button and its messages.
+// The full version (Notifications page) also has the test button and its messages;
+// its status line (Off / On / a warning) sits under the title instead of in a box.
 export default function PushToggle({ compact = false }) {
   const push = usePush();
   const id = useId();
@@ -50,23 +51,37 @@ export default function PushToggle({ compact = false }) {
 
   if (compact) return <div className="push-toggle push-toggle--compact">{row}</div>;
 
+  // Full version: icon · title and status · "Send a test" · switch, all on one row
   return (
     <div className="push-toggle">
-      {row}
-      {push.status.tone !== 'muted' && (
-        <div id={`${id}-status`}>
-          <Message {...push.status} />
+      <div className="push-toggle__row">
+        <span className="push-toggle__badge" aria-hidden="true"><Bell size={18} /></span>
+        <div className="push-toggle__text">
+          <span id={`${id}-label`} className="push-toggle__label">Pop-up notifications</span>
+          <small id={`${id}-status`} className={`push-toggle__status push-toggle__status--${push.status.tone}`} aria-live="polite">
+            {push.status.text}
+          </small>
         </div>
-      )}
-      {push.notice && <Message {...push.notice} />}
-      <div className="push-toggle__actions">
-        <p className="field__hint">
-          Pop-ups never show resident names or health details, because they can appear on a locked screen.
-        </p>
         <button type="button" className="btn btn--outline btn--sm" onClick={push.sendTest} disabled={!push.canTest || push.busy}>
-          <Send size={16} aria-hidden="true" /> Send test notification
+          Send a test
+        </button>
+        <button
+          type="button"
+          role="switch"
+          className="switch"
+          aria-checked={push.on}
+          aria-labelledby={`${id}-label`}
+          aria-describedby={`${id}-status`}
+          disabled={push.disabled}
+          onClick={push.toggle}
+        >
+          <span className="switch__track" aria-hidden="true" />
         </button>
       </div>
+      {push.notice && <Message {...push.notice} />}
+      <p className="field__hint push-toggle__privacy">
+        Pop-ups never show resident names or health details, because they can appear on a locked screen.
+      </p>
     </div>
   );
 }

@@ -275,7 +275,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 /* Checkbox with its label (whole row is at least 44px tall) */
 .checkbox-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--tap); }
 .checkbox-row input[type='checkbox'] { width: 18px; height: 18px; margin: 0; accent-color: var(--indigo); cursor: pointer; }
-.checkbox-row label { cursor: pointer; }
+/* The label is clickable too, and 44px tall, so box + label make one big tap area */
+.checkbox-row label { display: inline-flex; align-items: center; min-height: var(--tap); cursor: pointer; }
 .checkbox-row input[aria-invalid='true'] { outline: 2px solid var(--danger); outline-offset: 2px; }
 
 /* Button that looks like a link */
@@ -883,8 +884,27 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .push-toggle__status--info { color: var(--label); }
 .push-toggle__status--warning,
 .push-toggle__status--error { color: var(--pending-text); }
-.push-toggle__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
-.push-toggle__actions .field__hint { flex: 1 1 260px; }
+.push-toggle__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+.push-toggle__privacy { margin: 0; padding-left: 52px; }
+/* Full version: on narrow screens the test button and switch drop to a second line, on the right */
+.push-toggle > .push-toggle__row { flex-wrap: wrap; }
+.push-toggle > .push-toggle__row .push-toggle__text { flex-basis: 220px; }
+.push-toggle > .push-toggle__row .btn { margin-left: auto; }
+@media (max-width: 600px) {
+  .push-toggle > .push-toggle__row .push-toggle__text { flex-basis: calc(100% - 52px); }
+  .push-toggle > .push-toggle__row .btn { margin-left: 52px; }
+  .push-toggle > .push-toggle__row .switch { margin-left: auto; }
+}
 .push-toggle--compact { padding: 6px 8px 8px 10px; border-bottom: 1px solid var(--border); }
 .push-toggle--compact .push-toggle__row { align-items: flex-start; }
 .push-toggle--compact .push-toggle__icon { margin-top: 2px; }
@@ -904,28 +924,37 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   text-decoration: none;
 }
 .notif-item:hover { background: var(--tint); }
-.notif-item.is-unread { background: var(--tint); }
-.notif-item.is-unread:hover { background: var(--lavender); }
-.notif-item .unread-dot { margin-top: 7px; }
+/* Unread: a small indigo dot and a bolder title (no coloured row) */
+.notif-item .unread-dot { margin-top: 7px; background: var(--indigo); }
+.notif-item .unread-dot--space { background: transparent; }
 .notif-item__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-.notif-item__text strong { font-size: 0.92rem; }
+.notif-item__text strong { font-size: 0.92rem; font-weight: var(--fw-regular); }
+.notif-item.is-unread .notif-item__text strong { font-weight: var(--fw-bold); }
 .notif-item__text small { color: var(--muted); font-size: 0.82rem; }
 .notif-item__text time { color: var(--label); font-size: 0.75rem; margin-top: 2px; }
-.notif-item__time { color: var(--label); font-size: 0.8rem; white-space: nowrap; }
-.notif-list--page .notif-item { padding: 14px 12px; align-items: center; }
-.notif-list--page li + li { border-top: 1px solid var(--border); }
+.notif-item__time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.notif-list--page { padding: 0; }
+.notif-list--page .notif-item { align-items: center; gap: 14px; padding: 14px 20px; border-radius: 0; }
+.notif-list--page .unread-dot { margin-top: 0; }
+.notif-list--page li { border-top: 1px solid var(--border); }
+
+/* Notifications page: one card with the All / Unread tabs on top */
+.card.notif-card { padding: 0; overflow: hidden; }
+.notif-card__tabs { padding: 10px 14px; }
+.notif-card .empty-text { margin: 0; padding: 32px 20px; border-top: 1px solid var(--border); }
 
 .notif-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   flex-shrink: 0;
-  background: var(--tint);
-  color: var(--muted);
+  background: var(--indigo-soft);
+  color: var(--indigo);
 }
+.notif-popover .notif-icon { width: 36px; height: 36px; }
 
 /* Account dropdown (top-right avatar) */
 .account-popover { width: 280px; max-width: calc(100vw - 24px); }
@@ -1011,7 +1040,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   transition: width 0.2s var(--ease);
 }
 .sidebar__top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 6px; }
-.sidebar__logo { display: inline-flex; align-items: center; border-radius: var(--radius-sm); text-decoration: none; }
+/* 44px tall tap area; the negative margins keep the logo where it was */
+.sidebar__logo { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -6px; border-radius: var(--radius-sm); text-decoration: none; }
 .sidebar__mark { display: block; height: 34px; width: auto; }
 .sidebar__close { display: none; color: var(--on-navy); }
 

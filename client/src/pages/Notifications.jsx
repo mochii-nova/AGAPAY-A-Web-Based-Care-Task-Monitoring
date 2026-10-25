@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCheck } from 'lucide-react';
+import { Check } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import NotificationIcon from '../components/NotificationIcon';
-import CardHeader from '../components/CardHeader';
 import PushToggle from '../components/PushToggle';
 import { useNotifications } from '../context/NotificationContext';
 import { timeAgo } from '../utils/format';
@@ -18,26 +17,25 @@ export default function Notifications() {
   return (
     <div>
       <PageHeader title="Notifications" subtitle="Task reminders, handovers, schedule changes and messages.">
-        <button type="button" className="btn btn--soft" onClick={markAllRead} disabled={unreadCount === 0}>
-          <CheckCheck size={18} /> Mark all as read
+        <button type="button" className="btn btn--outline" onClick={markAllRead} disabled={unreadCount === 0}>
+          <Check size={18} aria-hidden="true" /> Mark all as read
         </button>
       </PageHeader>
 
-      <section className="card notif-settings">
-        <CardHeader title="Pop-up notifications" />
+      <section className="card notif-settings" aria-label="Pop-up notifications">
         <PushToggle />
       </section>
 
-      <div className="tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={filter === 'all'} className="tab" onClick={() => setFilter('all')}>
-          All ({notifications.length})
-        </button>
-        <button type="button" role="tab" aria-selected={filter === 'unread'} className="tab" onClick={() => setFilter('unread')}>
-          Unread ({unreadCount})
-        </button>
-      </div>
+      <div className="card notif-card">
+        <div className="tabs tabs--flat notif-card__tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={filter === 'all'} className="tab" onClick={() => setFilter('all')}>
+            All <span className="tab__count">{notifications.length}</span>
+          </button>
+          <button type="button" role="tab" aria-selected={filter === 'unread'} className="tab" onClick={() => setFilter('unread')}>
+            Unread <span className="tab__count">{unreadCount}</span>
+          </button>
+        </div>
 
-      <div className="card">
         {shown.length === 0 ? (
           <p className="empty-text">You're all caught up. No unread notifications.</p>
         ) : (
@@ -51,7 +49,7 @@ export default function Notifications() {
                     <small>{n.body}</small>
                   </span>
                   <time dateTime={n.time} className="notif-item__time">{timeAgo(n.time)}</time>
-                  {!n.read && <span className="unread-dot" aria-label="Unread" />}
+                  {n.read ? <span className="unread-dot unread-dot--space" aria-hidden="true" /> : <span className="unread-dot" aria-label="Unread" />}
                 </Link>
               </li>
             ))}
