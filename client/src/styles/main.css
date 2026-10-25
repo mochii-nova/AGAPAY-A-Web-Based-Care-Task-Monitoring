@@ -1025,9 +1025,12 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .app-main { flex: 1; padding: 32px 36px 64px; }
 
 /* Sidebar (Sidebar.jsx): 240px wide, or a 72px icon rail when collapsed (laptops) */
+/* z-index: above the page and the top bar (30), so the profile menu, which opens to the right
+   of the collapsed rail, is drawn on top of page titles and cards */
 .sidebar {
   position: sticky;
   top: 0;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   width: var(--sidebar-w);
@@ -1066,7 +1069,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sidebar__who { display: flex; flex-direction: column; min-width: 0; }
 .sidebar__who strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__who small { overflow: hidden; color: var(--on-navy-muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar__dropdown { left: 0; right: 0; }
+.sidebar__dropdown { left: 0; right: 0; z-index: 90; background: var(--card); color: var(--text); }
 
 .sidebar__nav { flex: 1; }
 .sidebar__group { margin-bottom: 6px; }
