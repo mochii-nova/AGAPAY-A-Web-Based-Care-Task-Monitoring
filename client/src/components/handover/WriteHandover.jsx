@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CircleAlert, ClipboardList, Info } from 'lucide-react';
 import { useHandovers } from '../../context/HandoverContext';
 import { useToast } from '../../context/ToastContext';
-import { loadDraft, saveDraft, clearDraft } from '../../data/handoverDraft';
-import { buildNotes, RESIDENT_STATUS } from '../../utils/handover';
+import { buildSummary, RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
 import StatusPill from '../StatusPill';
 import Avatar from '../Avatar';
@@ -13,19 +12,30 @@ import { EmptyState } from '../StateMessage';
 const QUICK_TAGS = ['Supplies', 'Family / Visitor', 'Room / Equipment'];
 const EMPTY = { passOn: {}, residents: {}, other: '' };
 const DEFAULT_RESIDENT = { status: 'normal', note: '' };
+const AUTOSAVE_AFTER = 2500; // ms after the last change
+const timeNow = () => new Date().toISOString();
 
-// "Maria Santos" -> "maria-santos" (for element ids)
-const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+// My saved draft from the backend, if it is for this shift, as the form's starting values
+function formFromDraft(draft, shift, shiftDate) {
+  if (!draft || draft.shift !== shift.apiValue || draft.shiftDate !== shiftDate) return EMPTY;
+  return {
+    passOn: Object.fromEntries(draft.tasks.map((t) => [t.taskId, t.note ?? ''])),
+    residents: Object.fromEntries(draft.residents.map((r) => [r.residentId, { status: r.status, note: r.note ?? '' }])),
+    other: draft.otherNotes ?? '',
+  };
+}
 
 // The four-part handover form for my current shift.
+// Drafts are saved in the database on their own a moment after each change (and with "Save draft").
 // Submitting never changes any task: unfinished tasks stay Pending for the next shift.
-export default function WriteHandover({ shift, next, dateLabel, shiftTasks, residents, draftKey, onOpenTask, onDraftSaved, onSubmitted }) {
-  const { submit } = useHandovers();
+export default function WriteHandover({ shift, shiftDate, next, shiftTasks, residents, draft, onOpenTask, onDraftSaved, onSubmitted }) {
+  const { submit, saveDraft } = useHandovers();
   const showToast = useToast();
-  const [form, setForm] = useState(() => {
-    const draft = loadDraft(draftKey);
-    return draft ? { passOn: draft.passOn ?? {}, residents: draft.residents ?? {}, other: draft.other ?? '' } : EMPTY;
-  });
+  const [form, setForm] = useState(() => formFromDraft(draft, shift, shiftDate));
+  // { status: 'idle' | 'saving' | 'saved' | 'error', at: when this computer last saved it }
+  const [draftState, setDraftState] = useState(() => (form !== EMPTY ? { status: 'saved', at: null } : { status: 'idle' }));
+  const changed = useRef(false); // nothing is autosaved until the person changes something
+  const submitted = useRef(false); // no autosave after submitting (it would start a new draft)
   const [checked, setChecked] = useState(false);
   const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -37,21 +47,67 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
   const unfinished = shiftTasks.filter((t) => t.status === 'pending' || t.status === 'overdue');
   const overdue = unfinished.filter((t) => t.status === 'overdue');
 
-  const residentOf = (name) => form.residents[name] ?? DEFAULT_RESIDENT;
-  const roomOf = (name) => residents.find((r) => r.name === name)?.room;
-  const flaggedCount = residents.filter((r) => residentOf(r.name).status !== 'normal').length;
+  const residentOf = (id) => form.residents[id] ?? DEFAULT_RESIDENT;
+  const flaggedCount = residents.filter((r) => residentOf(r.id).status !== 'normal').length;
 
   const clearError = (id) => setErrors((e) => ({ ...e, [id]: undefined }));
 
-  const setResident = (name, patch) => {
-    setForm((f) => ({ ...f, residents: { ...f.residents, [name]: { ...(f.residents[name] ?? DEFAULT_RESIDENT), ...patch } } }));
-    clearError(`res-note-${slug(name)}`);
+  // Every change to the form goes through here, so it can be autosaved
+  const change = (update) => {
+    changed.current = true;
+    setForm(update);
+  };
+
+  const setResident = (id, patch) => {
+    change((f) => ({ ...f, residents: { ...f.residents, [id]: { ...(f.residents[id] ?? DEFAULT_RESIDENT), ...patch } } }));
+    clearError(`res-note-${id}`);
   };
 
   const addTag = (tag) => {
-    setForm((f) => ({ ...f, other: `${f.other}${f.other && !f.other.endsWith('\n') ? '\n' : ''}${tag}: ` }));
+    change((f) => ({ ...f, other: `${f.other}${f.other && !f.other.endsWith('\n') ? '\n' : ''}${tag}: ` }));
     document.getElementById('handover-other')?.focus();
   };
+
+  // What the backend gets. A draft keeps notes as typed; a submitted handover
+  // leaves out notes for "Normal" residents and unused quick tags (e.g. just "Supplies:").
+  const payload = ({ final }) => ({
+    shift: shift.apiValue,
+    shiftDate,
+    summary: buildSummary({ completed: completed.length, notFinished: unfinished.length, skipped: skipped.length }, skipped),
+    residents: residents.map((r) => {
+      const state = residentOf(r.id);
+      return { residentId: r.id, status: state.status, note: final && state.status === 'normal' ? '' : state.note.trim() };
+    }),
+    tasks: unfinished.map((t) => ({ taskId: t._id, note: (form.passOn[t._id] ?? '').trim() })),
+    otherNotes: final
+      ? form.other.split('\n').filter((line) => !QUICK_TAGS.some((tag) => line.trim() === `${tag}:`)).join('\n').trim()
+      : form.other,
+  });
+
+  const storeDraft = async () => {
+    setDraftState((d) => ({ ...d, status: 'saving' }));
+    try {
+      await saveDraft(payload({ final: false }));
+      if (submitted.current) return false;
+      setDraftState({ status: 'saved', at: timeNow() });
+      onDraftSaved(true);
+      return true;
+    } catch {
+      setDraftState((d) => ({ ...d, status: 'error' }));
+      return false;
+    }
+  };
+
+  // Autosave a moment after the last change (with the newest form, kept in a ref after each render)
+  const latestStore = useRef(storeDraft);
+  useEffect(() => {
+    latestStore.current = storeDraft;
+  });
+  useEffect(() => {
+    if (!changed.current || submitted.current) return undefined;
+    const timer = setTimeout(() => latestStore.current(), AUTOSAVE_AFTER);
+    return () => clearTimeout(timer);
+  }, [form]);
 
   // Keyed by the id of the field to focus, so the first problem can be focused
   const validate = () => {
@@ -60,9 +116,9 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
       found[`fix-${t._id}`] = `${t.task} is overdue. Mark it Completed or Skipped first.`;
     });
     residents.forEach((r) => {
-      const state = residentOf(r.name);
+      const state = residentOf(r.id);
       if (state.status !== 'normal' && !state.note.trim()) {
-        found[`res-note-${slug(r.name)}`] = `Please write what changed for ${r.name.split(' ')[0]}.`;
+        found[`res-note-${r.id}`] = `Please write what changed for ${r.name.split(' ')[0]}.`;
       }
     });
     if (!checked) found['handover-checked'] = 'Please confirm that you checked your tasks and residents.';
@@ -83,51 +139,28 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
   };
 
   const sendHandover = async () => {
-    const data = {
-      v: 1,
-      shift: shift.apiValue,
-      date: dateLabel,
-      summary: { completed: completed.length, notFinished: unfinished.length, skipped: skipped.length },
-      tasks: shiftTasks.map((t) => ({ id: t._id, task: t.task, resident: t.resident, status: t.status, reason: t.skipReason ?? '' })),
-      passOn: unfinished.map((t) => ({ taskId: t._id, task: t.task, resident: t.resident, dueAt: t.dueAt, note: (form.passOn[t._id] ?? '').trim() })),
-      residents: residents.map((r) => {
-        const state = residentOf(r.name);
-        return { name: r.name, room: r.room ?? '', status: state.status, note: state.status === 'normal' ? '' : state.note.trim() };
-      }),
-      // Leave out quick-tag lines that were added but never filled in (e.g. just "Supplies:")
-      other: form.other
-        .split('\n')
-        .filter((line) => !QUICK_TAGS.some((tag) => line.trim() === `${tag}:`))
-        .join('\n')
-        .trim(),
-    };
-
     setSending(true);
+    submitted.current = true; // stops any autosave from starting a new draft
     try {
-      await submit({ shift: shift.apiValue, notes: buildNotes(data) });
-      clearDraft(draftKey);
+      await submit(payload({ final: true }));
       setConfirmOpen(false);
       showToast('Handover submitted. The next shift can read it now.');
       onSubmitted();
     } catch (err) {
+      submitted.current = false;
       setSendError(
         err.response
           ? err.response.data?.message || "Couldn't submit the handover. Please try again."
-          : "Can't reach the server. Your handover is not lost: press Save draft, then try again later."
+          : "Can't reach the server. Your handover is not lost: your draft is saved, so try again later."
       );
     } finally {
       setSending(false);
     }
   };
 
-  const handleSaveDraft = () => {
-    const savedAt = new Date().toISOString();
-    if (saveDraft(draftKey, { ...form, savedAt })) {
-      onDraftSaved(savedAt);
-      showToast(`Draft saved at ${formatTime(savedAt)} on this computer.`);
-    } else {
-      showToast("Couldn't save the draft in this browser.", 'error');
-    }
+  const handleSaveDraft = async () => {
+    if (await storeDraft()) showToast(`Draft saved at ${formatTime(timeNow())}.`);
+    else showToast("Couldn't save the draft. Please check that the server is running.", 'error');
   };
 
   const errorList = Object.values(errors).filter(Boolean);
@@ -159,7 +192,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
                     {t.skipReason && <small>Reason: {t.skipReason}</small>}
                   </span>
                   <span className="summary-list__resident">
-                    {t.resident}{roomOf(t.resident) && ` · Rm ${roomOf(t.resident)}`}
+                    {t.resident}{t.room && ` · Rm ${t.room}`}
                   </span>
                   <StatusPill status={t.status} />
                 </li>
@@ -188,7 +221,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
                   <li key={t._id} className={`passon ${isOverdue ? 'passon--overdue' : ''}`}>
                     <div className="passon__top">
                       <span>
-                        <strong>{t.task}</strong> · {t.resident}{roomOf(t.resident) && `, Rm ${roomOf(t.resident)}`}
+                        <strong>{t.task}</strong> · {t.resident}{t.room && `, Rm ${t.room}`}
                       </span>
                       <span className="passon__time">Due {formatTime(t.dueAt)}</span>
                     </div>
@@ -216,7 +249,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
                           id={`passon-${t._id}`}
                           className="field__input"
                           value={form.passOn[t._id] ?? ''}
-                          onChange={(e) => setForm((f) => ({ ...f, passOn: { ...f.passOn, [t._id]: e.target.value } }))}
+                          onChange={(e) => change((f) => ({ ...f, passOn: { ...f.passOn, [t._id]: e.target.value } }))}
                           placeholder="e.g. Started at 11:40, ate half of the rice"
                         />
                       </div>
@@ -236,14 +269,14 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
           <p className="section-help">Pick a status for each resident you cared for. Only write a note if something changed.</p>
 
           {residents.length === 0 ? (
-            <EmptyState icon={ClipboardList}>No residents in your tasks this shift.</EmptyState>
+            <EmptyState icon={ClipboardList}>No residents are assigned to you.</EmptyState>
           ) : (
             <ul className="resident-updates">
               {residents.map((r) => {
-                const state = residentOf(r.name);
-                const noteId = `res-note-${slug(r.name)}`;
+                const state = residentOf(r.id);
+                const noteId = `res-note-${r.id}`;
                 return (
-                  <li key={r.name} className="resident-update">
+                  <li key={r.id} className="resident-update">
                     <div className="resident-update__top">
                       <span className="resident-update__who">
                         <Avatar name={r.name} size={36} />
@@ -258,10 +291,10 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
                           <label key={value} className={`status-choice__opt status-choice__opt--${value}`}>
                             <input
                               type="radio"
-                              name={`status-${slug(r.name)}`}
+                              name={`status-${r.id}`}
                               value={value}
                               checked={state.status === value}
-                              onChange={() => setResident(r.name, { status: value })}
+                              onChange={() => setResident(r.id, { status: value })}
                             />
                             {label}
                           </label>
@@ -279,7 +312,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
                           className="field__input"
                           rows={2}
                           value={state.note}
-                          onChange={(e) => setResident(r.name, { note: e.target.value })}
+                          onChange={(e) => setResident(r.id, { note: e.target.value })}
                           placeholder="e.g. Felt weak, so the walk was skipped. Please check on her after her nap."
                           required
                           aria-invalid={!!errors[noteId]}
@@ -312,7 +345,7 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
               className="field__input"
               rows={3}
               value={form.other}
-              onChange={(e) => setForm((f) => ({ ...f, other: e.target.value }))}
+              onChange={(e) => change((f) => ({ ...f, other: e.target.value }))}
               placeholder="e.g. Supplies: adult wipes running low in Room 102."
             />
           </div>
@@ -342,7 +375,14 @@ export default function WriteHandover({ shift, next, dateLabel, shiftTasks, resi
           )}
 
           <div className="handover-submit__actions">
-            <button type="button" className="btn btn--outline" onClick={handleSaveDraft}>Save draft</button>
+            <p className="draft-status" role="status">
+              {draftState.status === 'saving' && 'Saving draft…'}
+              {draftState.status === 'saved' && `Draft saved${draftState.at ? ` · ${formatTime(draftState.at)}` : ''}`}
+              {draftState.status === 'error' && "Couldn't save the draft"}
+            </p>
+            <button type="button" className="btn btn--outline" onClick={handleSaveDraft} disabled={draftState.status === 'saving'}>
+              Save draft
+            </button>
             <button type="submit" className="btn btn--primary">Submit handover</button>
           </div>
         </section>

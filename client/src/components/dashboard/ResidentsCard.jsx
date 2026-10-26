@@ -13,7 +13,7 @@ export default function ResidentsCard({ residents, statusOf }) {
 
       <ul className="resident-tiles">
         {residents.map((r) => {
-          const status = statusOf(r.name);
+          const status = statusOf(r);
           return (
             <li key={r.id}>
               {/* The resident code (RP-2020-001), so the link works on the Residents page */}

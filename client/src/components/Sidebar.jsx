@@ -56,8 +56,8 @@ export default function Sidebar({ collapsed, onClose }) {
   const { profile, openPhoto, openEditProfile } = useProfile();
   const { ref: menuRef, ...menu } = usePopover();
 
-  // Handovers from other caregivers that nobody has marked as read yet
-  const newHandovers = handovers.filter((h) => h.author?._id !== profile.id && !h.acknowledgedBy).length;
+  // Handovers from others that I haven't marked as read yet
+  const newHandovers = handovers.filter((h) => h.author?._id !== profile.id && !h.readByMe).length;
   const badges = { '/handover': newHandovers > 0 ? { text: `${newHandovers} new`, label: `${newHandovers} new`, tone: 'new' } : null };
 
   const handleLogout = () => {

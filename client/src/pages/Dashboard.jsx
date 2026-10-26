@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Info } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
 import useShifts from '../hooks/useShifts';
 import useResidents from '../hooks/useResidents';
@@ -7,10 +6,11 @@ import useNow from '../hooks/useNow';
 import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
-import { findMyShiftHandover } from '../utils/handover';
+import { findMyShiftHandover, updateFor } from '../utils/handover';
 import { shiftLabel } from '../constants';
 import { isToday } from '../utils/tasks';
-import { shiftWindow, shiftPhase } from '../utils/shift';
+import { shiftPhase } from '../utils/shift';
+import { addDays } from '../utils/calendar';
 import { LoadingState, ErrorState } from '../components/StateMessage';
 import ProgressCard from '../components/dashboard/ProgressCard';
 import ShiftCard from '../components/dashboard/ShiftCard';
@@ -48,14 +48,15 @@ export default function Dashboard() {
   const now = useNow();
   const showToast = useToast();
   const tasksQuery = useTasks();
-  const shiftsQuery = useShifts(now, now);
+  const shiftsQuery = useShifts(addDays(now, -1), now);
   const residentsQuery = useResidents();
   const handoversQuery = useHandovers();
   const [marking, setMarking] = useState(false);
 
-  // My shift today, from the roster. null = day off.
-  const shift = shiftsQuery.shiftOn(now);
-  const shiftTimes = shift ? shiftWindow(shift, now) : { start: now, end: now };
+  // My shift now, from the roster (last night's Night shift counts until it ends). null = day off.
+  const current = shiftsQuery.currentShift(now);
+  const shift = current?.shift ?? null;
+  const shiftTimes = current?.times ?? { start: now, end: now };
   const phase = shift ? shiftPhase(shiftTimes, now) : 'off';
   const minutesLeft = (shiftTimes.end - now) / 60000;
 
@@ -64,10 +65,10 @@ export default function Dashboard() {
 
   const { handovers, acknowledge } = handoversQuery;
   const latestHandover = handovers.find((h) => h.author?._id !== profile.id);
-  const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes);
+  const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes, current.shiftDate);
 
   // Resident status from the latest handover someone else wrote ("Watch", "Urgent")
-  const statusOf = (name) => latestHandover?.data?.residents.find((r) => r.name === name)?.status;
+  const statusOf = (resident) => updateFor(latestHandover, resident)?.status;
 
   const markRead = async () => {
     setMarking(true);
@@ -94,14 +95,6 @@ export default function Dashboard() {
         </div>
         <p className="dash-greeting__date">{today}</p>
       </header>
-
-      {/* TODO (phase 4): handovers still fall back to samples when the server is off */}
-      {handoversQuery.usingSample && (
-        <div className="alert alert--info" role="status">
-          <Info size={18} aria-hidden="true" />
-          <span>Preview mode: the server isn't running, so you're seeing sample handovers.</span>
-        </div>
-      )}
 
       {/* Row 1: progress, shift, a warm note */}
       <div className="dash-row dash-row--three">

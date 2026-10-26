@@ -100,7 +100,10 @@
 /* Submit: the check box on the left, the two buttons on the right (no extra card) */
 .handover-submit { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; padding: 4px 2px 0; }
 .handover-submit .alert { order: 3; flex-basis: 100%; margin: 0; }
-.handover-submit__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.handover-submit__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+/* "Draft saved · 9:41 AM" next to the buttons (drafts autosave) */
+.draft-status { margin: 0 4px 0 0; color: var(--muted); font-size: 0.85rem; }
+.draft-status:empty { display: none; }
 .alert__title { margin: 0 0 4px; font-weight: var(--fw-medium); }
 .alert__list { margin: 0; padding-left: 18px; }
 

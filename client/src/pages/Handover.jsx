@@ -4,16 +4,17 @@ import { CalendarOff, Inbox, History, CircleCheck } from 'lucide-react';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
 import useTasks from '../hooks/useTasks';
+import useShifts from '../hooks/useShifts';
+import useResidents from '../hooks/useResidents';
+import useApiData from '../hooks/useApiData';
 import useNow from '../hooks/useNow';
-import { sampleResidents, sampleShiftOn } from '../data/sample';
 import { useProfile } from '../context/ProfileContext';
-import { draftKeyFor, loadDraft } from '../data/handoverDraft';
-import { SHIFTS, shiftLabel, shiftTime } from '../constants';
-import { shiftWindow, shiftPhase } from '../utils/shift';
+import { shiftLabel, shiftTime } from '../constants';
+import { shiftPhase } from '../utils/shift';
 import { formatTime } from '../utils/format';
-import { dayKey } from '../utils/calendar';
+import { addDays } from '../utils/calendar';
 import { savedText } from '../utils/tasks';
-import { handoverTiming, findMyShiftHandover, nextShift } from '../utils/handover';
+import { handoverTiming, findMyShiftHandover, nextShift, readersOf } from '../utils/handover';
 import PageHeader from '../components/PageHeader';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import WriteHandover from '../components/handover/WriteHandover';
@@ -28,9 +29,14 @@ const longDate = (date) =>
 const when = (date) =>
   `${formatTime(date)}, ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-// Header of a submitted handover (Received, History and "submitted" views)
+const firstNames = (people) => people.map((p) => p.name.split(' ')[0]).join(', ');
+
+// Header of a submitted handover (Received, History and "submitted" views).
+// My own handovers show who has read them; others show whether I have.
 function HandoverHead({ handover, isMine }) {
   const timing = handoverTiming(handover);
+  const readers = readersOf(handover);
+  const read = isMine ? readers.length > 0 : handover.readByMe;
   return (
     <div className="received__head">
       <div>
@@ -40,8 +46,8 @@ function HandoverHead({ handover, isMine }) {
           {timing && <> · <span className={`timing ${timing.late ? 'timing--late' : ''}`}>{timing.label}</span></>}
         </p>
       </div>
-      <span className={`status-pill status-pill--${handover.acknowledgedBy ? 'completed' : 'new'}`}>
-        {handover.acknowledgedBy ? 'Read' : 'Not yet read'}
+      <span className={`status-pill status-pill--${read ? 'completed' : 'new'}`}>
+        {isMine ? (read ? `Read by ${firstNames(readers)}` : 'Not yet read') : read ? 'Read' : 'Not yet read'}
       </span>
     </div>
   );
@@ -53,40 +59,51 @@ export default function Handover() {
   const showToast = useToast();
   const { tasks, status: tasksStatus, error: tasksError, reload: reloadTasks, updateTask } = useTasks();
   const { handovers, status, error, reload, acknowledge } = useHandovers();
+  const { residents: assigned, status: residentsStatus } = useResidents();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openTaskId, setOpenTaskId] = useState(null);
 
   const tab = ['received', 'history'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'write';
   const setTab = (id) => setSearchParams(id === 'write' ? {} : { tab: id }, { replace: true });
 
-  // My shift today (sample roster until the backend has shifts). null = day off.
-  const shift = SHIFTS.find((s) => s.apiValue === sampleShiftOn(now)) ?? null;
-  const shiftTimes = shift ? shiftWindow(shift, now) : null;
+  // My shift now, from the roster (last night's Night shift counts until it ends). null = day off.
+  const shiftsQuery = useShifts(addDays(now, -1), now);
+  const current = shiftsQuery.currentShift(now);
+  const shift = current?.shift ?? null;
+  const shiftTimes = current?.times ?? null;
+  const shiftDate = current?.shiftDate ?? null;
   const next = shift ? nextShift(shift) : null;
 
-  // My tasks in this shift's hours. TODO: only tasks assigned to me, once the backend has that.
+  // My tasks in this shift's hours, and the residents they are for
   const shiftTasks = shiftTimes
     ? tasks
         .filter((t) => new Date(t.dueAt) >= shiftTimes.start && new Date(t.dueAt) < shiftTimes.end)
         .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
     : [];
-  const residentsCared = [...new Set(shiftTasks.map((t) => t.resident))].map((name) => ({
-    name,
-    room: sampleResidents.find((r) => r.name === name)?.room,
-  }));
+  // Residents to update: everyone assigned to me, plus anyone else I had a task for
+  const residentsCared = [
+    ...new Map([
+      ...assigned.map((r) => [r.id, { id: r.id, name: r.name, room: r.room }]),
+      ...shiftTasks.filter((t) => t.residentId).map((t) => [t.residentId, { id: t.residentId, name: t.resident, room: t.room }]),
+    ]).values(),
+  ].sort((a, b) => String(a.room).localeCompare(String(b.room), undefined, { numeric: true }));
 
-  const myHandover = shiftTimes ? findMyShiftHandover(handovers, profile.id, shift, shiftTimes) : null;
+  const myHandover = shiftTimes ? findMyShiftHandover(handovers, profile.id, shift, shiftTimes, shiftDate) : null;
   const received = handovers.filter((h) => h.author?._id !== profile.id);
-  const unread = received.filter((h) => !h.acknowledgedBy);
+  const unread = received.filter((h) => !h.readByMe);
 
-  const draftKey = shiftTimes ? draftKeyFor(profile.id, shift.id, dayKey(shiftTimes.start)) : null;
-  const [draftSavedAt, setDraftSavedAt] = useState(() => loadDraft(draftKey)?.savedAt ?? null);
+  // My unfinished handover, saved in the database (null if there is none)
+  const draftQuery = useApiData('/handovers/draft');
+  const savedDraft = draftQuery.data;
+  const draftForThisShift = !!savedDraft && savedDraft.shift === shift?.apiValue && savedDraft.shiftDate === shiftDate;
+  const [draftSavedNow, setDraftSavedNow] = useState(false);
+  const hasDraft = draftSavedNow || draftForThisShift;
 
   const statusPill = (() => {
     if (!shift) return { label: 'Day off', tone: 'skipped' };
     if (myHandover) return { label: `Submitted · ${formatTime(myHandover.createdAt)}`, tone: 'completed' };
     if (shiftPhase(shiftTimes, now) === 'ended') return { label: `Late · was due ${shift.end}`, tone: 'overdue' };
-    if (draftSavedAt) return { label: `Draft · due by ${shift.end}`, tone: 'pending' };
+    if (hasDraft) return { label: `Draft · due by ${shift.end}`, tone: 'pending' };
     return { label: `Not started · due by ${shift.end}`, tone: 'skipped' };
   })();
 
@@ -158,7 +175,11 @@ export default function Handover() {
 
             <div className="handover-layout">
               <div className="handover-main">
-                {!shift ? (
+                {shiftsQuery.status === 'loading' || draftQuery.status === 'loading' || residentsStatus === 'loading' ? (
+                  <div className="card"><LoadingState label="Loading your shift…" /></div>
+                ) : shiftsQuery.status === 'error' ? (
+                  <div className="card"><ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} /></div>
+                ) : !shift ? (
                   <div className="card"><EmptyState icon={CalendarOff}>You have no shift today, so there's nothing to hand over.</EmptyState></div>
                 ) : myHandover ? (
                   <section className="card received">
@@ -174,16 +195,19 @@ export default function Handover() {
                   <div className="card"><ErrorState message={tasksError} onRetry={reloadTasks} /></div>
                 ) : (
                   <WriteHandover
-                    key={draftKey}
+                    key={`${shiftDate}-${shift.id}`}
                     shift={shift}
+                    shiftDate={shiftDate}
                     next={next}
-                    dateLabel={longDate(shiftTimes.start)}
                     shiftTasks={shiftTasks}
                     residents={residentsCared}
-                    draftKey={draftKey}
+                    draft={savedDraft}
                     onOpenTask={(t) => setOpenTaskId(t._id)}
-                    onDraftSaved={setDraftSavedAt}
-                    onSubmitted={() => setDraftSavedAt(null)}
+                    onDraftSaved={setDraftSavedNow}
+                    onSubmitted={() => {
+                      setDraftSavedNow(false);
+                      draftQuery.reload({ silent: true });
+                    }}
                   />
                 )}
               </div>
@@ -193,7 +217,7 @@ export default function Handover() {
                   <div className="card">{handoversState}</div>
                 ) : (
                   <>
-                    <LastShiftCard handover={received[0]} onAcknowledge={handleAcknowledge} />
+                    <LastShiftCard handover={received[0]} myId={profile.id} onAcknowledge={handleAcknowledge} />
                     <RecentHandovers handovers={handovers} myId={profile.id} onViewAll={() => setTab('history')} />
                   </>
                 )}
@@ -214,7 +238,7 @@ export default function Handover() {
                   <HandoverHead handover={h} />
                   <HandoverView handover={h} />
                   <p className="signature">— {h.author?.name?.split(' ')[0]}, {formatTime(h.createdAt)}</p>
-                  {!h.acknowledgedBy && (
+                  {!h.readByMe && (
                     <div className="received__actions">
                       <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as read</button>
                     </div>
@@ -251,10 +275,7 @@ export default function Handover() {
         )}
       </div>
 
-      <TaskDetailModal
-        task={openTask}        onSave={handleSaveTask}
-        onClose={() => setOpenTaskId(null)}
-      />
+      <TaskDetailModal task={openTask} onSave={handleSaveTask} onClose={() => setOpenTaskId(null)} />
     </div>
   );
 }

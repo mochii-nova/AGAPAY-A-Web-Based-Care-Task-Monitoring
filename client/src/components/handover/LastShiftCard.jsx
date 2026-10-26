@@ -9,8 +9,8 @@ import { RESIDENT_STATUS } from '../../utils/handover';
 const when = (date) =>
   `${formatTime(date)}, ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-// The newest handover from another caregiver, with "Mark as Read" to confirm you've seen it
-export default function LastShiftCard({ handover, onAcknowledge }) {
+// The newest handover from someone else, with "Mark as read" to confirm you've seen it
+export default function LastShiftCard({ handover, myId, onAcknowledge }) {
   const [busy, setBusy] = useState(false);
 
   if (!handover) {
@@ -24,7 +24,8 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
 
   const { data } = handover;
   const flagged = data?.residents.filter((r) => r.status !== 'normal') ?? [];
-  const read = !!handover.acknowledgedBy;
+  const read = handover.readByMe;
+  const myRead = handover.reads?.find((r) => r.userId === myId);
 
   const markRead = async () => {
     setBusy(true);
@@ -46,7 +47,7 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
       </p>
 
       {flagged.map((r) => (
-        <div key={r.name} className="last-shift__flag">
+        <div key={r.residentId ?? r.name} className="last-shift__flag">
           <p className="last-shift__flag-title">{RESIDENT_STATUS[r.status].label} · {r.name}</p>
           <p>{r.note}</p>
         </div>
@@ -64,8 +65,8 @@ export default function LastShiftCard({ handover, onAcknowledge }) {
 
       {read ? (
         <p className="last-shift__read">
-          <CheckCheck size={16} aria-hidden="true" /> Read by {handover.acknowledgedBy.name}
-          {handover.acknowledgedAt && ` at ${formatTime(handover.acknowledgedAt)}`}
+          <CheckCheck size={16} aria-hidden="true" /> You read this
+          {myRead?.readAt && ` at ${formatTime(myRead.readAt)}`}
         </p>
       ) : (
         <button type="button" className="btn btn--soft last-shift__btn" onClick={markRead} disabled={busy}>

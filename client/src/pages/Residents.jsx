@@ -8,7 +8,7 @@ import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES, shiftLabel } from '../constants';
 import { useHandovers } from '../context/HandoverContext';
 import { useProfile } from '../context/ProfileContext';
-import { RESIDENT_STATUS } from '../utils/handover';
+import { RESIDENT_STATUS, updateFor } from '../utils/handover';
 import { isToday, savedText } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import Modal from '../components/Modal';
@@ -20,13 +20,12 @@ import '../styles/residents.css';
 
 // Notes about this resident: their update in each handover (or, for older plain-text handovers,
 // any handover that mentions their first name), plus task notes and skip reasons.
-// TODO (phase 4): match handover updates by resident ID once handovers come from the new routes.
 function notesFor(resident, handovers, tasks) {
   const firstName = resident.name.split(' ')[0].toLowerCase();
   const fromHandovers = handovers.flatMap((h) => {
     const base = { id: `h${h._id}`, source: `${shiftLabel(h.shift)} shift handover`, author: h.author?.name, time: h.createdAt };
     if (h.data) {
-      const update = h.data.residents.find((r) => r.name === resident.name);
+      const update = updateFor(h, resident);
       if (!update || update.status === 'normal') return [];
       return [{ ...base, text: `${RESIDENT_STATUS[update.status].label}. ${update.note}` }];
     }
@@ -73,7 +72,7 @@ export default function Residents() {
   const tasksOf = (r) => tasks.filter((t) => t.residentId === r.id && isToday(t.dueAt));
   // "Watch closely" / "Urgent" from the latest handover another caregiver wrote
   const latestReceived = handovers.find((h) => h.author?._id !== profileId);
-  const statusOf = (r) => latestReceived?.data?.residents.find((u) => u.name === r.name)?.status;
+  const statusOf = (r) => updateFor(latestReceived, r)?.status;
   const profile = selected && (
     <ResidentProfile
       resident={selected}

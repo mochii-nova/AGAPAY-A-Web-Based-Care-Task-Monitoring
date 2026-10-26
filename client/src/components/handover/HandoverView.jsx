@@ -18,7 +18,7 @@ export default function HandoverView({ handover }) {
           <h4 className="small-label">Residents to watch</h4>
           <ul className="hv-list">
             {flagged.map((r) => (
-              <li key={r.name}>
+              <li key={r.residentId ?? r.name}>
                 <span className="hv-line">
                   <span className={`status-pill status-pill--${RESIDENT_STATUS[r.status].tone}`}>
                     {RESIDENT_STATUS[r.status].label}
