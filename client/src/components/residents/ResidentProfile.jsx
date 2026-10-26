@@ -17,6 +17,14 @@ const sentence = (label) => label.charAt(0) + label.slice(1).toLowerCase();
 export default function ResidentProfile({ resident, status, tasks, tasksLoading, notes, onOpenTask, showName = true }) {
   const firstName = resident.name.split(' ')[0];
   const flag = status && status !== 'normal' ? RESIDENT_STATUS[status] : null;
+  const contact = resident.emergencyContact ?? {};
+  // "Room 102 · RP-2020-001 · 72 years old · Female" (skips anything not filled in)
+  const details = [
+    `Room ${resident.room}`,
+    resident.residentCode,
+    resident.age != null && `${resident.age} years old`,
+    resident.gender,
+  ].filter(Boolean).join(' · ');
 
   return (
     <div className="resident-profile">
@@ -24,9 +32,7 @@ export default function ResidentProfile({ resident, status, tasks, tasksLoading,
         <Avatar name={resident.name} photo={resident.photo} size={68} />
         <div className="resident-profile__who">
           {showName && <h2 className="resident-profile__name">{resident.name}</h2>}
-          <p className="resident-profile__sub">
-            Room {resident.room} · {resident.id} · {resident.age} years old · {resident.gender}
-          </p>
+          <p className="resident-profile__sub">{details}</p>
         </div>
         {flag && <span className={`status-pill status-pill--${flag.tone}`}>{flag.label}</span>}
       </div>
@@ -40,12 +46,20 @@ export default function ResidentProfile({ resident, status, tasks, tasksLoading,
 
         <section>
           <h3 className="small-label">Emergency contact</h3>
-          <p className="resident-profile__contact">
-            <strong>{resident.emergencyContact.name}</strong> · {resident.emergencyContact.relationship}
-          </p>
-          <a className="btn btn--outline btn--sm" href={telHref(resident.emergencyContact.phone)}>
-            <Phone size={16} aria-hidden="true" /> {resident.emergencyContact.phone}
-          </a>
+          {contact.name || contact.phone ? (
+            <>
+              <p className="resident-profile__contact">
+                <strong>{contact.name}</strong>{contact.relationship && ` · ${contact.relationship}`}
+              </p>
+              {contact.phone && (
+                <a className="btn btn--outline btn--sm" href={telHref(contact.phone)}>
+                  <Phone size={16} aria-hidden="true" /> {contact.phone}
+                </a>
+              )}
+            </>
+          ) : (
+            <p className="resident-profile__contact">Not added yet.</p>
+          )}
         </section>
       </div>
 

@@ -12,13 +12,13 @@ export default function ResidentCard({ resident, todayTasks, selected, maxNeeds,
       className="resident-card"
       aria-pressed={selected}
       aria-label={`${resident.name}, room ${resident.room}. Open profile`}
-      onClick={() => onSelect(resident.id)}
+      onClick={() => onSelect(resident.residentCode)}
     >
       <Avatar name={resident.name} photo={resident.photo} size={44} />
       <span className="resident-card__body">
         <span className="resident-card__line">
           <strong className="resident-card__name">{resident.name}</strong>
-          <span className="resident-card__id">{resident.id}</span>
+          <span className="resident-card__id">{resident.residentCode}</span>
         </span>
         <span className="resident-card__line resident-card__meta">
           Room {resident.room} · {todayTasks.length} {todayTasks.length === 1 ? 'task' : 'tasks'} today

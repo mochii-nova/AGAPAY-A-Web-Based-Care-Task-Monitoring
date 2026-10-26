@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
+import useShifts from '../hooks/useShifts';
 import useNow from '../hooks/useNow';
 import { useToast } from '../context/ToastContext';
 import { SHIFTS, TASK_CATEGORIES } from '../constants';
-import { sampleShiftOn } from '../data/sample';
-import { addDays, addMonths, dayKey, monthTitle, weekTitle, sameDay } from '../utils/calendar';
+import { addDays, addMonths, dayKey, monthTitle, weekTitle, sameDay, startOfWeek } from '../utils/calendar';
 import { shiftOfTime } from '../utils/shift';
 import { savedText } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
@@ -24,16 +24,26 @@ const STATUS_FILTERS = [
   { id: 'skipped', label: 'Skipped' },
 ];
 
-// TODO (phase 3): shifts come from sample data until this page uses the real roster
-const shiftOn = (date) => SHIFTS.find((s) => s.apiValue === sampleShiftOn(date)) ?? null;
-
 export default function Schedule() {
-  const { tasks, status, error, reload, updateTask } = useTasks();
+  const tasksQuery = useTasks();
+  const { tasks, updateTask } = tasksQuery;
   const showToast = useToast();
   const today = useNow();
   const [searchParams] = useSearchParams();
   const [view, setView] = useState(searchParams.get('view') === 'week' ? 'week' : 'month');
   const [selected, setSelected] = useState(() => new Date());
+
+  // My shifts from the roster, for the 6 weeks a month page shows
+  // (the week view always falls inside them too)
+  const gridStart = startOfWeek(new Date(selected.getFullYear(), selected.getMonth(), 1));
+  const shiftsQuery = useShifts(gridStart, addDays(gridStart, 41));
+  const { shiftOn } = shiftsQuery;
+
+  // The page waits for both; a failed load offers "Try again" for whichever failed
+  const failed = [tasksQuery, shiftsQuery].find((q) => q.status === 'error');
+  const status = failed ? 'error' : tasksQuery.status === 'ready' && shiftsQuery.status === 'ready' ? 'ready' : 'loading';
+  const error = failed?.error;
+  const reload = () => failed?.reload();
   const [statuses, setStatuses] = useState(STATUS_FILTERS.map((s) => s.id));
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');

@@ -129,7 +129,7 @@
   gap: 6px;
   width: 100%;
   min-height: var(--tap);
-  padding: 6px 8px;
+  padding: 6px;
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--tint);
@@ -139,7 +139,8 @@
   text-align: left;
 }
 .week__task .dot { margin-top: 5px; }
-.week__task > span:last-child { min-width: 0; overflow-wrap: break-word; }
+/* Long words in narrow day columns break at syllables ("Medica-tion"), not anywhere */
+.week__task > span:last-child { min-width: 0; overflow-wrap: break-word; hyphens: auto; }
 .week__task small { display: block; color: var(--muted); font-weight: var(--fw-regular); }
 .week__task:hover { filter: brightness(0.97); }
 .week__task--pending { background: var(--pending-bg); }
