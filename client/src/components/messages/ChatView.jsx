@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ChevronLeft, MessageSquare, Send, CircleAlert } from 'lucide-react';
 import Avatar from '../Avatar';
+import { LoadingState, ErrorState } from '../StateMessage';
 import { useMessages, MAX_MESSAGE } from '../../context/MessagesContext';
+import useApiData from '../../hooks/useApiData';
 import { formatTime } from '../../utils/format';
+
+const REFRESH = 15 * 1000; // replies show up while the chat is open
 
 // "Today", "Yesterday" or "Fri, Oct 23"
 function dayLabel(iso) {
@@ -15,25 +19,49 @@ function dayLabel(iso) {
 
 // Right column: the messages with one administrator, and the box to write a new one
 export default function ChatView({ conversation, onBack }) {
-  const { myId, send } = useMessages();
-  const { user, messages } = conversation;
+  const { myId, send, markRead } = useMessages();
+  const { user } = conversation;
+  const query = useApiData(`/messages/${user.id}`, { refreshEvery: REFRESH });
+  const messages = query.data ?? [];
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
   const listRef = useRef(null);
 
   // Always show the newest message
   useEffect(() => {
     const list = listRef.current;
     if (list) list.scrollTop = list.scrollHeight;
-  }, [messages.length]);
+  }, [messages.length, query.status]);
 
-  const submit = (e) => {
+  // A reply that arrives while the chat is open is read straight away
+  const unreadFromThem = messages.some((m) => m.senderId === user.id && !m.readAt);
+  const readNow = useEffectEvent(() => markRead(user.id));
+  useEffect(() => {
+    if (unreadFromThem) readNow();
+  }, [unreadFromThem, messages.length]);
+
+  const submit = async (e) => {
     e.preventDefault();
     const text = draft.trim();
     if (!text) return setError('Type a message first.');
-    if (!send(user.id, text)) return setError("Couldn't save your message on this computer. Please try again.");
-    setDraft('');
+    if (sending) return undefined;
+    setSending(true);
     setError('');
+    try {
+      const saved = await send(user.id, text);
+      query.setData((list) => [...list, saved]);
+      setDraft('');
+    } catch (err) {
+      setError(
+        err.response
+          ? err.response.data?.message || "Couldn't send your message. Please try again."
+          : "Can't reach the server. Your message wasn't sent; please try again."
+      );
+    } finally {
+      setSending(false);
+    }
+    return undefined;
   };
 
   // Enter sends, Shift + Enter starts a new line
@@ -59,7 +87,11 @@ export default function ChatView({ conversation, onBack }) {
       </header>
 
       <div className="chat-log" ref={listRef} role="log" aria-live="polite" aria-label="Messages" tabIndex={0}>
-        {messages.length === 0 ? (
+        {query.status === 'loading' ? (
+          <LoadingState label="Loading messages…" />
+        ) : query.status === 'error' ? (
+          <ErrorState message={query.error} onRetry={query.reload} />
+        ) : messages.length === 0 ? (
           <div className="chat-empty">
             <MessageSquare size={28} aria-hidden="true" />
             <p>No messages yet. Write to {user.name.split(' ')[0]} below.</p>
@@ -78,9 +110,7 @@ export default function ChatView({ conversation, onBack }) {
                   </div>
                   <small className="bubble__meta">
                     <time dateTime={m.createdAt}>{formatTime(m.createdAt)}</time>
-                    {m === lastMine && (
-                      <> · {m.id.startsWith('local-') ? 'Saved on this computer only' : m.readAt ? 'Seen' : 'Sent'}</>
-                    )}
+                    {m === lastMine && <> · {m.readAt ? 'Seen' : 'Sent'}</>}
                   </small>
                 </div>
               </div>
@@ -104,8 +134,8 @@ export default function ChatView({ conversation, onBack }) {
             aria-invalid={error ? 'true' : undefined}
             aria-describedby="composer-note"
           />
-          <button type="submit" className="btn btn--primary composer__send">
-            <Send size={16} aria-hidden="true" /> <span>Send</span>
+          <button type="submit" className="btn btn--primary composer__send" disabled={sending}>
+            <Send size={16} aria-hidden="true" /> <span>{sending ? 'Sending…' : 'Send'}</span>
           </button>
         </div>
         {error && (
@@ -113,10 +143,7 @@ export default function ChatView({ conversation, onBack }) {
             <CircleAlert size={14} aria-hidden="true" /> {error}
           </p>
         )}
-        <p id="composer-note" className="local-note composer__note">
-          Sample data: messages you send are saved on this computer only and don’t reach the administrators yet.
-          Enter sends, Shift + Enter adds a new line.
-        </p>
+        <p id="composer-note" className="local-note composer__note">Enter sends, Shift + Enter adds a new line.</p>
       </form>
     </section>
   );

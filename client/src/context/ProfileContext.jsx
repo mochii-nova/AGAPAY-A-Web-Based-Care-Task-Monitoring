@@ -1,61 +1,78 @@
 import { createContext, useContext, useState } from 'react';
+import api from '../api';
 import { useAuth } from './AuthContext';
-import { sampleProfile } from '../data/sample';
-import { readProfile, writeProfile } from '../data/profileStore';
 import PhotoModal from '../components/profile/PhotoModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import '../styles/profile.css'; // the pop-ups can open on any page
 
 const ProfileContext = createContext();
 
-// Combines the logged-in user (real), details saved in this browser, and sample admin details
-function buildProfile(user, saved) {
-  const [registeredFirst = '', ...rest] = (user?.name ?? sampleProfile.name).split(' ');
-  const firstName = saved.firstName ?? registeredFirst;
-  const lastName = saved.lastName ?? rest.join(' ');
+const capitalize = (word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : '');
+
+// The signed-in user from the backend, in the shape the pages use.
+// Shift, date hired, title and status are set by an administrator.
+function buildProfile(user) {
+  const firstName = user?.firstName ?? '';
+  const lastName = user?.lastName ?? '';
   return {
-    // From the backend
     id: user?.id,
     role: user?.role ?? 'caregiver',
-    registeredName: user?.name ?? sampleProfile.name,
-    employeeId: user?.username ?? sampleProfile.employeeId,
-    // Saved in this browser (falls back to sample values)
+    employeeId: user?.employeeId ?? user?.username ?? '',
     firstName,
     lastName,
-    name: `${firstName} ${lastName}`.trim(),
-    email: saved.email ?? sampleProfile.email,
-    phone: saved.phone ?? sampleProfile.phone,
-    emergencyContact: saved.emergencyContact ?? sampleProfile.emergencyContact,
-    photo: saved.photo ?? null,
-    // Set by the administrator (sample until the backend has them)
-    shift: sampleProfile.shift,
-    dateHired: sampleProfile.dateHired,
-    accountStatus: sampleProfile.accountStatus,
+    name: user?.name ?? `${firstName} ${lastName}`.trim(),
+    email: user?.email ?? '',
+    phone: user?.phone ?? '',
+    emergencyContact: {
+      name: user?.emergencyContact?.name ?? '',
+      relationship: user?.emergencyContact?.relationship ?? '',
+      phone: user?.emergencyContact?.phone ?? '',
+    },
+    photo: user?.photoUrl ?? null,
+    shift: user?.assignedShift ?? null, // 'Morning' | 'Afternoon' | 'Night'
+    dateHired: user?.dateHired ?? null,
+    accountStatus: capitalize(user?.status ?? 'active'),
   };
+}
+
+// "data:image/jpeg;base64,..." -> a file the backend can receive
+async function dataUrlToFile(dataUrl) {
+  const blob = await (await fetch(dataUrl)).blob();
+  return new File([blob], 'photo.jpg', { type: blob.type || 'image/jpeg' });
 }
 
 // The signed-in person's profile, shared by the sidebar, top bar and pages.
 // Also owns the "Change photo" and "Edit profile" pop-ups so any page can open them.
 export function ProfileProvider({ children }) {
-  const { user } = useAuth();
-  const [saved, setSaved] = useState(() => readProfile(user?.id));
+  const { user, updateUser } = useAuth();
   // Separate, so the photo pop-up can open on top of Edit profile without losing your typing
   const [photoOpen, setPhotoOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  const profile = buildProfile(user, saved);
+  const profile = buildProfile(user);
 
-  // Returns false if the browser couldn't store it
-  const updateProfile = (changes) => {
-    const next = { ...saved, ...changes };
-    if (!writeProfile(user?.id, next)) return false;
-    setSaved(next);
-    return true;
+  // Saves name, email, phone and emergency contact. Throws with the backend's reason.
+  const updateProfile = async (changes) => {
+    const { data } = await api.patch('/users/me', changes);
+    updateUser(data);
+  };
+
+  // A square photo as a data URL, or null to go back to initials. Throws with the backend's reason.
+  const updatePhoto = async (photo) => {
+    if (photo) {
+      const form = new FormData();
+      form.append('photo', await dataUrlToFile(photo));
+      const { data } = await api.post('/users/me/photo', form);
+      updateUser({ ...user, photoUrl: data.photoUrl });
+    } else {
+      await api.delete('/users/me/photo');
+      updateUser({ ...user, photoUrl: null });
+    }
   };
 
   return (
     <ProfileContext.Provider
-      value={{ profile, updateProfile, openPhoto: () => setPhotoOpen(true), openEditProfile: () => setEditOpen(true) }}
+      value={{ profile, updateProfile, updatePhoto, openPhoto: () => setPhotoOpen(true), openEditProfile: () => setEditOpen(true) }}
     >
       {children}
       <EditProfileModal open={editOpen} onClose={() => setEditOpen(false)} />

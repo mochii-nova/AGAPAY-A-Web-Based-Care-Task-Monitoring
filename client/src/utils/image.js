@@ -1,5 +1,5 @@
 // Turns a chosen photo into a small square JPEG (centre crop), so it's quick to show
-// and small enough to keep in the browser. Resolves to a data URL.
+// and quick to upload. Resolves to a data URL.
 export function squarePhoto(file, size = 320) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);

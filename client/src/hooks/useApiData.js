@@ -4,14 +4,11 @@ import api from '../api';
 const OFFLINE_MESSAGE = "Can't reach the server. Please check that the backend is running.";
 
 // Loads data from a backend route and tracks loading / error.
-//
-// While developing (npm run dev), if the server can't be reached at all,
-// it shows `sample()` instead so the design can still be previewed.
-// The real website (npm run build) never shows sample data.
-//
-// `sample` and `transform` must be defined outside the component (not inline).
-export default function useApiData(path, { sample, transform = (data) => data } = {}) {
-  const [state, setState] = useState({ data: null, status: 'loading', error: '', usingSample: false });
+// `transform` must be defined outside the component (or memoized).
+// `refreshEvery` (ms): also refresh quietly on a timer and when you come back to the window,
+// e.g. for notifications and messages.
+export default function useApiData(path, { transform = (data) => data, refreshEvery } = {}) {
+  const [state, setState] = useState({ data: null, status: 'loading', error: '' });
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -20,23 +17,34 @@ export default function useApiData(path, { sample, transform = (data) => data } 
     api
       .get(path)
       .then(({ data }) => {
-        if (!cancelled) setState({ data: transform(data), status: 'ready', error: '', usingSample: false });
+        if (!cancelled) setState({ data: transform(data), status: 'ready', error: '' });
       })
       .catch((err) => {
         if (cancelled) return;
-        const offline = !err.response;
-        if (offline && import.meta.env.DEV && sample) {
-          setState({ data: transform(sample()), status: 'ready', error: '', usingSample: true });
-        } else {
-          const error = offline ? OFFLINE_MESSAGE : err.response.data?.message || 'Something went wrong. Please try again.';
-          setState({ data: null, status: 'error', error, usingSample: false });
-        }
+        const error = !err.response
+          ? OFFLINE_MESSAGE
+          : err.response.data?.message || 'Something went wrong. Please try again.';
+        // A failed quiet refresh keeps what is already on screen
+        setState((s) => (s.status === 'ready' ? s : { data: null, status: 'error', error }));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [path, reloadKey, sample, transform]);
+  }, [path, reloadKey, transform]);
+
+  useEffect(() => {
+    if (!refreshEvery) return undefined;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') setReloadKey((k) => k + 1);
+    };
+    const timer = setInterval(refresh, refreshEvery);
+    window.addEventListener('focus', refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [refreshEvery]);
 
   // reload() shows "Loading…" again; reload({ silent: true }) refreshes quietly in the background
   const reload = ({ silent = false } = {}) => {

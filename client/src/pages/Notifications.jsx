@@ -4,12 +4,13 @@ import { Check } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import NotificationIcon from '../components/NotificationIcon';
 import PushToggle from '../components/PushToggle';
+import { LoadingState, ErrorState } from '../components/StateMessage';
 import { useNotifications } from '../context/NotificationContext';
 import { timeAgo } from '../utils/format';
 
 // Full-page version of the bell dropdown
 export default function Notifications() {
-  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
+  const { notifications, unreadCount, markRead, markAllRead, status, error, reload } = useNotifications();
   const [filter, setFilter] = useState('all');
 
   const shown = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
@@ -36,13 +37,19 @@ export default function Notifications() {
           </button>
         </div>
 
-        {shown.length === 0 ? (
-          <p className="empty-text">You're all caught up. No unread notifications.</p>
+        {status === 'loading' ? (
+          <LoadingState label="Loading notifications…" />
+        ) : status === 'error' ? (
+          <ErrorState message={error} onRetry={reload} />
+        ) : shown.length === 0 ? (
+          <p className="empty-text">
+            {filter === 'unread' ? "You're all caught up. No unread notifications." : 'No notifications yet.'}
+          </p>
         ) : (
           <ul className="notif-list notif-list--page">
             {shown.map((n) => (
               <li key={n.id}>
-                <Link to={n.link} className={`notif-item ${n.read ? '' : 'is-unread'}`} onClick={() => markRead(n.id)}>
+                <Link to={n.link || '/notifications'} className={`notif-item ${n.read ? '' : 'is-unread'}`} onClick={() => markRead(n.id)}>
                   <NotificationIcon type={n.type} />
                   <span className="notif-item__text">
                     <strong>{n.title}</strong>

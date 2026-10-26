@@ -543,15 +543,6 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 /* Hand-written signature on handover notes (Caveat), e.g. "— Rosa, 5:52 AM" */
 .signature { margin: 8px 0 0; color: var(--indigo); font-family: var(--font-hand); font-size: 1.35rem; font-weight: var(--fw-medium); line-height: 1.2; }
 
-/* Marks parts of the screen that use sample data */
-.sample-tag {
-  padding: 1px 9px;
-  border: 1px dashed var(--lavender-line);
-  border-radius: var(--radius-pill);
-  color: var(--label);
-  font-size: 0.72rem;
-}
-
 /* Round icon in front of a task, by category */
 .task-icon {
   display: inline-flex;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleAlert, Info } from 'lucide-react';
+import { CircleAlert, CircleCheck } from 'lucide-react';
 import api from '../../api';
 import FormField from '../FormField';
 import CardHeader from '../CardHeader';
@@ -19,8 +19,7 @@ function validate(form) {
   return errors;
 }
 
-// Change password. The backend can check the current password (with the login route),
-// but it has no route to save a new one yet, so nothing is changed and the form says so.
+// Change password: the backend checks the current one and saves the new one
 export default function ChangePasswordForm({ employeeId }) {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
@@ -45,19 +44,19 @@ export default function ChangePasswordForm({ employeeId }) {
 
     setBusy(true);
     try {
-      await api.post('/auth/login', { username: employeeId, password: form.current });
-      // TODO: call PATCH /api/users/me/password once the backend has it
-      setResult({
-        tone: 'info',
-        text: 'Your current password is correct, but changing passwords isn’t available yet. Your password has not been changed.',
-      });
+      await api.patch('/users/me/password', { currentPassword: form.current, newPassword: form.next });
+      setResult({ tone: 'success', text: 'Your password was changed. Use the new one next time you sign in.' });
       setForm(EMPTY);
     } catch (err) {
-      if (err.response?.status === 401) {
+      const message = err.response?.data?.message;
+      if (err.response?.status === 400 && /current password/i.test(message ?? '')) {
         setErrors({ current: 'Your current password is incorrect.' });
         document.getElementById('pw-current')?.focus();
       } else {
-        setResult({ tone: 'error', text: "Can't reach the server. Please check that the backend is running." });
+        setResult({
+          tone: 'error',
+          text: err.response ? message || "Couldn't change your password. Please try again." : "Can't reach the server. Please check that the backend is running.",
+        });
       }
     } finally {
       setBusy(false);
@@ -73,7 +72,7 @@ export default function ChangePasswordForm({ employeeId }) {
       <CardHeader title="Change password" />
       {result && (
         <div className={`alert alert--${result.tone}`} role={result.tone === 'error' ? 'alert' : 'status'}>
-          {result.tone === 'error' ? <CircleAlert size={18} aria-hidden="true" /> : <Info size={18} aria-hidden="true" />}
+          {result.tone === 'error' ? <CircleAlert size={18} aria-hidden="true" /> : <CircleCheck size={18} aria-hidden="true" />}
           <span>{result.text}</span>
         </div>
       )}
@@ -91,7 +90,7 @@ export default function ChangePasswordForm({ employeeId }) {
         </div>
         <div className="password-form__actions">
           <button type="submit" className="btn btn--primary" disabled={busy}>
-            {busy ? 'Checking…' : 'Update password'}
+            {busy ? 'Saving…' : 'Update password'}
           </button>
         </div>
       </form>

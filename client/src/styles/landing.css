@@ -195,6 +195,8 @@
 .contact__message textarea.field__input { flex: 1; min-height: 150px; resize: none; }
 .contact__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
 .contact__hint { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+/* Spam trap field: off screen, so people never see or reach it */
+.contact__trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .contact__success { width: 100%; max-width: 460px; margin: auto; text-align: center; }
 .contact__success svg { color: var(--completed-text); }
 .contact__success h3 { margin: 12px 0 4px; font-size: 1.35rem; font-weight: var(--fw-bold); }

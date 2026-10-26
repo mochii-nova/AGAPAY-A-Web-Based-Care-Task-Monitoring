@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, Info, CircleAlert } from 'lucide-react';
+import { Camera, CircleAlert } from 'lucide-react';
 import Modal from '../Modal';
 import Avatar from '../Avatar';
 import FormField from '../FormField';
@@ -31,18 +31,19 @@ function EditProfileForm({ onClose }) {
     email: profile.email,
     phone: profile.phone,
     ecName: profile.emergencyContact.name,
-    ecRelationship: profile.emergencyContact.relationship,
+    ecRelationship: profile.emergencyContact.relationship || RELATIONSHIPS[0],
     ecPhone: profile.emergencyContact.phone,
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: undefined });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const found = validate(form);
     setErrors(found);
@@ -51,18 +52,29 @@ function EditProfileForm({ onClose }) {
       document.getElementById(`profile-${first}`)?.focus();
       return;
     }
-    const ok = updateProfile({
-      firstName: form.firstName.trim(),
-      lastName: form.lastName.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      emergencyContact: { name: form.ecName.trim(), relationship: form.ecRelationship, phone: form.ecPhone.trim() },
-    });
-    if (ok) {
-      showToast('Profile saved on this computer.');
+    setSaving(true);
+    setSaveError('');
+    try {
+      await updateProfile({
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        emergencyContact: { name: form.ecName.trim(), relationship: form.ecRelationship, phone: form.ecPhone.trim() },
+      });
+      showToast('Profile saved.');
       onClose();
-    } else {
-      setSaveError("This browser couldn't save your changes.");
+    } catch (err) {
+      const message = err.response?.data?.message;
+      if (err.response?.status === 409) {
+        // This email is already used by another account
+        setErrors({ email: message });
+        document.getElementById('profile-email')?.focus();
+      } else {
+        setSaveError(err.response ? message || "Couldn't save your changes. Please try again." : "Can't reach the server. Please try again.");
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -72,10 +84,6 @@ function EditProfileForm({ onClose }) {
 
   return (
     <form className="edit-profile" onSubmit={handleSubmit} noValidate>
-      <div className="alert alert--info">
-        <Info size={18} aria-hidden="true" />
-        <span>These details are saved on this computer only, until the backend can store them.</span>
-      </div>
       {saveError && (
         <div className="alert alert--error" role="alert">
           <CircleAlert size={18} aria-hidden="true" />
@@ -120,7 +128,7 @@ function EditProfileForm({ onClose }) {
 
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn--primary">Save changes</button>
+        <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
       </div>
     </form>
   );

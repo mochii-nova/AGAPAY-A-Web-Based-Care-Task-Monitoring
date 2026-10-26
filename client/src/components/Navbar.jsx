@@ -68,11 +68,12 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
 
               <PushToggle compact />
 
+              {notifications.length === 0 && <p className="empty-text">No notifications yet.</p>}
               <ul className="notif-list">
                 {notifications.slice(0, 5).map((n) => (
                   <li key={n.id}>
                     <Link
-                      to={n.link}
+                      to={n.link || '/notifications'}
                       className={`notif-item ${n.read ? '' : 'is-unread'}`}
                       onClick={() => { markRead(n.id); bell.setOpen(false); }}
                     >

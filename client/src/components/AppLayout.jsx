@@ -7,6 +7,7 @@ import { HandoverProvider } from '../context/HandoverContext';
 import { ProfileProvider } from '../context/ProfileContext';
 import { PushProvider } from '../context/PushContext';
 import { MessagesProvider } from '../context/MessagesContext';
+import { NotificationProvider } from '../context/NotificationContext';
 
 const RAIL_KEY = 'agapay.sidebar';
 
@@ -48,17 +49,19 @@ export default function AppLayout() {
       <HandoverProvider>
         <PushProvider>
           <MessagesProvider>
-            <div className={`app-layout ${rail ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
-              <Sidebar collapsed={rail} onClose={closeMobile} />
-              {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
+            <NotificationProvider>
+              <div className={`app-layout ${rail ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
+                <Sidebar collapsed={rail} onClose={closeMobile} />
+                {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
 
-              <div className="app-body">
-                <Navbar onMenuClick={toggleMenu} menuExpanded={small ? mobileOpen : !rail} />
-                <main className="app-main">
-                  <Outlet />
-                </main>
+                <div className="app-body">
+                  <Navbar onMenuClick={toggleMenu} menuExpanded={small ? mobileOpen : !rail} />
+                  <main className="app-main">
+                    <Outlet />
+                  </main>
+                </div>
               </div>
-            </div>
+            </NotificationProvider>
           </MessagesProvider>
         </PushProvider>
       </HandoverProvider>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, CircleAlert, Info } from 'lucide-react';
+import { Upload, CircleAlert } from 'lucide-react';
 import Modal from '../Modal';
 import Avatar from '../Avatar';
 import { useProfile } from '../../context/ProfileContext';
@@ -10,11 +10,12 @@ const MAX_MB = 5;
 
 // Pick a photo, see the preview, then save it (or remove the current one)
 function PhotoForm({ onClose }) {
-  const { profile, updateProfile } = useProfile();
+  const { profile, updatePhoto } = useProfile();
   const showToast = useToast();
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -33,12 +34,17 @@ function PhotoForm({ onClose }) {
     }
   };
 
-  const save = (photo, message) => {
-    if (updateProfile({ photo })) {
+  const save = async (photo, message) => {
+    setSaving(true);
+    setError('');
+    try {
+      await updatePhoto(photo);
       showToast(message);
       onClose();
-    } else {
-      setError("This browser couldn't store the photo. Try a smaller one.");
+    } catch (err) {
+      setError(err.response ? err.response.data?.message || "Couldn't save the photo. Please try again." : "Can't reach the server. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -63,20 +69,15 @@ function PhotoForm({ onClose }) {
       </label>
       <p className="field__hint photo-form__hint">JPG or PNG, up to {MAX_MB} MB. It will be cropped to a square.</p>
 
-      <p className="local-note">
-        <Info size={16} aria-hidden="true" />
-        Your photo is saved on this computer only, until the backend can store photos.
-      </p>
-
       <div className="modal__footer modal__footer--inline">
         {profile.photo && !preview && (
-          <button type="button" className="btn btn--outline photo-form__remove" onClick={() => save(null, 'Photo removed.')}>
+          <button type="button" className="btn btn--outline photo-form__remove" disabled={saving} onClick={() => save(null, 'Photo removed.')}>
             Remove photo
           </button>
         )}
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="button" className="btn btn--primary" disabled={!preview} onClick={() => save(preview, 'Profile photo saved.')}>
-          Save photo
+        <button type="button" className="btn btn--primary" disabled={!preview || saving} onClick={() => save(preview, 'Profile photo saved.')}>
+          {saving ? 'Saving…' : 'Save photo'}
         </button>
       </div>
     </div>
