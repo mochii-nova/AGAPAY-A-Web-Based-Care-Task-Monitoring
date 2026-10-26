@@ -8,6 +8,9 @@ import { ProfileProvider } from '../context/ProfileContext';
 import { PushProvider } from '../context/PushContext';
 import { MessagesProvider } from '../context/MessagesContext';
 import { NotificationProvider } from '../context/NotificationContext';
+import { StaffProvider } from '../context/StaffContext';
+import { useAuth } from '../context/AuthContext';
+import { isAdmin } from '../utils/roles';
 
 const RAIL_KEY = 'agapay.sidebar';
 
@@ -30,6 +33,7 @@ const saveRail = (rail) => {
 
 // Frame around every logged-in page: sidebar on the left, top bar, then the page itself
 export default function AppLayout() {
+  const admin = isAdmin(useAuth().user);
   const small = useMediaQuery('(max-width: 900px)');
   const [collapsed, setCollapsed] = useState(readRail); // laptops: icon rail instead of the full sidebar
   const [mobileOpen, setMobileOpen] = useState(false); // tablets and phones: slide the sidebar in
@@ -44,23 +48,28 @@ export default function AppLayout() {
   const closeMobile = () => setMobileOpen(false);
   const rail = collapsed && !small; // the slide-in drawer always shows the full menu
 
+  const page = (
+    <div className={`app-layout ${rail ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
+      <Sidebar collapsed={rail} onClose={closeMobile} />
+      {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
+
+      <div className="app-body">
+        <Navbar onMenuClick={toggleMenu} menuExpanded={small ? mobileOpen : !rail} />
+        <main className="app-main">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+
   return (
     <ProfileProvider>
       <HandoverProvider>
         <PushProvider>
           <MessagesProvider>
             <NotificationProvider>
-              <div className={`app-layout ${rail ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`}>
-                <Sidebar collapsed={rail} onClose={closeMobile} />
-                {mobileOpen && <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />}
-
-                <div className="app-body">
-                  <Navbar onMenuClick={toggleMenu} menuExpanded={small ? mobileOpen : !rail} />
-                  <main className="app-main">
-                    <Outlet />
-                  </main>
-                </div>
-              </div>
+              {/* The staff list is only loaded for administrators */}
+              {admin ? <StaffProvider>{page}</StaffProvider> : page}
             </NotificationProvider>
           </MessagesProvider>
         </PushProvider>

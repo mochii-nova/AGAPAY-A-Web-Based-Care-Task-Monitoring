@@ -452,6 +452,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .btn--soft:hover:not(:disabled) { background: var(--lavender-strong); }
 .btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--ink); }
 .btn--outline:hover:not(:disabled) { background: var(--tint); border-color: var(--lavender-line); }
+/* Actions that take something away (deactivate, delete): red words on an outlined button */
+.btn--danger { background: var(--card); border-color: var(--border-strong); color: var(--danger); }
+.btn--danger:hover:not(:disabled) { background: var(--overdue-tint); border-color: var(--overdue-bg); }
 .btn--sm { padding: 0 14px; font-size: 0.875rem; }
 .btn--lg { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
 

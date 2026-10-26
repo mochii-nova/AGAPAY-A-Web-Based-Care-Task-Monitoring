@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import api from '../api';
 import useApiData from '../hooks/useApiData';
+import { useAuth } from './AuthContext';
+import { linkFor } from '../utils/roles';
 
 const NotificationContext = createContext();
 
@@ -9,8 +11,10 @@ const REFRESH = 60 * 1000; // new notifications show up within a minute
 // My newest notifications from the backend (task reminders, overdue tasks, handovers,
 // schedule changes, messages). Shared so the bell dropdown and the Notifications page agree.
 export function NotificationProvider({ children }) {
+  const { user } = useAuth();
   const query = useApiData('/notifications', { refreshEvery: REFRESH });
-  const notifications = query.data ?? [];
+  // Administrators get the admin page for each link (e.g. a new handover opens Handover monitoring)
+  const notifications = (query.data ?? []).map((n) => ({ ...n, link: linkFor(user, n.link) }));
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // Shown as read straight away; the backend is told in the background

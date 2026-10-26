@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
+import { homeFor } from '../utils/roles';
 
 const EMPTY = {
   firstName: '',
@@ -48,7 +49,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to={homeFor(user)} replace />;
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;

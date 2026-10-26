@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../Logo';
+import { homeFor } from '../../utils/roles';
 
 // Top menu of the website: a floating bar that stays visible while scrolling.
 // Links jump to each section of the page.
@@ -62,7 +63,7 @@ export default function SiteHeader({ sections, active }) {
 
             <div className="site-header__cta">
               {user ? (
-                <Link to="/dashboard" className="btn btn--primary">Open dashboard</Link>
+                <Link to={homeFor(user)} className="btn btn--primary">Open dashboard</Link>
               ) : (
                 <>
                   <Link to="/login" className="btn btn--outline">Sign in</Link>

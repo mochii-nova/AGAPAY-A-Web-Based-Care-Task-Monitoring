@@ -8,14 +8,16 @@ import { useNotifications } from '../context/NotificationContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useProfile } from '../context/ProfileContext';
 import { useMessages } from '../context/MessagesContext';
+import { useStaff } from '../context/StaffContext';
 import { SHIFTS } from '../constants';
+import { homeFor } from '../utils/roles';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import markWhite from '../assets/images/agapay-mark-white.svg';
 
-// Menu groups. Same on every caregiver page.
-const NAV_GROUPS = [
+// Menu groups for caregivers
+const CAREGIVER_GROUPS = [
   {
     title: 'Today',
     items: [
@@ -30,6 +32,14 @@ const NAV_GROUPS = [
       { to: '/residents', label: 'My Residents', icon: UserRound },
       { to: '/handover', label: 'Handover', icon: FileText },
     ],
+  },
+];
+
+// Menu groups for administrators (each admin page is added here as it is built)
+const ADMIN_GROUPS = [
+  {
+    title: 'People',
+    items: [{ to: '/admin/staff', label: 'Manage Staff', icon: Users }],
   },
 ];
 
@@ -49,16 +59,22 @@ function SideLink({ to, label, icon: Icon, badge, badgeLabel, tone, onClick }) {
 // `collapsed` (laptops only): a narrow rail with icons; ☰ in the top bar switches it.
 export default function Sidebar({ collapsed, onClose }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const { unreadCount: unreadMessages } = useMessages();
   const { handovers } = useHandovers();
+  const staff = useStaff(); // only for administrators
   const { profile, openPhoto, openEditProfile } = useProfile();
   const { ref: menuRef, ...menu } = usePopover();
+  const groups = staff ? ADMIN_GROUPS : CAREGIVER_GROUPS;
 
   // Handovers from others that I haven't marked as read yet
   const newHandovers = handovers.filter((h) => h.author?._id !== profile.id && !h.readByMe).length;
-  const badges = { '/handover': newHandovers > 0 ? { text: `${newHandovers} new`, label: `${newHandovers} new`, tone: 'new' } : null };
+  const pending = staff?.pendingCount ?? 0;
+  const badges = {
+    '/handover': newHandovers > 0 ? { text: `${newHandovers} new`, label: `${newHandovers} new`, tone: 'new' } : null,
+    '/admin/staff': pending > 0 ? { text: pending, label: `${pending} waiting for approval` } : null,
+  };
 
   const handleLogout = () => {
     logout();
@@ -72,7 +88,7 @@ export default function Sidebar({ collapsed, onClose }) {
   return (
     <aside className={`sidebar ${collapsed ? 'is-rail' : ''}`} aria-label="Main menu">
       <div className="sidebar__top">
-        <Link to="/dashboard" className="sidebar__logo" onClick={onClose} aria-label="AGAPAY home">
+        <Link to={homeFor(user)} className="sidebar__logo" onClick={onClose} aria-label="AGAPAY home">
           {collapsed ? <img src={markWhite} alt="" className="sidebar__mark" /> : <Logo tone="white" height={32} />}
         </Link>
         <button type="button" className="icon-btn sidebar__close" onClick={onClose} aria-label="Close menu">
@@ -116,7 +132,7 @@ export default function Sidebar({ collapsed, onClose }) {
       </div>
 
       <nav className="sidebar__nav">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} className="sidebar__group">
             <p className="sidebar__group-title">{group.title}</p>
             {group.items.map((item) => (
@@ -131,14 +147,6 @@ export default function Sidebar({ collapsed, onClose }) {
             ))}
           </div>
         ))}
-
-        {/* Temporary until the Admin side is built */}
-        {profile.role === 'admin' && (
-          <div className="sidebar__group">
-            <p className="sidebar__group-title">Admin</p>
-            <SideLink to="/staff" label="Manage Staff" icon={Users} onClick={onClose} />
-          </div>
-        )}
       </nav>
 
       <div className="sidebar__bottom">

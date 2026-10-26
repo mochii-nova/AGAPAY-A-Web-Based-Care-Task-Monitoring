@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { CircleAlert, CircleCheck, Phone, Mail } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
+import { homeFor } from '../utils/roles';
 
 // Why api.js signed the person out (e.g. "Your account is inactive."), shown once
 function readSignedOutReason() {
@@ -19,7 +20,6 @@ function readSignedOutReason() {
 }
 
 export default function Login() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { user, login } = useAuth();
 
@@ -36,8 +36,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
-  // Already signed in? Go straight to the dashboard.
-  if (user) return <Navigate to="/dashboard" replace />;
+  // Already signed in? Go straight to your Home (admins to the admin side).
+  if (user) return <Navigate to={homeFor(user)} replace />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,8 +52,9 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', { username: username.trim(), password });
+      // Signing in is enough: the "already signed in" line above then takes them to their Home.
+      // (Navigating here as well made two redirects at once, which left the admin side blank.)
       login(data);
-      navigate('/dashboard');
     } catch (err) {
       const status = err.response?.status;
       const message = err.response?.data?.message;

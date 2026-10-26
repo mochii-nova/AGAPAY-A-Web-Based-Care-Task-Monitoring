@@ -1,0 +1,106 @@
+/* =====================================================================
+   Admin pages (pages/admin/ + components/admin/)
+   Same look as the caregiver side; colours come only from the variables in main.css.
+   (.card.x selectors are written specifically, because main.css loads after this file.)
+   ===================================================================== */
+
+/* "2 caregivers are waiting for approval" */
+.admin-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  background: var(--pending-bg);
+  color: var(--text);
+}
+.admin-banner p { margin: 0; }
+
+/* Table on the left, details panel on the right (it stays in view while you scroll) */
+.admin-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.card.admin-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+
+/* One card: filters on top, the table underneath */
+.card.admin-table-card { padding: 0; overflow: hidden; }
+.admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.admin-toolbar .search-box { flex: 1 1 220px; min-width: 0; }
+.admin-toolbar .select { flex: 0 0 170px; width: 170px; }
+
+/* Tables (same look as My Tasks) */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.data-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--label);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background-color 0.15s; }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table__row:hover td { background: var(--tint); }
+.data-table__row.is-selected td { background: var(--indigo-soft); }
+.data-table__muted { color: var(--muted); }
+.data-table__nowrap { white-space: nowrap; }
+.data-table__action { width: 1%; text-align: right; white-space: nowrap; }
+
+/* Avatar + name + a small line under it */
+.cell-person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cell-person > span { display: flex; flex-direction: column; min-width: 0; }
+.cell-person strong { font-weight: var(--fw-medium); }
+.cell-person small { color: var(--muted); font-size: 0.82rem; }
+.cell-person .avatar { font-size: 0.75rem; }
+
+/* Staff details (panel and pop-up) */
+.staff-details__identity { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.staff-details__identity > div { min-width: 0; }
+.staff-details__name { margin: 0; font-size: 1.25rem; font-weight: var(--fw-bold); }
+.staff-details__sub { margin: 2px 0 6px; color: var(--muted); font-size: 0.9rem; }
+.staff-details__pending { padding: 14px; margin-bottom: 16px; border-radius: var(--radius-sm); background: var(--pending-bg); }
+.staff-details__pending p { margin: 0 0 12px; color: var(--text); font-size: 0.92rem; }
+.staff-details__list { margin-bottom: 4px; }
+.staff-details__list dt { flex-shrink: 0; white-space: nowrap; }
+.staff-details__list dd { min-width: 0; overflow-wrap: anywhere; }
+.staff-details__line { display: block; color: var(--muted); font-size: 0.85rem; font-weight: var(--fw-regular); }
+.staff-details__section { padding-top: 14px; margin-top: 10px; border-top: 1px solid var(--border); }
+.staff-details__section .small-label { margin-bottom: 8px; }
+.staff-details__empty { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.staff-details__today { display: flex; flex-wrap: wrap; gap: 6px 16px; list-style: none; margin: 0; padding: 0; }
+.staff-details__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.staff-details__actions--grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border); }
+.staff-details__actions--grid .btn:only-child,
+.staff-details__wide { grid-column: 1 / -1; }
+
+/* Small text tags (assigned residents) */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.tag-list li { padding: 2px 10px; border-radius: var(--radius-pill); background: var(--tint); color: var(--muted); font-size: 0.82rem; }
+
+/* Add staff: the temporary password with its "New password" button */
+.staff-form__password { display: flex; align-items: flex-start; gap: 10px; }
+.staff-form__password .field { flex: 1; }
+.staff-form__password .btn { margin-top: 27px; flex-shrink: 0; }
+
+/* Reset password: the temporary password, large and easy to read out */
+.temp-password { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin: 4px 0 12px; border-radius: var(--radius-sm); background: var(--tint); }
+.temp-password code { font-size: 1.2rem; font-weight: var(--fw-bold); letter-spacing: 0.04em; overflow-wrap: anywhere; }
+
+/* Smaller screens: the table takes the full width; details open as a pop-up */
+@media (max-width: 1100px) {
+  .admin-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .data-table__wide-only { display: none; }
+  .admin-toolbar .select { flex: 1 1 140px; width: auto; }
+}
+@media (max-width: 600px) {
+  .admin-banner .btn { width: 100%; }
+  .data-table th, .data-table td { padding: 10px 8px; }
+  .staff-form__password { flex-direction: column; gap: 0; }
+  .staff-form__password .btn { margin: 0 0 12px; }
+}
