@@ -9,7 +9,7 @@ import { byUrgency } from '../../utils/tasks';
 const SHOW = 3;
 
 // The next few unfinished tasks (overdue first): time, task + resident, status, Open
-export default function NextTasksCard({ tasks, roomOf }) {
+export default function NextTasksCard({ tasks }) {
   const open = tasks.filter((t) => t.status === 'pending' || t.status === 'overdue').sort(byUrgency);
   const next = open.slice(0, SHOW);
 
@@ -24,7 +24,7 @@ export default function NextTasksCard({ tasks, roomOf }) {
       ) : (
         <ul className="task-rows">
           {next.map((t) => {
-            const room = roomOf(t.resident);
+            const { room } = t;
             return (
               <li key={t._id} className="task-row">
                 <span className="task-row__time">{formatTime(t.dueAt)}</span>

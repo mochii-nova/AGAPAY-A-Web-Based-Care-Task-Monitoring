@@ -7,7 +7,7 @@ import { dayTitle } from '../../utils/calendar';
 import { formatTime } from '../../utils/format';
 
 // Side panel for the selected day: my shift, Google Calendar, and that day's tasks
-export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilter, roomOf, onOpenTask }) {
+export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilter, onOpenTask }) {
   return (
     <aside className="card day-panel" aria-label={`Schedule for ${dayTitle(date)}`}>
       <h2 className="day-panel__title">{dayTitle(date)}</h2>
@@ -36,7 +36,7 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
       ) : (
         <ul className="day-panel__list">
           {tasks.map((t) => {
-            const room = roomOf(t.resident);
+            const { room } = t;
             return (
               <li key={t._id} className="day-task">
                 <span className="day-task__time">{formatTime(t.dueAt)}</span>

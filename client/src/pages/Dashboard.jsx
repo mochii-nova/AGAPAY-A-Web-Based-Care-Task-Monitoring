@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
+import useShifts from '../hooks/useShifts';
+import useResidents from '../hooks/useResidents';
 import useNow from '../hooks/useNow';
-import { sampleResidents, sampleShiftOn } from '../data/sample';
 import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
 import { findMyShiftHandover } from '../utils/handover';
-import { SHIFTS, shiftLabel } from '../constants';
+import { shiftLabel } from '../constants';
 import { isToday } from '../utils/tasks';
 import { shiftWindow, shiftPhase } from '../utils/shift';
 import { LoadingState, ErrorState } from '../components/StateMessage';
@@ -42,23 +43,22 @@ function helpfulLine(phase, shift, left) {
   return `You have ${tasks} left before your handover at ${shift.end}.`;
 }
 
-const roomOf = (name) => sampleResidents.find((r) => r.name === name)?.room;
-
 export default function Dashboard() {
   const { profile } = useProfile();
   const now = useNow();
   const showToast = useToast();
   const tasksQuery = useTasks();
+  const shiftsQuery = useShifts(now, now);
+  const residentsQuery = useResidents();
   const handoversQuery = useHandovers();
   const [marking, setMarking] = useState(false);
 
-  // My shift today (sample roster until the backend has shifts). null = day off.
-  const shift = SHIFTS.find((s) => s.apiValue === sampleShiftOn(now)) ?? null;
+  // My shift today, from the roster. null = day off.
+  const shift = shiftsQuery.shiftOn(now);
   const shiftTimes = shift ? shiftWindow(shift, now) : { start: now, end: now };
   const phase = shift ? shiftPhase(shiftTimes, now) : 'off';
   const minutesLeft = (shiftTimes.end - now) / 60000;
 
-  // TODO: only show tasks assigned to me once the backend has an assigned caregiver
   const todayTasks = tasksQuery.tasks.filter((t) => isToday(t.dueAt, now));
   const left = todayTasks.filter((t) => t.status === 'pending' || t.status === 'overdue').length;
 
@@ -82,23 +82,24 @@ export default function Dashboard() {
   };
 
   const quote = QUOTES[now.getDate() % QUOTES.length];
-  const usingSample = tasksQuery.usingSample || handoversQuery.usingSample;
   const today = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const ready = tasksQuery.status === 'ready' && shiftsQuery.status === 'ready';
 
   return (
     <div className="dashboard">
       <header className="page-header dash-greeting">
         <div>
           <h1>{greeting(now)}, {profile.name.split(' ')[0]}.</h1>
-          {tasksQuery.status === 'ready' && <p className="page-header__subtitle">{helpfulLine(phase, shift, left)}</p>}
+          {ready && <p className="page-header__subtitle">{helpfulLine(phase, shift, left)}</p>}
         </div>
         <p className="dash-greeting__date">{today}</p>
       </header>
 
-      {usingSample && (
+      {/* TODO (phase 4): handovers still fall back to samples when the server is off */}
+      {handoversQuery.usingSample && (
         <div className="alert alert--info" role="status">
           <Info size={18} aria-hidden="true" />
-          <span>Preview mode: the server isn't running, so you're seeing sample tasks and handovers.</span>
+          <span>Preview mode: the server isn't running, so you're seeing sample handovers.</span>
         </div>
       )}
 
@@ -115,14 +116,24 @@ export default function Dashboard() {
             )}
           </section>
         )}
-        <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} />
+        {shiftsQuery.status === 'ready' ? (
+          <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} />
+        ) : (
+          <section className="card">
+            {shiftsQuery.status === 'loading' ? (
+              <LoadingState label="Loading your shift…" />
+            ) : (
+              <ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} />
+            )}
+          </section>
+        )}
         <QuoteCard quote={quote} />
       </div>
 
       {/* Row 2: what's next, and the last shift's note */}
       <div className="dash-row dash-row--main">
         {tasksQuery.status === 'ready' ? (
-          <NextTasksCard tasks={todayTasks} roomOf={roomOf} />
+          <NextTasksCard tasks={todayTasks} />
         ) : (
           <section className="card" aria-hidden="true" />
         )}
@@ -140,7 +151,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      <ResidentsCard residents={sampleResidents} statusOf={statusOf} />
+      {residentsQuery.status === 'ready' && <ResidentsCard residents={residentsQuery.residents} statusOf={statusOf} />}
+      {residentsQuery.status === 'error' && (
+        <section className="card">
+          <ErrorState message={residentsQuery.error} onRetry={residentsQuery.reload} />
+        </section>
+      )}
     </div>
   );
 }

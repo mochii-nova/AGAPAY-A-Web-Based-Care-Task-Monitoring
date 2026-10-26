@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleCheck, Clock, CircleSlash, CircleAlert, Info } from 'lucide-react';
+import { CircleCheck, Clock, CircleSlash, CircleAlert } from 'lucide-react';
 import Modal from '../Modal';
 import StatusPill from '../StatusPill';
 import TaskCategoryIcon from '../TaskCategoryIcon';
@@ -18,7 +18,7 @@ const longDate = (date) =>
   new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
 // The form inside the pop-up. Its own component so it starts fresh for each task.
-function TaskForm({ task, residentRoom, onSave, onCancel }) {
+function TaskForm({ task, onSave, onCancel }) {
   // "Overdue" isn't something you pick; it means "pending, but late"
   const [status, setStatus] = useState(task.status === 'overdue' ? 'pending' : task.status);
   const [reason, setReason] = useState(task.skipReason ?? '');
@@ -26,9 +26,6 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
   const [reasonError, setReasonError] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-
-  // The backend can't undo "done" yet
-  const lockedCompleted = task.status === 'completed';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +52,7 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
           <p className="small-label">{getCategory(task.category)?.label ?? 'Care task'}</p>
           <p className="task-detail__resident">
             {task.resident}
-            {residentRoom && <span> · Room {residentRoom}</span>}
+            {task.room && <span> · Room {task.room}</span>}
           </p>
           <p className="task-detail__time">
             Due {formatTime(task.dueAt)}, {longDate(task.dueAt)}
@@ -77,26 +74,16 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
       <fieldset className="choice-group">
         <legend className="field__label">Update status</legend>
         <div className="choice-group__options">
-          {CHOICES.map(({ value, label, icon: Icon }) => {
-            const disabled = lockedCompleted && value !== 'completed';
-            return (
-              <label key={value} className={`choice choice--${value} ${disabled ? 'is-disabled' : ''}`}>
-                <input
-                  type="radio"
-                  name="status"
-                  value={value}
-                  checked={status === value}
-                  disabled={disabled}
-                  onChange={() => setStatus(value)}
-                />
-                <Icon size={18} aria-hidden="true" />
-                {label}
-              </label>
-            );
-          })}
+          {CHOICES.map(({ value, label, icon: Icon }) => (
+            <label key={value} className={`choice choice--${value}`}>
+              <input type="radio" name="status" value={value} checked={status === value} onChange={() => setStatus(value)} />
+              <Icon size={18} aria-hidden="true" />
+              {label}
+            </label>
+          ))}
         </div>
-        {lockedCompleted && (
-          <p className="field__hint">A completed task can't be changed back yet. The backend doesn't support it.</p>
+        {task.status !== 'pending' && task.status !== 'overdue' && (
+          <p className="field__hint">Changed your mind? Pick Pending to undo.</p>
         )}
       </fieldset>
 
@@ -144,11 +131,6 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
         />
       </div>
 
-      <p className="local-note">
-        <Info size={16} aria-hidden="true" />
-        Skip reasons and notes are saved on this computer only, until the backend can store them.
-      </p>
-
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onCancel}>Cancel</button>
         <button type="submit" className="btn btn--primary" disabled={saving}>
@@ -160,10 +142,10 @@ function TaskForm({ task, residentRoom, onSave, onCancel }) {
 }
 
 // Pop-up that opens when you click "View" on a task
-export default function TaskDetailModal({ task, residentRoom, onSave, onClose }) {
+export default function TaskDetailModal({ task, onSave, onClose }) {
   return (
     <Modal open={!!task} onClose={onClose} title={task?.task ?? ''}>
-      {task && <TaskForm key={task._id} task={task} residentRoom={residentRoom} onSave={onSave} onCancel={onClose} />}
+      {task && <TaskForm key={task._id} task={task} onSave={onSave} onCancel={onClose} />}
     </Modal>
   );
 }

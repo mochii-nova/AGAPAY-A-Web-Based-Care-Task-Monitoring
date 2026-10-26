@@ -44,5 +44,8 @@ export default function useApiData(path, { sample, transform = (data) => data } 
     setReloadKey((k) => k + 1);
   };
 
-  return { ...state, reload };
+  // Change the loaded data in place, e.g. to show a saved item right away: setData((list) => ...)
+  const setData = (update) => setState((s) => (s.data ? { ...s, data: update(s.data) } : s));
+
+  return { ...state, reload, setData };
 }

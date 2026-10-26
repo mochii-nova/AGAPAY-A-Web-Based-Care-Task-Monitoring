@@ -1,7 +1,7 @@
 // Helpers for task data coming from the backend
 
 // Words that point to each category, checked in this order.
-// TODO: remove once the backend stores a category for each task.
+// Only used when the administrator saved a task without a category.
 const CATEGORY_WORDS = [
   ['hygiene', ['bath', 'shower', 'teeth', 'brush', 'hair', 'groom', 'shave', 'toilet', 'diaper', 'hygiene']],
   ['medical', ['vital', 'medic', 'pill', 'wound', 'blood', 'pressure', 'sugar', 'insulin', 'temperature', 'dressing']],
@@ -17,25 +17,23 @@ export function guessCategory(taskName = '') {
   return CATEGORY_WORDS.find(([, words]) => words.some((w) => name.includes(w)))?.[0] ?? null;
 }
 
-// Backend says "done"; the screens say "completed". Also fills in a category.
+// Fills in a category when the task has none.
+// Status comes from the backend as completed / skipped / pending / overdue.
 export function normalizeTask(task) {
-  return {
-    ...task,
-    status: task.status === 'done' ? 'completed' : task.status,
-    category: task.category ?? guessCategory(task.task),
-  };
+  return { ...task, category: task.category ?? guessCategory(task.task) };
 }
 
 export const normalizeTasks = (tasks) => tasks.map(normalizeTask);
 
 export const isToday = (date, now = new Date()) => new Date(date).toDateString() === now.toDateString();
 
-// Toast text after saving: `${task.task} ${SAVED_TEXT[status]}.`
-export const SAVED_TEXT = {
-  completed: 'marked as completed',
-  pending: 'kept as pending',
-  skipped: 'marked as skipped',
-};
+// Toast text after saving, e.g. "Sponge Bath marked as completed."
+export function savedText(task, { status }) {
+  const was = task.status === 'overdue' ? 'pending' : task.status;
+  if (status === 'completed') return `${task.task} marked as completed.`;
+  if (status === 'skipped') return `${task.task} marked as skipped.`;
+  return was === 'pending' ? `${task.task} saved.` : `${task.task} moved back to pending.`;
+}
 
 // Overdue first, then the earliest due time
 export const byUrgency = (a, b) =>

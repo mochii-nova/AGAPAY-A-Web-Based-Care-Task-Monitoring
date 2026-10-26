@@ -19,8 +19,16 @@ export default function Modal({ open, onClose, title, size = 'md', children, foo
     if (e.target === dialogRef.current) onClose();
   };
 
+  // Escape (or a phone's Back gesture) asks to close: let the page close it, like the X button.
+  // The browser's later "close" event is not used: it can arrive after the next pop-up
+  // has already been asked to open (e.g. another task) and would shut that one.
+  const handleCancel = (e) => {
+    e.preventDefault();
+    onClose();
+  };
+
   return (
-    <dialog ref={dialogRef} className={`modal modal--${size}`} aria-labelledby={titleId} onClose={onClose} onClick={handleClick}>
+    <dialog ref={dialogRef} className={`modal modal--${size}`} aria-labelledby={titleId} onCancel={handleCancel} onClick={handleClick}>
       {open && (
         <div className="modal__box">
           <header className="modal__header">

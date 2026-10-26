@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, ClipboardList, Info, StickyNote } from 'lucide-react';
+import { Search, ClipboardList, StickyNote } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
 import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES } from '../constants';
-import { sampleResidents } from '../data/sample';
 import { formatTime } from '../utils/format';
-import { isToday, SAVED_TEXT } from '../utils/tasks';
+import { isToday, savedText } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../components/StatusPill';
 import Avatar from '../components/Avatar';
@@ -30,13 +29,10 @@ const EMPTY_TEXT = {
   overdue: 'No overdue tasks. Nice work!',
 };
 
-// TODO: residents come from sample data until the backend has a residents table
-const roomOf = (name) => sampleResidents.find((r) => r.name === name)?.room;
-
 const shortDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 export default function Tasks() {
-  const { tasks, status, error, usingSample, reload, updateTask } = useTasks();
+  const { tasks, status, error, reload, updateTask } = useTasks();
   const showToast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [scope, setScope] = useState('today');
@@ -65,7 +61,7 @@ export default function Tasks() {
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
     closeTask();
-    showToast(`${task.task} ${SAVED_TEXT[changes.status]}.`);
+    showToast(savedText(task, changes));
   };
 
   return (
@@ -76,13 +72,6 @@ export default function Tasks() {
           <button type="button" className="segmented__btn" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>All dates</button>
         </div>
       </PageHeader>
-
-      {usingSample && (
-        <div className="alert alert--info" role="status">
-          <Info size={18} aria-hidden="true" />
-          <span>Preview mode: the server isn't running, so these are sample tasks. Saving won't work.</span>
-        </div>
-      )}
 
       {/* One card: status tabs and filters on top, the table underneath */}
       <div className="card tasks-card">
@@ -132,9 +121,11 @@ export default function Tasks() {
           {status === 'error' && <ErrorState message={error} onRetry={reload} />}
           {status === 'ready' && shown.length === 0 && (
             <EmptyState icon={ClipboardList}>
-              {scope === 'today' && tasks.length > 0 && filtered.length === 0 && !query && !category
-                ? 'No tasks for today. Switch to “All dates” to see other days.'
-                : EMPTY_TEXT[tab]}
+              {tasks.length === 0
+                ? 'No tasks are assigned to you yet.'
+                : scope === 'today' && filtered.length === 0 && !query && !category
+                  ? 'No tasks for today. Switch to “All dates” to see other days.'
+                  : EMPTY_TEXT[tab]}
             </EmptyState>
           )}
 
@@ -151,7 +142,7 @@ export default function Tasks() {
               </thead>
               <tbody>
                 {shown.map((t) => {
-                  const room = roomOf(t.resident);
+                  const { room } = t;
                   return (
                     <tr key={t._id} className="task-table__row">
                       <td className="task-table__time">
@@ -196,12 +187,7 @@ export default function Tasks() {
         </section>
       </div>
 
-      <TaskDetailModal
-        task={openTask}
-        residentRoom={openTask && roomOf(openTask.resident)}
-        onSave={handleSave}
-        onClose={closeTask}
-      />
+      <TaskDetailModal task={openTask} onSave={handleSave} onClose={closeTask} />
     </div>
   );
 }

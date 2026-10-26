@@ -12,7 +12,7 @@ import { SHIFTS, shiftLabel, shiftTime } from '../constants';
 import { shiftWindow, shiftPhase } from '../utils/shift';
 import { formatTime } from '../utils/format';
 import { dayKey } from '../utils/calendar';
-import { SAVED_TEXT } from '../utils/tasks';
+import { savedText } from '../utils/tasks';
 import { handoverTiming, findMyShiftHandover, nextShift } from '../utils/handover';
 import PageHeader from '../components/PageHeader';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
@@ -103,7 +103,7 @@ export default function Handover() {
   const handleSaveTask = async (task, changes) => {
     await updateTask(task, changes);
     setOpenTaskId(null);
-    showToast(`${task.task} ${SAVED_TEXT[changes.status]}.`);
+    showToast(savedText(task, changes));
   };
 
   const TABS = [
@@ -252,9 +252,7 @@ export default function Handover() {
       </div>
 
       <TaskDetailModal
-        task={openTask}
-        residentRoom={openTask && sampleResidents.find((r) => r.name === openTask.resident)?.room}
-        onSave={handleSaveTask}
+        task={openTask}        onSave={handleSaveTask}
         onClose={() => setOpenTaskId(null)}
       />
     </div>

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
 import useNow from '../hooks/useNow';
 import { useToast } from '../context/ToastContext';
 import { SHIFTS, TASK_CATEGORIES } from '../constants';
-import { sampleResidents, sampleShiftOn } from '../data/sample';
+import { sampleShiftOn } from '../data/sample';
 import { addDays, addMonths, dayKey, monthTitle, weekTitle, sameDay } from '../utils/calendar';
 import { shiftOfTime } from '../utils/shift';
-import { SAVED_TEXT } from '../utils/tasks';
+import { savedText } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import MonthView from '../components/schedule/MonthView';
 import WeekView from '../components/schedule/WeekView';
@@ -24,12 +24,11 @@ const STATUS_FILTERS = [
   { id: 'skipped', label: 'Skipped' },
 ];
 
-// TODO: shifts and residents come from sample data until the backend has them
+// TODO (phase 3): shifts come from sample data until this page uses the real roster
 const shiftOn = (date) => SHIFTS.find((s) => s.apiValue === sampleShiftOn(date)) ?? null;
-const roomOf = (name) => sampleResidents.find((r) => r.name === name)?.room;
 
 export default function Schedule() {
-  const { tasks, status, error, usingSample, reload, updateTask } = useTasks();
+  const { tasks, status, error, reload, updateTask } = useTasks();
   const showToast = useToast();
   const today = useNow();
   const [searchParams] = useSearchParams();
@@ -72,7 +71,7 @@ export default function Schedule() {
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
     setOpenTaskId(null);
-    showToast(`${task.task} ${SAVED_TEXT[changes.status]}.`);
+    showToast(savedText(task, changes));
   };
 
   return (
@@ -83,13 +82,6 @@ export default function Schedule() {
           <button type="button" className="segmented__btn" aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
         </div>
       </PageHeader>
-
-      {usingSample && (
-        <div className="alert alert--info" role="status">
-          <Info size={18} aria-hidden="true" />
-          <span>Preview mode: the server isn't running, so these are sample tasks.</span>
-        </div>
-      )}
 
       <div className="card schedule-toolbar">
         <div className="date-nav">
@@ -168,18 +160,12 @@ export default function Schedule() {
             tasks={dayTasks}
             shiftFilter={shiftFilter}
             onShiftFilter={setShiftFilter}
-            roomOf={roomOf}
             onOpenTask={(t) => setOpenTaskId(t._id)}
           />
         </div>
       )}
 
-      <TaskDetailModal
-        task={openTask}
-        residentRoom={openTask && roomOf(openTask.resident)}
-        onSave={handleSave}
-        onClose={() => setOpenTaskId(null)}
-      />
+      <TaskDetailModal task={openTask} onSave={handleSave} onClose={() => setOpenTaskId(null)} />
     </div>
   );
 }

@@ -8,7 +8,6 @@ export default function ResidentsCard({ residents, statusOf }) {
     <section className="dash-residents" aria-labelledby="dash-residents-title">
       <header className="dash-residents__head">
         <h2 id="dash-residents-title">My residents</h2>
-        <span className="sample-tag" title="Residents aren't in the database yet">Sample data</span>
         <Link to="/residents" className="card__link">See all</Link>
       </header>
 
@@ -17,7 +16,8 @@ export default function ResidentsCard({ residents, statusOf }) {
           const status = statusOf(r.name);
           return (
             <li key={r.id}>
-              <Link to={`/residents?open=${r.id}`} className="resident-tile">
+              {/* The resident code (RP-2020-001), so the link works on the Residents page */}
+              <Link to={`/residents?open=${r.residentCode ?? r.id}`} className="resident-tile">
                 <Avatar name={r.name} photo={r.photo} size={40} />
                 <span className="resident-tile__main">
                   <strong>{r.name}</strong>

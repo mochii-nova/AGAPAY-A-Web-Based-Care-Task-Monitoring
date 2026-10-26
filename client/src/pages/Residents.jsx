@@ -9,7 +9,7 @@ import { sampleResidents } from '../data/sample';
 import { useHandovers } from '../context/HandoverContext';
 import { useProfile } from '../context/ProfileContext';
 import { RESIDENT_STATUS } from '../utils/handover';
-import { isToday, SAVED_TEXT } from '../utils/tasks';
+import { isToday, savedText } from '../utils/tasks';
 import PageHeader from '../components/PageHeader';
 import Modal from '../components/Modal';
 import ResidentCard from '../components/residents/ResidentCard';
@@ -92,7 +92,7 @@ export default function Residents() {
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
     setOpenTaskId(null);
-    showToast(`${task.task} ${SAVED_TEXT[changes.status]}.`);
+    showToast(savedText(task, changes));
   };
 
   return (
@@ -159,7 +159,7 @@ export default function Residents() {
 
       <TaskDetailModal
         task={openTask}
-        residentRoom={openTask && residents.find((r) => r.name === openTask.resident)?.room}
+
         onSave={handleSave}
         onClose={() => setOpenTaskId(null)}
       />
