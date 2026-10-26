@@ -67,21 +67,25 @@ export default function Register() {
       return;
     }
 
-    // The backend's login name is the Employee ID.
-    // TODO: email and phone aren't saved yet; the users table has no columns for them.
+    // The backend's login name is the Employee ID. New accounts wait for an administrator to approve them.
     const username = form.employeeId.trim().toUpperCase();
     setLoading(true);
     try {
-      await api.post('/auth/register', {
-        name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+      const { data } = await api.post('/auth/register', {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
         username,
         password: form.password,
       });
-      navigate('/login', { state: { registered: true, username } });
+      navigate('/login', { state: { registered: true, username, message: data?.message } });
     } catch (err) {
       if (err.response?.status === 409) {
-        setErrors({ employeeId: 'This Employee ID already has an account.' });
-        document.getElementById('reg-employeeId')?.focus();
+        // 409 = the Employee ID or the email already has an account; the message says which
+        const field = /email/i.test(err.response.data?.message ?? '') ? 'email' : 'employeeId';
+        setErrors({ [field]: err.response.data?.message || 'This Employee ID already has an account.' });
+        document.getElementById(`reg-${field}`)?.focus();
       } else {
         setError(
           err.response
@@ -102,7 +106,7 @@ export default function Register() {
   return (
     <AuthLayout
       panelTitle="Your role in better care starts here."
-      panelText="Make your caregiver account, then sign in to see your shift and tasks."
+      panelText="Make your caregiver account. Once an administrator approves it, sign in to see your shift and tasks."
     >
       <h1 className="auth__title">Create your account</h1>
       <p className="auth__subtitle">For Orchid Carehome caregivers.</p>

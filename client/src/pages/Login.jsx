@@ -7,19 +7,32 @@ import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
 
+// Why api.js signed the person out (e.g. "Your account is inactive."), shown once
+function readSignedOutReason() {
+  try {
+    const reason = sessionStorage.getItem('agapay.signedOut');
+    sessionStorage.removeItem('agapay.signedOut');
+    return reason;
+  } catch {
+    return null;
+  }
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, login } = useAuth();
 
-  // Register sends people here with their Employee ID after creating an account
+  // Register sends people here with their Employee ID and the backend's "waiting for approval" message
   const justRegistered = location.state?.registered;
-  // api.js sends people here with ?expired=1 when their login token runs out
+  // api.js sends people here with ?expired=1 when their session ends,
+  // and saves the reason when the account was deactivated
   const sessionExpired = new URLSearchParams(location.search).has('expired');
+  const [signedOutReason] = useState(readSignedOutReason);
   const [username, setUsername] = useState(location.state?.username ?? '');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null); // { tone, text }
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
@@ -28,10 +41,10 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
 
     const found = {};
-    if (!username.trim()) found.username = 'Please enter your Employee ID.';
+    if (!username.trim()) found.username = 'Please enter your Employee ID or email.';
     if (!password) found.password = 'Please enter your password.';
     setFieldErrors(found);
     if (Object.keys(found).length > 0) return;
@@ -42,11 +55,16 @@ export default function Login() {
       login(data);
       navigate('/dashboard');
     } catch (err) {
-      setError(
-        err.response
-          ? err.response.data?.message || 'Sign in failed. Please try again.'
-          : "Can't reach the server. Please check that the backend is running."
-      );
+      const status = err.response?.status;
+      const message = err.response?.data?.message;
+      // 403 = right password, but the account is waiting for approval or inactive
+      const waiting = status === 403 && /approval/i.test(message ?? '');
+      setError({
+        tone: waiting ? 'info' : 'error',
+        text: err.response
+          ? message || 'Sign in failed. Please try again.'
+          : "Can't reach the server. Please check that the backend is running.",
+      });
     } finally {
       setLoading(false);
     }
@@ -58,33 +76,35 @@ export default function Login() {
       panelText="See your shift, your tasks, and the latest handover."
     >
       <h1 className="auth__title">Sign in</h1>
-      <p className="auth__subtitle">Sign in with your Employee ID and password.</p>
+      <p className="auth__subtitle">Sign in with your Employee ID or email and your password.</p>
 
       {justRegistered && !error && (
         <div className="alert alert--success" role="status">
           <CircleCheck size={18} aria-hidden="true" />
-          <span>Your account was created. You can now sign in.</span>
+          <span>
+            {location.state?.message ?? 'Account created. An administrator needs to approve it before you can sign in.'}
+          </span>
         </div>
       )}
 
       {sessionExpired && !justRegistered && !error && (
-        <div className="alert alert--info" role="status">
+        <div className={`alert alert--${signedOutReason ? 'error' : 'info'}`} role="status">
           <CircleAlert size={18} aria-hidden="true" />
-          <span>Your session has ended. Please sign in again.</span>
+          <span>{signedOutReason ? `You were signed out. ${signedOutReason}` : 'Your session has ended. Please sign in again.'}</span>
         </div>
       )}
 
       {error && (
-        <div className="alert alert--error" role="alert">
+        <div className={`alert alert--${error.tone}`} role={error.tone === 'error' ? 'alert' : 'status'}>
           <CircleAlert size={18} aria-hidden="true" />
-          <span>{error}</span>
+          <span>{error.text}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} noValidate className="auth__form">
         <FormField
           id="login-username"
-          label="Employee ID"
+          label="Employee ID or email"
           placeholder="e.g. CGV-2026-017"
           autoComplete="username"
           value={username}

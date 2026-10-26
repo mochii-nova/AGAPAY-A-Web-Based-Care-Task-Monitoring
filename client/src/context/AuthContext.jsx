@@ -1,15 +1,47 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import api from '../api';
 import { disconnectFromServer } from '../utils/push';
 
 const AuthContext = createContext();
 
+const readUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch {
+    return null;
+  }
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [user, setUser] = useState(readUser);
+
+  // Keeps the saved copy of the user in step with what the app shows
+  const saveUser = (next) => {
+    localStorage.setItem('user', JSON.stringify(next));
+    setUser(next);
+  };
+
+  // Session check: when the app opens, ask the backend who is signed in.
+  // A deactivated account or an expired token answers 401, and api.js then signs the person out.
+  // If the server can't be reached, the saved user is kept so the page can show its own message.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId || !localStorage.getItem('token')) return;
+    let cancelled = false;
+    api
+      .get('/users/me')
+      .then(({ data }) => {
+        if (!cancelled) saveUser(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const login = (data) => {
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
+    saveUser(data.user);
   };
 
   const logout = () => {
@@ -21,7 +53,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser: saveUser }}>
       {children}
     </AuthContext.Provider>
   );

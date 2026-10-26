@@ -19,7 +19,9 @@ export default function RecentHandoverCard({ handover, onMarkRead, busy }) {
   }
 
   const read = !!handover.acknowledgedBy;
-  const note = handover.data ? handover.data.summary || handoverSummary(handover) : handover.text;
+  // Form handovers: their "Other notes", or a short line like "1 resident to watch".
+  // (data.summary is the task counts, not text.)
+  const note = handover.data ? handover.data.other || handoverSummary(handover) : handover.text;
   const firstName = handover.author?.name?.split(' ')[0];
 
   return (
