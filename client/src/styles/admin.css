@@ -90,17 +90,86 @@
 .temp-password { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin: 4px 0 12px; border-radius: var(--radius-sm); background: var(--tint); }
 .temp-password code { font-size: 1.2rem; font-weight: var(--fw-bold); letter-spacing: 0.04em; overflow-wrap: anywhere; }
 
+/* Manage Residents: the list cards (layout and card look come from residents.css) */
+.admin-residents__toolbar { flex-wrap: wrap; }
+.admin-residents__toolbar .search-box { flex: 1 1 100%; }
+.admin-residents__toolbar .select { flex: 1 1 160px; width: auto; }
+.resident-card__status { flex-shrink: 0; margin-left: auto; }
+.resident-card__ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.resident-details__gap { color: var(--overdue-text); font-weight: var(--fw-medium); }
+
+/* Resident details (panel and pop-up) */
+.resident-details__who { flex: 1; min-width: 0; }
+.resident-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin: 0 0 4px; }
+.resident-facts dt { margin-bottom: 4px; }
+.resident-facts dd { margin: 0; }
+.resident-details__note { margin: 10px 0 0; font-size: 0.93rem; }
+.resident-details__note span { color: var(--muted); }
+.resident-details__columns { display: grid; grid-template-columns: minmax(0, 1fr); }
+.resident-details__list { margin-bottom: 12px; }
+.resident-details__list div { padding: 9px 0; }
+.resident-details__list dt { flex-shrink: 0; }
+.resident-details__list dd { min-width: 0; overflow-wrap: anywhere; }
+.resident-details__phone { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); color: var(--indigo); }
+.resident-details__wide { width: 100%; }
+.resident-details__tasks { list-style: none; margin: 0; padding: 0; }
+.resident-details__tasks li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; color: var(--muted); font-size: 0.92rem; }
+.resident-details__tasks li + li { border-top: 1px solid var(--border); }
+.resident-details__tasks strong { color: var(--text); font-weight: var(--fw-medium); }
+.resident-details__tasks .status-pill { flex-shrink: 0; }
+.resident-details .state-msg { padding: 16px; }
+.resident-details__handover { padding: 14px 16px; margin-top: 16px; border-radius: var(--radius-sm); background: var(--tint); }
+.resident-details__handover p { margin: 0; }
+.resident-details__handover .small-label { margin-bottom: 6px; }
+
+/* Add / edit resident: care needs as tick boxes */
+.need-picker { margin: 0 0 16px; padding: 0; border: 0; }
+.need-picker__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.need-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.need-picker__option:hover { background: var(--tint); }
+.need-picker__option:has(input:checked) { border-color: var(--indigo); background: var(--indigo-soft); }
+.need-picker__option input,
+.assign__option input { width: 18px; height: 18px; margin: 0; flex-shrink: 0; accent-color: var(--indigo); cursor: pointer; }
+.resident-form__group { margin: 4px 0 10px; }
+
+/* Choose caregivers */
+.assign__intro { margin: 0 0 16px; color: var(--muted); }
+.assign__group { margin: 0 0 14px; padding: 0; border: 0; }
+.assign__group .small-label { margin-bottom: 6px; padding: 0; }
+.assign__option { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+.assign__option:hover { background: var(--tint); }
+.assign__option:has(input:checked) { background: var(--indigo-soft); }
+.assign__who { display: flex; flex-direction: column; min-width: 0; }
+.assign__who strong { font-weight: var(--fw-medium); }
+.assign__who small { color: var(--muted); font-size: 0.82rem; }
+
 /* Smaller screens: the table takes the full width; details open as a pop-up */
 @media (max-width: 1100px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); }
+  .resident-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .resident-details__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
 }
 @media (max-width: 760px) {
   .data-table__wide-only { display: none; }
   .admin-toolbar .select { flex: 1 1 140px; width: auto; }
+  .resident-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resident-details__columns { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {
   .admin-banner .btn { width: 100%; }
   .data-table th, .data-table td { padding: 10px 8px; }
   .staff-form__password { flex-direction: column; gap: 0; }
   .staff-form__password .btn { margin: 0 0 12px; }
+  .need-picker__options { grid-template-columns: minmax(0, 1fr); }
+  .resident-details__tasks li { align-items: flex-start; }
 }

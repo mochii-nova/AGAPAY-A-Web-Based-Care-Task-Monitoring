@@ -11,6 +11,7 @@ import Notifications from './pages/Notifications';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import ManageStaff from './pages/admin/ManageStaff';
+import ManageResidents from './pages/admin/ManageResidents';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import { useAuth } from './context/AuthContext';
@@ -50,6 +51,7 @@ export default function App() {
           {/* TODO (admin phase 6): the admin Dashboard; until then /admin opens Manage Staff */}
           <Route index element={<Navigate to="staff" replace />} />
           <Route path="staff" element={<ManageStaff />} />
+          <Route path="residents" element={<ManageResidents />} />
         </Route>
       </Route>
 

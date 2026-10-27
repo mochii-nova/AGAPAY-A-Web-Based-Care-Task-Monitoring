@@ -39,7 +39,10 @@ const CAREGIVER_GROUPS = [
 const ADMIN_GROUPS = [
   {
     title: 'People',
-    items: [{ to: '/admin/staff', label: 'Manage Staff', icon: Users }],
+    items: [
+      { to: '/admin/staff', label: 'Manage Staff', icon: Users },
+      { to: '/admin/residents', label: 'Manage Residents', icon: UserRound },
+    ],
   },
 ];
 
