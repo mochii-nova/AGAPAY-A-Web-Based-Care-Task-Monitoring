@@ -19,6 +19,7 @@ import CareNeeds from '../../components/residents/CareNeeds';
 import ResidentDetails from '../../components/admin/ResidentDetails';
 import ResidentFormModal, { nextResidentCode } from '../../components/admin/ResidentFormModal';
 import AssignCaregiversModal from '../../components/admin/AssignCaregiversModal';
+import TaskFormModal from '../../components/admin/TaskFormModal';
 import { LoadingState, ErrorState, EmptyState } from '../../components/StateMessage';
 import '../../styles/residents.css';
 import '../../styles/admin.css';
@@ -55,6 +56,7 @@ export default function ManageResidents() {
   const [need, setNeed] = useState('');
   const [form, setForm] = useState(null); // { resident } for Edit, {} for Add
   const [assignFor, setAssignFor] = useState(null);
+  const [taskFor, setTaskFor] = useState(null);
   const [deleteFor, setDeleteFor] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -135,6 +137,7 @@ export default function ManageResidents() {
       tasksLoading={tasksQuery.status === 'loading'}
       latest={latestOf(selected)}
       onEdit={() => setForm({ resident: selected })}
+      onAddTask={() => setTaskFor(selected)}
       onAssign={() => setAssignFor(selected)}
       onDelete={() => askDelete(selected)}
       showName={!isNarrow}
@@ -253,6 +256,23 @@ export default function ManageResidents() {
         residentCount={(id) => residents.filter((r) => r.caregivers.some((c) => c.id === id)).length}
         onSave={saveCaregivers}
         onClose={() => setAssignFor(null)}
+      />
+      <TaskFormModal
+        open={!!taskFor}
+        preset={{ residentId: taskFor?.id, date: today }}
+        residents={residents}
+        caregivers={caregivers}
+        onSaved={(saved, { offDays, partial }) => {
+          tasksQuery.reload({ silent: true });
+          if (!partial) {
+            showToast(
+              saved.length === 1
+                ? `Created ${saved[0].task} for ${taskFor.name}.`
+                : `Created ${saved.length} tasks for ${taskFor.name}.${offDays ? ` ${offDays} without a caregiver.` : ''}`
+            );
+          }
+        }}
+        onClose={() => setTaskFor(null)}
       />
       <ConfirmModal
         open={!!deleteFor}

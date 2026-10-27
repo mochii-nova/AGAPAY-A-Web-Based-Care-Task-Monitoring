@@ -153,6 +153,20 @@
 .assign__who strong { font-weight: var(--fw-medium); }
 .assign__who small { color: var(--muted); font-size: 0.82rem; }
 
+/* Edit + Add task, top right of the resident details */
+.resident-details__top-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+/* Tasks & Care: day picker next to the tabs, filters underneath */
+.day-picker { display: flex; flex-shrink: 0; align-items: center; gap: 6px; }
+.field__input.day-picker__input { width: 160px; }
+.card .admin-tasks__filters { border-bottom: 1px solid var(--border); }
+.admin-tasks__filters .select { flex: 0 0 170px; width: 170px; }
+.admin-task-table .task-table__time { width: 100px; }
+.admin-task-table .task-table__resident small,
+.admin-task-table .task-table__time small { display: block; }
+.admin-tasks__footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
+.task-view__list dd { max-width: 65%; overflow-wrap: anywhere; }
+
 /* Smaller screens: the table takes the full width; details open as a pop-up */
 @media (max-width: 1100px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); }
@@ -164,6 +178,23 @@
   .admin-toolbar .select { flex: 1 1 140px; width: auto; }
   .resident-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .resident-details__columns { grid-template-columns: minmax(0, 1fr); }
+  .card .admin-tasks__filters { padding: 0 0 14px; border: 0; }
+  .admin-tasks__filters .select { flex: 1 1 140px; width: auto; }
+  .day-picker { width: 100%; }
+  .field__input.day-picker__input { flex: 1; width: auto; }
+  /* Each task as a small card: task + status / time + caregiver / resident / View */
+  .admin-task-table .task-table__row { grid-template-areas: 'task status' 'time caregiver' 'resident resident' 'action action'; }
+  .admin-task-table .task-table__task { grid-area: task; }
+  .admin-task-table .task-table__status { grid-area: status; align-self: start; }
+  .admin-task-table .task-table__time { grid-area: time; width: auto; }
+  .admin-task-table .task-table__time small { display: inline; }
+  .admin-task-table .task-table__time small::before { content: ' · '; }
+  .admin-task-table .task-table__caregiver { grid-area: caregiver; justify-self: end; color: var(--muted); }
+  .admin-task-table .task-table__resident { grid-area: resident; }
+  .admin-task-table .task-table__resident small { display: inline; }
+  .admin-task-table .task-table__resident small::before { content: ' · '; }
+  .admin-task-table .task-table__action { grid-area: action; }
+  .admin-tasks__footer { padding: 4px 0 0; border: 0; }
 }
 @media (max-width: 600px) {
   .admin-banner .btn { width: 100%; }

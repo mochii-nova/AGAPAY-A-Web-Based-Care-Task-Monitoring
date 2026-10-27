@@ -44,6 +44,10 @@ const ADMIN_GROUPS = [
       { to: '/admin/residents', label: 'Manage Residents', icon: UserRound },
     ],
   },
+  {
+    title: 'Care operations',
+    items: [{ to: '/admin/tasks', label: 'Tasks & Care', icon: ClipboardList }],
+  },
 ];
 
 // One menu link. When the sidebar is collapsed, only the icon shows and the label

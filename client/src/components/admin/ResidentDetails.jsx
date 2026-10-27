@@ -1,4 +1,5 @@
-import { ClipboardList, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ClipboardList, Phone, Plus } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
 import CareNeeds from '../residents/CareNeeds';
@@ -12,7 +13,7 @@ import { shortDate, longDate } from '../../utils/staff';
 // Used in the side panel (laptops) and in a pop-up (tablets and phones).
 // `staff`: every account, to know each assigned caregiver's shift.
 // `latest`: { handover, update } — the newest handover that mentions this resident, or null.
-export default function ResidentDetails({ resident, staff, tasks, tasksLoading, latest, onEdit, onAssign, onDelete, showName = true }) {
+export default function ResidentDetails({ resident, staff, tasks, tasksLoading, latest, onEdit, onAddTask, onAssign, onDelete, showName = true }) {
   const firstName = resident.name.split(' ')[0];
   const contact = resident.emergencyContact ?? {};
   const notSet = <span className="profile-unset">Not set yet</span>;
@@ -35,7 +36,12 @@ export default function ResidentDetails({ resident, staff, tasks, tasksLoading, 
           {showName && <h2 className="staff-details__name">{resident.name}</h2>}
           <p className="staff-details__sub">{resident.residentCode} · Room {resident.room}</p>
         </div>
-        <button type="button" className="btn btn--soft" onClick={onEdit}>Edit</button>
+        <div className="resident-details__top-actions">
+          <button type="button" className="btn btn--soft" onClick={onEdit}>Edit</button>
+          <button type="button" className="btn btn--primary" onClick={onAddTask}>
+            <Plus size={18} aria-hidden="true" /> Add task
+          </button>
+        </div>
       </div>
 
       <dl className="resident-facts">
@@ -94,8 +100,10 @@ export default function ResidentDetails({ resident, staff, tasks, tasksLoading, 
       </div>
 
       <section className="staff-details__section">
-        {/* TODO (admin phase 3): "Open in Tasks & Care" and "Add task" once that page exists */}
-        <h3 className="small-label">Today's tasks</h3>
+        <div className="profile-section__head">
+          <h3 className="small-label">Today's tasks</h3>
+          <Link to={`/admin/tasks?q=${encodeURIComponent(resident.name)}`} className="card__link">Open in Tasks & Care</Link>
+        </div>
         {tasksLoading ? (
           <LoadingState label="Loading tasks…" />
         ) : tasks.length === 0 ? (
