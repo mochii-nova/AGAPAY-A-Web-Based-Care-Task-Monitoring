@@ -8,7 +8,7 @@ export const homeFor = (user) => (isAdmin(user) ? '/admin' : '/dashboard');
 // Notifications are written with caregiver links ("/handover", "/tasks?open=12").
 // For an administrator, the same thing lives on the admin side.
 const ADMIN_LINKS = [
-  ['/handover', '/admin/handovers'],
+  ['/handover', '/admin/handover'],
   ['/tasks', '/admin/tasks'],
   ['/schedule', '/admin/schedule'],
   ['/residents', '/admin/residents'],

@@ -91,6 +91,16 @@ export const parseHandovers = (list, myId) => list.map((h) => parseHandover(h, m
 export const updateFor = (handover, resident) =>
   handover?.data?.residents.find((u) => (u.residentId ? u.residentId === resident.id : u.name === resident.name));
 
+// The newest handover with an update about this resident: { handover, update } or null.
+// (`handovers` newest first, as the backend sends them.)
+export function latestUpdate(handovers, resident) {
+  for (const handover of handovers) {
+    const update = updateFor(handover, resident);
+    if (update && RESIDENT_STATUS[update.status]) return { handover, update };
+  }
+  return null;
+}
+
 // Who has read a handover: everyone with a read receipt (older handovers: the first reader)
 export function readersOf(h) {
   if (h.reads?.length) return h.reads;

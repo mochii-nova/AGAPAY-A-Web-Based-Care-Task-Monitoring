@@ -1,7 +1,7 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
-  Bell, Mail, LogOut, UserPen, Camera, X, IdCard, Inbox,
+  Bell, Mail, LogOut, UserPen, Camera, X, IdCard, Inbox, LayoutGrid, ChartColumn,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -35,8 +35,12 @@ const CAREGIVER_GROUPS = [
   },
 ];
 
-// Menu groups for administrators (each admin page is added here as it is built)
+// Menu groups for administrators. `end`: only selected on that exact page (every admin page starts with /admin)
 const ADMIN_GROUPS = [
+  {
+    title: 'Overview',
+    items: [{ to: '/admin', label: 'Dashboard', icon: LayoutGrid, end: true }],
+  },
   {
     title: 'People',
     items: [
@@ -53,6 +57,10 @@ const ADMIN_GROUPS = [
     ],
   },
   {
+    title: 'Insights',
+    items: [{ to: '/admin/reports', label: 'Reports', icon: ChartColumn }],
+  },
+  {
     title: 'Website',
     items: [{ to: '/admin/contact', label: 'Contact messages', icon: Inbox }],
   },
@@ -60,9 +68,9 @@ const ADMIN_GROUPS = [
 
 // One menu link. When the sidebar is collapsed, only the icon shows and the label
 // becomes a tooltip; a badge turns into a small dot.
-function SideLink({ to, label, icon: Icon, badge, badgeLabel, tone, onClick }) {
+function SideLink({ to, end, label, icon: Icon, badge, badgeLabel, tone, onClick }) {
   return (
-    <NavLink to={to} className="sidebar__link" onClick={onClick} aria-label={badge ? `${label}, ${badgeLabel}` : label}>
+    <NavLink to={to} end={end} className="sidebar__link" onClick={onClick} aria-label={badge ? `${label}, ${badgeLabel}` : label}>
       <Icon size={18} aria-hidden="true" />
       <span className="sidebar__label" aria-hidden="true">{label}</span>
       {badge && <span className={`count-badge ${tone === 'new' ? 'count-badge--new' : ''}`} aria-hidden="true">{badge}</span>}

@@ -53,7 +53,8 @@ export default function TasksCare() {
   const [shiftFilter, setShiftFilter] = useState('');
   const [caregiverFilter, setCaregiverFilter] = useState('');
   const [category, setCategory] = useState('');
-  const [viewId, setViewId] = useState(null);
+  // ?open=<task id> opens that task (the Dashboard and task notifications link here like that)
+  const [viewId, setViewId] = useState(() => Number(searchParams.get('open')) || null);
   const [form, setForm] = useState(null); // { task } for Edit, {} for Create
   const [deleteFor, setDeleteFor] = useState(null);
   const [deleting, setDeleting] = useState(false);

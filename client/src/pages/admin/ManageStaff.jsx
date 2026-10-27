@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Search, Users, UserPlus } from 'lucide-react';
 import { useStaff } from '../../context/StaffContext';
 import { useAuth } from '../../context/AuthContext';
@@ -60,10 +60,12 @@ export default function ManageStaff() {
   const { residents } = useResidents();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [shiftFilter, setShiftFilter] = useState('');
-  const [form, setForm] = useState(null); // { person } for Edit, {} for Add
+  // { person } for Edit, {} for Add (the Dashboard's "Add staff" opens it straight away)
+  const [form, setForm] = useState(() => (location.state?.add ? {} : null));
   const [resetFor, setResetFor] = useState(null);
   const [confirm, setConfirm] = useState(null); // { person, action, status }
   const [confirmBusy, setConfirmBusy] = useState(false);

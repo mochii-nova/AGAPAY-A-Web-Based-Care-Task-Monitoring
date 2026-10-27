@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Search, Users, UserPlus } from 'lucide-react';
 import api from '../../api';
 import { useStaff } from '../../context/StaffContext';
@@ -10,7 +10,7 @@ import useResidents from '../../hooks/useResidents';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { isoDay } from '../../hooks/useShifts';
 import { TASK_CATEGORIES } from '../../constants';
-import { RESIDENT_STATUS, updateFor } from '../../utils/handover';
+import { RESIDENT_STATUS, latestUpdate } from '../../utils/handover';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
 import Modal from '../../components/Modal';
@@ -30,16 +30,6 @@ const STATUS_FILTERS = [
   { value: 'unassigned', label: 'No caregiver yet' },
 ];
 
-// The newest handover that has an update about this resident: { handover, update } or null.
-// (Handovers come newest first.)
-function latestUpdate(handovers, resident) {
-  for (const handover of handovers) {
-    const update = updateFor(handover, resident);
-    if (update && RESIDENT_STATUS[update.status]) return { handover, update };
-  }
-  return null;
-}
-
 // Add residents, keep their details up to date and choose who looks after them
 export default function ManageResidents() {
   const { residents, status, error, reload, setData } = useResidents();
@@ -51,10 +41,12 @@ export default function ManageResidents() {
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 600px)');
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [need, setNeed] = useState('');
-  const [form, setForm] = useState(null); // { resident } for Edit, {} for Add
+  // { resident } for Edit, {} for Add (the Dashboard's "Add resident" opens it straight away)
+  const [form, setForm] = useState(() => (location.state?.add ? {} : null));
   const [assignFor, setAssignFor] = useState(null);
   const [taskFor, setTaskFor] = useState(null);
   const [deleteFor, setDeleteFor] = useState(null);

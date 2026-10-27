@@ -16,6 +16,8 @@ import TasksCare from './pages/admin/TasksCare';
 import AdminSchedule from './pages/admin/AdminSchedule';
 import HandoverMonitor from './pages/admin/HandoverMonitor';
 import ContactMessages from './pages/admin/ContactMessages';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import Reports from './pages/admin/Reports';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import { useAuth } from './context/AuthContext';
@@ -52,14 +54,14 @@ export default function App() {
 
         {/* Administrators only */}
         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Outlet /></ProtectedRoute>}>
-          {/* TODO (admin phase 6): the admin Dashboard; until then /admin opens Manage Staff */}
-          <Route index element={<Navigate to="staff" replace />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="staff" element={<ManageStaff />} />
           <Route path="residents" element={<ManageResidents />} />
           <Route path="tasks" element={<TasksCare />} />
           <Route path="schedule" element={<AdminSchedule />} />
           <Route path="handover" element={<HandoverMonitor />} />
           <Route path="contact" element={<ContactMessages />} />
+          <Route path="reports" element={<Reports />} />
         </Route>
       </Route>
 

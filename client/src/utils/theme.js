@@ -27,6 +27,12 @@ function apply() {
 // When "System" is chosen and the computer switches between light and dark
 darkQuery.addEventListener('change', apply);
 
+// Paper is white: always print with the light colours (dark-mode text would be too pale), then switch back
+window.addEventListener('beforeprint', () => {
+  document.documentElement.dataset.theme = 'light';
+});
+window.addEventListener('afterprint', apply);
+
 export function setTheme(next) {
   choice = next;
   try {

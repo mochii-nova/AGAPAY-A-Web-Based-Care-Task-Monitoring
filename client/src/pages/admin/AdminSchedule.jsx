@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarPlus, CalendarDays } from 'lucide-react';
 import api from '../../api';
 import { useStaff } from '../../context/StaffContext';
@@ -24,6 +25,7 @@ import '../../styles/admin.css';
 export default function AdminSchedule() {
   const { staff } = useStaff();
   const showToast = useToast();
+  const location = useLocation();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 760px)');
   const now = new Date();
@@ -33,7 +35,8 @@ export default function AdminSchedule() {
   const [who, setWho] = useState('');
   const [picked, setPicked] = useState(null);
   const [busyId, setBusyId] = useState(null);
-  const [filling, setFilling] = useState(false);
+  // The Dashboard's "Fill a month" opens it straight away
+  const [filling, setFilling] = useState(() => !!location.state?.add);
 
   const focusDate = dayToDate(focus);
   const days = view === 'week' ? weekDays(focusDate) : monthGrid(focusDate);
