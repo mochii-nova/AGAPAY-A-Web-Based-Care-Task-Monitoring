@@ -1,7 +1,7 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
-  Bell, Mail, LogOut, UserPen, Camera, X, IdCard,
+  Bell, Mail, LogOut, UserPen, Camera, X, IdCard, Inbox,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -49,7 +49,12 @@ const ADMIN_GROUPS = [
     items: [
       { to: '/admin/tasks', label: 'Tasks & Care', icon: ClipboardList },
       { to: '/admin/schedule', label: 'Schedule', icon: CalendarDays },
+      { to: '/admin/handover', label: 'Handover', icon: FileText },
     ],
+  },
+  {
+    title: 'Website',
+    items: [{ to: '/admin/contact', label: 'Contact messages', icon: Inbox }],
   },
 ];
 

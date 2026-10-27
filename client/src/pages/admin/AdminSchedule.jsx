@@ -31,9 +31,7 @@ export default function AdminSchedule() {
   const [view, setView] = useState('week');
   const [focus, setFocus] = useState(today); // a day in the week / month shown
   const [who, setWho] = useState('');
-  // Laptops always show a shift in the panel (today's Morning until you pick one)
   const [picked, setPicked] = useState(null);
-  const selected = picked ?? (isNarrow ? null : { date: today, shift: SHIFTS[0] });
   const [busyId, setBusyId] = useState(null);
   const [filling, setFilling] = useState(false);
 
@@ -41,6 +39,12 @@ export default function AdminSchedule() {
   const days = view === 'week' ? weekDays(focusDate) : monthGrid(focusDate);
   const from = isoDay(days[0]);
   const to = isoDay(days[days.length - 1]);
+  // The panel only knows the roster of the days on screen, so a pick from another week or month is
+  // dropped. Laptops always show a shift: today's Morning, or the first day shown.
+  const firstShown = view === 'week' ? from : isoDay(new Date(focusDate.getFullYear(), focusDate.getMonth(), 1));
+  const onScreen = (ymd) => ymd >= from && ymd <= to;
+  const selected =
+    picked && onScreen(picked.date) ? picked : isNarrow ? null : { date: onScreen(today) ? today : firstShown, shift: picked?.shift ?? SHIFTS[0] };
   // One day more each side: the panel checks for back-to-back shifts
   const rosterQuery = useApiData(`/shifts?from=${addDays(from, -1)}&to=${addDays(to, 1)}`);
   const tasksQuery = useApiData(`/tasks?from=${from}&to=${addDays(to, 1)}`);

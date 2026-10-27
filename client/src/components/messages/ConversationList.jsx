@@ -1,11 +1,11 @@
 import Avatar from '../Avatar';
 import { timeAgo } from '../../utils/format';
 
-// Left column: one row per administrator, newest conversation first
-export default function ConversationList({ conversations, selectedId, myId, onSelect }) {
+// Left column: one row per person, newest conversation first
+export default function ConversationList({ title = 'Administrators', conversations, selectedId, myId, onSelect }) {
   return (
     <nav className="convo-pane" aria-label="Conversations">
-      <p className="small-label convo-pane__title">Administrators</p>
+      <p className="small-label convo-pane__title">{title}</p>
       <ul className="convo-list">
         {conversations.map(({ user, last, unread }) => {
           const preview = last ? `${last.senderId === myId ? 'You: ' : ''}${last.body}` : 'No messages yet';

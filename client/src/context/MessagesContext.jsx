@@ -25,7 +25,9 @@ export function MessagesProvider({ children }) {
   // Sends a message; resolves to the saved message, or throws with the backend's reason
   const send = async (otherId, body) => {
     const { data } = await api.post(`/messages/${otherId}`, { body: body.trim().slice(0, MAX_MESSAGE) });
-    update(otherId, () => ({ last: data }));
+    // A first message to someone new (administrators): load the list again so they're in it
+    if (conversations.some((c) => c.user.id === otherId)) update(otherId, () => ({ last: data }));
+    else query.reload({ silent: true });
     return data;
   };
 

@@ -240,6 +240,56 @@
 .fill-month__clear { margin: -6px 0 10px; }
 .fill-month__summary { margin: 0; }
 
+/* Handover monitoring: filters in the header, four totals, then the table + details */
+.admin-handover__filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-handover__filters .select { width: 160px; }
+.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0 0 20px; padding: 0; }
+.card.stat-card { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px; }
+.stat-card__value { font-size: 1.9rem; font-weight: var(--fw-bold); line-height: 1.1; }
+.stat-card__value--completed { color: var(--completed-text); }
+.stat-card__value--pending { color: var(--pending-text); }
+.stat-card__value--overdue { color: var(--overdue-text); }
+.admin-handover__layout { grid-template-columns: minmax(0, 1fr) 380px; }
+.admin-handover__list .cell-person small { white-space: nowrap; }
+.handover-details .day-panel__shift-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.handover-details__empty { margin: 0 0 14px; color: var(--muted); }
+.handover-details__reads { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border); }
+.handover-details__reads .small-label { margin-bottom: 6px; }
+.handover-details__readers { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--completed-bg); color: var(--completed-text); font-size: 0.92rem; }
+.handover-details__readers li { display: flex; align-items: center; gap: 8px; }
+.handover-details__unread { margin: 0; color: var(--overdue-text); font-size: 0.92rem; }
+.handover-details__actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+
+/* Contact messages */
+.contact-list { list-style: none; margin: 0; padding: 0; }
+.contact-item { padding: 16px 20px; }
+.contact-item + .contact-item { border-top: 1px solid var(--border); }
+.contact-item__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.contact-item__head strong { display: block; font-weight: var(--fw-medium); }
+.contact-item__email { color: var(--indigo); font-size: 0.9rem; overflow-wrap: anywhere; }
+.contact-item__meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
+.contact-item__subject { margin: 10px 0 0; font-weight: var(--fw-medium); }
+.contact-item__body { margin: 4px 0 0; white-space: pre-line; overflow-wrap: anywhere; }
+.contact-item__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* Messages (admins): "New message to…" */
+.messages__new { width: 240px; }
+
+/* Print (Handover "Print"): only the handover details, on white */
+@media print {
+  body:has(.handover-print) .sidebar,
+  body:has(.handover-print) .topbar,
+  body:has(.handover-print) .page-header,
+  body:has(.handover-print) .stat-row,
+  body:has(.handover-print) .admin-handover__list,
+  body:has(.handover-print) .no-print,
+  body:has(.handover-print) .toasts { display: none !important; }
+  body:has(.handover-print) .admin-layout { display: block; }
+  body:has(.handover-print) .card.admin-panel { position: static; max-height: none; overflow: visible; border: 0; box-shadow: none; }
+  body:has(.handover-print) .app-layout,
+  body:has(.handover-print) .app-main { display: block; padding: 0; margin: 0; }
+}
+
 /* Smaller screens: the table takes the full width; details open as a pop-up */
 @media (max-width: 1100px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); }
@@ -276,6 +326,12 @@
   .staff-form__password .btn { margin: 0 0 12px; }
   .need-picker__options { grid-template-columns: minmax(0, 1fr); }
   .weekday-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .admin-handover__filters,
+  .admin-handover__filters .select,
+  .messages__new { width: 100%; }
+  .contact-item { padding: 14px; }
+  .contact-item__actions .btn { flex: 1; }
   .admin-schedule__toolbar .date-nav { width: 100%; }
   .admin-schedule__toolbar .segmented,
   .admin-schedule__toolbar .select { flex: 1 1 140px; width: auto; }

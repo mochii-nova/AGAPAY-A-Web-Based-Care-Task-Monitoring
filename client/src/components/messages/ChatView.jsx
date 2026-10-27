@@ -17,13 +17,14 @@ function dayLabel(iso) {
   return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-// Right column: the messages with one administrator, and the box to write a new one
-export default function ChatView({ conversation, onBack }) {
+// Right column: the messages with one person, and the box to write a new one.
+// `initialDraft` fills in the box (e.g. a handover reminder); onSent() runs after a message is sent.
+export default function ChatView({ conversation, initialDraft = '', onSent, onBack }) {
   const { myId, send, markRead } = useMessages();
   const { user } = conversation;
   const query = useApiData(`/messages/${user.id}`, { refreshEvery: REFRESH });
   const messages = query.data ?? [];
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(initialDraft);
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef(null);
@@ -52,6 +53,7 @@ export default function ChatView({ conversation, onBack }) {
       const saved = await send(user.id, text);
       query.setData((list) => [...list, saved]);
       setDraft('');
+      onSent?.();
     } catch (err) {
       setError(
         err.response
@@ -70,6 +72,9 @@ export default function ChatView({ conversation, onBack }) {
   };
 
   const lastMine = messages.findLast((m) => m.senderId === myId);
+  // "Caregiver · Night lead" (the job title is left out when it just repeats the role)
+  const role = user.role === 'admin' ? 'Administrator' : 'Caregiver';
+  const who = [role, user.title?.toLowerCase() === role.toLowerCase() ? null : user.title].filter(Boolean).join(' · ');
 
   return (
     <section className="chat-pane" aria-label={`Conversation with ${user.name}`}>
@@ -82,7 +87,7 @@ export default function ChatView({ conversation, onBack }) {
         <Avatar name={user.name} size={40} />
         <div className="chat-pane__who">
           <h2>{user.name}</h2>
-          <small>Administrator · {user.title}</small>
+          <small>{who}</small>
         </div>
       </header>
 
