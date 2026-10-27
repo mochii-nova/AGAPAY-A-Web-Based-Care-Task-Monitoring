@@ -167,6 +167,79 @@
 .admin-tasks__footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
 .task-view__list dd { max-width: 65%; overflow-wrap: anywhere; }
 
+/* Schedule: toolbar (arrows + title, Week/Month, caregiver, Google Calendar note) */
+.schedule-toolbar.admin-schedule__toolbar { flex-wrap: wrap; }
+.admin-schedule__title { margin: 0 0 0 8px; font-size: 1rem; font-weight: var(--fw-medium); white-space: nowrap; }
+.admin-schedule__toolbar .select { flex: 0 0 190px; width: 190px; }
+.admin-schedule__gcal { display: flex; align-items: center; gap: 6px; margin: 0 0 0 auto; color: var(--muted); font-size: 0.85rem; }
+.admin-schedule__gcal svg { flex-shrink: 0; }
+.admin-schedule__gaps { margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
+
+/* Roster grid: shifts down the side, days across (phones: days down the side, shifts across) */
+.roster { display: grid; gap: 1px; background: var(--border); }
+.roster--week { grid-template-columns: 128px repeat(7, minmax(0, 1fr)); }
+.roster--days { grid-template-columns: 64px repeat(3, minmax(0, 1fr)); }
+.roster > * { background: var(--card); }
+.roster-corner { background: var(--tint) !important; }
+.roster-head { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 4px; background: var(--tint) !important; }
+.roster-head__weekday { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); text-transform: uppercase; }
+.roster-head__date { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-weight: var(--fw-medium); }
+.roster-head.is-today .roster-head__date { background: var(--indigo); color: var(--on-indigo); }
+.roster-shift { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 10px 12px; background: var(--tint) !important; }
+.roster-shift strong { font-weight: var(--fw-medium); }
+.roster-shift small { color: var(--muted); font-size: 0.78rem; }
+.roster--days .roster-shift { align-items: center; padding: 10px 4px; }
+.roster-slot {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 84px;
+  padding: 8px;
+  border: 0;
+  color: var(--text);
+  text-align: left;
+  transition: background-color 0.15s;
+}
+.roster-slot:hover { background: var(--tint); }
+.roster-slot[aria-pressed='true'] { background: var(--indigo-soft); box-shadow: inset 0 0 0 2px var(--indigo); }
+.roster-people { display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0; list-style: none; margin: 0; padding: 0; }
+.roster-chip { min-width: 0; padding: 3px 8px; overflow: hidden; border-radius: var(--radius-sm); background: var(--tint); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
+.roster-gap { padding: 3px 8px; border-radius: var(--radius-sm); background: var(--overdue-bg); color: var(--overdue-text); font-size: 0.8rem; font-weight: var(--fw-medium); }
+.roster--days .roster-slot { min-height: 56px; padding: 6px; }
+.roster--days .roster-chip { padding: 3px 6px; }
+.roster--days .roster-gap { font-size: 0.75rem; }
+
+/* Month roster: three short lines per day (phones: three dots) */
+.roster-month .month__day { min-height: 112px; gap: 6px; }
+.roster-month__lines { display: flex; flex-direction: column; gap: 2px; width: 100%; min-width: 0; }
+.roster-month__line { display: flex; gap: 4px; min-width: 0; font-size: 0.74rem; line-height: 1.35; }
+.roster-month__shift { flex-shrink: 0; width: 4.1em; color: var(--muted); }
+.roster-month__names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-month__line.is-gap .roster-month__names { color: var(--overdue-text); font-weight: var(--fw-medium); }
+.month__day.is-outside .roster-month__lines { opacity: 0.55; }
+.roster-month__dots { display: none; gap: 3px; }
+.roster-month__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo); }
+.roster-month__dot.is-gap { background: var(--overdue-dot); }
+
+/* The selected shift (side panel / pop-up) */
+.slot-panel .small-label { margin-bottom: 4px; }
+.segmented.slot-panel__shifts { display: flex; margin-bottom: 14px; }
+.slot-panel__shifts .segmented__btn { flex: 1; }
+.slot-panel__section { margin-top: 14px; }
+.slot-panel__section .small-label { margin-bottom: 6px; }
+.slot-panel__list { list-style: none; margin: 0; padding: 0; }
+.slot-panel__list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.slot-panel__list li + li { border-top: 1px solid var(--border); }
+.slot-panel__list .assign__who { flex: 1; }
+.slot-panel__list .btn { flex-shrink: 0; }
+.slot-panel__hint { margin-top: 8px; }
+
+/* Fill a month */
+.weekday-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.need-picker__option.weekday-picker__day { justify-content: center; gap: 6px; padding: 6px 4px; font-size: 0.88rem; }
+.fill-month__clear { margin: -6px 0 10px; }
+.fill-month__summary { margin: 0; }
+
 /* Smaller screens: the table takes the full width; details open as a pop-up */
 @media (max-width: 1100px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); }
@@ -202,5 +275,13 @@
   .staff-form__password { flex-direction: column; gap: 0; }
   .staff-form__password .btn { margin: 0 0 12px; }
   .need-picker__options { grid-template-columns: minmax(0, 1fr); }
+  .weekday-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .admin-schedule__toolbar .date-nav { width: 100%; }
+  .admin-schedule__toolbar .segmented,
+  .admin-schedule__toolbar .select { flex: 1 1 140px; width: auto; }
+  .admin-schedule__gcal { margin: 0; }
+  .roster-month .month__day { min-height: 60px; }
+  .roster-month__lines { display: none; }
+  .roster-month__dots { display: flex; }
   .resident-details__tasks li { align-items: flex-start; }
 }

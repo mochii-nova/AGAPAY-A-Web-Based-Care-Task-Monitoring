@@ -35,7 +35,7 @@ function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="staff-form" onSubmit={handleSubmit}>
       {error && (
         <div className="alert alert--error" role="alert">
           <CircleAlert size={18} aria-hidden="true" />

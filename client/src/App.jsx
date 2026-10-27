@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import ManageStaff from './pages/admin/ManageStaff';
 import ManageResidents from './pages/admin/ManageResidents';
 import TasksCare from './pages/admin/TasksCare';
+import AdminSchedule from './pages/admin/AdminSchedule';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import { useAuth } from './context/AuthContext';
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="staff" element={<ManageStaff />} />
           <Route path="residents" element={<ManageResidents />} />
           <Route path="tasks" element={<TasksCare />} />
+          <Route path="schedule" element={<AdminSchedule />} />
         </Route>
       </Route>
 

@@ -46,7 +46,10 @@ const ADMIN_GROUPS = [
   },
   {
     title: 'Care operations',
-    items: [{ to: '/admin/tasks', label: 'Tasks & Care', icon: ClipboardList }],
+    items: [
+      { to: '/admin/tasks', label: 'Tasks & Care', icon: ClipboardList },
+      { to: '/admin/schedule', label: 'Schedule', icon: CalendarDays },
+    ],
   },
 ];
 
