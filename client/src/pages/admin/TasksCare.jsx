@@ -207,7 +207,8 @@ export default function TasksCare() {
               </thead>
               <tbody>
                 {shown.map((t) => (
-                  <tr key={t.id} className="task-table__row">
+                  // The whole row opens the task (the View button stays for keyboards and screen readers)
+                  <tr key={t.id} className="task-table__row is-clickable" onClick={() => setViewId(t.id)}>
                     <td className="task-table__time">
                       {formatTime(t.dueAt)}
                       <small>{shiftOfDue(t.dueAt).shift.label}</small>

@@ -4,10 +4,7 @@ import CardHeader from '../CardHeader';
 import { EmptyState } from '../StateMessage';
 import { shiftLabel } from '../../constants';
 import { formatTime } from '../../utils/format';
-import { RESIDENT_STATUS } from '../../utils/handover';
-
-const when = (date) =>
-  `${formatTime(date)}, ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+import { RESIDENT_STATUS, submittedLine } from '../../utils/handover';
 
 // The newest handover from someone else, with "Mark as read" to confirm you've seen it
 export default function LastShiftCard({ handover, myId, onAcknowledge }) {
@@ -42,8 +39,8 @@ export default function LastShiftCard({ handover, myId, onAcknowledge }) {
         <span className={`status-pill status-pill--${read ? 'completed' : 'new'}`}>{read ? 'Read' : 'Unread'}</span>
       </CardHeader>
 
-      <p className="last-shift__meta">
-        {handover.author?.name} · submitted {when(handover.createdAt)}
+      <p className="last-shift__meta submitted-line">
+        {submittedLine(handover)}, {new Date(handover.submittedAt ?? handover.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </p>
 
       {flagged.map((r) => (
@@ -61,7 +58,6 @@ export default function LastShiftCard({ handover, myId, onAcknowledge }) {
       ) : (
         <p className="last-shift__text">{handover.text}</p>
       )}
-      <p className="signature">— {handover.author?.name?.split(' ')[0]}, {formatTime(handover.createdAt)}</p>
 
       {read ? (
         <p className="last-shift__read">

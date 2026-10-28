@@ -20,7 +20,7 @@
   --label: #5b5878;             /* small uppercase labels (6.4:1 on the page) */
   --apricot: #e08c6a;           /* tiny warm accent: "new" badges and hearts only (never for text) */
   --apricot-text: #a4502f;      /* apricot words, e.g. "1 new" (5.0:1 on --apricot-soft) */
-  --apricot-soft: #fdf1ea;      /* warm card background (quote card) */
+  --apricot-soft: #fdf1ea;      /* warm background */
   --apricot-line: #f6dccf;
 
   /* Warm surfaces, lightest to strongest */
@@ -40,7 +40,7 @@
   --text: #23223a;              /* main text (15:1 on white) */
   --muted: #68667e;             /* secondary text (5.5:1 on white, 5.0:1 on --tint) */
   --faint: #6b6981;             /* days outside the month, quiet text (5.3:1 on white, 4.8:1 on --tint) */
-  --placeholder: #a9a6b8;       /* example text inside empty input boxes (kept light on purpose) */
+  --placeholder: #6d6b83;       /* example text inside empty input boxes (5.2:1 on white, 4.7:1 on --tint; typed text is far darker) */
 
   /* Fonts: Lexend for everything (same family as the logo), Caveat for rare hand-written notes */
   --font-sans: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -126,7 +126,7 @@
   --text: #e8e7f6;
   --muted: #aeadcb;
   --faint: #9f9ebe;
-  --placeholder: #6f6e8e;
+  --placeholder: #9a99ba;       /* 6.1:1 on the dark card, 5.5:1 on dark --tint */
 
   --on-navy-muted: #c4bee3;
   --on-navy-hover: rgba(255, 255, 255, 0.07);
@@ -543,8 +543,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   text-transform: uppercase;
 }
 
-/* Hand-written signature on handover notes (Caveat), e.g. "— Rosa, 5:52 AM" */
-.signature { margin: 8px 0 0; color: var(--indigo); font-family: var(--font-hand); font-size: 1.35rem; font-weight: var(--fw-medium); line-height: 1.2; }
+/* Who submitted a handover note: "Submitted by Claire River (Morning shift) · 5:23 AM" */
+.submitted-line { margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; }
 
 /* Round icon in front of a task, by category */
 .task-icon {
@@ -1056,14 +1056,15 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   background: var(--on-navy-hover);
   color: var(--on-navy);
   text-align: left;
+  text-decoration: none;
   transition: background-color 0.15s;
 }
+/* A link to My profile; stays highlighted while you're on that page */
 .sidebar__profile:hover,
-.sidebar__profile[aria-expanded='true'] { background: var(--on-navy-line); }
+.sidebar__profile.active { background: var(--on-navy-line); }
 .sidebar__who { display: flex; flex-direction: column; min-width: 0; }
 .sidebar__who strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__who small { overflow: hidden; color: var(--on-navy-muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar__dropdown { left: 0; right: 0; z-index: 90; background: var(--card); color: var(--text); }
 
 .sidebar__nav { flex: 1; }
 .sidebar__group { margin-bottom: 6px; }
@@ -1107,25 +1108,28 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   .sidebar.is-rail .sidebar__menu { margin: 16px 0 10px; }
   .sidebar.is-rail .sidebar__profile { justify-content: center; min-height: var(--tap); padding: 4px; background: transparent; }
   .sidebar.is-rail .sidebar__profile:hover,
-  .sidebar.is-rail .sidebar__profile[aria-expanded='true'] { background: var(--on-navy-hover); }
+  .sidebar.is-rail .sidebar__profile.active { background: var(--on-navy-hover); }
   .sidebar.is-rail .sidebar__who,
   .sidebar.is-rail .sidebar__group-title { display: none; }
   .sidebar.is-rail .sidebar__group { margin: 0 0 14px; }
-  .sidebar.is-rail .sidebar__dropdown { left: calc(100% + 10px); right: auto; top: 0; width: 220px; }
   .sidebar.is-rail .sidebar__link { justify-content: center; padding: 0; }
 
-  /* The label becomes a tooltip next to the icon (on hover and keyboard focus) */
+  /* The label becomes a tooltip next to the icon (on hover and keyboard focus).
+     It sits clear of the sidebar's edge, with a border and shadow, so it never blends into the navy rail. */
   .sidebar.is-rail .sidebar__label {
     position: absolute;
-    left: calc(100% + 12px);
+    left: calc(100% + 22px);
     top: 50%;
     z-index: 80;
-    padding: 5px 10px;
+    padding: 7px 12px;
+    border: 1px solid var(--lavender-line);
     border-radius: var(--radius-sm);
     background: var(--ink);
+    box-shadow: var(--shadow-float);
     color: var(--card);
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: var(--fw-medium);
+    white-space: nowrap;
     opacity: 0;
     pointer-events: none;
     transform: translate(-4px, -50%);

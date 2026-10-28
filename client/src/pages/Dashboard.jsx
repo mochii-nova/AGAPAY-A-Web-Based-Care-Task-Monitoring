@@ -6,7 +6,7 @@ import useNow from '../hooks/useNow';
 import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
-import { findMyShiftHandover, updateFor } from '../utils/handover';
+import { findMyShiftHandover, updateFor, latestUpdate } from '../utils/handover';
 import { shiftLabel } from '../constants';
 import { isToday } from '../utils/tasks';
 import { shiftPhase } from '../utils/shift';
@@ -14,18 +14,11 @@ import { addDays } from '../utils/calendar';
 import { LoadingState, ErrorState } from '../components/StateMessage';
 import ProgressCard from '../components/dashboard/ProgressCard';
 import ShiftCard from '../components/dashboard/ShiftCard';
-import QuoteCard from '../components/dashboard/QuoteCard';
+import PriorityAlertsCard from '../components/dashboard/PriorityAlertsCard';
 import NextTasksCard from '../components/dashboard/NextTasksCard';
 import RecentHandoverCard from '../components/dashboard/RecentHandoverCard';
 import ResidentsCard from '../components/dashboard/ResidentsCard';
 import '../styles/dashboard.css';
-
-const QUOTES = [
-  'Every small act of care adds up to a good day.',
-  'Care is better when it’s shared.',
-  'A kind word is part of good care, too.',
-  'You make someone’s day a little easier.',
-];
 
 function greeting(now) {
   const hour = now.getHours();
@@ -82,7 +75,16 @@ export default function Dashboard() {
     }
   };
 
-  const quote = QUOTES[now.getDate() % QUOTES.length];
+  // Priority alerts: residents marked Urgent / Watch closely in handovers from others (urgent first),
+  // and all my overdue tasks, also ones left from earlier days (earliest first)
+  const fromOthers = handovers.filter((h) => h.author?._id !== profile.id);
+  const flagged = residentsQuery.residents
+    .map((resident) => ({ resident, update: latestUpdate(fromOthers, resident)?.update }))
+    .filter(({ update }) => update && update.status !== 'normal')
+    .map(({ resident, update }) => ({ resident, status: update.status, note: update.note }))
+    .sort((a, b) => (b.status === 'urgent') - (a.status === 'urgent'));
+  const overdue = tasksQuery.tasks.filter((t) => t.status === 'overdue').sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+
   const today = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const ready = tasksQuery.status === 'ready' && shiftsQuery.status === 'ready';
 
@@ -120,7 +122,7 @@ export default function Dashboard() {
             )}
           </section>
         )}
-        <QuoteCard quote={quote} />
+        <PriorityAlertsCard flagged={flagged} overdue={overdue} />
       </div>
 
       {/* Row 2: what's next, and the last shift's note */}

@@ -108,8 +108,8 @@ export default function ResidentProfile({ resident, status, tasks, tasksLoading,
               <li key={n.id} className="profile-note">
                 <p className="small-label">{i === 0 ? `Latest note · ${n.source}` : n.source}</p>
                 <p className="profile-note__text">{n.text}</p>
-                <p className="signature profile-note__sign">
-                  — {n.author ? `${n.author.split(' ')[0]}, ` : ''}{formatTime(n.time)}
+                <p className="submitted-line">
+                  {n.author ? `Submitted by ${n.author} · ` : ''}{formatTime(n.time)}
                 </p>
               </li>
             ))}

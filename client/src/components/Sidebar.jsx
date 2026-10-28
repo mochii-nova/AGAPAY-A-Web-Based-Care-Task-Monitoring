@@ -1,7 +1,7 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
-  Bell, Mail, LogOut, UserPen, Camera, X, IdCard, Inbox, LayoutGrid, ChartColumn,
+  Bell, Mail, LogOut, X, Inbox, LayoutGrid, ChartColumn,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -11,7 +11,6 @@ import { useMessages } from '../context/MessagesContext';
 import { useStaff } from '../context/StaffContext';
 import { SHIFTS } from '../constants';
 import { homeFor } from '../utils/roles';
-import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import markWhite from '../assets/images/agapay-mark-white.svg';
@@ -87,8 +86,7 @@ export default function Sidebar({ collapsed, onClose }) {
   const { unreadCount: unreadMessages } = useMessages();
   const { handovers } = useHandovers();
   const staff = useStaff(); // only for administrators
-  const { profile, openPhoto, openEditProfile } = useProfile();
-  const { ref: menuRef, ...menu } = usePopover();
+  const { profile } = useProfile();
   const groups = staff ? ADMIN_GROUPS : CAREGIVER_GROUPS;
 
   // Handovers from others that I haven't marked as read yet
@@ -106,7 +104,6 @@ export default function Sidebar({ collapsed, onClose }) {
 
   const roleLabel = profile.role === 'admin' ? 'Administrator' : 'Caregiver';
   const shiftLabel = SHIFTS.find((s) => s.apiValue === profile.shift)?.label;
-  const closeMenu = () => menu.setOpen(false);
 
   return (
     <aside className={`sidebar ${collapsed ? 'is-rail' : ''}`} aria-label="Main menu">
@@ -119,39 +116,15 @@ export default function Sidebar({ collapsed, onClose }) {
         </button>
       </div>
 
-      {/* Profile card: opens a small menu (edit profile, photo, view profile, sign out) */}
-      <div className="sidebar__menu" ref={menuRef}>
-        <button
-          type="button"
-          className="sidebar__profile"
-          onClick={menu.toggle}
-          aria-expanded={menu.open}
-          aria-haspopup="menu"
-          aria-label={`${profile.name}, ${roleLabel}. Open profile menu`}
-        >
+      {/* Profile card: opens My profile (the account menu lives only on the avatar, top right) */}
+      <div className="sidebar__menu">
+        <NavLink to="/profile" className="sidebar__profile" onClick={onClose} aria-label={`${profile.name}, ${roleLabel}. Open my profile`}>
           <Avatar name={profile.name} photo={profile.photo} size={collapsed ? 36 : 40} />
           <span className="sidebar__who" aria-hidden="true">
             <strong>{profile.name}</strong>
             <small>{roleLabel}{shiftLabel && ` · ${shiftLabel}`}</small>
           </span>
-        </button>
-
-        {menu.open && (
-          <div className="popover sidebar__dropdown" role="menu">
-            <button type="button" className="popover__item" role="menuitem" onClick={() => { closeMenu(); openEditProfile(); }}>
-              <UserPen size={18} /> Edit profile
-            </button>
-            <button type="button" className="popover__item" role="menuitem" onClick={() => { closeMenu(); openPhoto(); }}>
-              <Camera size={18} /> Change photo
-            </button>
-            <Link to="/profile" className="popover__item" role="menuitem" onClick={() => { closeMenu(); onClose(); }}>
-              <IdCard size={18} /> View my profile
-            </Link>
-            <button type="button" className="popover__item" role="menuitem" onClick={handleLogout}>
-              <LogOut size={18} /> Sign out
-            </button>
-          </div>
-        )}
+        </NavLink>
       </div>
 
       <nav className="sidebar__nav">

@@ -21,8 +21,10 @@ export default function WeekView({ selected, today, tasksByDay, shiftOn, onSelec
               <span className="week__weekday">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
               <span className="week__date">{day.getDate()}</span>
               {shift ? (
-                <span className={`shift-bar shift-bar--${shift.id}`} title={`${shift.label} shift`}>
-                  <span className="sr-only">{shift.label} shift</span>
+                <span className={`shift-chip shift-chip--${shift.id}`}>
+                  <span className="shift-chip__mark" aria-hidden="true" />
+                  <span className="shift-chip__text">{shift.label}</span>
+                  <span className="sr-only"> shift</span>
                 </span>
               ) : (
                 <span className="week__off">Day off</span>

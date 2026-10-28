@@ -35,8 +35,10 @@ export default function Tasks() {
   const { tasks, status, error, reload, updateTask } = useTasks();
   const showToast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [scope, setScope] = useState('today');
-  const [tab, setTab] = useState('all');
+  // ?tab=overdue (the Dashboard's priority alerts) opens that tab over all dates
+  const linkedTab = TABS.some((t) => t.id === searchParams.get('tab')) ? searchParams.get('tab') : null;
+  const [scope, setScope] = useState(linkedTab ? 'all' : 'today');
+  const [tab, setTab] = useState(linkedTab ?? 'all');
   // ?q=<name> fills the search box (used by "View all" on a resident's profile)
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [category, setCategory] = useState('');
@@ -144,7 +146,8 @@ export default function Tasks() {
                 {shown.map((t) => {
                   const { room } = t;
                   return (
-                    <tr key={t._id} className="task-table__row">
+                    // The whole row opens the task (the View button stays for keyboards and screen readers)
+                    <tr key={t._id} className="task-table__row is-clickable" onClick={() => openTaskById(t._id)}>
                       <td className="task-table__time">
                         {scope === 'all' && !isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
                         {formatTime(t.dueAt)}

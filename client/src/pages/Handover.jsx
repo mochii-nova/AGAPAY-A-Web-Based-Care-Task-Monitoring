@@ -14,7 +14,7 @@ import { shiftPhase } from '../utils/shift';
 import { formatTime } from '../utils/format';
 import { addDays } from '../utils/calendar';
 import { savedText } from '../utils/tasks';
-import { handoverTiming, findMyShiftHandover, nextShift, readersOf } from '../utils/handover';
+import { handoverTiming, findMyShiftHandover, nextShift, readersOf, submittedLine } from '../utils/handover';
 import PageHeader from '../components/PageHeader';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import WriteHandover from '../components/handover/WriteHandover';
@@ -237,7 +237,7 @@ export default function Handover() {
                 <article key={h._id} className="card received">
                   <HandoverHead handover={h} />
                   <HandoverView handover={h} />
-                  <p className="signature">— {h.author?.name?.split(' ')[0]}, {formatTime(h.createdAt)}</p>
+                  <p className="submitted-line">{submittedLine(h)}</p>
                   {!h.readByMe && (
                     <div className="received__actions">
                       <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as read</button>

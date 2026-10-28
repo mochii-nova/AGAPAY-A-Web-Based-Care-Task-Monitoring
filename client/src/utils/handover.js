@@ -78,7 +78,8 @@ export function parseHandover(h, myId) {
     data: {
       summary: summary ?? { completed: 0, notFinished: h.tasks.length, skipped: skipped.length },
       tasks: skipped,
-      passOn: h.tasks.map(({ taskId, task, resident, dueAt, note }) => ({ taskId, task, resident, dueAt, note: note ?? '' })),
+      // taskStatus: the task's status right now (pending / completed / skipped), so readers see if it got done
+      passOn: h.tasks.map(({ taskId, task, resident, dueAt, note, taskStatus }) => ({ taskId, task, resident, dueAt, note: note ?? '', taskStatus })),
       residents: h.residents.map(({ residentId, name, room, status, note }) => ({ residentId, name, room, status, note: note ?? '' })),
       other: h.otherNotes ?? '',
     },
@@ -100,6 +101,10 @@ export function latestUpdate(handovers, resident) {
   }
   return null;
 }
+
+// "Submitted by Claire River (Morning shift) · 5:23 AM"
+export const submittedLine = (h) =>
+  `Submitted by ${h.author?.name ?? 'a caregiver'} (${SHIFTS.find((s) => s.apiValue === h.shift)?.label ?? h.shift} shift) · ${formatTime(h.submittedAt ?? h.createdAt)}`;
 
 // Who has read a handover: everyone with a read receipt (older handovers: the first reader)
 export function readersOf(h) {

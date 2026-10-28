@@ -172,6 +172,7 @@
 .hv-list li { padding: 10px 12px; border-radius: var(--radius-sm); background: var(--tint); }
 .hv-list p { margin: 4px 0 0; font-size: 0.92rem; }
 .hv-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.hv-status { margin-left: auto; }
 .hv-muted { margin: 0; color: var(--muted); font-size: 0.88rem; }
 .hv-other { margin: 0; white-space: pre-line; }
 .hv-summary { max-width: none; padding-top: 10px; border-top: 1px solid var(--border); }

@@ -43,7 +43,15 @@ export default function MonthView({ selected, today, tasksByDay, shiftOn, onSele
               onClick={() => onSelect(day)}
             >
               <span className="month__date">{day.getDate()}</span>
-              {shift && <span className={`shift-bar shift-bar--${shift.id}`} aria-hidden="true" />}
+              {/* "Morning · 3 tasks" (phones: just the coloured bar, the cell is too narrow for words) */}
+              {shift && (
+                <span className={`shift-chip shift-chip--${shift.id}`} aria-hidden="true">
+                  <span className="shift-chip__mark" />
+                  <span className="shift-chip__text">{shift.label}</span>
+                  {/* Moves under the shift name when the day is too narrow for one line */}
+                  {list.length > 0 && <span className="shift-chip__count">{list.length} {list.length === 1 ? 'task' : 'tasks'}</span>}
+                </span>
+              )}
               {list.length > 0 && (
                 <span className="dots" aria-hidden="true">
                   {list.slice(0, 5).map((t) => <span key={t._id} className={`dot dot--${t.status}`} />)}

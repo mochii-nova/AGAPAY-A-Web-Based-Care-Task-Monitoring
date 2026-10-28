@@ -45,13 +45,18 @@
 .shift-card__note--overdue { background: var(--overdue-bg); color: var(--overdue-text); }
 .shift-card__note--neutral { background: var(--tint); color: var(--muted); }
 
-/* A warm note for the day */
-.card.quote-card { display: flex; align-items: center; gap: 18px; border-color: var(--apricot-line); background: var(--apricot-soft); }
-.quote-card__art { flex-shrink: 0; width: 60px; height: 60px; }
-.quote-card__line { fill: none; stroke: var(--indigo); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.quote-card__heart { fill: var(--apricot); }
-.quote-card__quote { margin: 0; font-size: 1.05rem; font-weight: var(--fw-medium); line-height: 1.4; }
-.quote-card__sub { margin: 6px 0 0; color: var(--muted); font-size: 0.88rem; }
+/* Priority alerts: residents to watch, then overdue tasks; each line opens it */
+.alerts-card__list { list-style: none; margin: -6px 0 0; padding: 0; }
+.alerts-card__list li + li { border-top: 1px solid var(--border); }
+.alerts-card__item { display: flex; align-items: center; gap: 10px; min-height: var(--tap); padding: 8px 6px; margin: 0 -6px; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; transition: background-color 0.15s; }
+.alerts-card__item:hover { background: var(--tint); }
+.alerts-card__item .status-pill { flex-shrink: 0; min-width: 70px; }
+.alerts-card__text { display: flex; flex-direction: column; min-width: 0; }
+.alerts-card__text strong { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.alerts-card__text small { overflow: hidden; color: var(--muted); font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; }
+.alerts-card__more { display: inline-flex; align-items: center; min-height: var(--tap); margin-top: 2px; }
+.alerts-card__clear { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--completed-text); }
+.alerts-card__clear svg { flex-shrink: 0; margin-top: 2px; }
 
 /* Up next */
 .task-rows { list-style: none; margin: 0; padding: 0; }
@@ -117,7 +122,7 @@
 /* Smaller screens */
 @media (max-width: 1280px) {
   .dash-row--three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dash-row--three .quote-card { grid-column: 1 / -1; }
+  .dash-row--three .alerts-card { grid-column: 1 / -1; }
   .resident-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 1000px) {

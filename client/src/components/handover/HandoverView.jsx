@@ -1,3 +1,4 @@
+import StatusPill from '../StatusPill';
 import { RESIDENT_STATUS } from '../../utils/handover';
 
 // The content of one submitted handover: residents to watch, passed-on and skipped tasks, other notes.
@@ -43,6 +44,13 @@ export default function HandoverView({ handover }) {
                 <span className="hv-line">
                   <strong>{p.task}</strong>
                   <span className="hv-muted">{p.resident}</span>
+                  {/* Live status of the task now (older handovers don't have it). Pending and past
+                      its time shows as Overdue, the same as on My Tasks. */}
+                  {p.taskStatus && (
+                    <span className="hv-status">
+                      <StatusPill status={p.taskStatus === 'pending' && new Date(p.dueAt) < new Date() ? 'overdue' : p.taskStatus} />
+                    </span>
+                  )}
                 </span>
                 {p.note && <p>{p.note}</p>}
               </li>

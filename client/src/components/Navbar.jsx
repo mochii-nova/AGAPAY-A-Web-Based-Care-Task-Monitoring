@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Mail, LogOut, Maximize2, CheckCheck, IdCard, UserRound, Monitor, Check } from 'lucide-react';
+import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -8,7 +8,6 @@ import { timeAgo } from '../utils/format';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationIcon from './NotificationIcon';
-import PushToggle from './PushToggle';
 import ThemeToggle from './ThemeToggle';
 import { setTheme, useShownTheme, useTheme } from '../utils/theme';
 
@@ -19,7 +18,7 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
   const shownTheme = useShownTheme();
   const { logout } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
-  const { profile } = useProfile();
+  const { profile, openEditProfile, openPhoto } = useProfile();
   const { unreadCount: unreadMessages } = useMessages();
   const { ref: bellRef, ...bell } = usePopover();
   const { ref: accountRef, ...account } = usePopover();
@@ -60,17 +59,13 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
                       <CheckCheck size={16} /> Mark all read
                     </button>
                   )}
-                  <Link to="/notifications" className="icon-btn icon-btn--sm" onClick={() => bell.setOpen(false)} aria-label="Open full notifications page">
-                    <Maximize2 size={16} />
-                  </Link>
                 </div>
               </div>
 
-              <PushToggle compact />
-
+              {/* The 4 newest only; the full list and the pop-up switch are on the Notifications page */}
               {notifications.length === 0 && <p className="empty-text">No notifications yet.</p>}
               <ul className="notif-list">
-                {notifications.slice(0, 5).map((n) => (
+                {notifications.slice(0, 4).map((n) => (
                   <li key={n.id}>
                     <Link
                       to={n.link || '/notifications'}
@@ -90,7 +85,7 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
               </ul>
 
               <Link to="/notifications" className="popover__footer" onClick={() => bell.setOpen(false)}>
-                View all notifications
+                View all{notifications.length > 4 ? ` ${notifications.length} notifications` : ' notifications'}
               </Link>
             </div>
           )}
@@ -138,6 +133,12 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
               <Link to="/profile" className="popover__item" onClick={() => account.setOpen(false)}>
                 <UserRound size={18} /> My profile
               </Link>
+              <button type="button" className="popover__item" onClick={() => { account.setOpen(false); openEditProfile(); }}>
+                <UserPen size={18} /> Edit profile
+              </button>
+              <button type="button" className="popover__item" onClick={() => { account.setOpen(false); openPhoto(); }}>
+                <Camera size={18} /> Change photo
+              </button>
               <button type="button" className="popover__item popover__item--danger" onClick={handleLogout}>
                 <LogOut size={18} /> Sign out
               </button>

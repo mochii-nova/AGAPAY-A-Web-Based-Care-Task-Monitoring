@@ -51,6 +51,24 @@
 .shift-bar--morning { background: var(--lavender-deep); }
 .shift-bar--noon { background: var(--apricot); }
 .shift-bar--night { background: var(--indigo); }
+/* Shift label on calendar days: a dot in the shift's colour + "Morning · 3 tasks" */
+.shift-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 1px 7px 1px 5px; border-radius: var(--radius-sm); background: var(--tint); color: var(--text); font-size: 0.74rem; font-weight: var(--fw-medium); line-height: 1.5; }
+.shift-chip__mark { flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; }
+.shift-chip--morning .shift-chip__mark { background: var(--lavender-deep); }
+.shift-chip--noon .shift-chip__mark { background: var(--apricot); }
+.shift-chip--night .shift-chip__mark { background: var(--indigo); }
+.shift-chip__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shift-chip__count { white-space: nowrap; }
+.shift-chip__count::before { content: '· '; }
+.month__day[aria-pressed='true'] .shift-chip { background: var(--card); }
+/* A day that's too narrow for "Morning · 10 tasks" on one line: the count goes underneath */
+.month__day { container-type: inline-size; }
+@container (max-width: 140px) {
+  .month__day .shift-chip { display: inline-grid; grid-template-columns: auto auto; column-gap: 5px; align-items: center; }
+  .month__day .shift-chip__count { grid-column: 2; color: var(--muted); font-weight: var(--fw-regular); }
+  .month__day .shift-chip__count::before { content: none; }
+}
+.week__head .shift-chip { margin-top: 4px; }
 .shift-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
 .shift-legend li { display: flex; align-items: center; gap: 8px; }
 .shift-legend .shift-bar { width: 22px; }
@@ -63,8 +81,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  min-height: 100px;
+  gap: 6px;
+  min-height: 92px;
   padding: 10px;
   border: 0;
   background: var(--card);
@@ -119,7 +137,6 @@
   font-weight: var(--fw-medium);
 }
 .week__head.is-today .week__date { background: var(--indigo); color: var(--on-indigo); }
-.week__head .shift-bar { width: 40px; margin-top: 4px; }
 .week__off { color: var(--faint); font-size: 0.7rem; }
 .week__empty { margin: 12px 0; color: var(--faint); font-size: 0.82rem; text-align: center; }
 .week__tasks { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 6px; }
@@ -152,19 +169,22 @@
 .day-panel { position: sticky; top: 84px; }
 .day-panel__title { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-bold); }
 .day-panel__shift-line { margin: 2px 0 14px; color: var(--muted); }
-.day-panel__gcal { padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
-/* Google Calendar (GoogleCalendarBox.jsx) */
-.gcal { display: flex; flex-direction: column; gap: 8px; }
-.gcal__btn { width: 100%; padding: 0 12px; font-size: 0.92rem; }
-.gcal__added { display: flex; align-items: center; gap: 6px; color: var(--completed-text); font-weight: var(--fw-medium); }
-.gcal__error { display: flex; align-items: flex-start; gap: 6px; color: var(--danger); font-size: 0.88rem; }
+.day-panel__gcal { padding: 4px 4px 4px 12px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
+/* Google Calendar (GoogleCalendarBox.jsx): one compact line, notes underneath only when needed */
+.gcal { display: flex; flex-direction: column; gap: 6px; }
+.gcal__line { display: flex; align-items: center; gap: 8px; min-height: var(--tap); }
+.gcal__icon { flex-shrink: 0; color: var(--muted); }
+/* "Google Calendar" with its state in small text underneath, so it fits next to the button */
+.gcal__status { display: flex; flex: 1; flex-direction: column; min-width: 0; margin: 0; line-height: 1.3; }
+.gcal__status strong { color: var(--text); font-size: 0.9rem; font-weight: var(--fw-medium); white-space: nowrap; }
+.gcal__state { overflow: hidden; color: var(--muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
+.gcal__state.is-on { color: var(--completed-text); }
+.gcal__actions { display: flex; flex-shrink: 0; align-items: center; gap: 2px; }
+.gcal__error { display: flex; align-items: flex-start; gap: 6px; margin: 0 8px 8px 0; color: var(--danger); font-size: 0.85rem; }
 .gcal__error svg { flex-shrink: 0; margin-top: 2px; }
-.gcal__tz { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); font-size: 0.85rem; }
+.gcal__tz { display: flex; align-items: flex-start; gap: 6px; margin: 0 8px 8px 0; color: var(--muted); font-size: 0.82rem; }
 .gcal__tz svg { flex-shrink: 0; margin-top: 2px; }
 .gcal__tz strong { color: var(--text); font-weight: var(--fw-medium); }
-.gcal__status { color: var(--muted); font-size: 0.85rem; overflow-wrap: anywhere; }
-.gcal__status strong { color: var(--text); font-weight: var(--fw-medium); }
-.gcal__status .link-btn { min-height: var(--tap); margin: -12px 0; padding: 0 2px; vertical-align: middle; }
 .day-panel__filter { margin-bottom: 6px; }
 .day-panel__list { list-style: none; margin: 0; padding: 0; }
 .day-panel__list li + li { border-top: 1px solid var(--border); }
@@ -216,7 +236,11 @@
 @media (max-width: 600px) {
   .month__day { align-items: center; gap: 5px; min-height: 60px; padding: 6px 4px; }
   .month__date { margin: 0; }
-  .month__day .shift-bar { max-width: 28px; }
+  /* Phones: the label shrinks to a coloured bar */
+  .month__day .shift-chip { display: inline-flex; width: 100%; max-width: 28px; height: 4px; padding: 0; border-radius: var(--radius-pill); }
+  .month__day .shift-chip__text,
+  .month__day .shift-chip__count { display: none; }
+  .month__day .shift-chip__mark { width: 100%; height: 4px; border-radius: var(--radius-pill); }
   .dots { gap: 2px; }
   .dots .dot { width: 6px; height: 6px; }
   .month__head span { font-size: 0.75rem; }

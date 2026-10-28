@@ -3,8 +3,10 @@
    Colours come only from the variables in main.css.
    ===================================================================== */
 .site { background: var(--bg); overflow-x: clip; }
-/* Jumping to a section stops below the floating header */
-.site section[id] { scroll-margin-top: 104px; }
+/* Anything scrolled into view (menu links, /#contact, tabbing into a form field) stops below the
+   floating header: 16px gap + 64px bar + 24px breathing room. (One value for the whole page;
+   a scroll-margin on the sections as well would add up and leave too big a gap.) */
+html:has(.site) { scroll-padding-top: 104px; }
 
 /* Indigo words in headings */
 .accent { color: var(--indigo); }
@@ -65,45 +67,16 @@
 /* ---------- Home ---------- */
 .hero { padding: 56px 0 96px; }
 .hero__inner { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 72px; }
-.hero__title { margin: 0; font-size: clamp(2.3rem, 4.4vw, var(--fs-hero)); font-weight: var(--fw-bold); line-height: 1.12; letter-spacing: -0.02em; }
+/* About 12% smaller than --fs-hero, so it sits calmly next to the photo */
+.hero__title { margin: 0; font-size: clamp(2rem, 3.9vw, calc(var(--fs-hero) * 0.88)); font-weight: var(--fw-bold); line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; }
+/* "one shift at a time." stays together, so no word is left alone on the last line */
+.hero__title .accent { white-space: nowrap; }
 .hero__body { max-width: 34em; margin: 22px 0 0; color: var(--muted); font-size: 1.1rem; line-height: 1.65; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 
-/* One rounded photo, with three small cards resting on its edges */
+/* One rounded photo */
 .hero__visual { position: relative; width: 100%; aspect-ratio: 1 / 1; }
 .site .hero__photo { width: 100%; height: 100%; border-radius: 20px; }
-
-.float-badge {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--card);
-  box-shadow: var(--shadow-float);
-  font-size: var(--fs-small);
-  font-weight: var(--fw-medium);
-  white-space: nowrap;
-}
-.float-badge--task { top: 12%; left: -28px; }
-.float-badge--shift { top: 45%; right: -28px; }
-.float-badge--handover { bottom: 12%; left: -28px; }
-.float-badge__stack { display: flex; flex-direction: column; line-height: 1.25; }
-.float-badge__stack small { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-regular); }
-.float-badge__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--indigo-soft);
-  color: var(--indigo);
-}
 
 /* ---------- About ---------- */
 .about__head { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 32px 48px; margin-bottom: 36px; }
@@ -130,44 +103,19 @@
 .features__head { max-width: 640px; margin: 0 auto; text-align: center; }
 .features__sub { margin: 14px 0 0; color: var(--muted); font-size: 1.05rem; }
 
-.features__stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr);
-  grid-template-areas:
-    'tl laptop tr'
-    'bl laptop br';
-  align-items: center;
-  gap: 24px 16px;
-  margin-top: 48px;
-}
-
-/* A simple browser window around the screenshot */
-.browser { grid-area: laptop; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-lg); }
+/* A clean browser window around the dashboard screenshot */
+.browser { max-width: 960px; margin: 48px auto 0; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-lg); }
 .browser__bar { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
 .browser__bar span { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
 .site .browser__shot { width: 100%; aspect-ratio: 16 / 10; border-radius: 0; }
 .site .browser__shot.image-slot--empty { background-color: var(--indigo-soft); }
 
-.claim {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 0;
-  color: var(--indigo);
-  font-family: var(--font-hand);
-  font-size: 1.6rem;
-  font-weight: var(--fw-medium);
-  line-height: 1.15;
-}
-.claim__arrow { width: 84px; height: 36px; color: var(--indigo); }
-.claim--tl { grid-area: tl; align-items: flex-end; text-align: right; }
-.claim--tl .claim__arrow { transform: rotate(14deg); }
-.claim--bl { grid-area: bl; flex-direction: column-reverse; align-items: flex-end; text-align: right; }
-.claim--bl .claim__arrow { transform: rotate(-38deg); }
-.claim--tr { grid-area: tr; align-items: flex-start; }
-.claim--tr .claim__arrow { transform: scaleX(-1) rotate(14deg); }
-.claim--br { grid-area: br; flex-direction: column-reverse; align-items: flex-start; }
-.claim--br .claim__arrow { transform: scaleX(-1) rotate(-38deg); }
+/* Four feature cards under the screenshot: icon, title, one line */
+.feature-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 960px; margin: 32px auto 0; padding: 0; list-style: none; }
+.feature-card { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+.feature-card__icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-bottom: 12px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
+.feature-card h3 { margin: 0 0 6px; font-size: var(--fs-card-title); }
+.feature-card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
 
 /* ---------- Contact ---------- */
 .contact__grid { display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr); align-items: stretch; gap: 24px; }
@@ -243,7 +191,7 @@
   .site-header { top: 10px; margin-top: 10px; }
   .site-header__bar,
   .site-header.is-scrolled .site-header__bar { min-height: 60px; padding: 0 8px 0 16px; }
-  .site section[id] { scroll-margin-top: 88px; }
+  html:has(.site) { scroll-padding-top: 88px; }
   .site-header .site-header__toggle { display: inline-flex; }
   .site-header__menu {
     display: none;
@@ -271,48 +219,23 @@
   .hero { padding: 32px 0 72px; }
   .hero__inner { grid-template-columns: minmax(0, 1fr); }
   .hero__visual { justify-self: center; max-width: 440px; }
-  .float-badge--task, .float-badge--handover { left: -12px; }
-  .float-badge--shift { right: -12px; }
 
   .about__head,
   .about__grid { grid-template-columns: minmax(0, 1fr); }
   .site .about__photo { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
 
-  .features__stage {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas:
-      'laptop laptop'
-      'tl tr'
-      'bl br';
-    gap: 12px;
-  }
-  .claim,
-  .claim--bl,
-  .claim--br {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    min-height: 56px;
-    padding: 8px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    font-size: 1.35rem;
-    text-align: center;
-  }
-  .claim__arrow { display: none; }
+  .feature-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .contact__grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 600px) {
   .hero__actions .btn { flex: 1 1 100%; }
-  .float-badge { padding: 6px 10px; font-size: 0.75rem; }
-  .float-badge__icon { width: 22px; height: 22px; }
 
   .about__cards { grid-template-columns: minmax(0, 1fr); }
 
-  .features__stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'laptop' 'tl' 'tr' 'bl' 'br'; }
+  .feature-cards { grid-template-columns: minmax(0, 1fr); }
+  .browser { margin-top: 32px; }
 
   .contact__panel,
   .contact__form-wrap { padding: 20px; }

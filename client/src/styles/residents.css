@@ -88,7 +88,7 @@
 .profile-note p { margin: 0; }
 .profile-note .small-label { margin-bottom: 6px; }
 .profile-note__text { line-height: 1.55; }
-.profile-note__sign { margin-top: 6px !important; font-size: 1.25rem; }
+.profile-note .submitted-line { margin-top: 6px; }
 
 .resident-profile .state-msg { padding: 16px; }
 

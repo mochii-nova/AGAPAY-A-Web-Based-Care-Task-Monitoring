@@ -37,6 +37,13 @@ function useActiveSection() {
 export default function Landing() {
   const active = useActiveSection();
 
+  // Opening the site at /#contact (or any section): the browser tries to jump before the page is
+  // built, so jump once it is (the page's scroll-padding keeps the title below the header)
+  useEffect(() => {
+    const target = window.location.hash && document.getElementById(window.location.hash.slice(1));
+    if (target) requestAnimationFrame(() => target.scrollIntoView());
+  }, []);
+
   return (
     <div className="site">
       <SiteHeader sections={SECTIONS} active={active} />

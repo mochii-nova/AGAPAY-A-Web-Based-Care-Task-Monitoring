@@ -27,7 +27,7 @@ export default function SiteFooter() {
         <div>
           <h3>Developed by</h3>
           <p>CTRL + SIA + PRAY</p>
-          <p>BSIT III · Universidad de Dagupan</p>
+          <p>BSIT · Universidad de Dagupan</p>
         </div>
 
         <div>

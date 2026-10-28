@@ -3,11 +3,10 @@ import { Inbox } from 'lucide-react';
 import CardHeader from '../CardHeader';
 import { EmptyState } from '../StateMessage';
 import { shiftLabel } from '../../constants';
-import { formatTime } from '../../utils/format';
-import { handoverSummary } from '../../utils/handover';
+import { handoverSummary, submittedLine } from '../../utils/handover';
 
-// The latest handover written by someone else (usually the previous shift),
-// signed by hand, with the same "Mark as read" as on the Handover page.
+// The latest handover written by someone else (usually the previous shift), with who submitted it
+// and the same "Mark as read" as on the Handover page.
 export default function RecentHandoverCard({ handover, onMarkRead, busy }) {
   if (!handover) {
     return (
@@ -22,7 +21,6 @@ export default function RecentHandoverCard({ handover, onMarkRead, busy }) {
   // Form handovers: their "Other notes", or a short line like "1 resident to watch".
   // (data.summary is the task counts, not text.)
   const note = handover.data ? handover.data.other || handoverSummary(handover) : handover.text;
-  const firstName = handover.author?.name?.split(' ')[0];
 
   return (
     <section className="card handover-note-card">
@@ -32,7 +30,7 @@ export default function RecentHandoverCard({ handover, onMarkRead, busy }) {
 
       <Link to="/handover?tab=received" className="handover-note">
         <p className="handover-note__text">{note}</p>
-        <p className="signature">— {firstName}, {formatTime(handover.createdAt)}</p>
+        <p className="submitted-line">{submittedLine(handover)}</p>
       </Link>
 
       {!read && (

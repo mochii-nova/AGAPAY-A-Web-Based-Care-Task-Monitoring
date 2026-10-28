@@ -1,12 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Check, CalendarDays, FileText } from 'lucide-react';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
-import { getShift, shiftTime } from '../../constants';
 
 export default function HeroSection() {
-  const morning = getShift('morning');
-
   return (
     <section id="home" className="hero">
       <div className="container hero__inner">
@@ -28,23 +24,6 @@ export default function HeroSection() {
 
         <div className="hero__visual">
           <ImageSlot image={images.hero} className="hero__photo" />
-
-          {/* Small floating cards on the photo's edges */}
-          <div className="float-badge float-badge--task" aria-hidden="true">
-            <span className="float-badge__icon"><Check size={14} strokeWidth={3} /></span>
-            Today’s task: completed
-          </div>
-          <div className="float-badge float-badge--shift" aria-hidden="true">
-            <span className="float-badge__icon"><CalendarDays size={14} /></span>
-            <span className="float-badge__stack">
-              <small>{morning.label} shift</small>
-              <strong>{shiftTime(morning)}</strong>
-            </span>
-          </div>
-          <div className="float-badge float-badge--handover" aria-hidden="true">
-            <span className="float-badge__icon"><FileText size={14} /></span>
-            Shift handover: updated
-          </div>
         </div>
       </div>
     </section>

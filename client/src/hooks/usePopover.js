@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Open/close state for a small dropdown. Closes on a click outside it or on Escape.
+// Open/close state for a small dropdown. Closes on a click or tap outside it, or on Escape.
+// (pointerdown covers mouse, touch and pen alike.)
 export default function usePopover() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -15,10 +16,10 @@ export default function usePopover() {
       if (e.key === 'Escape') setOpen(false);
     };
 
-    document.addEventListener('mousedown', onClick);
+    document.addEventListener('pointerdown', onClick);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('pointerdown', onClick);
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
