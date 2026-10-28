@@ -6,7 +6,7 @@ import useNow from '../hooks/useNow';
 import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
-import { findMyShiftHandover, updateFor, latestUpdate } from '../utils/handover';
+import { findMyShiftHandover, latestUpdate } from '../utils/handover';
 import { shiftLabel } from '../constants';
 import { isToday } from '../utils/tasks';
 import { shiftPhase } from '../utils/shift';
@@ -27,13 +27,18 @@ function greeting(now) {
   return 'Good evening';
 }
 
-// One helpful line under the greeting
-function helpfulLine(phase, shift, left) {
-  const tasks = `${left} ${left === 1 ? 'task' : 'tasks'}`;
-  if (phase === 'off') return 'You have the day off today. Rest well.';
-  if (phase === 'ended') return left ? `Your shift has ended. ${tasks} still open today.` : 'Your shift has ended. Thank you for today.';
-  if (!left) return 'All of today’s tasks are done. Great work.';
-  return `You have ${tasks} left before your handover at ${shift.end}.`;
+// One helpful line under the greeting. "All done" only when there were tasks today and all are
+// finished; earlier days' overdue tasks are mentioned too, the same as in Today's progress.
+function helpfulLine(phase, shift, total, left, earlier) {
+  const count = (n) => `${n} ${n === 1 ? 'task' : 'tasks'}`;
+  const line = (() => {
+    if (phase === 'off') return 'You have the day off today. Rest well.';
+    if (total === 0) return 'No tasks scheduled for today.';
+    if (phase === 'ended') return left ? `Your shift has ended. ${count(left)} still open today.` : 'Your shift has ended. Thank you for today.';
+    if (!left) return 'All of today’s tasks are done. Great work.';
+    return `You have ${count(left)} left before your handover at ${shift.end}.`;
+  })();
+  return earlier ? `${line} ${earlier} overdue from earlier days.` : line;
 }
 
 export default function Dashboard() {
@@ -60,8 +65,6 @@ export default function Dashboard() {
   const latestHandover = handovers.find((h) => h.author?._id !== profile.id);
   const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes, current.shiftDate);
 
-  // Resident status from the latest handover someone else wrote ("Watch", "Urgent")
-  const statusOf = (resident) => updateFor(latestHandover, resident)?.status;
 
   const markRead = async () => {
     setMarking(true);
@@ -75,15 +78,20 @@ export default function Dashboard() {
     }
   };
 
-  // Priority alerts: residents marked Urgent / Watch closely in handovers from others (urgent first),
-  // and all my overdue tasks, also ones left from earlier days (earliest first)
+  // Resident status from the latest handover someone else wrote that mentions them ("Watch", "Urgent").
+  // Priority alerts and the resident tiles use the same answer.
   const fromOthers = handovers.filter((h) => h.author?._id !== profile.id);
+  const statusOf = (resident) => latestUpdate(fromOthers, resident)?.update.status;
   const flagged = residentsQuery.residents
     .map((resident) => ({ resident, update: latestUpdate(fromOthers, resident)?.update }))
     .filter(({ update }) => update && update.status !== 'normal')
     .map(({ resident, update }) => ({ resident, status: update.status, note: update.note }))
     .sort((a, b) => (b.status === 'urgent') - (a.status === 'urgent'));
-  const overdue = tasksQuery.tasks.filter((t) => t.status === 'overdue').sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+
+  // Overdue: today's ones one by one, earlier days' as one count. Today's progress and
+  // Priority alerts both show this same count.
+  const overdueToday = todayTasks.filter((t) => t.status === 'overdue').sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+  const earlierOverdue = tasksQuery.tasks.filter((t) => t.status === 'overdue' && !isToday(t.dueAt, now)).length;
 
   const today = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const ready = tasksQuery.status === 'ready' && shiftsQuery.status === 'ready';
@@ -93,15 +101,15 @@ export default function Dashboard() {
       <header className="page-header dash-greeting">
         <div>
           <h1>{greeting(now)}, {profile.name.split(' ')[0]}.</h1>
-          {ready && <p className="page-header__subtitle">{helpfulLine(phase, shift, left)}</p>}
+          {ready && <p className="page-header__subtitle">{helpfulLine(phase, shift, todayTasks.length, left, earlierOverdue)}</p>}
         </div>
         <p className="dash-greeting__date">{today}</p>
       </header>
 
-      {/* Row 1: progress, shift, a warm note */}
+      {/* Row 1: three compact cards of the same height: progress, shift, handover status */}
       <div className="dash-row dash-row--three">
         {tasksQuery.status === 'ready' ? (
-          <ProgressCard tasks={todayTasks} />
+          <ProgressCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
         ) : (
           <section className="card">
             {tasksQuery.status === 'loading' ? (
@@ -122,19 +130,8 @@ export default function Dashboard() {
             )}
           </section>
         )}
-        <PriorityAlertsCard flagged={flagged} overdue={overdue} />
-      </div>
-
-      {/* Row 2: what's next, and the last shift's note */}
-      <div className="dash-row dash-row--main">
-        {tasksQuery.status === 'ready' ? (
-          <NextTasksCard tasks={todayTasks} />
-        ) : (
-          <section className="card" aria-hidden="true" />
-        )}
-
         {handoversQuery.status === 'ready' ? (
-          <RecentHandoverCard handover={latestHandover} onMarkRead={markRead} busy={marking} />
+          <RecentHandoverCard handover={latestHandover} myId={profile.id} onMarkRead={markRead} busy={marking} />
         ) : (
           <section className="card">
             {handoversQuery.status === 'loading' ? (
@@ -145,6 +142,22 @@ export default function Dashboard() {
           </section>
         )}
       </div>
+
+      {/* Row 2: what's next (2/3) and priority alerts (1/3), lined up at the top */}
+      <div className="dash-row dash-row--main">
+        {tasksQuery.status === 'ready' ? (
+          <NextTasksCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
+        ) : (
+          <section className="card" aria-hidden="true" />
+        )}
+        {tasksQuery.status === 'ready' ? (
+          <PriorityAlertsCard flagged={flagged} overdueToday={overdueToday} earlierOverdue={earlierOverdue} />
+        ) : (
+          <section className="card" aria-hidden="true" />
+        )}
+      </div>
+
+      {/* Row 3 */}
 
       {residentsQuery.status === 'ready' && <ResidentsCard residents={residentsQuery.residents} statusOf={statusOf} />}
       {residentsQuery.status === 'error' && (

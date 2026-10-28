@@ -1,43 +1,56 @@
 import { Link } from 'react-router-dom';
-import { Inbox } from 'lucide-react';
-import CardHeader from '../CardHeader';
-import { EmptyState } from '../StateMessage';
+import { CheckCheck } from 'lucide-react';
 import { shiftLabel } from '../../constants';
-import { handoverSummary, submittedLine } from '../../utils/handover';
+import { formatTime } from '../../utils/format';
+import { handoverSummary } from '../../utils/handover';
 
-// The latest handover written by someone else (usually the previous shift), with who submitted it
-// and the same "Mark as read" as on the Handover page.
-export default function RecentHandoverCard({ handover, onMarkRead, busy }) {
+// "Sat, Oct 24 · 10:17 PM"
+const when = (date) =>
+  `${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${formatTime(date)}`;
+
+// Handover status: the last handover I received (from whom, when, read or not),
+// with the same "Mark as read" as on the Handover page.
+export default function RecentHandoverCard({ handover, myId, onMarkRead, busy }) {
   if (!handover) {
     return (
-      <section className="card">
-        <CardHeader title="From the last shift" />
-        <EmptyState icon={Inbox}>No handovers yet.</EmptyState>
+      <section className="card dash-card">
+        <p className="small-label">Handover status</p>
+        <p className="dash-card__big">No handovers yet</p>
+        <p className="dash-card__sub">When the shift before yours hands over, it shows here.</p>
       </section>
     );
   }
 
   const read = handover.readByMe;
-  // Form handovers: their "Other notes", or a short line like "1 resident to watch".
-  // (data.summary is the task counts, not text.)
-  const note = handover.data ? handover.data.other || handoverSummary(handover) : handover.text;
+  const myRead = handover.reads?.find((r) => r.userId === myId);
+  // Form handovers: a short line like "1 resident to watch"; older plain-text ones: their text
+  // (cut to two lines by CSS, so it never stops in the middle of a word)
+  const summary = handover.data ? handoverSummary(handover) : handover.text;
 
   return (
-    <section className="card handover-note-card">
-      <CardHeader title={`From the ${shiftLabel(handover.shift).toLowerCase()} shift`}>
+    <section className="card dash-card">
+      <div className="dash-card__head">
+        <p className="small-label">Handover status</p>
         <span className={`status-pill status-pill--${read ? 'completed' : 'new'}`}>{read ? 'Read' : 'Unread'}</span>
-      </CardHeader>
+      </div>
+      <p className="dash-card__big">From {handover.author?.name ?? 'a caregiver'}</p>
+      <p className="dash-card__sub">
+        {shiftLabel(handover.shift)} shift · submitted {when(handover.submittedAt ?? handover.createdAt)}
+      </p>
+      <p className="dash-card__line">{summary}</p>
 
-      <Link to="/handover?tab=received" className="handover-note">
-        <p className="handover-note__text">{note}</p>
-        <p className="submitted-line">{submittedLine(handover)}</p>
-      </Link>
-
-      {!read && (
-        <button type="button" className="btn btn--primary handover-note-card__btn" onClick={onMarkRead} disabled={busy}>
-          {busy ? 'Marking…' : 'Mark as read'}
-        </button>
-      )}
+      <div className="dash-card__foot">
+        {read ? (
+          <span className="dash-card__done">
+            <CheckCheck size={16} aria-hidden="true" /> You read it{myRead?.readAt && ` at ${formatTime(myRead.readAt)}`}
+          </span>
+        ) : (
+          <button type="button" className="btn btn--soft btn--sm" onClick={onMarkRead} disabled={busy}>
+            {busy ? 'Marking…' : 'Mark as read'}
+          </button>
+        )}
+        <Link to="/handover?tab=received" className="card__link">Open</Link>
+      </div>
     </section>
   );
 }

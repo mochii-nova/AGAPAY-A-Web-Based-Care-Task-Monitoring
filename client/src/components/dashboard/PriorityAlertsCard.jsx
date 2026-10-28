@@ -3,14 +3,14 @@ import { CircleCheck } from 'lucide-react';
 import CardHeader from '../CardHeader';
 import { RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
-import { isToday } from '../../utils/tasks';
 
 const MAX = 4;
 
 // What needs attention first: residents marked Urgent / Watch closely in the latest handovers,
-// then my overdue tasks. Each line opens the resident or the task.
-// `flagged`: [{ resident, status, note }] (urgent first); `overdue`: my overdue tasks (earliest first)
-export default function PriorityAlertsCard({ flagged, overdue }) {
+// today's overdue tasks, then one line for tasks still open from earlier days.
+// `flagged`: [{ resident, status, note }] (urgent first); `overdueToday`: earliest first;
+// `earlierOverdue`: how many (the same number Today's progress shows)
+export default function PriorityAlertsCard({ flagged, overdueToday, earlierOverdue }) {
   const alerts = [
     ...flagged.map(({ resident, status, note }) => ({
       key: `r${resident.id}`,
@@ -20,20 +20,29 @@ export default function PriorityAlertsCard({ flagged, overdue }) {
       sub: note || RESIDENT_STATUS[status].label,
       to: `/residents?open=${resident.residentCode}`,
     })),
-    ...overdue.map((t) => ({
+    ...overdueToday.map((t) => ({
       key: `t${t._id}`,
       tone: 'overdue',
       tag: 'Overdue',
       title: t.task,
-      sub: `${t.resident} · due ${isToday(t.dueAt) ? '' : `${new Date(t.dueAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, `}${formatTime(t.dueAt)}`,
+      sub: `${t.resident} · due ${formatTime(t.dueAt)}`,
       to: `/tasks?open=${t._id}`,
     })),
+    ...(earlierOverdue > 0
+      ? [{
+          key: 'earlier',
+          tone: 'overdue',
+          tag: 'Overdue',
+          title: `${earlierOverdue} overdue from earlier days`,
+          sub: 'Still open from before today',
+          to: '/tasks?tab=overdue',
+        }]
+      : []),
   ];
-  const more = alerts.length - MAX;
 
   return (
     <section className="card alerts-card">
-      <CardHeader title="Priority alerts" />
+      <CardHeader title="Priority alerts" linkTo={alerts.length ? '/tasks?tab=overdue' : undefined} />
       {alerts.length === 0 ? (
         <p className="alerts-card__clear">
           <CircleCheck size={18} aria-hidden="true" /> Nothing urgent. No residents to watch and no overdue tasks.
@@ -52,11 +61,6 @@ export default function PriorityAlertsCard({ flagged, overdue }) {
             </li>
           ))}
         </ul>
-      )}
-      {more > 0 && (
-        <Link to="/tasks?tab=overdue" className="card__link alerts-card__more">
-          {more} more {more === 1 ? 'alert' : 'alerts'}
-        </Link>
       )}
     </section>
   );

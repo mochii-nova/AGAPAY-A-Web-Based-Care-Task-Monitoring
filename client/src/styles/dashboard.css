@@ -6,12 +6,27 @@
 .dash-greeting__date { margin: 0; color: var(--muted); }
 
 .dash-row { display: grid; gap: 20px; margin-bottom: 20px; }
-.dash-row--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.dash-row--main { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); align-items: start; }
+/* Row 1: three compact cards, all the same height */
+.dash-row--three { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+/* Row 2: Up next (2/3) and Priority alerts (1/3), lined up at the top */
+.dash-row--main { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
 
-/* Today's progress: ring + legend */
-.progress-card { display: flex; align-items: center; gap: 22px; }
-.ring { position: relative; flex-shrink: 0; width: 108px; height: 108px; }
+/* The compact cards of row 1: label, a big line, a small line, and a footer kept at the bottom */
+.card.dash-card { display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; }
+.dash-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dash-card .small-label { margin: 0 0 4px; }
+.dash-card__big { margin: 0; overflow: hidden; font-size: 1.25rem; font-weight: var(--fw-bold); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.dash-card__sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.dash-card__line { display: -webkit-box; margin: 6px 0 0; overflow: hidden; font-size: 0.9rem; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dash-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; }
+.dash-card__done { display: inline-flex; align-items: center; gap: 6px; color: var(--completed-text); font-size: 0.9rem; font-weight: var(--fw-medium); }
+.dash-card__foot .card__link { display: inline-flex; align-items: center; min-height: var(--tap); }
+
+/* Today's progress: ring + legend, and earlier days' overdue tasks underneath */
+.progress-card__body { display: flex; align-items: center; gap: 18px; }
+.progress-card__earlier { color: inherit; text-decoration: none; }
+.progress-card__earlier:hover .card__link { text-decoration-color: currentColor; }
+.ring { position: relative; flex-shrink: 0; width: 92px; height: 92px; }
 .ring svg { width: 100%; height: 100%; }
 .ring__track,
 .ring__fill { fill: none; stroke-width: 9; }
@@ -20,15 +35,13 @@
 /* The ring fills up when the page opens */
 @keyframes ring-fill { from { stroke-dashoffset: var(--ring-length); } }
 .ring__label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring__label strong { font-size: 1.55rem; font-weight: var(--fw-bold); line-height: 1.1; }
+.ring__label strong { font-size: 1.35rem; font-weight: var(--fw-bold); line-height: 1.1; }
 .ring__label small { color: var(--muted); font-size: 0.75rem; }
 .progress-card__text { min-width: 0; }
-.progress-card .card__title { margin-bottom: 8px; }
-.progress-legend { display: flex; flex-direction: column; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.progress-legend { display: flex; flex-direction: column; gap: 2px; list-style: none; margin: 0; padding: 0; }
 
-/* Your shift */
-.shift-card__name { margin: 6px 0 0; font-size: 1.4rem; font-weight: var(--fw-bold); line-height: 1.2; }
-.shift-card__time { margin: 2px 0 14px; color: var(--muted); }
+/* Your shift: the handover reminder is the card's footer */
+.dash-card__foot.shift-card__note { padding-top: 4px; }
 .shift-card__note {
   display: flex;
   align-items: center;
@@ -52,13 +65,14 @@
 .alerts-card__item:hover { background: var(--tint); }
 .alerts-card__item .status-pill { flex-shrink: 0; min-width: 70px; }
 .alerts-card__text { display: flex; flex-direction: column; min-width: 0; }
-.alerts-card__text strong { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.alerts-card__text strong { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
 .alerts-card__text small { overflow: hidden; color: var(--muted); font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; }
-.alerts-card__more { display: inline-flex; align-items: center; min-height: var(--tap); margin-top: 2px; }
 .alerts-card__clear { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--completed-text); }
 .alerts-card__clear svg { flex-shrink: 0; margin-top: 2px; }
 
 /* Up next */
+.next-empty { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 0 2px; border-top: 1px solid var(--border); color: var(--muted); }
+.next-empty svg { flex-shrink: 0; margin-top: 2px; color: var(--completed-text); }
 .task-rows { list-style: none; margin: 0; padding: 0; }
 .task-row {
   display: grid;
@@ -73,30 +87,8 @@
 .task-row__main strong { font-weight: var(--fw-medium); }
 .task-row__main span { color: var(--muted); font-size: 0.85rem; }
 
-/* From the last shift */
-.handover-note {
-  display: block;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--text);
-  text-decoration: none;
-  transition: border-color 0.15s;
-}
-.handover-note:hover { border-color: var(--lavender-line); }
-.handover-note__text {
-  display: -webkit-box;
-  margin: 0;
-  overflow: hidden;
-  line-height: 1.6;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-.handover-note-card__btn { width: 100%; margin-top: 14px; }
-
 /* My residents */
-.dash-residents { margin-top: 8px; }
+.dash-residents { margin-top: 4px; }
 .dash-residents__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .dash-residents__head h2 { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-medium); }
 .dash-residents__head .card__link { margin-left: auto; }
@@ -122,10 +114,11 @@
 /* Smaller screens */
 @media (max-width: 1280px) {
   .dash-row--three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dash-row--three .alerts-card { grid-column: 1 / -1; }
+  .dash-row--three > :last-child { grid-column: 1 / -1; }
   .resident-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 1000px) {
+/* The 1/3 alerts column gets too narrow below this: Up next and alerts take the full width */
+@media (max-width: 1200px) {
   .dash-row--main { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {

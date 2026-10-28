@@ -8,8 +8,10 @@ export default function HeroSection() {
       <div className="container hero__inner">
         <div className="hero__text">
           <p className="eyebrow">For the caregivers of Orchid Carehome</p>
+          {/* Two lines on laptops; phones wrap it naturally */}
           <h1 className="hero__title">
-            Making caregiving easier, <span className="accent">one shift at a time.</span>
+            <span className="hero__line">Making caregiving easier,</span>{' '}
+            <span className="hero__line accent">one shift at a time.</span>
           </h1>
           <p className="hero__body">
             Keep track of each resident’s care, pass on what matters to the next shift, and always know what

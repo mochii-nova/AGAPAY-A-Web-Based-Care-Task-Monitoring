@@ -9,6 +9,9 @@
 // `size` = the file to make (2× the size on screen, so it's sharp on phones).
 // The full list with details is in design-reference/IMAGE-PLACEHOLDERS.md.
 // (The logo is real now: agapay-logo*.svg in this folder, shown by components/Logo.jsx.)
+// The Features screenshot is real too: Claire River's dashboard (light mode, real data), 1440 × 900.
+
+import featuresDashboard from './features-dashboard.webp';
 
 export const images = {
   hero: {
@@ -26,11 +29,11 @@ export const images = {
     size: '1100 × 760 px, JPG',
   },
   featuresLaptop: {
-    src: null,
+    src: featuresDashboard,
     label: 'Screenshot: the AGAPAY dashboard',
-    file: 'features-dashboard.png',
+    file: 'features-dashboard.webp',
     page: 'Features section (inside the browser window)',
-    size: '1400 × 875 px (16 : 10), PNG',
+    size: '1440 × 900 px (16 : 10), WebP',
   },
   authPanel: {
     src: null,

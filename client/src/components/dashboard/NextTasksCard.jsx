@@ -1,26 +1,36 @@
 import { Link } from 'react-router-dom';
-import { PartyPopper } from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
 import CardHeader from '../CardHeader';
 import StatusPill from '../StatusPill';
-import { EmptyState } from '../StateMessage';
 import { formatTime } from '../../utils/format';
 import { byUrgency } from '../../utils/tasks';
 
 const SHOW = 3;
 
-// The next few unfinished tasks (overdue first): time, task + resident, status, Open
-export default function NextTasksCard({ tasks }) {
+// Today's next few unfinished tasks (overdue first): time, task + resident, status, Open.
+// `earlierOverdue`: open tasks from earlier days, linked when today has nothing left.
+export default function NextTasksCard({ tasks, earlierOverdue = 0 }) {
   const open = tasks.filter((t) => t.status === 'pending' || t.status === 'overdue').sort(byUrgency);
   const next = open.slice(0, SHOW);
 
   return (
     <section className="card">
-      <CardHeader title="Up next" linkTo="/tasks" linkLabel={`All ${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`} />
+      <CardHeader title="Up next" linkTo="/tasks" linkLabel={tasks.length ? `All ${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}` : 'My tasks'} />
 
       {next.length === 0 ? (
-        <EmptyState icon={PartyPopper}>
-          {tasks.length === 0 ? 'No tasks for today.' : 'All tasks for today are done. Great work!'}
-        </EmptyState>
+        // One compact line, so the card doesn't leave a big empty area
+        <p className="next-empty">
+          <CalendarCheck size={18} aria-hidden="true" />
+          <span>
+            {tasks.length === 0 ? 'No tasks scheduled for today.' : 'All of today’s tasks are done. Great work.'}
+            {earlierOverdue > 0 && (
+              <>
+                {' '}
+                <Link to="/tasks?tab=overdue" className="card__link">{earlierOverdue} overdue from earlier days</Link>
+              </>
+            )}
+          </span>
+        </p>
       ) : (
         <ul className="task-rows">
           {next.map((t) => {

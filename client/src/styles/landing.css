@@ -66,11 +66,12 @@ html:has(.site) { scroll-padding-top: 104px; }
 
 /* ---------- Home ---------- */
 .hero { padding: 56px 0 96px; }
-.hero__inner { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 72px; }
-/* About 12% smaller than --fs-hero, so it sits calmly next to the photo */
-.hero__title { margin: 0; font-size: clamp(2rem, 3.9vw, calc(var(--fs-hero) * 0.88)); font-weight: var(--fw-bold); line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; }
-/* "one shift at a time." stays together, so no word is left alone on the last line */
-.hero__title .accent { white-space: nowrap; }
+/* The text gets a little more room than the photo, so the heading fits on two lines */
+.hero__inner { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: center; gap: 64px; }
+/* Exactly two lines on laptops: "Making caregiving easier," / "one shift at a time." (indigo).
+   The size follows the screen width so the longer first line always fits its column. */
+.hero__title { margin: 0; font-size: clamp(1.9rem, 3.6vw, 3.05rem); font-weight: var(--fw-bold); line-height: 1.15; letter-spacing: -0.02em; }
+.hero__line { display: block; white-space: nowrap; }
 .hero__body { max-width: 34em; margin: 22px 0 0; color: var(--muted); font-size: 1.1rem; line-height: 1.65; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 
@@ -110,10 +111,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site .browser__shot { width: 100%; aspect-ratio: 16 / 10; border-radius: 0; }
 .site .browser__shot.image-slot--empty { background-color: var(--indigo-soft); }
 
-/* Four feature cards under the screenshot: icon, title, one line */
+/* Four feature cards under the screenshot: title + one line */
 .feature-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; max-width: 960px; margin: 32px auto 0; padding: 0; list-style: none; }
 .feature-card { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
-.feature-card__icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-bottom: 12px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
 .feature-card h3 { margin: 0 0 6px; font-size: var(--fs-card-title); }
 .feature-card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
 
@@ -219,6 +219,8 @@ html:has(.site) { scroll-padding-top: 104px; }
   .hero { padding: 32px 0 72px; }
   .hero__inner { grid-template-columns: minmax(0, 1fr); }
   .hero__visual { justify-self: center; max-width: 440px; }
+  /* Phones and tablets: the heading wraps naturally */
+  .hero__line { display: inline; white-space: normal; }
 
   .about__head,
   .about__grid { grid-template-columns: minmax(0, 1fr); }
