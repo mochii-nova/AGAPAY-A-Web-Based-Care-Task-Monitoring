@@ -10,8 +10,10 @@
 // The full list with details is in design-reference/IMAGE-PLACEHOLDERS.md.
 // (The logo is real now: agapay-logo*.svg in this folder, shown by components/Logo.jsx.)
 // The Features screenshot is real too: Claire River's dashboard (light mode, real data), 1440 × 900.
+// So is the About photo (about-caregiver.jpg). The hero photo is imported by HeroSection.jsx.
 
 import featuresDashboard from './features-dashboard.webp';
+import aboutCaregiver from './about-caregiver.jpg';
 
 export const images = {
   hero: {
@@ -22,11 +24,11 @@ export const images = {
     size: '1100 × 1100 px (square), JPG',
   },
   about: {
-    src: null,
-    label: 'Photo: two hands holding, a caregiver and an elderly resident',
-    file: 'about.jpg',
-    page: 'About section (same height as the 4 cards)',
-    size: '1100 × 760 px, JPG',
+    src: aboutCaregiver,
+    label: 'Photo: a caregiver smiling with an elderly resident',
+    file: 'about-caregiver.jpg',
+    page: 'About section (left of the text, about 420 px tall)',
+    size: '748 × 749 px, JPG',
   },
   featuresLaptop: {
     src: featuresDashboard,

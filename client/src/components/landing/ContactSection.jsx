@@ -89,7 +89,7 @@ export default function ContactSection() {
         <div className="contact__panel">
           <p className="eyebrow">Contact</p>
           <h2 className="contact__title">Get in touch</h2>
-          <p className="contact__intro">Questions about AGAPAY or Orchid Carehome? Send us a message.</p>
+          <p className="contact__intro">Questions about AGAPAY? Send us a message.</p>
           <dl className="contact__list">
             <div>
               <dt>Phone</dt>
@@ -135,7 +135,7 @@ export default function ContactSection() {
                 {field('name', 'Your name', { placeholder: 'e.g. Juan Dela Cruz', autoComplete: 'name' })}
                 {field('email', 'Your email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email' })}
               </div>
-              {field('subject', 'Subject', { placeholder: 'e.g. Question about visiting hours' })}
+              {field('subject', 'Subject', { placeholder: 'e.g. Question about AGAPAY' })}
               {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here', className: 'contact__message' })}
               <div className="contact__actions">
                 <p className="contact__hint">All fields are required.</p>

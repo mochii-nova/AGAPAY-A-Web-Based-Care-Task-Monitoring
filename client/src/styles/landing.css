@@ -177,26 +177,17 @@ html:has(.site) { scroll-padding-top: 104px; }
 .hero__ghost { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 .hero__ghost:hover { background: rgba(255, 255, 255, 0.18); }
 
-/* ---------- About ---------- */
-.about__head { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 32px 48px; margin-bottom: 36px; }
-.about__body { margin: 0; color: var(--muted); font-size: 1.05rem; line-height: 1.7; }
-.about__body strong { color: var(--text); }
-
-/* Photo and the four cards are the same height */
-.about__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 24px; }
-.site .about__photo { width: 100%; height: 100%; min-height: 320px; border-radius: 20px; }
-
-.about__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 16px; list-style: none; margin: 0; padding: 0; }
-.about-card {
-  padding: 22px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
-  transition: box-shadow 0.15s, transform 0.15s;
-}
-.about-card:hover { box-shadow: var(--shadow-float); transform: translateY(-2px); }
-.about-card h3 { margin: 0 0 8px; font-size: var(--fs-card-title); }
-.about-card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+/* ---------- About: photo on the left, text and three facts on the right ---------- */
+.section.about { padding: 128px 0 64px; }
+.about__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 64px; }
+/* About 420px tall, cropped from the upper middle so both faces stay in view */
+.site .about__photo { width: 100%; height: 420px; border-radius: 16px; object-position: 50% 30%; }
+.about__body { margin: 20px 0 0; color: var(--muted); font-size: calc(17rem / 15); line-height: 1.65; }
+.about__body strong { color: var(--text); font-weight: 600; }
+.about__facts { margin: 24px 0 0; padding-top: 20px; border-top: 1px solid var(--border); }
+.about__facts div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 12px; padding: 4px 0; }
+.about__facts dt { color: var(--muted); }
+.about__facts dd { margin: 0; color: var(--text); }
 
 /* ---------- Section headings (label, title, one line) ---------- */
 .section-head { max-width: 760px; }
@@ -254,12 +245,13 @@ html:has(.site) { scroll-padding-top: 104px; }
 .feature-more p { margin: 0; color: var(--muted); line-height: 1.6; }
 
 /* ---------- Contact ---------- */
-.contact__grid { display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr); align-items: stretch; gap: 24px; }
+.section.contact { padding: 64px 0 128px; }
+.contact__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: 28px; }
 /* Both cards are always the same height: the photo fills the bottom of the left card,
    and the message box grows to fill the form card */
-.contact__panel { display: flex; flex-direction: column; padding: 28px; border-radius: 16px; background: var(--indigo-soft); }
-.contact__title { margin: 0 0 8px; font-size: clamp(1.7rem, 3vw, 2.1rem); font-weight: var(--fw-bold); }
-.contact__intro { margin: 0 0 22px; color: var(--muted); }
+.contact__panel { display: flex; flex-direction: column; padding: 36px; border-radius: var(--radius); background: var(--indigo-soft); }
+.contact__title { margin: 0 0 14px; font-size: clamp(2rem, 3.4vw, calc(44rem / 15)); font-weight: 700; letter-spacing: -0.02em; }
+.contact__intro { margin: 0 0 32px; color: var(--muted); font-size: calc(17rem / 15); }
 /* Contact details: a small label above each value */
 .contact__list { margin: 0 0 20px; }
 .contact__list div { padding: 10px 0; border-top: 1px solid var(--lavender-line); }
@@ -271,9 +263,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 .contact__list a:hover { text-decoration: underline; }
 /* Phone and email links: 44px tall tap area without moving the text */
 .contact__list a { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -12px; }
-.site .contact__photo { flex: 1; width: 100%; min-height: 170px; border-radius: 16px; }
+.site .contact__photo { flex: 1; width: 100%; min-height: 170px; border-radius: var(--radius); }
 
-.contact__form-wrap { display: flex; padding: 28px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+.contact__form-wrap { display: flex; padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
 .contact__form { display: flex; flex-direction: column; width: 100%; }
 .contact__form .contact__message { flex: 1; }
 .contact__message textarea.field__input { flex: 1; min-height: 150px; resize: none; }
@@ -286,32 +278,26 @@ html:has(.site) { scroll-padding-top: 104px; }
 .contact__success h3 { margin: 12px 0 4px; font-size: 1.35rem; font-weight: var(--fw-bold); }
 .contact__success p { margin-bottom: 20px; color: var(--muted); }
 
-/* ---------- Footer ---------- */
-.site-footer { margin-top: 32px; padding: 56px 0 24px; background: var(--navy); color: var(--on-navy); font-size: 0.92rem; }
-.site-footer__top { display: grid; grid-template-columns: 1fr 0.95fr 0.95fr 2.1fr; gap: 32px; }
-.site-footer h3 {
-  margin: 0 0 12px;
-  color: var(--on-navy-muted);
-  font-size: 0.75rem;
-  font-weight: var(--fw-medium);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.site-footer p { margin: 2px 0; }
-.site-footer__brand p { margin-top: 14px; color: var(--on-navy-muted); }
-/* Team names in two tidy columns */
-.site-footer__team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; list-style: none; margin: 0; padding: 0; }
+/* ---------- Footer: light, on the cream page, with a thin line on top ---------- */
+.site-footer { padding: 64px 0 72px; border-top: 1px solid var(--border); background: var(--bg); color: var(--muted); font-size: 0.93rem; }
+.site-footer__top { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
+.site-footer__brand p { max-width: 16em; margin: 14px 0 0; line-height: 1.55; }
+.site-footer__title { margin: 0 0 12px; color: var(--text); font-size: 0.93rem; font-weight: 600; }
+.site-footer__list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; font-style: normal; list-style: none; }
+/* Footer links: 44px tall tap areas that overlap a little, so they still look like a tight list */
+.site-footer__link { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -11px; color: var(--muted); text-decoration: none; }
+.site-footer__link:hover { color: var(--text); text-decoration: underline; }
 .site-footer__bottom {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 40px;
-  padding-top: 16px;
-  border-top: 1px solid var(--on-navy-line);
-  color: var(--on-navy-muted);
-  font-size: 0.85rem;
+  gap: 8px 24px;
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
 }
+.site-footer__bottom p { margin: 0; }
 
 /* =====================================================================
    Smaller screens
@@ -354,11 +340,12 @@ html:has(.site) { scroll-padding-top: 104px; }
 
   .section { padding: 48px 0; }
 
-  .about__head,
-  .about__grid { grid-template-columns: minmax(0, 1fr); }
-  .site .about__photo { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
-
   /* Columns stack */
+  .section.about { padding: 80px 0 40px; }
+  .about__grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .site .about__photo { height: 360px; }
+  .section.contact { padding: 40px 0 80px; }
+  .site-footer { padding: 48px 0 64px; }
   .section.how { padding: 72px 0 80px; }
   .section.features { padding: 72px 0; }
   .how__steps,
@@ -376,7 +363,8 @@ html:has(.site) { scroll-padding-top: 104px; }
   .hero__body { font-size: 1.05rem; }
   .hero__actions .btn { flex: 1 1 100%; }
 
-  .about__cards { grid-template-columns: minmax(0, 1fr); }
+  .site .about__photo { height: 300px; }
+  .about__facts div { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 6px 0; }
 
   .browser { margin-top: 32px; }
   .sample-card { padding: 16px; }
@@ -390,4 +378,5 @@ html:has(.site) { scroll-padding-top: 104px; }
   .contact__actions .btn { width: 100%; }
 
   .site-footer__top { grid-template-columns: minmax(0, 1fr); }
+  .site-footer__bottom { flex-direction: column; }
 }
