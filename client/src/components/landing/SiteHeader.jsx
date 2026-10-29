@@ -5,31 +5,43 @@ import { useAuth } from '../../context/AuthContext';
 import Logo from '../Logo';
 import { homeFor } from '../../utils/roles';
 
-// Top menu of the website: a floating bar that stays visible while scrolling.
+// Top menu of the website. Over the hero photo it is see-through with white text;
+// once the hero has scrolled away it becomes the white floating bar.
 // Links jump to each section of the page.
 export default function SiteHeader({ sections, active }) {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const close = () => setMenuOpen(false);
+  // Solid white bar after the hero, and while the phone menu is open (so it stays readable)
+  const solid = scrolled || menuOpen;
 
-  // Once the Home section has scrolled away, the bar gets a soft shadow and gets a little shorter
+  // Watch the hero: once it has scrolled up under the header, switch to the white bar
   useEffect(() => {
     const hero = document.getElementById('home');
     if (!hero) return;
     const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting), {
-      rootMargin: '-120px 0px 0px 0px',
+      rootMargin: '-96px 0px 0px 0px',
     });
     observer.observe(hero);
     return () => observer.disconnect();
   }, []);
 
+  // The logo is a real link to "/"; on this page it glides back to the top instead of reloading
+  const toTop = (e) => {
+    e.preventDefault();
+    close();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    if (window.location.hash) window.history.replaceState(null, '', '/');
+  };
+
   return (
-    <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+    <header className={`site-header ${solid ? 'is-solid' : 'is-clear'}`}>
       <div className="container">
         <div className="site-header__bar">
-          <a href="#home" className="site-header__logo" aria-label="AGAPAY, back to top" onClick={close}>
-            <Logo height={32} />
+          <a href="/" className="site-header__logo" aria-label="AGAPAY home" onClick={toTop}>
+            <Logo tone={solid ? 'auto' : 'white'} height={32} />
           </a>
 
           <button
@@ -66,7 +78,7 @@ export default function SiteHeader({ sections, active }) {
                 <Link to={homeFor(user)} className="btn btn--primary">Open dashboard</Link>
               ) : (
                 <>
-                  <Link to="/login" className="btn btn--outline">Sign in</Link>
+                  <Link to="/login" className="btn btn--outline site-header__signin">Sign in</Link>
                   <Link to="/register" className="btn btn--primary">Get started</Link>
                 </>
               )}
