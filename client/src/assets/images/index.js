@@ -15,6 +15,8 @@
 
 import featuresDashboard from './features-dashboard.webp';
 import aboutCaregiver from './about-caregiver.jpg';
+// Web-sized copy of the original contact-photo.jpg (kept in design-reference/)
+import contactPhoto from './contact-photo.webp';
 
 export const images = {
   hero: {
@@ -39,10 +41,10 @@ export const images = {
     size: '1440 × 900 px (16 : 10), WebP',
   },
   contact: {
-    src: null,
-    label: 'Photo: a caregiver and a resident laughing together',
-    file: 'contact.jpg',
+    src: contactPhoto,
+    label: 'A caregiver and a resident laughing together',
+    file: 'contact-photo.webp',
     page: 'Contact section (under the contact details)',
-    size: '820 × 410 px (2 : 1), JPG',
+    size: '736 × 396 px, WebP',
   },
 };

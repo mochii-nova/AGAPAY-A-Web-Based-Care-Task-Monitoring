@@ -110,6 +110,7 @@ export default function Register() {
     <AuthLayout
       photo={registerPhoto}
       photoPosition="center top"
+      photoPositionPhone="center 38%"
       panelTitle="Your role in better care"
       panelTitleSoft="starts here."
       panelText="Create your caregiver account. Once an administrator approves it, you can sign in and see your shift and tasks."

@@ -203,7 +203,7 @@ html:has(.site) { scroll-padding-top: 104px; }
 .contact__list a:hover { text-decoration: underline; }
 /* Phone and email links: 44px tall tap area without moving the text */
 .contact__list a { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -12px; }
-.site .contact__photo { flex: 1; width: 100%; min-height: 170px; border-radius: var(--radius); }
+.site .contact__photo { flex: 1; width: 100%; min-height: 170px; border-radius: 16px; object-position: center; }
 
 .contact__form-wrap { display: flex; padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
 .contact__form { display: flex; flex-direction: column; width: 100%; }

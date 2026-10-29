@@ -5,13 +5,20 @@ import '../styles/auth.css';
 
 // Two-column frame for Sign In and Register: a rounded photo panel on the left (white logo on top,
 // welcome text at the bottom), the form on the cream on the right.
-// photo = an imported image; photoPosition = which part of the photo stays in view when it is cropped.
-export default function AuthLayout({ photo, photoPosition = 'center', panelTitle, panelTitleSoft, panelText, wide = false, children }) {
+// photo = an imported image; photoPosition = which part of the photo stays in view when it is cropped
+// (photoPositionPhone = the same for the short banner on phones).
+export default function AuthLayout({
+  photo, photoPosition = 'center', photoPositionPhone = photoPosition, panelTitle, panelTitleSoft, panelText, wide = false, children,
+}) {
   return (
     <div className="auth">
       <aside
         className="auth__panel"
-        style={{ '--auth-photo': `url(${photo})`, '--auth-photo-position': photoPosition }}
+        style={{
+          '--auth-photo': `url(${photo})`,
+          '--auth-photo-position': photoPosition,
+          '--auth-photo-position-phone': photoPositionPhone,
+        }}
       >
         <Link to="/" className="auth__logo-link" aria-label="AGAPAY home">
           <Logo tone="white" height={40} className="auth__logo" />
