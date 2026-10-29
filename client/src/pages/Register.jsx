@@ -7,6 +7,8 @@ import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
 import { homeFor } from '../utils/roles';
+// Web-sized copy of the original register-photo.jpg (kept in design-reference/)
+import registerPhoto from '../assets/images/register-photo.webp';
 
 const EMPTY = {
   firstName: '',
@@ -106,11 +108,15 @@ export default function Register() {
 
   return (
     <AuthLayout
-      panelTitle="Your role in better care starts here."
-      panelText="Make your caregiver account. Once an administrator approves it, sign in to see your shift and tasks."
+      photo={registerPhoto}
+      photoPosition="center top"
+      panelTitle="Your role in better care"
+      panelTitleSoft="starts here."
+      panelText="Create your caregiver account. Once an administrator approves it, you can sign in and see your shift and tasks."
+      wide
     >
       <h1 className="auth__title">Create your account</h1>
-      <p className="auth__subtitle">For Orchid Carehome caregivers.</p>
+      <p className="auth__subtitle">For caregivers. An administrator reviews every new account.</p>
 
       {error && (
         <div className="alert alert--error" role="alert">
@@ -189,7 +195,7 @@ export default function Register() {
         }
       >
         <ol className="terms-list">
-          <li>AGAPAY is for authorized staff of Orchid Carehome Inc. only.</li>
+          <li>AGAPAY is for authorized staff of the care home only.</li>
           <li>Keep your Employee ID and password private. Don't share your account.</li>
           <li>Resident information is confidential. Only view and record what you need for care.</li>
           <li>Record tasks and handovers truthfully and on time.</li>

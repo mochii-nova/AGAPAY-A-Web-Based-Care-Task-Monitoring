@@ -72,6 +72,11 @@
   --badge: var(--apricot);      /* notification dots and counts (counts use --on-apricot text) */
   --overlay: rgba(36, 26, 48, 0.4);
 
+  /* Text over a darkened photo (Sign in and Register panels). The same in dark mode. */
+  --photo-overlay: rgba(36, 26, 48, 0.58);
+  --on-photo: #ffffff;
+  --on-photo-soft: #dccff5;     /* the second, lilac line of the welcome text */
+
   /* Shape and depth (soft plum shadows only; no glows, no coloured shadows) */
   --radius: 14px;               /* cards */
   --radius-sm: 10px;            /* inputs, buttons, tabs */

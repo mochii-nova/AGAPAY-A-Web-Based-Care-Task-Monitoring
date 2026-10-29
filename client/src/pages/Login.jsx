@@ -7,6 +7,8 @@ import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
 import { homeFor } from '../utils/roles';
+// Web-sized copy of the original signin-photo.jpg (kept in design-reference/)
+import signinPhoto from '../assets/images/signin-photo.webp';
 
 // Why api.js signed the person out (e.g. "Your account is inactive."), shown once
 function readSignedOutReason() {
@@ -73,11 +75,13 @@ export default function Login() {
 
   return (
     <AuthLayout
-      panelTitle="Welcome back. Today’s care is waiting."
-      panelText="See your shift, your tasks, and the latest handover."
+      photo={signinPhoto}
+      panelTitle="Welcome back."
+      panelTitleSoft="Today’s care is waiting."
+      panelText="See your shift, your tasks and the latest handover."
     >
       <h1 className="auth__title">Sign in</h1>
-      <p className="auth__subtitle">Sign in with your Employee ID or email and your password.</p>
+      <p className="auth__subtitle">Use your Employee ID or email and your password.</p>
 
       {justRegistered && !error && (
         <div className="alert alert--success" role="status">
