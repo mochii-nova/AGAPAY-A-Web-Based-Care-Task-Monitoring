@@ -2,60 +2,63 @@
    AGAPAY design system
    ALL colours live here as variables. Never write a colour anywhere else;
    use var(--name). Dark mode only redefines these values.
-   Look: "warm minimalism" (AGAPAY-REDESIGN-BRIEF): warm paper background, white cards,
-   navy sidebar, one indigo accent, a tiny apricot accent. No gradients, glass or glows.
+   Look: the same as the website: cream pages, white cards, a deep plum sidebar,
+   one plum accent and a tiny apricot accent. Inter for all text. No gradients, glass or glows.
+   (Some names are older than the colours: --navy is now the deep plum sidebar, --indigo is plum.)
    ===================================================================== */
 :root {
   /* Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
 
   /* Brand */
-  --navy: #1c1f4a;              /* sidebar, footer: the only strong colour block (backgrounds only) */
-  --ink: #1c1f4a;               /* strongest text: soft/outline buttons, active menu item (navy in light mode) */
-  --indigo: #4f46a5;            /* THE accent: links, selected tabs, checkboxes, focus, main button (7.6:1 on white) */
-  --indigo-hover: #433b8f;
-  --on-indigo: #ffffff;         /* text on the main button */
-  --indigo-soft: #eeebf8;       /* "lavender mist": selected tabs, today's highlight (indigo text 6.5:1) */
-  --display-lavender: #736ab6;  /* big lavender words on the website (4.7:1 on white) */
-  --lavender-deep: #9d93d6;     /* decoration only (illustrations, the logo's elder): never for text */
-  --label: #5b5878;             /* small uppercase labels (6.4:1 on the page) */
-  --apricot: #e08c6a;           /* tiny warm accent: "new" badges and hearts only (never for text) */
+  --navy: #2f2440;              /* deep plum: the sidebar, the only strong colour block (backgrounds only) */
+  --ink: #2a2233;               /* strongest text: soft/outline buttons */
+  --indigo: #67479a;            /* plum, THE accent: buttons, links, selected tabs, checkboxes, focus (6.7:1 on cream) */
+  --indigo-hover: #563a84;
+  --on-indigo: #ffffff;         /* text on the plum button (7.1:1) */
+  --indigo-soft: #efe7f7;       /* lilac: selected tabs, today's highlight (plum text 5.9:1) */
+  --display-lavender: #765aa3;  /* big plum-lilac words (5.6:1 on white) */
+  --lavender-deep: #a994d6;     /* decoration only (the logo's lilac, Morning shift marks): never for text */
+  --label: #6b6274;             /* small uppercase labels (5.5:1 on cream) */
+  --apricot: #e08c6a;           /* tiny warm accent: notification dots and count badges (never for text) */
+  --on-apricot: #2a2233;        /* numbers on apricot badges (5.9:1) */
   --apricot-text: #a4502f;      /* apricot words, e.g. "1 new" (5.0:1 on --apricot-soft) */
   --apricot-soft: #fdf1ea;      /* warm background */
   --apricot-line: #f6dccf;
 
   /* Warm surfaces, lightest to strongest */
-  --bg: #faf8f5;                /* page background: warm paper */
+  --bg: #fbf8f3;                /* cream: page background */
   --card: #ffffff;
-  --tint: #f6f3f7;              /* hover and soft backgrounds */
-  --lavender: #eeebf8;          /* soft buttons, selected menu item */
-  --lavender-strong: #e4e0f4;   /* hover on soft buttons */
-  --lavender-line: #d3cce6;     /* dashed placeholder borders, quiet icons */
-  --border: #ece7ef;
-  --border-strong: #dcd6e2;     /* inputs and outline buttons */
-  --topbar: #faf8f5;            /* top bar sits on the paper, with a thin bottom border */
+  --tint: #f4efe8;              /* linen: hover and soft backgrounds */
+  --lavender: #efe7f7;          /* lilac: soft buttons */
+  --lavender-strong: #e5d9f2;   /* hover on soft buttons */
+  --lavender-line: #ddd0ec;     /* dashed placeholder borders, quiet icons */
+  --border: #ece5dd;
+  --border-strong: #ddd3ca;     /* inputs and outline buttons */
+  --topbar: #fbf8f3;            /* top bar sits on the cream, with a thin bottom border */
   --photo-bg: #e9e3de;          /* photo placeholders (warm) */
   --photo-stripe: rgba(255, 255, 255, 0.45);
 
   /* Text */
-  --text: #23223a;              /* main text (15:1 on white) */
-  --muted: #68667e;             /* secondary text (5.5:1 on white, 5.0:1 on --tint) */
-  --faint: #6b6981;             /* days outside the month, quiet text (5.3:1 on white, 4.8:1 on --tint) */
-  --placeholder: #6d6b83;       /* example text inside empty input boxes (5.2:1 on white, 4.7:1 on --tint; typed text is far darker) */
+  --text: #2a2233;              /* ink: main text (14.4:1 on cream) */
+  --muted: #6b6274;             /* secondary text (5.8:1 on white, 5.1:1 on linen) */
+  --faint: #6b6274;             /* days outside the month, quiet text */
+  --placeholder: #736a7c;       /* example text inside empty input boxes (5.2:1 on white, 4.5:1 on linen; typed text is far darker) */
 
-  /* Fonts: Lexend for everything (same family as the logo), Caveat for rare hand-written notes */
-  --font-sans: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-hand: 'Caveat', 'Segoe Print', cursive;
+  /* Fonts: Inter for all text (the logo's lettering is drawn into the logo files) */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --fs-small: 0.867rem;         /* 13px labels */
   --fs-card-title: 1.133rem;    /* 17px */
   --fs-page-title: 1.867rem;    /* 28px */
   --fs-hero: 3.467rem;          /* 52px max */
 
-  /* On the navy sidebar / footer */
-  --on-navy: #ffffff;
-  --on-navy-muted: #c4bee3;     /* 8.9:1 on navy */
+  /* On the deep plum sidebar */
+  --on-navy: #ffffff;           /* 14.5:1 */
+  --on-navy-muted: #b4a9cc;     /* group labels (TODAY, CARE) and small text: 6.6:1 */
   --on-navy-hover: rgba(255, 255, 255, 0.08);
   --on-navy-line: rgba(255, 255, 255, 0.12);
   --on-topbar-hover: var(--tint);
+  --sidebar-active: #efe7f7;    /* the page you're on: lilac */
+  --on-sidebar-active: #2f2440; /* with dark plum text (12:1) */
 
   /* Status (always paired with a text label) */
   --completed-bg: #e3f2e8;  --completed-text: #2f6b45;  --completed-dot: #5ba777;
@@ -66,19 +69,19 @@
 
   /* Other colours */
   --danger: #b42318;
-  --badge: #c8372d;             /* red notification counts */
-  --overlay: rgba(30, 33, 64, 0.4);
+  --badge: var(--apricot);      /* notification dots and counts (counts use --on-apricot text) */
+  --overlay: rgba(36, 26, 48, 0.4);
 
-  /* Shape and depth (soft navy shadows only; no glows, no coloured shadows) */
+  /* Shape and depth (soft plum shadows only; no glows, no coloured shadows) */
   --radius: 14px;               /* cards */
   --radius-sm: 10px;            /* inputs, buttons, tabs */
   --radius-pill: 999px;         /* ONLY status labels and tags */
-  --shadow-sm: 0 1px 2px rgba(28, 31, 74, 0.04);
-  --shadow: 0 1px 3px rgba(28, 31, 74, 0.04);
-  --shadow-float: 0 4px 16px rgba(28, 31, 74, 0.06);  /* floating header, raised cards */
-  --shadow-lg: 0 8px 24px rgba(28, 31, 74, 0.09);
+  --shadow-sm: 0 1px 2px rgba(42, 34, 51, 0.04);
+  --shadow: 0 1px 3px rgba(42, 34, 51, 0.05);
+  --shadow-float: 0 6px 20px rgba(42, 34, 51, 0.08);  /* floating header, raised cards */
+  --shadow-lg: 0 12px 32px rgba(42, 34, 51, 0.12);
 
-  /* Type: 400 body and menus, 500 buttons and labels, 600 (Lexend SemiBold) titles and big numbers */
+  /* Type: 400 body and menus, 500 buttons and labels, 600 titles and big numbers */
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-bold: 600;
@@ -95,52 +98,55 @@
 
 /* Dark mode: the same names with dark values. utils/theme.js sets data-theme="dark" on <html>
    (from the Appearance choice, or the computer's setting when "System" is chosen).
-   Still one lavender-tinted family; the navy sidebar stays the strongest block. */
+   Deep plum surfaces; the sidebar stays the strongest block. */
 :root[data-theme='dark'] {
-  --navy: #1b1d45;
-  --ink: #eeedfb;
-  --indigo: #a9a2f2;            /* lighter so links read on dark cards (7.4:1 on --card) */
-  --indigo-hover: #bcb6f6;
-  --on-indigo: #171833;         /* dark text on the light main button (8.6:1) */
-  --indigo-soft: #2e2b5c;
-  --display-lavender: #ada6ec;
-  --lavender-deep: #b3aae6;
-  --label: #b0b1dc;
+  --navy: #211a2e;              /* the sidebar */
+  --ink: #f1ebf6;
+  --indigo: #c2a8ec;            /* light plum, so links read on dark cards (8.2:1 on --card) */
+  --indigo-hover: #d2bdf2;
+  --on-indigo: #1d1626;         /* dark text on the light plum button (8.5:1) */
+  --indigo-soft: #33284a;       /* light plum text on it: 6.6:1 */
+  --display-lavender: #c2a8ec;
+  --lavender-deep: #b9a6e0;
+  --label: #b4aac0;
   --apricot: #f0a98a;
+  --on-apricot: #2a2233;        /* 7.8:1 */
   --apricot-text: #f3b89f;
-  --apricot-soft: #2a2230;
-  --apricot-line: #463644;
+  --apricot-soft: #2c2129;
+  --apricot-line: #47363e;
 
-  --bg: #121327;
-  --card: #1a1c35;
-  --tint: #222442;
-  --lavender: #2b2d52;
-  --lavender-strong: #36385f;
-  --lavender-line: #4a4c76;
-  --border: #2c2e4b;
-  --border-strong: #3d4065;
-  --topbar: #121327;
-  --photo-bg: #262842;
+  --bg: #15111b;
+  --card: #1f1928;
+  --tint: #271f31;
+  --lavender: #2f2640;
+  --lavender-strong: #3a2f4d;
+  --lavender-line: #4a3e5e;
+  --border: #2e2738;
+  --border-strong: #3e3449;
+  --topbar: #15111b;
+  --photo-bg: #2a2233;
   --photo-stripe: rgba(255, 255, 255, 0.04);
 
-  --text: #e8e7f6;
-  --muted: #aeadcb;
-  --faint: #9f9ebe;
-  --placeholder: #9a99ba;       /* 6.1:1 on the dark card, 5.5:1 on dark --tint */
+  --text: #f1ebf6;
+  --muted: #b4aac0;             /* 7.7:1 on the dark card */
+  --faint: #a99fb6;
+  --placeholder: #a59bb2;       /* 6.5:1 on the dark card */
 
-  --on-navy-muted: #c4bee3;
+  --on-navy-muted: #b4a9cc;     /* 7.6:1 */
   --on-navy-hover: rgba(255, 255, 255, 0.07);
   --on-navy-line: rgba(255, 255, 255, 0.1);
+  --sidebar-active: #3b2f52;
+  --on-sidebar-active: #f1ebf6; /* 10.5:1 */
 
   --completed-bg: #1c3527;  --completed-text: #93d6aa;  --completed-dot: #5ba777;
   --pending-bg: #3a3014;    --pending-text: #ebcb73;    --pending-dot: #d9a93a;
   --overdue-bg: #3f1f25;    --overdue-text: #f4a8a8;    --overdue-dot: #d86a6a;
-  --skipped-bg: #2a2a3e;    --skipped-text: #c7c5da;    --skipped-dot: #8d8aa6;
-  --overdue-tint: #251a2a;
+  --skipped-bg: #2c2636;    --skipped-text: #c7c5da;    --skipped-dot: #8d8aa6;
+  --overdue-tint: #261a24;
 
   --danger: #f28b82;
-  --badge: #d0443a;
-  --overlay: rgba(5, 6, 16, 0.65);
+  --badge: var(--apricot);
+  --overlay: rgba(8, 5, 12, 0.65);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -657,21 +663,21 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   border-radius: var(--radius-pill);
   background: var(--badge);
   box-shadow: 0 0 0 2px var(--topbar);
-  color: var(--on-navy);
+  color: var(--on-apricot);
   font-size: 0.68rem;
   font-weight: var(--fw-medium);
   line-height: 17px;
   text-align: center;
 }
-/* "1 new" badges use the warm apricot accent */
-.count-badge.count-badge--new { background: var(--apricot); color: var(--navy); }
+/* "1 new" badges and counts: apricot with dark text */
+.count-badge.count-badge--new { background: var(--apricot); color: var(--on-apricot); }
 .count-badge {
   margin-left: auto;
   min-width: 20px;
   padding: 0 6px;
   border-radius: var(--radius-pill);
   background: var(--badge);
-  color: var(--on-navy);
+  color: var(--on-apricot);
   font-size: 0.72rem;
   font-weight: var(--fw-medium);
   text-align: center;
@@ -1097,7 +1103,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .sidebar__link svg { flex-shrink: 0; opacity: 0.85; }
 .sidebar__link:hover { background: var(--on-navy-hover); }
-.sidebar__link.active { background: var(--lavender); color: var(--ink); font-weight: var(--fw-medium); }
+/* The page you are on: lilac with dark plum text (dark mode: a lighter plum with light text) */
+.sidebar__link.active { background: var(--sidebar-active); color: var(--on-sidebar-active); font-weight: var(--fw-medium); }
 .sidebar__link.active svg { opacity: 1; }
 .sidebar__bottom { padding-top: 10px; border-top: 1px solid var(--on-navy-line); }
 
@@ -1152,7 +1159,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
     box-shadow: 0 0 0 2px var(--navy);
     font-size: 0;
   }
-  .sidebar.is-rail .sidebar__link.active .count-badge { box-shadow: 0 0 0 2px var(--lavender); }
+  .sidebar.is-rail .sidebar__link.active .count-badge { box-shadow: 0 0 0 2px var(--sidebar-active); }
 }
 
 .sidebar-backdrop { display: none; }

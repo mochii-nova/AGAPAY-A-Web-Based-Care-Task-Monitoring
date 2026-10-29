@@ -1,77 +1,17 @@
 /* =====================================================================
    Public website (Landing.jsx): header, hero, How it works, Features, About, Contact, footer
 
-   The website has its own warm colours and the Inter font. They are set only inside .site,
-   by giving the app's colour names (main.css) website values, so the shared buttons, form
-   fields and links turn plum here while the app pages stay exactly as they are.
-   Text contrast (checked): ink 14.4:1 and secondary text 5.5:1 on cream, 5.1:1 on linen,
-   4.8:1 on lilac; white on plum 7.1:1. Dark mode values are underneath, also 4.5:1 or better.
+   Colours and the Inter font come from main.css, the same as every page of the app.
+   Only the two colours that sit on the hero photo are the website's own.
    ===================================================================== */
 .site {
-  /* Website colours */
-  --site-cream: #fbf8f3;        /* page background */
-  --site-linen: #f4efe8;        /* light bands (Features) */
-  --site-border: #ece5dd;
-  --site-ink: #2a2233;          /* main text */
-  --site-muted: #6b6274;        /* secondary text */
-  --site-plum: #67479a;         /* main colour: buttons, links, labels */
-  --site-plum-hover: #563a84;
-  --site-lilac: #efe7f7;        /* soft backgrounds (contact panel, selected menu item) */
-  --site-lilac-line: #ddd0ec;
-  --site-apricot: #e08c6a;      /* tiny warm accent (decoration only, never text) */
   --site-on-photo-soft: #dccff5;/* "one shift at a time." over the dark photo (11:1) */
   --site-overlay: rgba(36, 26, 48, 0.58);
 
-  /* The app's colour names, with website values (so shared parts follow along) */
-  --bg: var(--site-cream);
-  --card: #ffffff;
-  --tint: var(--site-linen);
-  --border: var(--site-border);
-  --border-strong: #ddd3c8;
-  --text: var(--site-ink);
-  --ink: var(--site-ink);
-  --muted: var(--site-muted);
-  --label: var(--site-muted);
-  --faint: var(--site-muted);
-  --placeholder: #7a7182;       /* 4.6:1 on white */
-  --indigo: var(--site-plum);
-  --indigo-hover: var(--site-plum-hover);
-  --on-indigo: #ffffff;
-  --indigo-soft: var(--site-lilac);
-  --lavender: var(--site-lilac);
-  --lavender-strong: #e5d9f2;
-  --lavender-line: var(--site-lilac-line);
-  --radius: 14px;               /* cards */
-  --radius-sm: 10px;            /* buttons and inputs */
-  --shadow-float: 0 6px 20px rgba(42, 34, 51, 0.08);
-  --shadow-lg: 0 12px 32px rgba(42, 34, 51, 0.12);
-
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   overflow-x: clip;
 }
-
-/* Dark mode (follows the app's light/dark choice) */
-:root[data-theme='dark'] .site {
-  --site-cream: #15111b;
-  --site-linen: #1d1826;
-  --site-border: #2e2738;
-  --site-ink: #f1ebf6;
-  --site-muted: #b4aac0;
-  --site-plum: #7653b0;         /* buttons: white text 5.8:1 */
-  --site-plum-hover: #8462bf;
-  --site-lilac: #2a2238;
-  --site-lilac-line: #3b3149;
-  --card: #221c2c;
-  --border-strong: #3b3149;
-  --placeholder: #a59bb2;
-  --lavender-strong: #33293f;
-  --shadow-float: 0 6px 20px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
-}
-/* Links and labels in dark mode use a lighter plum, so they stay readable (9:1) */
-:root[data-theme='dark'] .site :is(.eyebrow, .card__link, .site-nav__link.is-active, .how__label, .sample-tab.is-active) { color: #c2a8ec; }
 
 /* Anything scrolled into view (menu links, /#contact, tabbing into a form field) stops below the
    floating header: 16px gap + 64px bar + 24px breathing room. */
