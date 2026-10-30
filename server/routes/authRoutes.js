@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const pool = require('../db');
 const { fullUser, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
 
@@ -65,10 +66,56 @@ router.post('/login', async (req, res) => {
   if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
   if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
 
-  const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  sendSession(req, res, user);
+});
 
-  // AuthContext.login expects { token, user }
-  res.json({ token, user: fullUser(user, req) });
+const googleClient = new OAuth2Client();
+
+router.post('/google', async (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return res.status(503).json({ message: 'Google sign-in isn’t set up on the server yet. Please use your Employee ID.' });
+  }
+  const { accessToken } = req.body;
+  if (typeof accessToken !== 'string' || !accessToken || accessToken.length > 4096) {
+    return res.status(400).json({ message: 'Google sign-in failed. Please try again.' });
+  }
+
+  // 1. Ask Google about the token. A fake or expired token makes this throw.
+  let info;
+  try {
+    info = await googleClient.getTokenInfo(accessToken);
+  } catch {
+    return res.status(401).json({ message: 'Google sign-in failed. Please try again.' });
+  }
+
+  // 2. The token must be made for OUR app (otherwise a token from any other site would work)
+  if (info.aud !== clientId) {
+    return res.status(401).json({ message: 'Google sign-in failed. Please try again.' });
+  }
+
+  // 3. Google must have confirmed the email. Google sends "true" as TEXT, so compare as text.
+  if (!info.email || String(info.email_verified) !== 'true') {
+    return res.status(401).json({ message: 'This Google account’s email isn’t verified.' });
+  }
+
+  // 4. Match the email to an account
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [info.email.toLowerCase()]);
+  const user = rows[0];
+  if (!user) return res.status(403).json({ message: GOOGLE_NOT_LINKED });
+  if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
+  if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
+  
+  const GOOGLE_NOT_LINKED =
+    'This Google account isn’t linked to an approved AGAPAY account. Sign in with your Employee ID, or ask the administrator to add this email to your account.';
+
+  // Same answer for both ways of signing in: AuthContext.login expects { token, user }
+  function sendSession(req, res, user) {
+    const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token, user: fullUser(user, req) });
+  }
+
+  sendSession(req, res, user);
 });
 
 module.exports = router;

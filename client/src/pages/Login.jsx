@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
+import GoogleButton from '../components/GoogleButton';
 import { homeFor } from '../utils/roles';
 // Web-sized copy of the original signin-photo.jpg (kept in design-reference/)
 import signinPhoto from '../assets/images/signin-photo.webp';
@@ -51,16 +52,29 @@ export default function Login() {
     setFieldErrors(found);
     if (Object.keys(found).length > 0) return;
 
+    await signIn(() => api.post('/auth/login', { username: username.trim(), password }));
+  };
+
+  // Google gave us a signed ID token; the backend checks it and matches the email to an approved account
+  const handleGoogle = (accessToken) => {
+    if (loading) return;
+    setError(null);
+    setFieldErrors({});
+    signIn(() => api.post('/auth/google', { accessToken }));
+  };
+
+  // Shared by both ways of signing in
+  const signIn = async (request) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/login', { username: username.trim(), password });
+      const { data } = await request();
       // Signing in is enough: the "already signed in" line above then takes them to their Home.
       // (Navigating here as well made two redirects at once, which left the admin side blank.)
       login(data);
     } catch (err) {
       const status = err.response?.status;
       const message = err.response?.data?.message;
-      // 403 = right password, but the account is waiting for approval or inactive
+      // 403 = the account is waiting for approval (info), inactive, or not linked to Google (error)
       const waiting = status === 403 && /approval/i.test(message ?? '');
       setError({
         tone: waiting ? 'info' : 'error',
@@ -137,6 +151,13 @@ export default function Login() {
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+
+      {/* Second way in. The Employee ID + password form above stays the main one and the backup. */}
+      <GoogleButton
+        onToken={handleGoogle}
+        onError={(text) => setError({ tone: 'error', text })}
+        disabled={loading}
+      />
 
       <p className="auth__switch">
         New caregiver? <Link to="/register">Create an account</Link>
