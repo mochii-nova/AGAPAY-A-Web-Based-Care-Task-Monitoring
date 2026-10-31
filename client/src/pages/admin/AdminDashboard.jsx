@@ -14,7 +14,7 @@ import { shiftOnDate, minutesToText } from '../../utils/shift';
 import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
 import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
-import { addDays, dayLabel, dayToDate, shiftOfDue } from '../../utils/adminTasks';
+import { addDays, dayLabel, dayToDate, shiftOfDue, offShiftTasks } from '../../utils/adminTasks';
 import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay } from '../../utils/handoverMonitor';
 import { useProfile } from '../../context/ProfileContext';
 import PageHeader from '../../components/PageHeader';
@@ -161,6 +161,20 @@ export default function AdminDashboard() {
       onClick: () => navigate(`/admin/residents?gap=${s.id}`),
     });
   });
+  // Today's open tasks given to someone who isn't scheduled on that shift
+  const offShift = offShiftTasks(tasks, roster);
+  if (offShift.length) {
+    const n = offShift.length;
+    attention.push({
+      key: 'offshift',
+      tone: 'overdue',
+      tag: 'Wrong shift',
+      title: `${plural(n, 'task')} ${n === 1 ? 'is' : 'are'} assigned to someone not working that shift`,
+      sub: 'Give them to someone on the shift, or change the Schedule',
+      action: 'Fix',
+      onClick: () => navigate(`/admin/tasks?date=${day}&problem=offshift`),
+    });
+  }
   // Residents marked Urgent / Watch closely in their latest handover update (Urgent first)
   residents
     .map((r) => ({ r, latest: latestUpdate(handovers, r) }))

@@ -10,6 +10,7 @@ import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS } from '../../constants';
 import { weekDays, monthGrid, addMonths, monthTitle, weekTitle, addDays as addDaysTo } from '../../utils/calendar';
 import { addDays, dayLabel, dayToDate, shiftOfDue } from '../../utils/adminTasks';
+import { normalizeTasks } from '../../utils/tasks';
 import { activeCaregivers } from '../../utils/staff';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../../components/Modal';
@@ -31,10 +32,12 @@ export default function AdminSchedule() {
   const isPhone = useMediaQuery('(max-width: 760px)');
   const now = new Date();
   const today = isoDay(now);
+  // Tasks & Care's "Open schedule" comes here with { date, shift } to show that shift
+  const linked = location.state?.date ? { date: location.state.date, shift: SHIFTS.find((s) => s.id === location.state.shift) } : null;
   const [view, setView] = useState('week');
-  const [focus, setFocus] = useState(today); // a day in the week / month shown
+  const [focus, setFocus] = useState(() => linked?.date ?? today); // a day in the week / month shown
   const [who, setWho] = useState('');
-  const [picked, setPicked] = useState(null);
+  const [picked, setPicked] = useState(() => (linked?.shift ? linked : null));
   const [busyId, setBusyId] = useState(null);
   const saving = useRef(new Set()); // people whose shift is being saved right now
   // The Dashboard's "Fill a month" opens it straight away
@@ -48,14 +51,33 @@ export default function AdminSchedule() {
   // dropped. Laptops always show a shift: today's Morning, or the first day shown.
   const firstShown = view === 'week' ? from : isoDay(new Date(focusDate.getFullYear(), focusDate.getMonth(), 1));
   const onScreen = (ymd) => ymd >= from && ymd <= to;
-  const selected =
-    picked && onScreen(picked.date) ? picked : isNarrow ? null : { date: onScreen(today) ? today : firstShown, shift: picked?.shift ?? SHIFTS[0] };
   // One day more each side: the panel checks for back-to-back shifts
   const rosterQuery = useApiData(`/shifts?from=${addDays(from, -1)}&to=${addDays(to, 1)}`);
-  const tasksQuery = useApiData(`/tasks?from=${from}&to=${addDays(to, 1)}`);
+  const tasksQuery = useApiData(`/tasks?from=${from}&to=${addDays(to, 1)}`, { transform: normalizeTasks });
   const entries = rosterQuery.data ?? [];
   const tasks = tasksQuery.data ?? [];
   const caregivers = activeCaregivers(staff);
+
+  // The tasks of one shift (a Night shift's tasks after midnight belong to the day it started)
+  const tasksOn = (ymd, shift) =>
+    tasks
+      .filter((t) => {
+        const s = shiftOfDue(t.dueAt);
+        return s.shiftDate === ymd && s.shift.id === shift.id;
+      })
+      .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+  // Opening a day picks the shift on now (today), else the first shift with tasks, else Morning
+  const shiftFor = (ymd) => {
+    const current = shiftOfDue(now);
+    if (current.shiftDate === ymd) return current.shift;
+    return SHIFTS.find((s) => tasksOn(ymd, s).length) ?? SHIFTS[0];
+  };
+  const openDay = (ymd) => setPicked({ date: ymd, shift: shiftFor(ymd) });
+  // Laptops always show a shift: the one on now (after midnight that's still yesterday's Night shift)
+  const onNow = shiftOfDue(now).shiftDate;
+  const defaultDate = onScreen(onNow) ? onNow : onScreen(today) ? today : firstShown;
+  const selected =
+    picked && onScreen(picked.date) ? picked : isNarrow ? null : { date: defaultDate, shift: shiftFor(defaultDate) };
 
   const peopleOn = (ymd, shift) =>
     entries.filter((e) => e.shiftDate === ymd && e.shift === shift.apiValue && (!who || String(e.userId) === who));
@@ -92,10 +114,8 @@ export default function AdminSchedule() {
       slot={selected}
       entries={entries}
       caregivers={caregivers}
-      taskCount={tasks.filter((t) => {
-        const s = shiftOfDue(t.dueAt);
-        return s.shiftDate === selected.date && s.shift.id === selected.shift.id;
-      }).length}
+      tasks={tasksOn(selected.date, selected.shift)}
+      tasksLoading={tasksQuery.status === 'loading'}
       busyId={busyId}
       onAssign={(c) => save(c, selected.date, selected.shift)}
       onDayOff={(e) => save({ id: e.userId, name: e.userName }, selected.date, null)}
@@ -150,9 +170,9 @@ export default function AdminSchedule() {
           {ready && (
             <>
               {view === 'week' ? (
-                <RosterWeek days={days} today={now} selected={selected} peopleOn={peopleOn} onSelect={setPicked} transposed={isPhone} />
+                <RosterWeek days={days} today={now} selected={selected} peopleOn={peopleOn} taskCount={(ymd, s) => tasksOn(ymd, s).length} onSelect={setPicked} transposed={isPhone} />
               ) : (
-                <RosterMonth month={focusDate} today={now} selected={selected} peopleOn={peopleOn} onSelect={setPicked} />
+                <RosterMonth month={focusDate} today={now} selected={selected} peopleOn={peopleOn} taskCount={(ymd, s) => tasksOn(ymd, s).length} onOpenDay={openDay} />
               )}
               <p className="admin-schedule__gaps" role="status">
                 {gapsShown === 0

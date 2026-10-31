@@ -19,7 +19,7 @@ function validate(form, chosenOk) {
   if (!form.residentId) errors.residentId = 'Please choose a resident.';
   if (!form.date) errors.date = 'Please choose the date.';
   if (!form.time) errors.time = 'Please choose the due time.';
-  if (!chosenOk) errors.assignedTo = "This caregiver isn't on that shift. Choose someone else or \"Not assigned yet\".";
+  if (!chosenOk) errors.assignedTo = "This caregiver isn't scheduled on that shift. Choose someone who is, or \"Not assigned yet\".";
   const n = Number(form.repeat);
   if (!Number.isInteger(n) || n < 1 || n > MAX_REPEAT) errors.repeat = `Use a number from 1 to ${MAX_REPEAT}.`;
   return errors;
@@ -47,22 +47,21 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
   const due = form.date && form.time ? dueFrom(form.date, form.time) : null;
   const { shift, shiftDate } = shiftOfDue(due ?? new Date());
 
-  // The roster around these days (two weeks either side shows who uses the roster at all)
-  const from = addDays(shiftDate, -14);
-  const to = addDays(shiftDate, days + 14);
-  const rosterQuery = useApiData(`/shifts?from=${from}&to=${to}`);
+  // The Schedule for these days: only caregivers scheduled on the task's date and shift can be chosen
+  const rosterQuery = useApiData(`/shifts?from=${shiftDate}&to=${addDays(shiftDate, days)}`);
   const roster = rosterQuery.data ?? [];
 
   // Caregivers of the chosen resident go first, in their own group
   const resident = residents.find((r) => String(r.id) === form.residentId);
   const looksAfter = (c) => !!resident?.caregivers.some((x) => x.id === c.id);
   const onShift = caregiversOnShift(caregivers, roster, shift, shiftDate).sort((a, b) => a.caregiver.name.localeCompare(b.caregiver.name));
-  // When editing, the person it's already given to stays in the list even if their shift changed
+  // Editing a task whose caregiver isn't scheduled (any more): they still show, so the form says who it
+  // was, but saving asks for someone who is scheduled, or "Not assigned yet"
   const keepCurrent =
     editing && task.assignedTo && String(task.assignedTo) === form.assignedTo && !onShift.some((o) => String(o.caregiver.id) === form.assignedTo);
-  const chosenOk = !form.assignedTo || keepCurrent || onShift.some((o) => String(o.caregiver.id) === form.assignedTo);
+  const chosenOk = !form.assignedTo || onShift.some((o) => String(o.caregiver.id) === form.assignedTo);
 
-  const toOption = ({ caregiver: c, usual }) => ({ value: String(c.id), label: `${c.name} · ${shift.label}${usual ? ' (usual shift)' : ''}` });
+  const toOption = ({ caregiver: c }) => ({ value: String(c.id), label: `${c.name} · ${shift.label}` });
   const firstName = resident?.name.split(' ')[0];
   const caregiverOptions = [
     { value: '', label: 'Not assigned yet' },
@@ -72,7 +71,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
           { group: `Others on the ${shift.label} shift`, options: onShift.filter((o) => !looksAfter(o.caregiver)).map(toOption) },
         ]
       : onShift.map(toOption)),
-    ...(keepCurrent ? [{ value: String(task.assignedTo), label: `${task.assignedToName} (not on this shift)` }] : []),
+    ...(keepCurrent ? [{ value: String(task.assignedTo), label: `${task.assignedToName} (not scheduled on this shift)` }] : []),
   ];
 
   // Offers shown in the form: give the resident to the chosen caregiver too (ticked), and (new tasks)
@@ -168,10 +167,11 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
     <SelectField id={`task-${name}`} name={name} label={label} value={form[name]} onChange={handleChange} options={options} error={errors[name]} {...props} />
   );
 
-  const shiftHint =
-    onShift.length === 0
-      ? `No one is on the ${shift.label} shift on ${dayLabel(shiftDate)}. Add someone in Schedule, or save it without a caregiver for now.`
-      : `Only caregivers on the ${shift.label} shift (${shiftTime(shift)}) on ${dayLabel(shiftDate)} are listed.`;
+  const shiftHint = keepCurrent
+    ? `${task.assignedToName} isn't scheduled on the ${shift.label} shift on ${dayLabel(shiftDate)}. Choose someone who is, or "Not assigned yet".`
+    : onShift.length === 0
+      ? `No one is scheduled on the ${shift.label} shift on ${dayLabel(shiftDate)}. Add someone in Schedule, or save it without a caregiver for now.`
+      : `Only caregivers scheduled on the ${shift.label} shift (${shiftTime(shift)}) on ${dayLabel(shiftDate)} are listed.`;
 
   return (
     <form className="staff-form" onSubmit={handleSubmit} noValidate>

@@ -38,18 +38,20 @@ export function shiftOfDue(due) {
   return { shift, shiftDate: startsDayBefore ? addDays(day, -1) : day };
 }
 
-// The active caregivers working `shift` on `shiftDate`, as [{ caregiver, usual }].
-// Someone who is on the roster (`roster` = shifts loaded around these dates) counts only on the
-// days the roster gives them that shift; a missing day is a day off. Someone who was never put on
-// the roster falls back to their usual shift from Manage Staff (`usual: true`).
-export function caregiversOnShift(caregivers, roster, shift, shiftDate) {
-  const rostered = new Set(roster.map((e) => e.userId));
-  return caregivers
-    .filter((c) => c.status === 'active')
-    .map((c) =>
-      rostered.has(c.id)
-        ? roster.some((e) => e.userId === c.id && e.shiftDate === shiftDate && e.shift === shift.apiValue) && { caregiver: c, usual: false }
-        : c.assignedShift === shift.apiValue && { caregiver: c, usual: true }
-    )
-    .filter(Boolean);
-}
+// Is this person on the Schedule for `shift` on `shiftDate`? (`roster` = shifts loaded around that day)
+export const isScheduled = (roster, userId, shift, shiftDate) =>
+  roster.some((e) => e.userId === userId && e.shiftDate === shiftDate && e.shift === shift.apiValue);
+
+// The active caregivers scheduled on `shift` on `shiftDate`, as [{ caregiver }]. Only the Schedule
+// counts: someone who isn't on it that day can't be given a task on that shift.
+export const caregiversOnShift = (caregivers, roster, shift, shiftDate) =>
+  caregivers.filter((c) => c.status === 'active' && isScheduled(roster, c.id, shift, shiftDate)).map((c) => ({ caregiver: c }));
+
+// Open tasks (pending or overdue) given to someone who isn't scheduled on the task's shift.
+// The roster must cover the day before the first task too (a Night shift starts the evening before).
+export const offShiftTasks = (tasks, roster) =>
+  tasks.filter((t) => {
+    if (!t.assignedTo || (t.status !== 'pending' && t.status !== 'overdue')) return false;
+    const { shift, shiftDate } = shiftOfDue(t.dueAt);
+    return !isScheduled(roster, t.assignedTo, shift, shiftDate);
+  });

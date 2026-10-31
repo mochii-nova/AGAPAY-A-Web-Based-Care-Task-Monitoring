@@ -17,13 +17,17 @@ function SlotPeople({ people }) {
   );
 }
 
-// One week of the roster: Morning / Noon / Night by 7 days. Each slot is a button.
+const tasksText = (n) => `${n} ${n === 1 ? 'task' : 'tasks'}`;
+
+// One week of the roster: Morning / Noon / Night by 7 days. Each slot is a button; under the names,
+// how many tasks that shift has (the side panel lists them).
 // `transposed` (phones): one row per day, the three shifts across, so it fits the width.
-// peopleOn(ymd, shift) -> roster entries shown in that slot.
-export default function RosterWeek({ days, today, selected, peopleOn, onSelect, transposed }) {
+// peopleOn(ymd, shift) -> roster entries shown in that slot; taskCount(ymd, shift) -> a number.
+export default function RosterWeek({ days, today, selected, peopleOn, taskCount, onSelect, transposed }) {
   const slot = (day, shift) => {
     const ymd = isoDay(day);
     const people = peopleOn(ymd, shift);
+    const count = taskCount(ymd, shift);
     const isSelected = selected?.date === ymd && selected?.shift.id === shift.id;
     const names = people.map((p) => p.userName).join(', ') || 'no caregiver';
     return (
@@ -32,10 +36,11 @@ export default function RosterWeek({ days, today, selected, peopleOn, onSelect, 
         type="button"
         className={`roster-slot ${people.length === 0 ? 'is-gap' : ''}`}
         aria-pressed={isSelected}
-        aria-label={`${longDay(day)}, ${shift.label} shift: ${names}. Open`}
+        aria-label={`${longDay(day)}, ${shift.label} shift: ${names}${count ? `, ${tasksText(count)}` : ''}. Open`}
         onClick={() => onSelect({ date: ymd, shift })}
       >
         <SlotPeople people={people} />
+        {count > 0 && <span className="roster-count" aria-hidden="true">{tasksText(count)}</span>}
       </button>
     );
   };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, ClipboardList, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, ClipboardList, Plus, ChevronLeft, ChevronRight, TriangleAlert } from 'lucide-react';
 import api from '../../api';
 import { useStaff } from '../../context/StaffContext';
 import { useToast } from '../../context/ToastContext';
@@ -12,7 +12,7 @@ import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
 import { activeCaregivers } from '../../utils/staff';
 import { searchTerm, matchesSearch } from '../../utils/search';
-import { addDays, dayLabel, shiftOfDue } from '../../utils/adminTasks';
+import { addDays, dayLabel, shiftOfDue, offShiftTasks } from '../../utils/adminTasks';
 import PageHeader from '../../components/PageHeader';
 import StatusPill from '../../components/StatusPill';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -44,6 +44,7 @@ export default function TasksCare() {
   const { staff } = useStaff();
   const { residents, setData: setResidents } = useResidents();
   const showToast = useToast();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const today = isoDay(new Date());
   // ?date=2026-10-27 (default today), ?q= fills the search (Manage Residents links here like that)
@@ -53,7 +54,8 @@ export default function TasksCare() {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [shiftFilter, setShiftFilter] = useState('');
-  const [caregiverFilter, setCaregiverFilter] = useState('');
+  // ?problem=offshift (the Dashboard's "Fix") starts on the tasks given to someone not on that shift
+  const [caregiverFilter, setCaregiverFilter] = useState(() => (searchParams.get('problem') === 'offshift' ? 'offshift' : ''));
   const [category, setCategory] = useState('');
   // ?open=<task id> opens that task (the Dashboard and task notifications link here like that)
   const [viewId, setViewId] = useState(() => Number(searchParams.get('open')) || null);
@@ -70,6 +72,14 @@ export default function TasksCare() {
   const [deleteError, setDeleteError] = useState('');
 
   const caregivers = activeCaregivers(staff);
+  // The Schedule for this day (and the evening before: a Night shift's tasks after midnight belong to it),
+  // to warn about tasks given to someone who isn't working that shift
+  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${day}`);
+  const offShift = new Set(rosterQuery.status === 'ready' ? offShiftTasks(tasks, rosterQuery.data).map((t) => t.id) : []);
+  const openSchedule = (t) => {
+    const { shift, shiftDate } = shiftOfDue(t.dueAt);
+    navigate('/admin/schedule', { state: { date: shiftDate, shift: shift.id } });
+  };
   const goTo = (ymd) => {
     const next = new URLSearchParams(searchParams);
     if (ymd === today) next.delete('date');
@@ -81,7 +91,11 @@ export default function TasksCare() {
   const q = searchTerm(search);
   const filtered = tasks
     .filter((t) => !shiftFilter || shiftOfDue(t.dueAt).shift.id === shiftFilter)
-    .filter((t) => !caregiverFilter || (caregiverFilter === 'none' ? !t.assignedTo : String(t.assignedTo) === caregiverFilter))
+    .filter(
+      (t) =>
+        !caregiverFilter ||
+        (caregiverFilter === 'none' ? !t.assignedTo : caregiverFilter === 'offshift' ? offShift.has(t.id) : String(t.assignedTo) === caregiverFilter)
+    )
     .filter((t) => !category || t.category === category)
     .filter((t) => matchesSearch(q, t.task, t.resident, t.room))
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
@@ -190,6 +204,7 @@ export default function TasksCare() {
             <option value="">All caregivers</option>
             {caregivers.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
             <option value="none">Not assigned yet</option>
+            <option value="offshift">Wrong shift</option>
           </select>
           <label htmlFor="tasks-category" className="sr-only">Filter by category</label>
           <select id="tasks-category" className="field__input select" value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -240,6 +255,19 @@ export default function TasksCare() {
                     </td>
                     <td className="task-table__caregiver">
                       {t.assignedToName ?? <span className="resident-details__gap">Not assigned</span>}
+                      {offShift.has(t.id) && (
+                        // Given to someone who isn't working this shift: reassign, or fix the Schedule.
+                        // (Clicks here don't open the task, unlike the rest of the row.)
+                        <span className="offshift" onClick={(e) => e.stopPropagation()}>
+                          <span className="offshift__text">
+                            <TriangleAlert size={14} aria-hidden="true" /> {t.assignedToName.split(' ')[0]} isn’t scheduled on this shift
+                          </span>
+                          <span className="offshift__actions">
+                            <button type="button" className="link-btn" onClick={() => setForm({ task: t })} aria-label={`Reassign ${t.task}`}>Reassign</button>
+                            <button type="button" className="link-btn" onClick={() => openSchedule(t)}>Open schedule</button>
+                          </span>
+                        </span>
+                      )}
                     </td>
                     <td className="task-table__status"><StatusPill status={t.status} /></td>
                     <td className="task-table__action">

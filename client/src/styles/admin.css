@@ -219,7 +219,9 @@
 .roster-shift[class*='roster-shift--'] small { color: inherit; }
 .roster-slot {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   min-width: 0;
   min-height: 84px;
   padding: 8px;
@@ -233,6 +235,8 @@
 .roster-people { display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0; list-style: none; margin: 0; padding: 0; }
 .roster-chip { min-width: 0; padding: 3px 8px; overflow: hidden; border-radius: var(--radius-sm); background: var(--tint); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
 .roster-gap { padding: 3px 8px; border-radius: var(--radius-sm); background: var(--overdue-bg); color: var(--overdue-text); font-size: 0.8rem; font-weight: var(--fw-medium); }
+/* "3 tasks" under the names */
+.roster-count { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); }
 .roster--days .roster-slot { min-height: 56px; padding: 6px; }
 .roster--days .roster-chip { padding: 3px 6px; }
 .roster--days .roster-gap { font-size: 0.75rem; }
@@ -247,6 +251,8 @@
 .roster-month__shift--night { background: var(--shift-night-bg); color: var(--shift-night-text); }
 .roster-month__names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .roster-month__line.is-gap .roster-month__names { color: var(--overdue-text); font-weight: var(--fw-medium); }
+/* The number of tasks on that shift, at the end of its line */
+.roster-month__count { flex-shrink: 0; margin-left: auto; padding: 0 5px; border-radius: var(--radius-pill); background: var(--tint); color: var(--muted); font-weight: var(--fw-medium); }
 .month__day.is-outside .roster-month__lines { opacity: 0.55; }
 .roster-month__dots { display: none; gap: 3px; }
 .roster-month__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo); }
@@ -267,6 +273,27 @@
 .slot-panel__list .assign__who { flex: 1; }
 .slot-panel__list .btn { flex-shrink: 0; }
 .slot-panel__hint { margin-top: 8px; }
+/* Tasks & Care: the caregiver isn't scheduled on the task's shift */
+.offshift { display: flex; flex-direction: column; gap: 0; margin-top: 4px; cursor: default; }
+.offshift__text { display: inline-flex; align-items: flex-start; gap: 4px; color: var(--overdue-text); font-size: 0.82rem; font-weight: var(--fw-medium); }
+.offshift__text svg { flex-shrink: 0; margin-top: 2px; }
+.offshift__actions { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.offshift__actions .link-btn { padding: 0; font-size: 0.82rem; }
+
+/* Tasks on the selected shift */
+.slot-panel__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.slot-panel__head .small-label { margin-bottom: 0; }
+/* The task name opens it in Tasks & Care (44px tall tap area, no taller row) */
+.slot-tasks__link { display: inline-flex; align-items: center; min-height: var(--tap); margin: -12px 0 -14px; color: var(--text); text-decoration: none; }
+.slot-tasks__link:hover strong { text-decoration: underline; }
+.slot-tasks { list-style: none; margin: 0; padding: 0; }
+.slot-tasks li { display: grid; grid-template-columns: 68px minmax(0, 1fr) auto; align-items: center; gap: 4px 10px; padding: 8px 0; }
+.slot-tasks li + li { border-top: 1px solid var(--border); }
+.slot-tasks__time { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.slot-tasks__main { display: flex; flex-direction: column; min-width: 0; }
+.slot-tasks__main strong { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.slot-tasks__main small { color: var(--muted); font-size: 0.82rem; }
+.slot-tasks__warn { color: var(--overdue-text); font-weight: var(--fw-medium); }
 
 /* Fill a month */
 .weekday-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
