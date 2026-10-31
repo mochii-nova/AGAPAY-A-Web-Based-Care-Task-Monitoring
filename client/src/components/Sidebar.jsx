@@ -1,7 +1,7 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
-  Bell, Mail, LogOut, X, Inbox, LayoutGrid, ChartColumn,
+  Bell, Mail, LogOut, X, Inbox, ChartColumn,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -38,7 +38,7 @@ const CAREGIVER_GROUPS = [
 const ADMIN_GROUPS = [
   {
     title: 'Overview',
-    items: [{ to: '/admin', label: 'Dashboard', icon: LayoutGrid, end: true }],
+    items: [{ to: '/admin', label: 'Dashboard', icon: House, end: true }],
   },
   {
     title: 'People',

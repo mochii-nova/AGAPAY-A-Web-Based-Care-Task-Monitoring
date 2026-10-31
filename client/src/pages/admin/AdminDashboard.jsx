@@ -17,6 +17,7 @@ import { addDays, dayLabel, dayToDate, shiftOfDue } from '../../utils/adminTasks
 import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay } from '../../utils/handoverMonitor';
 import { useProfile } from '../../context/ProfileContext';
 import PageHeader from '../../components/PageHeader';
+import PushPrompt from '../../components/PushPrompt';
 import CardHeader from '../../components/CardHeader';
 import Avatar from '../../components/Avatar';
 import TaskFormModal from '../../components/admin/TaskFormModal';
@@ -192,6 +193,8 @@ export default function AdminDashboard() {
           </button>
         </div>
       </PageHeader>
+
+      <PushPrompt />
 
       {failed && <div className="card"><ErrorState message={failed.error} onRetry={() => { tasksQuery.reload(); rosterQuery.reload(); }} /></div>}
       {!ready && !failed && <div className="card"><LoadingState label="Loading today…" /></div>}

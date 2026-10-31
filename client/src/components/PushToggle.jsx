@@ -58,9 +58,21 @@ export default function PushToggle({ compact = false }) {
         <span className="push-toggle__badge" aria-hidden="true"><Bell size={18} /></span>
         <div className="push-toggle__text">
           <span id={`${id}-label`} className="push-toggle__label">Pop-up notifications</span>
-          <small id={`${id}-status`} className={`push-toggle__status push-toggle__status--${push.status.tone}`} aria-live="polite">
-            {push.status.text}
-          </small>
+          {push.blocked ? (
+            // Blocked in the browser: plain steps to allow them again
+            <div id={`${id}-status`} className="push-blocked" role="status">
+              <strong>Pop-ups are turned off in your browser</strong>
+              <ol>
+                <li>Click the ⓘ or lock icon on the left of the website address at the top of your browser.</li>
+                <li>Find “Notifications” and choose “Allow”.</li>
+                <li>Refresh this page.</li>
+              </ol>
+            </div>
+          ) : (
+            <small id={`${id}-status`} className={`push-toggle__status push-toggle__status--${push.status.tone}`} aria-live="polite">
+              {push.status.text}
+            </small>
+          )}
         </div>
         <button type="button" className="btn btn--outline btn--sm" onClick={push.sendTest} disabled={!push.canTest || push.busy}>
           Send a test

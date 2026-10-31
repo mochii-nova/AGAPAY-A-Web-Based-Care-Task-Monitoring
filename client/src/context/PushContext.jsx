@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { isAdmin } from '../utils/roles';
 import {
   PUSH_MESSAGES,
   pushSupport,
@@ -12,23 +13,26 @@ import {
 
 const PushContext = createContext();
 
-// "This person wants pop-ups on this browser", remembered per AGAPAY account
+// Pop-ups are wanted unless this person turned the switch off on this browser (remembered per AGAPAY account).
+// So once the browser allows notifications, AGAPAY subscribes again by itself at every sign-in and app start.
 const wantedKey = (userId) => `agapay.push.${userId}`;
 const readWanted = (userId) => {
   try {
-    return localStorage.getItem(wantedKey(userId)) === 'on';
+    return localStorage.getItem(wantedKey(userId)) !== 'off';
   } catch {
-    return false;
+    return true;
   }
 };
 const writeWanted = (userId, on) => {
   try {
-    if (on) localStorage.setItem(wantedKey(userId), 'on');
-    else localStorage.removeItem(wantedKey(userId));
+    localStorage.setItem(wantedKey(userId), on ? 'on' : 'off');
   } catch {
-    // Only a convenience; the switch just starts off next time
+    // Only a convenience; pop-ups just stay on by default next time
   }
 };
+
+// What the pop-ups are about, for the status line
+const topics = (user) => (isAdmin(user) ? 'new sign-ups, missing handovers and new messages' : 'overdue tasks and new handovers');
 
 const support = pushSupport();
 
@@ -45,8 +49,8 @@ export function PushProvider({ children }) {
 
   const on = support === 'ok' && perm === 'granted' && wanted;
 
-  // Whenever the switch is on (also when AGAPAY opens), connect this browser to the server.
-  // So it starts working by itself once Aeron adds the backend part.
+  // Whenever the switch is on (also after signing in and when AGAPAY opens), quietly connect this browser
+  // to the server again, so pop-ups always stay on. It also starts working by itself once the backend is ready.
   useEffect(() => {
     if (!on) return;
     connectToServer().then(
@@ -109,7 +113,7 @@ export function PushProvider({ children }) {
         await sendServerTest();
         setNotice({ tone: 'success', text: 'Test sent by the AGAPAY server. It should pop up in a few seconds.' });
       } else {
-        await showLocalTest();
+        await showLocalTest(topics(user));
         setNotice({ tone: 'success', text: 'Test pop-up shown by this browser. Click it to check that it opens AGAPAY.' });
       }
     } catch (err) {
@@ -123,8 +127,8 @@ export function PushProvider({ children }) {
   let status;
   if (support !== 'ok') status = { tone: 'warning', text: PUSH_MESSAGES[support] };
   else if (perm === 'denied') status = { tone: 'warning', text: PUSH_MESSAGES.denied };
-  else if (!on) status = { tone: 'muted', text: 'Off. Turn on to get pop-ups for overdue tasks and new handovers.' };
-  else if (server === 'ready') status = { tone: 'success', text: 'On. You’ll get pop-ups for overdue tasks and new handovers, even when AGAPAY is in the background.' };
+  else if (!on) status = { tone: 'muted', text: `Off. Turn on to get pop-ups for ${topics(user)}.` };
+  else if (server === 'ready') status = { tone: 'success', text: `On. You’ll get pop-ups for ${topics(user)}, even when AGAPAY is in the background.` };
   else if (server === 'backend') status = { tone: 'info', text: PUSH_MESSAGES.backend };
   else if (server === 'worker') status = { tone: 'warning', text: PUSH_MESSAGES.worker };
   else if (server === 'error') status = { tone: 'warning', text: PUSH_MESSAGES.server };
@@ -138,9 +142,15 @@ export function PushProvider({ children }) {
         disabled: busy || support !== 'ok' || perm === 'denied',
         busy,
         canTest: on && ['ready', 'backend', 'error'].includes(server),
+        // The browser has blocked notifications: the Notifications page shows how to allow them
+        blocked: support === 'ok' && perm === 'denied',
+        // The browser has never asked yet: the dashboards offer a "Turn on reminders" card
+        canAsk: support === 'ok' && perm === 'default',
         status,
         notice,
         toggle,
+        // "Turn on" on the dashboard card: the same steps as switching it on
+        turnOn: () => (on ? undefined : toggle()),
         sendTest,
       }}
     >

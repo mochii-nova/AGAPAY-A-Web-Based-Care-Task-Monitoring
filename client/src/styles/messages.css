@@ -17,6 +17,10 @@
 .convo-pane { padding: 14px 10px; border-right: 1px solid var(--border); overflow-y: auto; }
 .convo-pane__title { margin: 6px 8px 10px; }
 .convo-list { display: flex; flex-direction: column; gap: 2px; list-style: none; margin: 0; padding: 0; }
+/* "Start a new conversation" + the "New message to…" picker, under the list (and in the empty state) */
+.messages__start { margin: 12px 8px 4px; padding-top: 14px; border-top: 1px solid var(--border); }
+.messages__start-title { margin: 0 0 8px; color: var(--muted); font-size: 0.88rem; }
+.messages__start--empty { max-width: 320px; margin: -8px auto 16px; padding-top: 0; border-top: 0; }
 .convo {
   display: flex;
   align-items: center;

@@ -10,9 +10,23 @@ import ChatView from '../components/messages/ChatView';
 import { LoadingState, ErrorState, EmptyState } from '../components/StateMessage';
 import '../styles/messages.css';
 
+// "New message to…" dropdown: picking a person opens (or starts) the conversation with them
+function NewMessagePicker({ id, people, onPick, className = '' }) {
+  return (
+    <>
+      <label htmlFor={id} className="sr-only">New message to</label>
+      <select id={id} className={`field__input select ${className}`} value="" onChange={(e) => e.target.value && onPick(e.target.value)}>
+        <option value="">New message to…</option>
+        {people.map((u) => <option key={u.id} value={u.id}>{u.name}{u.role === 'admin' ? ' (administrator)' : ''}</option>)}
+      </select>
+    </>
+  );
+}
+
 // Chat between caregivers and the administrators.
 // Laptops: list on the left, chat on the right. Phones: the list, then the chat on its own screen.
-// Administrators can also start a conversation with anyone (the list only has people they've talked to).
+// Administrators can also start a conversation with anyone (the list only has people they've talked to);
+// caregivers can write to every administrator. Both get "Start a new conversation" under the list.
 export default function Messages() {
   const { myId, conversations: talkedTo, markRead, status, error, reload } = useMessages();
   const staff = useStaff(); // only for administrators
@@ -39,8 +53,11 @@ export default function Messages() {
     if (current?.unread) readCurrent();
   }, [current?.user.id, current?.unread]);
 
-  // Administrators: everyone active they could write to
-  const others = staff ? staff.staff.filter((u) => u.status === 'active' && u.id !== myId).sort((a, b) => a.name.localeCompare(b.name)) : [];
+  // Everyone I could write to: administrators, everyone active; caregivers, every administrator
+  // (the server already lists each administrator as a conversation, even with no messages yet)
+  const others = staff
+    ? staff.staff.filter((u) => u.status === 'active' && u.id !== myId).sort((a, b) => a.name.localeCompare(b.name))
+    : talkedTo.map((c) => c.user).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>
@@ -48,15 +65,7 @@ export default function Messages() {
         title="Messages"
         subtitle={staff ? 'Message caregivers and other administrators.' : 'Message the administrators. Their replies show up here.'}
       >
-        {staff && (
-          <>
-            <label htmlFor="message-new" className="sr-only">New message to</label>
-            <select id="message-new" className="field__input select messages__new" value="" onChange={(e) => e.target.value && open(e.target.value)}>
-              <option value="">New message to…</option>
-              {others.map((u) => <option key={u.id} value={u.id}>{u.name}{u.role === 'admin' ? ' (administrator)' : ''}</option>)}
-            </select>
-          </>
-        )}
+        {staff && <NewMessagePicker id="message-new" people={others} onPick={open} className="messages__new" />}
       </PageHeader>
 
       {status === 'loading' && <div className="card"><LoadingState label="Loading your messages…" /></div>}
@@ -64,8 +73,13 @@ export default function Messages() {
       {status === 'ready' && conversations.length === 0 && (
         <div className="card">
           <EmptyState icon={MessageSquare}>
-            {staff ? 'No conversations yet. Choose someone in "New message to…" to start one.' : "There's no administrator to message yet."}
+            {others.length ? 'No conversations yet. Choose someone to message.' : "There's no administrator to message yet."}
           </EmptyState>
+          {others.length > 0 && (
+            <div className="messages__start messages__start--empty">
+              <NewMessagePicker id="message-new-empty" people={others} onPick={open} />
+            </div>
+          )}
         </div>
       )}
 
@@ -78,7 +92,14 @@ export default function Messages() {
               selectedId={current?.user.id}
               myId={myId}
               onSelect={open}
-            />
+            >
+              {others.length > 0 && (
+                <div className="messages__start">
+                  <p className="messages__start-title">Start a new conversation</p>
+                  <NewMessagePicker id="message-new-list" people={others} onPick={open} />
+                </div>
+              )}
+            </ConversationList>
           )}
           {current && (
             <ChatView

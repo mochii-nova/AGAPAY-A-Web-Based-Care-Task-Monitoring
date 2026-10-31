@@ -1,8 +1,8 @@
 import Avatar from '../Avatar';
 import { timeAgo } from '../../utils/format';
 
-// Left column: one row per person, newest conversation first
-export default function ConversationList({ title = 'Administrators', conversations, selectedId, myId, onSelect }) {
+// Left column: one row per person, newest conversation first. `children` go under the list ("Start a new conversation").
+export default function ConversationList({ title = 'Administrators', conversations, selectedId, myId, onSelect, children }) {
   return (
     <nav className="convo-pane" aria-label="Conversations">
       <p className="small-label convo-pane__title">{title}</p>
@@ -35,6 +35,7 @@ export default function ConversationList({ title = 'Administrators', conversatio
           );
         })}
       </ul>
+      {children}
     </nav>
   );
 }

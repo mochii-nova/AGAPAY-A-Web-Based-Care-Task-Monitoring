@@ -18,6 +18,7 @@ import PriorityAlertsCard from '../components/dashboard/PriorityAlertsCard';
 import NextTasksCard from '../components/dashboard/NextTasksCard';
 import RecentHandoverCard from '../components/dashboard/RecentHandoverCard';
 import ResidentsCard from '../components/dashboard/ResidentsCard';
+import PushPrompt from '../components/PushPrompt';
 import '../styles/dashboard.css';
 
 function greeting(now) {
@@ -105,6 +106,8 @@ export default function Dashboard() {
         </div>
         <p className="dash-greeting__date">{today}</p>
       </header>
+
+      <PushPrompt />
 
       {/* Row 1: three compact cards of the same height: progress, shift, handover status */}
       <div className="dash-row dash-row--three">

@@ -5,8 +5,7 @@ import api from '../api';
 export const PUSH_MESSAGES = {
   unsupported: "This browser can't show AGAPAY notifications. Please use Chrome or Edge on a computer or Android phone.",
   insecure: 'Notifications only work on a secure address (https:// or localhost).',
-  denied:
-    'Notifications are blocked for AGAPAY. Click the lock (or settings) icon next to the address bar, set Notifications to Allow, then reload the page.',
+  denied: 'Pop-ups are turned off in your browser. The Notifications page shows how to turn them on.',
   dismissed: 'You closed the question without choosing. Click the switch again and choose Allow.',
   backend:
     "Notifications are on in this browser, but the AGAPAY server can't send them yet. Use “Send test notification” to see how they will look.",
@@ -103,10 +102,10 @@ export const sendServerTest = () => api.post('/push/test');
 
 // A pop-up made right here in the browser, to check the design before the backend is ready.
 // Goes through the service worker, so clicking it behaves exactly like a real one.
-export async function showLocalTest() {
+export async function showLocalTest(topics = 'overdue tasks and new handovers') {
   const registration = await registerWorker();
   await registration.showNotification('AGAPAY notifications are on', {
-    body: 'This is a test. Real alerts will tell you about overdue tasks and new handovers.',
+    body: `This is a test. Real alerts will tell you about ${topics}.`,
     tag: 'test',
     renotify: true,
     data: { url: '/notifications' },
