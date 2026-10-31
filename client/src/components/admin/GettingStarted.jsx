@@ -2,8 +2,8 @@ import { CircleCheck, Circle } from 'lucide-react';
 import CardHeader from '../CardHeader';
 
 // "Getting started" on the admin dashboard: the five things that set AGAPAY up, each ticked from real
-// data. steps: [{ key, title, text, done, action: { label, onClick } }]. "Hide" puts it away for good;
-// the dashboard drops it by itself once every step is done.
+// data. steps: [{ key, title, text, done, action: { label, onClick } }]. "Hide" puts it away (the "?"
+// Help menu can bring it back); the dashboard drops it by itself once every step is done.
 export default function GettingStarted({ steps, onHide }) {
   const done = steps.filter((s) => s.done).length;
   return (
@@ -47,6 +47,3 @@ export default function GettingStarted({ steps, onHide }) {
     </section>
   );
 }
-
-// Hidden for good once this administrator presses "Hide" (in this browser)
-export const gettingStartedKey = (userId) => `agapay.gettingStartedHidden.${userId}`;

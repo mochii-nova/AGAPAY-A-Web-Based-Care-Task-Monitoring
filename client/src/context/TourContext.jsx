@@ -40,14 +40,45 @@ const markSeen = (user) => {
   } catch { /* shows again next time; harmless */ }
 };
 
-// The welcome tour: shown the first time someone signs in (on their dashboard), and again from the
-// "?" Help button in the top bar.
+// The admin's "Getting started" card, once they press "Hide" (remembered per person in this browser)
+const setupKey = (user) => `agapay.gettingStartedHidden.${user?.id}`;
+const readSetupHidden = (user) => {
+  try {
+    return localStorage.getItem(setupKey(user)) === '1';
+  } catch {
+    return false;
+  }
+};
+const saveSetupHidden = (user, hidden) => {
+  try {
+    if (hidden) localStorage.setItem(setupKey(user), '1');
+    else localStorage.removeItem(setupKey(user));
+  } catch { /* remembered until the page is reloaded */ }
+};
+
+// First-time guidance, shared by the dashboards and the "?" Help menu in the top bar:
+// - the welcome tour: shown the first time someone signs in (on their dashboard), and on request
+// - whether the admin's "Getting started" card is hidden, and whether all its steps are done
+//   (the dashboard works that out from real data and reports it here)
 export function TourProvider({ children }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const home = homeFor(user);
   const [open, setOpen] = useState(false);
+  const [setupHidden, setSetupHidden] = useState(() => readSetupHidden(user));
+  const [setupDone, setSetupDone] = useState(null); // null until the dashboard has checked
+
+  const hideSetup = () => {
+    saveSetupHidden(user, true);
+    setSetupHidden(true);
+  };
+  // Help menu: un-hide the card and go to the dashboard, where it is
+  const showSetup = () => {
+    saveSetupHidden(user, false);
+    setSetupHidden(false);
+    if (pathname !== home) navigate(home);
+  };
 
   const start = useCallback(() => {
     markSeen(user);
@@ -68,7 +99,7 @@ export function TourProvider({ children }) {
   };
 
   return (
-    <TourContext.Provider value={{ replay }}>
+    <TourContext.Provider value={{ replay, setupHidden, setupDone, setSetupDone, hideSetup, showSetup }}>
       {children}
       {open && <Tour steps={STEPS[isAdmin(user) ? 'admin' : 'caregiver']} onClose={() => setOpen(false)} />}
     </TourContext.Provider>

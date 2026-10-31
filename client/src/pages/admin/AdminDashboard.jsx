@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, UserPlus, CalendarPlus, CircleCheck } from 'lucide-react';
 import { useStaff } from '../../context/StaffContext';
@@ -20,7 +20,8 @@ import { useProfile } from '../../context/ProfileContext';
 import PageHeader from '../../components/PageHeader';
 import PushPrompt from '../../components/PushPrompt';
 import StartHere from '../../components/StartHere';
-import GettingStarted, { gettingStartedKey } from '../../components/admin/GettingStarted';
+import GettingStarted from '../../components/admin/GettingStarted';
+import { useTour } from '../../context/TourContext';
 import CardHeader from '../../components/CardHeader';
 import Avatar from '../../components/Avatar';
 import TaskFormModal from '../../components/admin/TaskFormModal';
@@ -54,21 +55,16 @@ export default function AdminDashboard() {
   const { profile } = useProfile();
   const [creating, setCreating] = useState(false);
   const [allAttention, setAllAttention] = useState(false); // "View all" in Needs attention
-  const [setupHidden, setSetupHidden] = useState(() => {
-    try {
-      return localStorage.getItem(gettingStartedKey(profile.id)) === '1';
-    } catch {
-      return false;
-    }
-  });
+  const { setupHidden, setSetupDone, hideSetup } = useTour();
 
   const current = currentShift(now);
   const day = current.shiftDate; // "today" for shifts: until 6:00 AM that's still yesterday's Night shift
   const tasksQuery = useApiData(`/tasks?from=${day}&to=${addDays(day, 1)}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
   const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${addDays(day, 6)}`, { refreshEvery: 60 * 1000 });
   const contactQuery = useApiData('/contact');
-  // Getting started, "Create the first task": any task in the 60 days around today (only while it shows)
-  const anyTaskQuery = useApiData(setupHidden ? null : `/tasks?from=${addDays(day, -60)}&to=${addDays(day, 60)}`);
+  // Getting started, "Create the first task": any task in the 60 days around today. Loaded even while
+  // the card is hidden, so the Help menu knows whether there is anything left to show.
+  const anyTaskQuery = useApiData(`/tasks?from=${addDays(day, -60)}&to=${addDays(day, 60)}`);
 
   const ready = tasksQuery.status === 'ready' && rosterQuery.status === 'ready' && residentsStatus === 'ready';
   const failed = [tasksQuery, rosterQuery].find((q) => q.status === 'error');
@@ -248,13 +244,13 @@ export default function AdminDashboard() {
       action: { label: 'Create task', onClick: () => setCreating(true) },
     },
   ];
-  const showSetup = ready && !setupHidden && anyTaskQuery.status === 'ready' && setupSteps.some((s) => !s.done);
-  const hideSetup = () => {
-    setSetupHidden(true);
-    try {
-      localStorage.setItem(gettingStartedKey(profile.id), '1');
-    } catch { /* hidden until the page is reloaded */ }
-  };
+  const setupChecked = ready && anyTaskQuery.status === 'ready';
+  const setupAllDone = setupSteps.every((s) => s.done);
+  const showSetup = setupChecked && !setupHidden && !setupAllDone;
+  // Tell the Help menu whether "Show getting started" would show anything
+  useEffect(() => {
+    if (setupChecked) setSetupDone(setupAllDone);
+  }, [setupChecked, setupAllDone, setSetupDone]);
 
   const recent = handovers.slice(0, 3);
   const timingOf = (h) => {
@@ -452,7 +448,7 @@ export default function AdminDashboard() {
         caregivers={caregivers}
         onSaved={(saved, { offDays, partial, also }) => {
           tasksQuery.reload({ silent: true });
-          if (!setupHidden) anyTaskQuery.reload({ silent: true });
+          anyTaskQuery.reload({ silent: true });
           if (!partial) {
             showToast(
               (saved.length === 1 ? `Created ${saved[0].task}.` : `Created ${saved.length} tasks.${offDays ? ` ${offDays} without a caregiver.` : ''}`) +

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check, CircleHelp } from 'lucide-react';
+import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check, CircleHelp, Compass, ListChecks } from 'lucide-react';
 import { useTour } from '../context/TourContext';
+import { isAdmin } from '../utils/roles';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -16,11 +17,14 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const shownTheme = useShownTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const { profile, openEditProfile, openPhoto } = useProfile();
   const { unreadCount: unreadMessages } = useMessages();
-  const { replay: replayTour } = useTour();
+  const tour = useTour();
+  const { ref: helpRef, ...help } = usePopover();
+  // Only when it's hidden and still has steps to do (it hides itself once everything is done)
+  const canShowSetup = isAdmin(user) && tour.setupHidden && tour.setupDone !== true;
   const { ref: bellRef, ...bell } = usePopover();
   const { ref: accountRef, ...account } = usePopover();
 
@@ -36,10 +40,24 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
       </button>
 
       <div className="topbar__actions">
-        {/* Help: shows the welcome tour again */}
-        <button type="button" className="icon-btn" onClick={replayTour} aria-label="Help: show the tour again" title="Help">
-          <CircleHelp size={20} />
-        </button>
+        {/* Help: replay the welcome tour; administrators can also bring back a hidden "Getting started" */}
+        <div className="popover-anchor" ref={helpRef}>
+          <button type="button" className="icon-btn" onClick={help.toggle} aria-expanded={help.open} aria-haspopup="true" aria-label="Help" title="Help">
+            <CircleHelp size={20} />
+          </button>
+          {help.open && (
+            <div className="popover help-popover">
+              <button type="button" className="popover__item" onClick={() => { help.setOpen(false); tour.replay(); }}>
+                <Compass size={18} /> Replay the tour
+              </button>
+              {canShowSetup && (
+                <button type="button" className="popover__item" onClick={() => { help.setOpen(false); tour.showSetup(); }}>
+                  <ListChecks size={18} /> Show getting started
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <ThemeToggle />
         {/* Notifications */}
         <div className="popover-anchor" ref={bellRef}>

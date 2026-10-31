@@ -1092,6 +1092,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .notif-popover .notif-icon { width: 36px; height: 36px; }
 
+/* Help dropdown ("?" in the top bar) */
+.help-popover { width: 240px; max-width: calc(100vw - 24px); }
+
 /* Account dropdown (top-right avatar) */
 .account-popover { width: 280px; max-width: calc(100vw - 24px); }
 .account-popover__head { display: flex; align-items: center; gap: 12px; padding: 8px; }
@@ -1344,6 +1347,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 @media (max-width: 600px) {
   .topbar { padding: 0 8px; }
   .popover.notif-popover,
+  .popover.help-popover,
   .popover.account-popover { position: fixed; top: 60px; left: 12px; right: 12px; width: auto; max-width: none; }
 }
 
