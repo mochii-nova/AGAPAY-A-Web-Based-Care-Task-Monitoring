@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Phone, ClipboardList, MessageSquareText } from 'lucide-react';
+import { ClipboardList, MessageSquareText } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
 import CareNeeds from './CareNeeds';
@@ -7,7 +7,8 @@ import TodayLine from './TodayLine';
 import { LoadingState, EmptyState } from '../StateMessage';
 import { getCategory } from '../../constants';
 import { RESIDENT_STATUS } from '../../utils/handover';
-import { formatTime, telHref } from '../../utils/format';
+import { formatTime } from '../../utils/format';
+import PhoneNumber from '../PhoneNumber';
 
 // Everything about one resident: details, care needs, emergency contact, today's tasks and recent notes.
 // Used in the side panel (laptop) and in a pop-up (tablet / phone).
@@ -52,9 +53,7 @@ export default function ResidentProfile({ resident, status, tasks, dayTasks = ta
                 <strong>{contact.name}</strong>{contact.relationship && ` · ${contact.relationship}`}
               </p>
               {contact.phone && (
-                <a className="btn btn--outline btn--sm" href={telHref(contact.phone)}>
-                  <Phone size={16} aria-hidden="true" /> {contact.phone}
-                </a>
+                <PhoneNumber phone={contact.phone} className="btn btn--outline btn--sm" label={`Call ${contact.name || 'emergency contact'}, ${contact.phone}`} icon />
               )}
             </>
           ) : (
@@ -84,7 +83,7 @@ export default function ResidentProfile({ resident, status, tasks, dayTasks = ta
                 <StatusPill status={t.status} />
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm"
+                  className="btn btn--outline btn--sm btn--row"
                   onClick={() => onOpenTask(t)}
                   aria-label={`View task: ${t.task}`}
                 >

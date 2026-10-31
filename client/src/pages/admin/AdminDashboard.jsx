@@ -299,12 +299,12 @@ export default function AdminDashboard() {
                 <ul className="attention-list">
                   {attention.slice(0, 7).map((a) => (
                     <li key={a.key}>
-                      <span className={`status-pill status-pill--${a.tone}`}>{a.tag}</span>
+                      <span className="attention-list__tag"><span className={`status-pill status-pill--${a.tone}`}>{a.tag}</span></span>
                       <span className="attention-list__text">
                         <strong>{a.title}</strong>
                         <small>{a.sub}</small>
                       </span>
-                      <button type="button" className="btn btn--outline btn--sm" onClick={a.onClick} aria-label={`${a.action}: ${a.title}`}>
+                      <button type="button" className="btn btn--outline btn--sm btn--row" onClick={a.onClick} aria-label={`${a.action}: ${a.title}`}>
                         {a.action}
                       </button>
                     </li>

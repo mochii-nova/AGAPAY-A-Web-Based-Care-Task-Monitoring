@@ -12,6 +12,7 @@ import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS } from '../../constants';
 import { shiftOnDate } from '../../utils/shift';
 import { shortDate, roleLabel, STATUS_LABEL } from '../../utils/staff';
+import { searchTerm, matchesSearch } from '../../utils/search';
 import { jobTitle } from '../../utils/format';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
@@ -75,11 +76,11 @@ export default function ManageStaff() {
   const tasks = tasksQuery.data ?? [];
   const todayShifts = shiftsQuery.data ?? [];
 
-  const query = search.trim().toLowerCase();
+  const query = searchTerm(search);
   const shown = staff
     .filter((u) => !statusFilter || u.status === statusFilter)
     .filter((u) => !shiftFilter || (shiftFilter === 'none' ? !u.assignedShift : u.assignedShift === shiftFilter))
-    .filter((u) => !query || u.name.toLowerCase().includes(query) || u.employeeId.toLowerCase().includes(query))
+    .filter((u) => matchesSearch(query, u.name, u.employeeId))
     .sort(byStatusThenName);
 
   // ?open=<Employee ID> picks a person. Laptops always show someone (the first in the list).
@@ -228,7 +229,7 @@ export default function ManageStaff() {
                         <td className="data-table__action">
                           <button
                             type="button"
-                            className="btn btn--sm btn--outline"
+                            className="btn btn--sm btn--outline btn--row"
                             onClick={() => select(u)}
                             aria-label={`${u.status === 'pending' ? 'Review' : 'View'} ${u.name}`}
                           >

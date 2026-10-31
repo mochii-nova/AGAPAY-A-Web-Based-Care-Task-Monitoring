@@ -103,11 +103,11 @@ export default function ContactMessages() {
                     {subject && <p className="contact-item__subject">{subject}</p>}
                     <p className="contact-item__body">{body}</p>
                     <div className="contact-item__actions">
-                      <a className="btn btn--soft btn--sm" href={reply}>
+                      <a className="btn btn--outline btn--sm btn--row" href={reply}>
                         <Mail size={16} aria-hidden="true" /> Reply by email
                       </a>
                       {!m.handled && (
-                        <button type="button" className="btn btn--outline btn--sm" disabled={busyId === m.id} onClick={() => markHandled(m)}>
+                        <button type="button" className="btn btn--outline btn--sm btn--row" disabled={busyId === m.id} onClick={() => markHandled(m)}>
                           <Check size={16} aria-hidden="true" /> {busyId === m.id ? 'Saving…' : 'Mark as handled'}
                         </button>
                       )}

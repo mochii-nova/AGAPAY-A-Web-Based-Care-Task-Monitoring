@@ -6,11 +6,12 @@ import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES } from '../constants';
 import { formatTime } from '../utils/format';
 import { isToday, savedText } from '../utils/tasks';
+import { searchTerm, matchesSearch } from '../utils/search';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../components/StatusPill';
 import Avatar from '../components/Avatar';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
-import { LoadingState, ErrorState, EmptyState } from '../components/StateMessage';
+import { LoadingState, ErrorState, EmptyState, NoMatchState } from '../components/StateMessage';
 import '../styles/tasks.css';
 
 const TABS = [
@@ -50,15 +51,17 @@ export default function Tasks() {
   const closeTask = () => setSearchParams({}, { replace: true });
 
   // Date, search and category filters first; the tabs then split what's left
-  const query = search.trim().toLowerCase();
+  const query = searchTerm(search);
   const filtered = tasks
     .filter((t) => scope === 'all' || isToday(t.dueAt))
     .filter((t) => !category || t.category === category)
-    .filter((t) => !query || t.task.toLowerCase().includes(query) || t.resident.toLowerCase().includes(query))
+    .filter((t) => matchesSearch(query, t.task, t.resident, t.room))
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
   const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
   const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
+  // The search found nothing (as opposed to an empty tab)
+  const noMatch = !!query && tasks.length > 0 && filtered.length === 0;
 
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
@@ -98,12 +101,12 @@ export default function Tasks() {
           <div className="tasks-toolbar__filters">
             <div className="search-box">
               <Search size={18} aria-hidden="true" />
-              <label htmlFor="task-search" className="sr-only">Search task or resident</label>
+              <label htmlFor="task-search" className="sr-only">Search task, resident or room</label>
               <input
                 id="task-search"
                 type="search"
                 className="field__input"
-                placeholder="Search task or resident"
+                placeholder="Search task, resident or room"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -121,7 +124,10 @@ export default function Tasks() {
         <section id="tasks-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="tasks-panel">
           {status === 'loading' && <LoadingState label="Loading your tasks…" />}
           {status === 'error' && <ErrorState message={error} onRetry={reload} />}
-          {status === 'ready' && shown.length === 0 && (
+          {status === 'ready' && noMatch && (
+            <NoMatchState icon={ClipboardList} what="tasks" query={search} onClear={() => setSearch('')} />
+          )}
+          {status === 'ready' && shown.length === 0 && !noMatch && (
             <EmptyState icon={ClipboardList}>
               {tasks.length === 0
                 ? 'No tasks are assigned to you yet.'
@@ -174,7 +180,7 @@ export default function Tasks() {
                       <td className="task-table__action">
                         <button
                           type="button"
-                          className="btn btn--outline btn--sm"
+                          className="btn btn--outline btn--sm btn--row"
                           onClick={() => openTaskById(t._id)}
                           aria-label={`View task: ${t.task} for ${t.resident}`}
                         >

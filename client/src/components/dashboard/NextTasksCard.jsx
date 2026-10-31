@@ -43,7 +43,7 @@ export default function NextTasksCard({ tasks, earlierOverdue = 0 }) {
                   <span>{t.resident}{room && ` · Room ${room}`}</span>
                 </div>
                 <StatusPill status={t.status} />
-                <Link to={`/tasks?open=${t._id}`} className="btn btn--outline btn--sm" aria-label={`Open task: ${t.task}`}>
+                <Link to={`/tasks?open=${t._id}`} className="btn btn--outline btn--sm btn--row" aria-label={`Open task: ${t.task}`}>
                   Open
                 </Link>
               </li>

@@ -30,7 +30,7 @@ function validate(form) {
   if (!form.email.trim()) errors.email = 'Please enter your email.';
   else if (!/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Please enter a valid email, like name@example.com.';
   if (!form.phone.trim()) errors.phone = 'Please enter your phone number.';
-  else if (!/^09\d{9}$/.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09, like 0917 555 0123.';
+  else if (!/^09\d{9}$/.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09, like 0917 123 4567.';
   if (!form.employeeId.trim()) errors.employeeId = 'Please enter your Employee ID.';
   else if (!/^[A-Za-z0-9-]{3,20}$/.test(form.employeeId.trim())) errors.employeeId = 'Use only letters, numbers and dashes, like CGV-2026-000.';
   if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/\d/.test(form.password)) {
@@ -129,11 +129,11 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} noValidate className="auth__form">
         <div className="form-grid">
-          {field('firstName', 'First name', { placeholder: 'e.g. Juan', autoComplete: 'given-name', icon: UserRound })}
-          {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'family-name', icon: UserRound })}
+          {field('firstName', 'First name', { placeholder: 'e.g. Paolo', autoComplete: 'given-name', icon: UserRound })}
+          {field('lastName', 'Last name', { placeholder: 'e.g. Villanueva', autoComplete: 'family-name', icon: UserRound })}
         </div>
         <div className="form-grid">
-          {field('email', 'Email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email', icon: Mail })}
+          {field('email', 'Email', { type: 'email', placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'email', icon: Mail })}
           {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel', icon: Phone })}
         </div>
         {field('employeeId', 'Employee ID', {

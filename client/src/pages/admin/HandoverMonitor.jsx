@@ -150,13 +150,13 @@ export default function HandoverMonitor() {
                           </td>
                           <td className="data-table__action">
                             {r.status === 'missing' ? (
-                              <button type="button" className="btn btn--sm btn--soft" onClick={() => remind(r)} aria-label={`Remind ${r.userName} about the ${r.shift.label} handover`}>
+                              <button type="button" className="btn btn--sm btn--outline btn--row" onClick={() => remind(r)} aria-label={`Remind ${r.userName} about the ${r.shift.label} handover`}>
                                 Remind
                               </button>
                             ) : (
                               <button
                                 type="button"
-                                className="btn btn--sm btn--outline"
+                                className="btn btn--sm btn--outline btn--row"
                                 onClick={() => setPickedKey(r.key)}
                                 aria-label={`View ${r.userName}'s ${r.shift.label} handover, ${dayLabel(r.shiftDate)}`}
                               >

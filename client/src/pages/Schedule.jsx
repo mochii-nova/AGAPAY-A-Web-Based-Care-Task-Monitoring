@@ -16,6 +16,7 @@ import DayPanel from '../components/schedule/DayPanel';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import { LoadingState, ErrorState } from '../components/StateMessage';
 import '../styles/schedule.css';
+import { searchTerm, matchesSearch } from '../utils/search';
 
 const STATUS_FILTERS = [
   { id: 'pending', label: 'Pending' },
@@ -54,11 +55,11 @@ export default function Schedule() {
     setStatuses((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
 
   // Filters shared by the calendar and the side panel
-  const query = search.trim().toLowerCase();
+  const query = searchTerm(search);
   const visible = tasks
     .filter((t) => statuses.includes(t.status))
     .filter((t) => !category || t.category === category)
-    .filter((t) => !query || t.task.toLowerCase().includes(query) || t.resident.toLowerCase().includes(query))
+    .filter((t) => matchesSearch(query, t.task, t.resident, t.room))
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
   const tasksByDay = {};
@@ -120,7 +121,7 @@ export default function Schedule() {
         <div className="schedule-toolbar__filters">
           <div className="search-box">
             <Search size={18} aria-hidden="true" />
-            <label htmlFor="schedule-search" className="sr-only">Search task or resident</label>
+            <label htmlFor="schedule-search" className="sr-only">Search task, resident or room</label>
             <input
               id="schedule-search"
               type="search"

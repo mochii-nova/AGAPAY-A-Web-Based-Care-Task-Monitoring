@@ -1,7 +1,7 @@
 import { Camera } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { SHIFTS, shiftTime } from '../constants';
-import { telHref } from '../utils/format';
+import PhoneNumber from '../components/PhoneNumber';
 import PageHeader from '../components/PageHeader';
 import CardHeader from '../components/CardHeader';
 import Avatar from '../components/Avatar';
@@ -74,7 +74,7 @@ export default function Profile() {
                 <dt>Their phone</dt>
                 <dd>
                   {contact.phone ? (
-                    <a href={telHref(contact.phone)} aria-label={`Call ${contact.name || 'emergency contact'}, ${contact.phone}`}>{contact.phone}</a>
+                    <PhoneNumber phone={contact.phone} label={`Call ${contact.name || 'emergency contact'}, ${contact.phone}`} />
                   ) : (
                     orNotSet(null)
                   )}

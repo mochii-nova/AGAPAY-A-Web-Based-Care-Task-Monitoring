@@ -25,6 +25,17 @@ export function ErrorState({ message, onRetry }) {
   );
 }
 
+// Nothing matches a search: No residents match "Room 102". [Clear search]
+export function NoMatchState({ icon: Icon, what, query, onClear }) {
+  return (
+    <div className="state-msg" role="status">
+      {Icon && <Icon size={20} aria-hidden="true" />}
+      <span>No {what} match “{query.trim()}”.</span>
+      <button type="button" className="btn btn--outline btn--sm" onClick={onClear}>Clear search</button>
+    </div>
+  );
+}
+
 // Friendly message when there's nothing to show
 export function EmptyState({ icon: Icon, children }) {
   return (

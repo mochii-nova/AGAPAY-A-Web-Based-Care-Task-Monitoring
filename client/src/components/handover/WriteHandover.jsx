@@ -347,7 +347,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
               rows={3}
               value={form.other}
               onChange={(e) => change((f) => ({ ...f, other: e.target.value }))}
-              placeholder="e.g. Supplies: adult wipes running low in Room 102."
+              placeholder="e.g. Supplies: adult wipes running low in Room 215."
             />
           </div>
         </section>

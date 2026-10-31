@@ -4,6 +4,7 @@ import api from '../../api';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
 import useSaving from '../../hooks/useSaving';
+import PhoneNumber from '../PhoneNumber';
 
 // `website` is a hidden trap: people never see it, simple spam bots fill it in
 const EMPTY = { name: '', email: '', subject: '', message: '', website: '' };
@@ -94,7 +95,7 @@ export default function ContactSection() {
           <dl className="contact__list">
             <div>
               <dt>Phone</dt>
-              <dd><a href="tel:+63755290256">(075) 529 0256</a></dd>
+              <dd><PhoneNumber phone="(075) 529 0256" /></dd>
             </div>
             <div>
               <dt>Address</dt>
@@ -133,8 +134,8 @@ export default function ContactSection() {
                 <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={handleChange} />
               </div>
               <div className="form-grid">
-                {field('name', 'Your name', { placeholder: 'e.g. Juan Dela Cruz', autoComplete: 'name' })}
-                {field('email', 'Your email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email' })}
+                {field('name', 'Your name', { placeholder: 'e.g. Paolo Villanueva', autoComplete: 'name' })}
+                {field('email', 'Your email', { type: 'email', placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'email' })}
               </div>
               {field('subject', 'Subject', { placeholder: 'e.g. Question about AGAPAY' })}
               {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here', className: 'contact__message' })}

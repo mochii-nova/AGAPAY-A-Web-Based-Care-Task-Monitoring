@@ -12,12 +12,13 @@ import { RESIDENT_STATUS, updateFor } from '../utils/handover';
 import { isToday, savedText, normalizeTasks } from '../utils/tasks';
 import useApiData from '../hooks/useApiData';
 import { isoDay } from '../hooks/useShifts';
+import { searchTerm, matchesSearch } from '../utils/search';
 import PageHeader from '../components/PageHeader';
 import Modal from '../components/Modal';
 import ResidentCard from '../components/residents/ResidentCard';
 import ResidentProfile from '../components/residents/ResidentProfile';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
-import { EmptyState, LoadingState, ErrorState } from '../components/StateMessage';
+import { EmptyState, LoadingState, ErrorState, NoMatchState } from '../components/StateMessage';
 import '../styles/residents.css';
 
 // Notes about this resident: their update in each handover (or, for older plain-text handovers,
@@ -59,10 +60,10 @@ export default function Residents() {
   const today = isoDay(new Date());
   const dayQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
 
-  const query = search.trim().toLowerCase();
+  const query = searchTerm(search);
   const shown = residents
     .filter((r) => !need || r.careNeeds.includes(need))
-    .filter((r) => !query || r.name.toLowerCase().includes(query) || r.residentCode.toLowerCase().includes(query));
+    .filter((r) => matchesSearch(query, r.name, r.room, r.residentCode));
 
   // ?open=<resident code, e.g. RP-2020-001> picks a resident (the Dashboard links here like that).
   // Laptops always show a profile (the first resident until you pick one);
@@ -113,12 +114,12 @@ export default function Residents() {
             <div className="residents-toolbar">
               <div className="search-box">
                 <Search size={18} aria-hidden="true" />
-                <label htmlFor="resident-search" className="sr-only">Search by name or resident ID</label>
+                <label htmlFor="resident-search" className="sr-only">Search name, room or resident ID</label>
                 <input
                   id="resident-search"
                   type="search"
                   className="field__input"
-                  placeholder="Search name or resident ID"
+                  placeholder="Search name, room or ID"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -132,9 +133,13 @@ export default function Residents() {
 
             {shown.length === 0 ? (
               <div className="card">
-                <EmptyState icon={Users}>
-                  {residents.length === 0 ? 'No residents are assigned to you yet.' : 'No residents match your search.'}
-                </EmptyState>
+                {residents.length > 0 && search.trim() ? (
+                  <NoMatchState icon={Users} what="residents" query={search} onClear={() => setSearch('')} />
+                ) : (
+                  <EmptyState icon={Users}>
+                    {residents.length === 0 ? 'No residents are assigned to you yet.' : 'No residents match your filters.'}
+                  </EmptyState>
+                )}
               </div>
             ) : (
               <ul className="resident-list">
@@ -142,6 +147,7 @@ export default function Residents() {
                   <li key={r.id}>
                     <ResidentCard
                       resident={r}
+                      status={statusOf(r)}
                       todayTasks={dayOf(r)}
                       selected={selected?.id === r.id}
                       maxNeeds={isPhone ? 2 : 3}

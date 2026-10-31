@@ -7,6 +7,7 @@ import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
 import GoogleButton from '../components/GoogleButton';
+import PhoneNumber from '../components/PhoneNumber';
 import { homeFor } from '../utils/roles';
 // Web-sized copy of the original signin-photo.jpg (kept in design-reference/)
 import signinPhoto from '../assets/images/signin-photo.webp';
@@ -90,7 +91,7 @@ export default function Login() {
   return (
     <AuthLayout
       photo={signinPhoto}
-      panelTitle="Welcome back."
+      panelTitle="Good to see you."
       panelTitleSoft="Today’s care is waiting."
       panelText="See your shift, your tasks and the latest handover."
     >
@@ -171,7 +172,7 @@ export default function Login() {
         <p>For your security, passwords are reset by the facility administrator.</p>
         <p>Please contact the administrator and tell them your Employee ID:</p>
         <ul className="contact-lines">
-          <li><Phone size={18} aria-hidden="true" /> <a href="tel:+63755290256">(075) 529 0256</a></li>
+          <li><Phone size={18} aria-hidden="true" /> <PhoneNumber phone="(075) 529 0256" /></li>
           <li><Mail size={18} aria-hidden="true" /> <a href="mailto:ctrlsiapray@gmail.com">ctrlsiapray@gmail.com</a></li>
         </ul>
       </Modal>

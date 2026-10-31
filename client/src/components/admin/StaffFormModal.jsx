@@ -127,15 +127,15 @@ function StaffForm({ person, isMe, onClose }) {
       {adding && (
         <>
           <div className="form-grid">
-            {field('firstName', 'First name', { placeholder: 'e.g. Mark', autoComplete: 'off' })}
-            {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'off' })}
+            {field('firstName', 'First name', { placeholder: 'e.g. Paolo', autoComplete: 'off' })}
+            {field('lastName', 'Last name', { placeholder: 'e.g. Villanueva', autoComplete: 'off' })}
           </div>
           <div className="form-grid">
             {field('username', 'Employee ID', { placeholder: 'e.g. CGV-2026-000', autoComplete: 'off' })}
             {select('role', 'Role', ROLE_OPTIONS)}
           </div>
           <div className="form-grid">
-            {field('email', 'Email', { type: 'email', required: false, placeholder: 'e.g. mark.delacruz@gmail.com', autoComplete: 'off' })}
+            {field('email', 'Email', { type: 'email', required: false, placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'off' })}
             {field('phone', 'Phone number', { type: 'tel', required: false, placeholder: 'e.g. 0917 123 4567', autoComplete: 'off' })}
           </div>
         </>

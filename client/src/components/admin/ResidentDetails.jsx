@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ClipboardList, Phone, Plus } from 'lucide-react';
+import { ClipboardList, Plus } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
 import CareNeeds from '../residents/CareNeeds';
@@ -7,7 +7,8 @@ import TodayLine from '../residents/TodayLine';
 import { LoadingState, EmptyState } from '../StateMessage';
 import { SHIFTS, shiftLabel } from '../../constants';
 import { RESIDENT_STATUS } from '../../utils/handover';
-import { formatTime, telHref } from '../../utils/format';
+import { formatTime } from '../../utils/format';
+import PhoneNumber from '../PhoneNumber';
 import { shortDate, longDate } from '../../utils/staff';
 
 // Everything about one resident, with the admin's actions.
@@ -93,9 +94,7 @@ export default function ResidentDetails({ resident, staff, tasks, tasksLoading, 
                 <dt>Phone</dt>
                 <dd>
                   {contact.phone ? (
-                    <a className="resident-details__phone" href={telHref(contact.phone)}>
-                      <Phone size={14} aria-hidden="true" /> {contact.phone}
-                    </a>
+                    <PhoneNumber phone={contact.phone} className="resident-details__phone" icon />
                   ) : notSet}
                 </dd>
               </div>

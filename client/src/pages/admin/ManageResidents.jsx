@@ -13,6 +13,7 @@ import { SHIFTS, TASK_CATEGORIES } from '../../constants';
 import { RESIDENT_STATUS, latestUpdate } from '../../utils/handover';
 import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
 import { normalizeTasks } from '../../utils/tasks';
+import { searchTerm, matchesSearch } from '../../utils/search';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
 import Modal from '../../components/Modal';
@@ -23,7 +24,7 @@ import ResidentDetails from '../../components/admin/ResidentDetails';
 import ResidentFormModal, { nextResidentCode } from '../../components/admin/ResidentFormModal';
 import AssignCaregiversModal from '../../components/admin/AssignCaregiversModal';
 import TaskFormModal from '../../components/admin/TaskFormModal';
-import { LoadingState, ErrorState, EmptyState } from '../../components/StateMessage';
+import { LoadingState, ErrorState, EmptyState, NoMatchState } from '../../components/StateMessage';
 import '../../styles/residents.css';
 import '../../styles/admin.css';
 
@@ -69,19 +70,13 @@ export default function ManageResidents() {
 
   const gapShift = SHIFTS.find((s) => statusFilter === `gap-${s.id}`);
   const uncovered = gapShift ? residentsWithoutShift(residents, caregivers, gapShift) : [];
-  const query = search.trim().toLowerCase();
+  const query = searchTerm(search);
   const shown = residents
     .filter((r) => statusFilter !== 'flagged' || isFlagged(r))
     .filter((r) => statusFilter !== 'unassigned' || r.caregivers.length === 0)
     .filter((r) => !gapShift || uncovered.includes(r))
     .filter((r) => !need || r.careNeeds.includes(need))
-    .filter(
-      (r) =>
-        !query ||
-        r.name.toLowerCase().includes(query) ||
-        r.room.toLowerCase().includes(query) ||
-        r.residentCode.toLowerCase().includes(query)
-    );
+    .filter((r) => matchesSearch(query, r.name, r.room, r.residentCode));
 
   // ?open=<Resident ID> picks a resident. Laptops always show one (the first in the list).
   const openCode = searchParams.get('open');
@@ -193,9 +188,13 @@ export default function ManageResidents() {
 
             {shown.length === 0 ? (
               <div className="card">
-                <EmptyState icon={Users}>
-                  {count === 0 ? 'No residents yet. Press "Add resident" to add the first one.' : 'No residents match your search.'}
-                </EmptyState>
+                {count > 0 && search.trim() ? (
+                  <NoMatchState icon={Users} what="residents" query={search} onClear={() => setSearch('')} />
+                ) : (
+                  <EmptyState icon={Users}>
+                    {count === 0 ? 'No residents yet. Press "Add resident" to add the first one.' : 'No residents match your filters.'}
+                  </EmptyState>
+                )}
               </div>
             ) : (
               <ul className="resident-list">

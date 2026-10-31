@@ -52,7 +52,7 @@ export default function DayPanel({ date, shift, tasks, shiftFilter, onShiftFilte
                 <StatusPill status={t.status} />
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm"
+                  className="btn btn--outline btn--sm btn--row"
                   onClick={() => onOpenTask(t)}
                   aria-label={`View task: ${t.task} for ${t.resident}`}
                 >

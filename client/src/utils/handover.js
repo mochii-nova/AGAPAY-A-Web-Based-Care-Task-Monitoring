@@ -15,9 +15,11 @@ import { formatTime } from './format';
 
 const OLD_MARKER = '\n\n[agapay-data]';
 
+// A resident's condition. "Watch closely" has its own apricot badge with an eye (status-pill--watch),
+// so it never looks like a task's amber "Pending".
 export const RESIDENT_STATUS = {
   normal: { label: 'Normal', tone: 'completed' },
-  watch: { label: 'Watch closely', tone: 'pending' },
+  watch: { label: 'Watch closely', tone: 'watch' },
   urgent: { label: 'Urgent', tone: 'overdue' },
 };
 

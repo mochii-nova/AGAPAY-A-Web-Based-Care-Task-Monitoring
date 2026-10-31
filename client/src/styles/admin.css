@@ -111,7 +111,6 @@
 @media (max-width: 600px) {
   .admin-residents__toolbar .select { flex: none; width: 100%; }
 }
-.resident-card__status { flex-shrink: 0; margin-left: auto; }
 .resident-card__ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .resident-details__gap { color: var(--overdue-text); font-weight: var(--fw-medium); }
 
@@ -305,7 +304,8 @@
 .contact-item__meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
 .contact-item__subject { margin: 10px 0 0; font-weight: var(--fw-medium); }
 .contact-item__body { margin: 4px 0 0; white-space: pre-line; overflow-wrap: anywhere; }
-.contact-item__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.contact-item__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.contact-item__actions .btn--row { margin-left: 0; }
 
 /* Totals: a small note under the number; tiles that open a page */
 .stat-row--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -330,7 +330,8 @@
 .attention-list { list-style: none; margin: 0; padding: 0; }
 .attention-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .attention-list li + li { border-top: 1px solid var(--border); }
-.attention-list .status-pill { flex-shrink: 0; }
+/* The labels sit in a fixed-width column, so every row's text starts at the same place */
+.attention-list__tag { flex: 0 0 112px; }
 .attention-list__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
 .attention-list__text strong { font-weight: var(--fw-medium); }
 .attention-list__text small { color: var(--muted); font-size: 0.85rem; }

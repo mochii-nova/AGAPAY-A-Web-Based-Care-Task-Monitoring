@@ -11,13 +11,14 @@ import { SHIFTS, TASK_CATEGORIES, getCategory } from '../../constants';
 import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
 import { activeCaregivers } from '../../utils/staff';
+import { searchTerm, matchesSearch } from '../../utils/search';
 import { addDays, dayLabel, shiftOfDue } from '../../utils/adminTasks';
 import PageHeader from '../../components/PageHeader';
 import StatusPill from '../../components/StatusPill';
 import ConfirmModal from '../../components/ConfirmModal';
 import TaskFormModal from '../../components/admin/TaskFormModal';
 import TaskViewModal from '../../components/admin/TaskViewModal';
-import { LoadingState, ErrorState, EmptyState } from '../../components/StateMessage';
+import { LoadingState, ErrorState, EmptyState, NoMatchState } from '../../components/StateMessage';
 import '../../styles/tasks.css';
 import '../../styles/residents.css';
 import '../../styles/admin.css';
@@ -77,16 +78,18 @@ export default function TasksCare() {
   };
 
   // Filters first; the tabs then split what's left
-  const q = search.trim().toLowerCase();
+  const q = searchTerm(search);
   const filtered = tasks
     .filter((t) => !shiftFilter || shiftOfDue(t.dueAt).shift.id === shiftFilter)
     .filter((t) => !caregiverFilter || (caregiverFilter === 'none' ? !t.assignedTo : String(t.assignedTo) === caregiverFilter))
     .filter((t) => !category || t.category === category)
-    .filter((t) => !q || t.task.toLowerCase().includes(q) || (t.resident ?? '').toLowerCase().includes(q))
+    .filter((t) => matchesSearch(q, t.task, t.resident, t.room))
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
   const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
   const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
   const filtering = q || shiftFilter || caregiverFilter || category;
+  // The search found nothing (as opposed to an empty tab)
+  const noMatch = !!q && tasks.length > 0 && filtered.length === 0;
 
   const viewTask = tasks.find((t) => t.id === viewId) ?? null;
 
@@ -167,12 +170,12 @@ export default function TasksCare() {
         <div className="admin-toolbar admin-tasks__filters">
           <div className="search-box">
             <Search size={18} aria-hidden="true" />
-            <label htmlFor="tasks-search" className="sr-only">Search task or resident</label>
+            <label htmlFor="tasks-search" className="sr-only">Search task, resident or room</label>
             <input
               id="tasks-search"
               type="search"
               className="field__input"
-              placeholder="Search task or resident"
+              placeholder="Search task, resident or room"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -198,7 +201,10 @@ export default function TasksCare() {
         <section id="tasks-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="tasks-panel">
           {query.status === 'loading' && <LoadingState label="Loading tasks…" />}
           {query.status === 'error' && <ErrorState message={query.error} onRetry={query.reload} />}
-          {query.status === 'ready' && shown.length === 0 && (
+          {query.status === 'ready' && noMatch && (
+            <NoMatchState icon={ClipboardList} what="tasks" query={search} onClear={() => setSearch('')} />
+          )}
+          {query.status === 'ready' && shown.length === 0 && !noMatch && (
             <EmptyState icon={ClipboardList}>
               {tasks.length === 0 ? `No tasks on ${dayLabel(day)} yet. Press "Create task" to add one.` : EMPTY_TEXT[filtering && tab === 'all' ? 'all' : tab]}
             </EmptyState>
@@ -239,7 +245,7 @@ export default function TasksCare() {
                     <td className="task-table__action">
                       <button
                         type="button"
-                        className="btn btn--outline btn--sm"
+                        className="btn btn--outline btn--sm btn--row"
                         onClick={() => setViewId(t.id)}
                         aria-label={`View task: ${t.task}${t.resident ? ` for ${t.resident}` : ''}`}
                       >

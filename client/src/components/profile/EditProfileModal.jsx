@@ -17,7 +17,7 @@ function validate(form) {
   if (!form.lastName.trim()) errors.lastName = 'Please enter your last name.';
   if (!form.email.trim()) errors.email = 'Please enter your email.';
   else if (!/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Please enter a valid email, like name@example.com.';
-  if (!PHONE.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09, like 0917 555 0123.';
+  if (!PHONE.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09, like 0917 123 4567.';
   if (!form.ecName.trim()) errors.ecName = "Please enter your emergency contact's name.";
   if (!PHONE.test(form.ecPhone.replace(/[\s-]/g, ''))) errors.ecPhone = 'Use 11 digits starting with 09.';
   return errors;

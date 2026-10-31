@@ -58,7 +58,7 @@ export default function SlotPanel({ slot, entries, caregivers, taskCount, busyId
                 <span className="assign__who"><strong>{e.userName}</strong></span>
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm"
+                  className="btn btn--outline btn--sm btn--row"
                   disabled={busyId === e.userId}
                   onClick={() => onDayOff(e)}
                   aria-label={`Give ${e.userName} the day off`}
@@ -86,7 +86,7 @@ export default function SlotPanel({ slot, entries, caregivers, taskCount, busyId
                 </span>
                 <button
                   type="button"
-                  className="btn btn--soft btn--sm"
+                  className="btn btn--outline btn--sm btn--row"
                   disabled={busyId === c.id}
                   onClick={() => onAssign(c)}
                   aria-label={`Assign ${c.name} to the ${shift.label} shift`}

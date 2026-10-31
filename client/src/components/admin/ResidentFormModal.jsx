@@ -114,10 +114,10 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
         </div>
       )}
 
-      {field('name', 'Full name', { placeholder: 'e.g. Maria Santos', autoComplete: 'off' })}
+      {field('name', 'Full name', { placeholder: 'e.g. Lourdes Bautista', autoComplete: 'off' })}
       <div className="form-grid">
         {field('residentCode', 'Resident ID', { placeholder: 'e.g. RP-2026-001', autoComplete: 'off' })}
-        {field('room', 'Room', { placeholder: 'e.g. 102', autoComplete: 'off' })}
+        {field('room', 'Room', { placeholder: 'e.g. 215', autoComplete: 'off' })}
       </div>
       <div className="form-grid">
         {field('birthDate', 'Birth date', { type: 'date', required: false, max: today })}
@@ -153,7 +153,7 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
 
       <h3 className="small-label resident-form__group">Emergency contact</h3>
       <div className="form-grid">
-        {field('contactName', 'Name', { required: false, placeholder: 'e.g. Liza Santos-Uy', autoComplete: 'off' })}
+        {field('contactName', 'Name', { required: false, placeholder: 'e.g. Teresa Bautista-Uy', autoComplete: 'off' })}
         {field('contactRelationship', 'Relationship', { required: false, placeholder: 'e.g. Daughter', autoComplete: 'off' })}
       </div>
       {field('contactPhone', 'Phone number', { type: 'tel', required: false, placeholder: 'e.g. 0917 123 4567', autoComplete: 'off' })}

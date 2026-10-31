@@ -12,13 +12,13 @@
 .residents-toolbar .select { flex: 0 0 200px; width: 200px; }
 
 /* Resident cards: one column, all the same height and layout */
-.resident-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.resident-list { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
 .resident-card {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
@@ -29,15 +29,17 @@
 }
 .resident-card:hover { border-color: var(--lavender-line); }
 .resident-card[aria-pressed='true'] { border-color: var(--indigo); background: var(--indigo-soft); }
-.resident-card__body { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+/* Name, ID line, care-need chips and the Today line, about 8px apart */
+.resident-card__body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+/* The condition badge (Watch closely / Normal) sits in the top-right corner */
+.resident-card__status { flex-shrink: 0; margin-left: auto; }
 .resident-card__line { display: flex; align-items: center; gap: 10px; min-height: 22px; white-space: nowrap; }
 .resident-card__name { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; }
-.resident-card__id { flex-shrink: 0; margin-left: auto; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.3px; }
 .resident-card__meta { gap: 8px; color: var(--muted); font-size: 0.88rem; }
 
 /* Care need tags (text only) */
 .care-needs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; margin-top: 2px; }
+.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; }
 .care-need {
   display: inline-flex;
   align-items: center;
@@ -106,7 +108,7 @@
 @media (max-width: 600px) {
   .residents-toolbar { flex-direction: column; }
   .residents-toolbar .select { flex: none; width: 100%; }
-  .resident-card { gap: 12px; padding: 12px; }
+  .resident-card { gap: 12px; padding: 14px; }
   .resident-profile__columns { grid-template-columns: minmax(0, 1fr); }
   .profile-task { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main view' 'meta view'; row-gap: 2px; }
   .profile-task__main { grid-area: main; }

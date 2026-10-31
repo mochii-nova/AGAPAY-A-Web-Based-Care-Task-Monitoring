@@ -79,6 +79,8 @@
   --overdue-bg: #f9e1e1;    --overdue-text: #9a2c2c;    --overdue-dot: #d86a6a;
   --skipped-bg: #eeebf0;    --skipped-text: #4f4d63;    --skipped-dot: #a3a0b8;
   --overdue-tint: #fcf5f5;      /* light red row background */
+  --watch-bg: #fcede5;          /* resident "Watch closely" badge */
+  --watch-text: #8a3f22;        /* 7.4:1 on --watch-bg */
 
   /* Other colours */
   --danger: #b42318;
@@ -175,6 +177,8 @@
   --overdue-bg: #3f1f25;    --overdue-text: #f4a8a8;    --overdue-dot: #d86a6a;
   --skipped-bg: #2c2636;    --skipped-text: #c7c5da;    --skipped-dot: #8d8aa6;
   --overdue-tint: #261a24;
+  --watch-bg: #3e261c;
+  --watch-text: #f6bfa4;        /* 8.6:1 on --watch-bg */
 
   --danger: #f28b82;
   --danger-hover: #f6a39b;
@@ -293,6 +297,12 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 /* Two fields side by side (stack on phones) */
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
 @media (max-width: 600px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Phone number on laptops: the number as text + a small "Copy" button (PhoneNumber.jsx) */
+.phone-copy { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
+.phone-copy__number { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: var(--fw-medium); white-space: nowrap; }
+.phone-copy__btn { gap: 4px; font-size: 0.85rem; text-decoration: none; }
+.phone-copy__btn:hover { text-decoration: underline; }
 
 /* A field with a small icon inside the box, on the left */
 .field__control { position: relative; }
@@ -510,6 +520,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .btn--danger-solid { background: var(--danger); color: var(--on-danger); }
 .btn--danger-solid:hover:not(:disabled) { background: var(--danger-hover); }
 .btn--sm { padding: 0 14px; font-size: 0.875rem; }
+/* The action button at the end of a list row (View, Remind, Assign…): every row's button is the same
+   width and height, so they line up in one column on the right */
+.btn--row { flex-shrink: 0; justify-content: center; min-width: 96px; min-height: var(--tap); margin-left: auto; }
 .btn--lg { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
 
 .text-btn {
@@ -645,6 +658,22 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .status-pill--skipped   { color: var(--skipped-text); }
 .status-pill--new       { color: var(--accent-text); }
 .status-pill--new::before { background: var(--accent); }
+/* Resident condition "Watch closely": a small apricot badge with an eye (tasks' "Pending" is an amber dot) */
+.status-pill--watch {
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--watch-bg);
+  color: var(--watch-text);
+  font-size: 0.8rem;
+}
+.status-pill--watch::before {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 
 /* Image placeholders (until real pictures are added) */
 /* The AGAPAY logo (Logo.jsx): the white version replaces the dark one in dark mode */
