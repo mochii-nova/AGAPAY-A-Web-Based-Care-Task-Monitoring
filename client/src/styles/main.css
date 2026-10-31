@@ -85,6 +85,7 @@
   --shadow: 0 1px 3px rgba(42, 34, 51, 0.05);
   --shadow-float: 0 6px 20px rgba(42, 34, 51, 0.08);  /* floating header, raised cards */
   --shadow-lg: 0 12px 32px rgba(42, 34, 51, 0.12);
+  --shadow-btn: 0 6px 16px rgba(42, 34, 51, 0.18);  /* buttons on hover and keyboard focus */
 
   /* Type: 400 body and menus, 500 buttons and labels, 600 titles and big numbers */
   --fw-regular: 400;
@@ -157,6 +158,7 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-float: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-btn: 0 6px 16px rgba(0, 0, 0, 0.45);
 
   color-scheme: dark;            /* dark scrollbars, date pickers and dropdown lists */
 }
@@ -168,6 +170,7 @@ html { font-size: 15px; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
+  .btn:is(:hover, :focus-visible), .google-btn:is(:hover, :focus-visible) { transform: none !important; }
 }
 
 /* Motion: when a page opens, its header and cards fade in and rise 8px, one after another (40ms apart).
@@ -440,9 +443,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .alert--warning { background: var(--pending-bg); color: var(--pending-text); }
 
 /* Buttons
-   primary = the ONE main action on a page (solid navy)
-   soft    = everyday actions (light lavender)
-   outline = quiet secondary actions */
+   primary = the ONE main action on a page (solid plum)
+   soft    = everyday actions (light lilac)
+   outline = quiet secondary actions (white; fills plum on hover)
+   Every button: 200ms colour change, and on hover or keyboard focus it lifts 1px with a soft shadow
+   (no lift or transition when the computer asks for reduced motion). */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -455,14 +460,16 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   font-weight: var(--fw-medium);
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease),
+    transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
+.btn:is(:hover, :focus-visible):not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-btn); }
 .btn--primary { background: var(--indigo); color: var(--on-indigo); }
 .btn--primary:hover:not(:disabled) { background: var(--indigo-hover); }
 .btn--soft { background: var(--lavender); color: var(--ink); }
 .btn--soft:hover:not(:disabled) { background: var(--lavender-strong); }
 .btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--ink); }
-.btn--outline:hover:not(:disabled) { background: var(--tint); border-color: var(--lavender-line); }
+.btn--outline:hover:not(:disabled) { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
 /* Actions that take something away (deactivate, delete): red words on an outlined button */
 .btn--danger { background: var(--card); border-color: var(--border-strong); color: var(--danger); }
 .btn--danger:hover:not(:disabled) { background: var(--overdue-tint); border-color: var(--overdue-bg); }

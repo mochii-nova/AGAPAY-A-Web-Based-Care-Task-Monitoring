@@ -99,9 +99,12 @@
   font: inherit;
   font-weight: var(--fw-medium);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease),
+    transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.google-btn:hover:not(:disabled) { background: var(--tint); }
+/* Same as every white button: fills plum on hover, lifts 1px on hover and keyboard focus */
+.google-btn:hover:not(:disabled) { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
+.google-btn:is(:hover, :focus-visible):not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-btn); }
 .google-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .auth__google-note { margin: 0; color: var(--muted); font-size: 0.9rem; text-align: center; }

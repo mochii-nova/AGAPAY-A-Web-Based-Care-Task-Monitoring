@@ -78,8 +78,8 @@ export default function SiteHeader({ sections, active }) {
                 <Link to={homeFor(user)} className="btn btn--primary">Open dashboard</Link>
               ) : (
                 <>
-                  <Link to="/login" className="btn btn--outline site-header__signin">Sign in</Link>
-                  <Link to="/register" className="btn btn--primary">Get started</Link>
+                  <Link to="/login" className="btn btn--primary site-header__signin">Sign in</Link>
+                  <Link to="/register" className="btn site-header__create">Create account</Link>
                 </>
               )}
             </div>
