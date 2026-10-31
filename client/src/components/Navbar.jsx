@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check } from 'lucide-react';
+import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check, CircleHelp } from 'lucide-react';
+import { useTour } from '../context/TourContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -19,6 +20,7 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const { profile, openEditProfile, openPhoto } = useProfile();
   const { unreadCount: unreadMessages } = useMessages();
+  const { replay: replayTour } = useTour();
   const { ref: bellRef, ...bell } = usePopover();
   const { ref: accountRef, ...account } = usePopover();
 
@@ -34,6 +36,10 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
       </button>
 
       <div className="topbar__actions">
+        {/* Help: shows the welcome tour again */}
+        <button type="button" className="icon-btn" onClick={replayTour} aria-label="Help: show the tour again" title="Help">
+          <CircleHelp size={20} />
+        </button>
         <ThemeToggle />
         {/* Notifications */}
         <div className="popover-anchor" ref={bellRef}>

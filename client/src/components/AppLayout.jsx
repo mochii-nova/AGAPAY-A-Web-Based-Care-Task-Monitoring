@@ -9,6 +9,7 @@ import { PushProvider } from '../context/PushContext';
 import { MessagesProvider } from '../context/MessagesContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import { StaffProvider } from '../context/StaffContext';
+import { TourProvider } from '../context/TourContext';
 import { useAuth } from '../context/AuthContext';
 import { isAdmin } from '../utils/roles';
 
@@ -70,10 +71,14 @@ export default function AppLayout() {
             {/* The staff list is only loaded for administrators (notifications use it for sign-ups) */}
             {admin ? (
               <StaffProvider>
-                <NotificationProvider>{page}</NotificationProvider>
+                <NotificationProvider>
+                  <TourProvider>{page}</TourProvider>
+                </NotificationProvider>
               </StaffProvider>
             ) : (
-              <NotificationProvider>{page}</NotificationProvider>
+              <NotificationProvider>
+                <TourProvider>{page}</TourProvider>
+              </NotificationProvider>
             )}
           </MessagesProvider>
         </PushProvider>

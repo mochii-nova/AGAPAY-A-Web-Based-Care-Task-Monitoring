@@ -304,6 +304,44 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .phone-copy__btn { gap: 4px; font-size: 0.85rem; text-decoration: none; }
 .phone-copy__btn:hover { text-decoration: underline; }
 
+/* Welcome tour (Tour.jsx): the page dimmed, a highlight around one part, and a small card beside it.
+   Above everything else (pop-ups use 100). */
+.tour__backdrop { position: fixed; inset: 0; z-index: 200; background: var(--overlay); }
+.tour__backdrop.is-clear { background: transparent; }
+.tour__spot {
+  position: fixed;
+  z-index: 201;
+  border-radius: 14px;
+  box-shadow: 0 0 0 3px var(--indigo), 0 0 0 9999px var(--overlay);
+  pointer-events: none;
+  transition: left 0.2s var(--ease), top 0.2s var(--ease), width 0.2s var(--ease), height 0.2s var(--ease);
+}
+.tour__card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 202;
+  width: min(320px, calc(100vw - 32px));
+  padding: 18px 20px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  visibility: hidden;
+}
+.tour__card[data-ready='true'] { visibility: visible; }
+.tour__card.is-centered { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.tour__count { margin: 0 0 4px; color: var(--label); font-size: 0.75rem; font-weight: var(--fw-bold); letter-spacing: 0.5px; text-transform: uppercase; }
+.tour__title { margin: 0 0 6px; font-size: 1.1rem; font-weight: var(--fw-bold); }
+.tour__title:focus { outline: none; }
+.tour__title:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; border-radius: 4px; }
+.tour__text { margin: 0 0 12px; color: var(--muted); font-size: 0.93rem; line-height: 1.5; }
+.tour__actions { display: flex; align-items: center; gap: 8px; }
+.tour__skip { margin-left: -4px; }
+.tour__nav { display: flex; gap: 8px; margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .tour__spot { transition: none; } }
+
 /* A field with a small icon inside the box, on the left */
 .field__control { position: relative; }
 .field__icon { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--muted); transform: translateY(-50%); pointer-events: none; }

@@ -19,6 +19,8 @@ import NextTasksCard from '../components/dashboard/NextTasksCard';
 import RecentHandoverCard from '../components/dashboard/RecentHandoverCard';
 import ResidentsCard from '../components/dashboard/ResidentsCard';
 import PushPrompt from '../components/PushPrompt';
+import StartHere from '../components/StartHere';
+import { formatTime } from '../utils/format';
 import '../styles/dashboard.css';
 
 function greeting(now) {
@@ -97,6 +99,34 @@ export default function Dashboard() {
   const today = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const ready = tasksQuery.status === 'ready' && shiftsQuery.status === 'ready';
 
+  // "Start here": the one thing that matters most right now, in this order:
+  // an unread handover, then overdue tasks, then the next task, else a friendly line
+  const startHere = (() => {
+    if (latestHandover && !latestHandover.readByMe) {
+      const name = latestHandover.author?.name ?? 'the last shift';
+      return {
+        text: `${name} handed over the ${shiftLabel(latestHandover.shift)} shift. Read it before you start.`,
+        action: { label: `Read ${name.split(' ')[0]}'s handover`, to: '/handover?tab=received' },
+      };
+    }
+    const overdueCount = overdueToday.length + earlierOverdue;
+    if (overdueCount) {
+      return {
+        text: 'Some tasks are past their time. Do them first, or skip them with a reason.',
+        action: { label: `Do your ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}`, to: '/tasks?tab=overdue' },
+      };
+    }
+    const next = todayTasks.filter((t) => t.status === 'pending').sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))[0];
+    if (next) {
+      return {
+        text: 'You’re on track. Here’s what comes next.',
+        action: { label: `Next: ${next.task} at ${formatTime(next.dueAt)}`, to: `/tasks?open=${next._id}` },
+      };
+    }
+    if (phase === 'off') return { text: 'You have the day off today. Rest well, nothing needs you right now.', action: null };
+    return { text: 'No tasks waiting for you right now. Nice work.', action: null };
+  })();
+
   return (
     <div className="dashboard">
       <header className="page-header dash-greeting">
@@ -107,61 +137,72 @@ export default function Dashboard() {
         <p className="dash-greeting__date">{today}</p>
       </header>
 
+      {ready && handoversQuery.status === 'ready' && <StartHere {...startHere} />}
+
       <PushPrompt />
 
-      {/* Row 1: three compact cards of the same height: progress, shift, handover status */}
-      <div className="dash-row dash-row--three">
-        {tasksQuery.status === 'ready' ? (
-          <ProgressCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
-        ) : (
-          <section className="card">
-            {tasksQuery.status === 'loading' ? (
-              <LoadingState label="Loading today's tasks…" />
-            ) : (
-              <ErrorState message={tasksQuery.error} onRetry={tasksQuery.reload} />
-            )}
-          </section>
-        )}
-        {shiftsQuery.status === 'ready' ? (
-          <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} />
-        ) : (
-          <section className="card">
-            {shiftsQuery.status === 'loading' ? (
-              <LoadingState label="Loading your shift…" />
-            ) : (
-              <ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} />
-            )}
-          </section>
-        )}
-        {handoversQuery.status === 'ready' ? (
-          <RecentHandoverCard handover={latestHandover} myId={profile.id} onMarkRead={markRead} busy={marking} />
-        ) : (
-          <section className="card">
-            {handoversQuery.status === 'loading' ? (
-              <LoadingState label="Loading handovers…" />
-            ) : (
-              <ErrorState message={handoversQuery.error} onRetry={handoversQuery.reload} />
-            )}
-          </section>
-        )}
+      {/* On the 12-column grid. Row 1, the stat cards: progress, shift, handover status (4 + 4 + 4) */}
+      <div className="dash-grid dash-grid--tiles">
+        <div className="span-4">
+          {tasksQuery.status === 'ready' ? (
+            <ProgressCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
+          ) : (
+            <section className="card">
+              {tasksQuery.status === 'loading' ? (
+                <LoadingState label="Loading today's tasks…" />
+              ) : (
+                <ErrorState message={tasksQuery.error} onRetry={tasksQuery.reload} />
+              )}
+            </section>
+          )}
+        </div>
+        <div className="span-4">
+          {shiftsQuery.status === 'ready' ? (
+            <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} />
+          ) : (
+            <section className="card">
+              {shiftsQuery.status === 'loading' ? (
+                <LoadingState label="Loading your shift…" />
+              ) : (
+                <ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} />
+              )}
+            </section>
+          )}
+        </div>
+        <div className="span-4">
+          {handoversQuery.status === 'ready' ? (
+            <RecentHandoverCard handover={latestHandover} myId={profile.id} onMarkRead={markRead} busy={marking} />
+          ) : (
+            <section className="card">
+              {handoversQuery.status === 'loading' ? (
+                <LoadingState label="Loading handovers…" />
+              ) : (
+                <ErrorState message={handoversQuery.error} onRetry={handoversQuery.reload} />
+              )}
+            </section>
+          )}
+        </div>
       </div>
 
-      {/* Row 2: what's next (2/3) and priority alerts (1/3), lined up at the top */}
-      <div className="dash-row dash-row--main">
-        {tasksQuery.status === 'ready' ? (
-          <NextTasksCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
-        ) : (
-          <section className="card" aria-hidden="true" />
-        )}
-        {tasksQuery.status === 'ready' ? (
-          <PriorityAlertsCard flagged={flagged} overdueToday={overdueToday} earlierOverdue={earlierOverdue} />
-        ) : (
-          <section className="card" aria-hidden="true" />
-        )}
+      {/* Row 2: what's next (8) and priority alerts (4), the same height */}
+      <div className="dash-grid">
+        <div className="span-8">
+          {tasksQuery.status === 'ready' ? (
+            <NextTasksCard tasks={todayTasks} earlierOverdue={earlierOverdue} />
+          ) : (
+            <section className="card" aria-hidden="true" />
+          )}
+        </div>
+        <div className="span-4">
+          {tasksQuery.status === 'ready' ? (
+            <PriorityAlertsCard flagged={flagged} overdueToday={overdueToday} earlierOverdue={earlierOverdue} />
+          ) : (
+            <section className="card" aria-hidden="true" />
+          )}
+        </div>
       </div>
 
-      {/* Row 3 */}
-
+      {/* Row 3: my residents, full width */}
       {residentsQuery.status === 'ready' && <ResidentsCard residents={residentsQuery.residents} statusOf={statusOf} />}
       {residentsQuery.status === 'error' && (
         <section className="card">
