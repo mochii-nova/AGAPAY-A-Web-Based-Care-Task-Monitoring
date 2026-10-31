@@ -41,7 +41,8 @@ export default function AdminSchedule() {
   const [busyId, setBusyId] = useState(null);
   const saving = useRef(new Set()); // people whose shift is being saved right now
   // The Dashboard's "Fill a month" opens it straight away
-  const [filling, setFilling] = useState(() => !!location.state?.add);
+  // (Manage Staff's "Yes, fill this month" opens it too, with the caregiver and shift chosen: state.fill)
+  const [filling, setFilling] = useState(() => !!(location.state?.add || location.state?.fill));
 
   const focusDate = dayToDate(focus);
   const days = view === 'week' ? weekDays(focusDate) : monthGrid(focusDate);
@@ -111,6 +112,7 @@ export default function AdminSchedule() {
 
   const panel = selected && (
     <SlotPanel
+      key={`${selected.date}-${selected.shift.id}`}
       slot={selected}
       entries={entries}
       caregivers={caregivers}
@@ -184,7 +186,12 @@ export default function AdminSchedule() {
           )}
         </div>
 
-        {!isNarrow && <aside className="card day-panel" aria-label="Selected shift">{panel}</aside>}
+        {/* The panel stays in view and scrolls by itself, so the page is no longer than the calendar */}
+        {!isNarrow && (
+          <div className="admin-schedule__panel-wrap">
+            <aside className="card day-panel" aria-label="Selected shift">{panel}</aside>
+          </div>
+        )}
       </div>
 
       {isNarrow && (
@@ -196,6 +203,7 @@ export default function AdminSchedule() {
       <FillMonthModal
         open={filling}
         caregivers={caregivers}
+        preset={location.state?.fill}
         startMonth={new Date(now.getFullYear(), now.getMonth(), 1)}
         onDone={({ person, shift, month, count, cleared }) => {
           rosterQuery.reload({ silent: true });

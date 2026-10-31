@@ -280,21 +280,42 @@
 .offshift__actions { display: flex; flex-wrap: wrap; gap: 0 10px; }
 .offshift__actions .link-btn { padding: 0; font-size: 0.82rem; }
 
-/* Tasks on the selected shift */
-.slot-panel__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-.slot-panel__head .small-label { margin-bottom: 0; }
-/* The task name opens it in Tasks & Care (44px tall tap area, no taller row) */
-.slot-tasks__link { display: inline-flex; align-items: center; min-height: var(--tap); margin: -12px 0 -14px; color: var(--text); text-decoration: none; }
-.slot-tasks__link:hover strong { text-decoration: underline; }
-.slot-tasks { list-style: none; margin: 0; padding: 0; }
-.slot-tasks li { display: grid; grid-template-columns: 68px minmax(0, 1fr) auto; align-items: center; gap: 4px 10px; padding: 8px 0; }
-.slot-tasks li + li { border-top: 1px solid var(--border); }
-.slot-tasks__time { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
-.slot-tasks__main { display: flex; flex-direction: column; min-width: 0; }
-.slot-tasks__main strong { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
-.slot-tasks__main small { color: var(--muted); font-size: 0.82rem; }
-.slot-tasks__warn { color: var(--overdue-text); font-weight: var(--fw-medium); }
+/* The panel on laptops: stays in view and scrolls by itself. Its wrapper takes no height of its own
+   (contain: size), so the row is as tall as the calendar; the panel is at most the window's height. */
+.admin-schedule__panel-wrap { contain: size; align-self: stretch; }
+.admin-schedule__panel-wrap .card.day-panel { max-height: min(max(100%, 520px), calc(100vh - 104px)); overflow-y: auto; overscroll-behavior: contain; }
 
+/* Manage Staff: an active caregiver with no shift on this week's Schedule */
+.staff-offweek { display: block; margin-top: 2px; color: var(--pending-text); font-size: 0.8rem; font-weight: var(--fw-medium); }
+.staff-offweek a { color: var(--indigo); }
+
+/* "Add a caregiver": one dropdown and the Assign button */
+/* The dropdown gets the full width so "Name · Free that day" fits; Assign sits under it */
+.slot-add { display: flex; flex-direction: column; gap: 8px; }
+.slot-add .select { width: 100%; }
+.slot-add__btn { justify-content: center; width: 100%; }
+
+/* One banner per caregiver who has tasks here but isn't on this shift */
+.alert.slot-warn { align-items: flex-start; margin-bottom: 8px; }
+.slot-warn__body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.slot-warn__body p { margin: 0; }
+.slot-warn__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.slot-warn__actions .btn { background: var(--card); }
+
+/* Tasks on the selected shift: one tight row each (time · name · status dot, resident underneath) */
+.slot-tasks { list-style: none; margin: 0; padding: 0; }
+.slot-tasks li + li { border-top: 1px solid var(--border); }
+.slot-tasks__row { display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); padding: 6px 4px; margin: 0 -4px; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.slot-tasks__row:hover { background: var(--tint); }
+.slot-tasks__line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.slot-tasks__time { flex-shrink: 0; width: 64px; color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.slot-tasks__name { flex: 1; min-width: 0; overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.slot-tasks__dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; }
+.slot-tasks__dot--pending { background: var(--pending-dot); }
+.slot-tasks__dot--completed { background: var(--completed-dot); }
+.slot-tasks__dot--overdue { background: var(--overdue-dot); }
+.slot-tasks__dot--skipped { background: var(--skipped-dot); }
+.slot-tasks__resident { padding-left: 72px; color: var(--muted); font-size: 0.8rem; }
 /* Fill a month */
 .weekday-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .need-picker__option.weekday-picker__day { justify-content: center; gap: 6px; padding: 6px 4px; font-size: 0.88rem; }

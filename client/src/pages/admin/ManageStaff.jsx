@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Users, UserPlus } from 'lucide-react';
 import { useStaff } from '../../context/StaffContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,7 @@ import useNow from '../../hooks/useNow';
 import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS } from '../../constants';
 import { shiftOnDate } from '../../utils/shift';
+import { weekDays } from '../../utils/calendar';
 import { shortDate, roleLabel, STATUS_LABEL } from '../../utils/staff';
 import { searchTerm, matchesSearch } from '../../utils/search';
 import { jobTitle } from '../../utils/format';
@@ -30,7 +31,7 @@ const STATUS_FILTERS = [
   { value: 'pending', label: 'Pending approval' },
   { value: 'inactive', label: 'Deactivated' },
 ];
-const SHIFT_FILTERS = [{ value: '', label: 'All shifts' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: s.label })), { value: 'none', label: 'Not set' }];
+const SHIFT_FILTERS = [{ value: '', label: 'Any usual shift' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: s.label })), { value: 'none', label: 'Not set' }];
 
 // Waiting for approval first, then active, then deactivated; by name within each
 const ORDER = { pending: 0, active: 1, inactive: 2 };
@@ -58,11 +59,14 @@ export default function ManageStaff() {
   const now = useNow();
   const today = isoDay(now);
   const tasksQuery = useApiData(`/tasks?from=${today}&to=${today}`);
-  const shiftsQuery = useApiData(`/shifts?from=${today}&to=${today}`);
+  // This week's Schedule: who works today, and who isn't on it at all this week
+  const week = weekDays(now);
+  const shiftsQuery = useApiData(`/shifts?from=${isoDay(week[0])}&to=${isoDay(week[6])}`);
   const { residents } = useResidents();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [shiftFilter, setShiftFilter] = useState('');
@@ -72,9 +76,17 @@ export default function ManageStaff() {
   const [confirm, setConfirm] = useState(null); // { person, action, status }
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmError, setConfirmError] = useState('');
+  // After a caregiver's usual shift is set or changed: offer to put them on this month's Schedule
+  const [fillAsk, setFillAsk] = useState(null); // the saved account
+  const fillShift = SHIFTS.find((s) => s.apiValue === fillAsk?.assignedShift);
+  const monthName = now.toLocaleDateString('en-US', { month: 'long' });
 
   const tasks = tasksQuery.data ?? [];
-  const todayShifts = shiftsQuery.data ?? [];
+  const weekShifts = shiftsQuery.data ?? [];
+  const todayShifts = weekShifts.filter((s) => s.shiftDate === today);
+  // Active caregivers with no shift at all this week (only once the Schedule has loaded)
+  const offThisWeek = (person) =>
+    shiftsQuery.status === 'ready' && person.role === 'caregiver' && person.status === 'active' && !weekShifts.some((s) => s.userId === person.id);
 
   const query = searchTerm(search);
   const shown = staff
@@ -140,6 +152,7 @@ export default function ManageStaff() {
       residents={residentsOf(selected)}
       onEdit={() => setForm({ person: selected })}
       onReset={() => setResetFor(selected)}
+      offThisWeek={offThisWeek(selected)}
       onStatus={(s) => askStatus(selected, s)}
       showName={!isNarrow}
     />
@@ -200,7 +213,7 @@ export default function ManageStaff() {
                   <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Employee ID</th>
-                    <th scope="col" className="data-table__wide-only">Shift</th>
+                    <th scope="col" className="data-table__wide-only">Usual shift</th>
                     <th scope="col" className="data-table__wide-only">Today</th>
                     <th scope="col">Status</th>
                     <th scope="col"><span className="sr-only">Open</span></th>
@@ -223,7 +236,14 @@ export default function ManageStaff() {
                           </div>
                         </td>
                         <td className="data-table__muted data-table__nowrap">{u.employeeId}</td>
-                        <td className="data-table__wide-only">{shift ? shift.label : <span className="data-table__muted">Not set</span>}</td>
+                        <td className="data-table__wide-only">
+                          {shift ? shift.label : <span className="data-table__muted">Not set</span>}
+                          {offThisWeek(u) && (
+                            <small className="staff-offweek">
+                              Not on this week’s schedule · <Link to="/admin/schedule">Schedule</Link>
+                            </small>
+                          )}
+                        </td>
                         <td className="data-table__wide-only data-table__muted data-table__nowrap">{todayText(u)}</td>
                         <td><span className={`status-pill status-pill--${st.tone}`}>{st.label}</span></td>
                         <td className="data-table__action">
@@ -262,8 +282,36 @@ export default function ManageStaff() {
         open={!!form}
         person={form?.person}
         isMe={form?.person?.id === user.id}
-        onClose={() => setForm(null)}
+        onClose={(saved, shiftChangedFor) => {
+          setForm(null);
+          if (shiftChangedFor?.role === 'caregiver' && shiftChangedFor.status === 'active') setFillAsk(shiftChangedFor);
+        }}
       />
+      <Modal
+        open={!!fillAsk}
+        onClose={() => setFillAsk(null)}
+        title="Add to the Schedule?"
+        size="sm"
+        footer={
+          <>
+            <button type="button" className="btn btn--outline" onClick={() => setFillAsk(null)}>Not now</button>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => navigate('/admin/schedule', { state: { fill: { userId: fillAsk.id, shift: fillAsk.assignedShift } } })}
+            >
+              Yes, fill this month
+            </button>
+          </>
+        }
+      >
+        {fillAsk && fillShift && (
+          <p>
+            Also add {fillAsk.name} to the Schedule for {monthName} on the {fillShift.label} shift? The usual shift alone doesn’t put
+            them on the Schedule, so they can’t be given tasks until they are.
+          </p>
+        )}
+      </Modal>
       <ResetPasswordModal person={resetFor} onClose={() => setResetFor(null)} />
       <ConfirmModal
         open={!!confirm}

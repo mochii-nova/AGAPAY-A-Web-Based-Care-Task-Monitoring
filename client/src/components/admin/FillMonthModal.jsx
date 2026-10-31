@@ -20,13 +20,14 @@ function monthOptions(now) {
   });
 }
 
-function FillForm({ caregivers, startMonth, onDone, onClose }) {
+function FillForm({ caregivers, startMonth, preset, onDone, onClose }) {
   const active = caregivers.filter((c) => c.status === 'active');
-  const first = active[0];
+  // `preset` ({ userId, shift }) chooses the caregiver and shift; otherwise the first caregiver
+  const first = active.find((c) => c.id === preset?.userId) ?? active[0];
   const [form, setForm] = useState({
     userId: String(first?.id ?? ''),
     month: isoDay(startMonth).slice(0, 7),
-    shift: first?.assignedShift ?? SHIFTS[0].apiValue,
+    shift: (first?.id === preset?.userId && preset?.shift) || first?.assignedShift || SHIFTS[0].apiValue,
   });
   const [offDays, setOffDays] = useState([]);
   const [clearOff, setClearOff] = useState(true);
@@ -142,11 +143,11 @@ function FillForm({ caregivers, startMonth, onDone, onClose }) {
 }
 
 // Pop-up for "Fill a month": one caregiver, one shift, every day of a month except their days off.
-// onDone({ person, shift, month, count, cleared }) after saving.
-export default function FillMonthModal({ open, caregivers, startMonth, onDone, onClose }) {
+// `preset`: { userId, shift } to start with (from Manage Staff). onDone({ person, shift, month, count, cleared }) after saving.
+export default function FillMonthModal({ open, caregivers, startMonth, preset, onDone, onClose }) {
   return (
     <Modal open={open} onClose={onClose} title="Fill a month">
-      {open && <FillForm caregivers={caregivers} startMonth={startMonth} onDone={onDone} onClose={onClose} />}
+      {open && <FillForm caregivers={caregivers} startMonth={startMonth} preset={preset} onDone={onDone} onClose={onClose} />}
     </Modal>
   );
 }

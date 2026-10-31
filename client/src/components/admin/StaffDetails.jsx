@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { UserCheck } from 'lucide-react';
 import Avatar from '../Avatar';
 import { SHIFTS, shiftTime } from '../../constants';
@@ -13,7 +14,8 @@ const TODAY_TONES = [
 
 // Everything about one account, with the admin's actions.
 // Used in the side panel (laptops) and in a pop-up (tablets and phones).
-export default function StaffDetails({ person, isMe, todayTasks, residents, onEdit, onReset, onStatus, showName = true }) {
+// `offThisWeek`: an active caregiver with no shift on this week's Schedule.
+export default function StaffDetails({ person, isMe, todayTasks, residents, offThisWeek, onEdit, onReset, onStatus, showName = true }) {
   const shift = SHIFTS.find((s) => s.apiValue === person.assignedShift);
   const contact = person.emergencyContact ?? {};
   const status = STATUS_LABEL[person.status];
@@ -46,7 +48,17 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, onEd
       )}
 
       <dl className="info-list staff-details__list">
-        <div><dt>Shift</dt><dd>{shift ? `${shift.label} · ${shiftTime(shift)}` : notSet}</dd></div>
+        <div>
+          <dt>Usual shift</dt>
+          <dd>
+            {shift ? `${shift.label} · ${shiftTime(shift)}` : notSet}
+            {offThisWeek && (
+              <small className="staff-offweek">
+                Not on this week’s schedule · <Link to="/admin/schedule">Schedule</Link>
+              </small>
+            )}
+          </dd>
+        </div>
         <div><dt>Phone</dt><dd>{person.phone || notSet}</dd></div>
         <div><dt>Email</dt><dd className="staff-details__email">{person.email || notSet}</dd></div>
         <div><dt>Date hired</dt><dd>{person.dateHired ? longDate(person.dateHired) : notSet}</dd></div>

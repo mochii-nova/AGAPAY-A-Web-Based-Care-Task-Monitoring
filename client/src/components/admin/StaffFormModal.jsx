@@ -76,6 +76,7 @@ function StaffForm({ person, isMe, onClose }) {
     if (!startSaving()) return;
     setSaveError('');
     const adminDetails = { assignedShift: form.assignedShift || null, dateHired: form.dateHired || null, title: form.title.trim() };
+    let result = null;
     try {
       if (adding) {
         const saved = await create({
@@ -89,11 +90,14 @@ function StaffForm({ person, isMe, onClose }) {
           ...adminDetails,
         });
         showToast(`Account created for ${saved.name}. They can sign in now.`);
+        result = saved;
       } else {
-        await update(person.id, isMe ? adminDetails : { ...adminDetails, role: form.role });
+        result = await update(person.id, isMe ? adminDetails : { ...adminDetails, role: form.role });
         showToast(`Saved ${person.name}'s details.`);
       }
-      onClose(true);
+      // A caregiver's usual shift was set or changed: ManageStaff offers to put them on the Schedule
+      const shiftChanged = form.assignedShift && form.assignedShift !== (person?.assignedShift ?? '');
+      onClose(true, shiftChanged ? result : null);
     } catch (err) {
       const message = err.response?.data?.message;
       if (err.response?.status === 409) {
@@ -142,7 +146,7 @@ function StaffForm({ person, isMe, onClose }) {
       )}
 
       <div className="form-grid">
-        {select('assignedShift', 'Assigned shift', SHIFT_OPTIONS)}
+        {select('assignedShift', 'Usual shift', SHIFT_OPTIONS, { hint: 'Their regular shift. The Schedule says which days they work.' })}
         {field('dateHired', 'Date hired', { type: 'date', required: false })}
       </div>
       <div className="form-grid">
@@ -173,7 +177,8 @@ function StaffForm({ person, isMe, onClose }) {
   );
 }
 
-// Pop-up for "Add staff" (no `person`) and "Edit" (shift, date hired, title, role)
+// Pop-up for "Add staff" (no `person`) and "Edit" (usual shift, date hired, title, role).
+// onClose(saved, shiftChangedFor): shiftChangedFor is the saved account when its usual shift was set or changed.
 export default function StaffFormModal({ open, person, isMe, onClose }) {
   return (
     <Modal open={open} onClose={() => onClose(false)} title={person ? `Edit ${person.name}` : 'Add staff'} size="lg">

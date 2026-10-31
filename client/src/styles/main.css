@@ -1092,6 +1092,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .notif-popover .notif-icon { width: 36px; height: 36px; }
 
+/* "View all (N)" / "Show all N tasks" under a shortened list */
+.card-more { margin-top: 6px; font-size: 0.9rem; }
+
 /* Help dropdown ("?" in the top bar) */
 .help-popover { width: 240px; max-width: calc(100vw - 24px); }
 

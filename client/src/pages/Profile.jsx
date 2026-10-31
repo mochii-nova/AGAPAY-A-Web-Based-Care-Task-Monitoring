@@ -47,7 +47,7 @@ export default function Profile() {
             <dl className="info-list">
               <div><dt>Employee ID</dt><dd>{profile.employeeId}</dd></div>
               {/* Administrators don't work shifts */}
-              {profile.role !== 'admin' && <div><dt>Shift</dt><dd>{shift ? shiftTime(shift) : orNotSet(null)}</dd></div>}
+              {profile.role !== 'admin' && <div><dt>Usual shift</dt><dd>{shift ? shiftTime(shift) : orNotSet(null)}</dd></div>}
               <div><dt>Date hired</dt><dd>{profile.dateHired ? longDate(profile.dateHired) : orNotSet(null)}</dd></div>
               <div>
                 <dt>Status</dt>

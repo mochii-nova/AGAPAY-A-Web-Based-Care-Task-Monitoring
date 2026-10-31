@@ -88,8 +88,6 @@
 .alerts-card__text { display: flex; flex-direction: column; min-width: 0; }
 .alerts-card__text strong { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
 .alerts-card__text small { overflow: hidden; color: var(--muted); font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; }
-/* "View all (N)" under a list of the most urgent items (Priority alerts, Needs attention) */
-.card-more { margin-top: 6px; font-size: 0.9rem; }
 .alerts-card__clear { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--completed-text); }
 .alerts-card__clear svg { flex-shrink: 0; margin-top: 2px; }
 
