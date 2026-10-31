@@ -7,8 +7,20 @@ const { fullUser, strongPassword, PASSWORD_RULE, validEmail, clean } = require('
 
 const router = express.Router();
 
-// REGISTER (anyone). Always makes a caregiver account that waits for an admin to approve it.
-// Admins are created by another admin (POST /api/users) or in phpMyAdmin.
+const GOOGLE_NOT_LINKED =
+  'This Google account isn’t linked to an approved AGAPAY account. Sign in with your Employee ID, or ask the administrator to add this email to your account.';
+
+// Global session handler for both standard login and Google auth
+function sendSession(req, res, user) {
+  const token = jwt.sign(
+    { id: user.id, role: user.role, name: user.name },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+  res.json({ token, user: fullUser(user, req) });
+}
+
+// REGISTER
 router.post('/register', async (req, res) => {
   const { name, firstName, lastName, username, password } = req.body;
   const first = clean(firstName, 40);
@@ -47,7 +59,7 @@ router.post('/register', async (req, res) => {
   });
 });
 
-// LOGIN with the Employee ID or the email address
+// LOGIN
 router.post('/login', async (req, res) => {
   const login = String(req.body.username ?? '').trim();
   const { password } = req.body;
@@ -57,12 +69,11 @@ router.post('/login', async (req, res) => {
 
   const [rows] = await pool.query('SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1', [login, login.toLowerCase()]);
   const user = rows[0];
-  // Same answer for "no such user" and "wrong password", so nobody can find out which IDs exist
+
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return res.status(401).json({ message: 'Invalid Employee ID or password.' });
   }
 
-  // Only checked after the password is right
   if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
   if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
 
@@ -71,6 +82,7 @@ router.post('/login', async (req, res) => {
 
 const googleClient = new OAuth2Client();
 
+// GOOGLE AUTH
 router.post('/google', async (req, res) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
@@ -81,7 +93,6 @@ router.post('/google', async (req, res) => {
     return res.status(400).json({ message: 'Google sign-in failed. Please try again.' });
   }
 
-  // 1. Ask Google about the token. A fake or expired token makes this throw.
   let info;
   try {
     info = await googleClient.getTokenInfo(accessToken);
@@ -89,31 +100,19 @@ router.post('/google', async (req, res) => {
     return res.status(401).json({ message: 'Google sign-in failed. Please try again.' });
   }
 
-  // 2. The token must be made for OUR app (otherwise a token from any other site would work)
   if (info.aud !== clientId) {
     return res.status(401).json({ message: 'Google sign-in failed. Please try again.' });
   }
 
-  // 3. Google must have confirmed the email. Google sends "true" as TEXT, so compare as text.
   if (!info.email || String(info.email_verified) !== 'true') {
     return res.status(401).json({ message: 'This Google account’s email isn’t verified.' });
   }
 
-  // 4. Match the email to an account
   const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [info.email.toLowerCase()]);
   const user = rows[0];
   if (!user) return res.status(403).json({ message: GOOGLE_NOT_LINKED });
   if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
   if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
-  
-  const GOOGLE_NOT_LINKED =
-    'This Google account isn’t linked to an approved AGAPAY account. Sign in with your Employee ID, or ask the administrator to add this email to your account.';
-
-  // Same answer for both ways of signing in: AuthContext.login expects { token, user }
-  function sendSession(req, res, user) {
-    const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, user: fullUser(user, req) });
-  }
 
   sendSession(req, res, user);
 });
