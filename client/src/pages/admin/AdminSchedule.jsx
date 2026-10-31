@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarPlus, CalendarDays } from 'lucide-react';
 import api from '../../api';
@@ -35,6 +35,7 @@ export default function AdminSchedule() {
   const [who, setWho] = useState('');
   const [picked, setPicked] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const saving = useRef(new Set()); // people whose shift is being saved right now
   // The Dashboard's "Fill a month" opens it straight away
   const [filling, setFilling] = useState(() => !!location.state?.add);
 
@@ -65,6 +66,9 @@ export default function AdminSchedule() {
 
   // Saves one person's shift on one day (shift null = day off), then refreshes the roster
   const save = async (person, date, shift) => {
+    // One save per person at a time: a double-click on Assign / Day off is ignored
+    if (saving.current.has(person.id)) return;
+    saving.current.add(person.id);
     setBusyId(person.id);
     try {
       await api.put('/shifts', { userId: person.id, shiftDate: date, shift: shift?.apiValue ?? null });
@@ -77,6 +81,7 @@ export default function AdminSchedule() {
     } catch (err) {
       showToast(err.response ? err.response.data?.message || "Couldn't save. Please try again." : "Can't reach the server. Please try again.", 'error');
     } finally {
+      saving.current.delete(person.id);
       setBusyId(null);
     }
   };

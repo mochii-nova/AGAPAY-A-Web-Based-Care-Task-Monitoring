@@ -8,6 +8,7 @@ import useApiData from '../../hooks/useApiData';
 import { TASK_CATEGORIES, shiftTime } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
 import { addDays, dayLabel, dueFrom, timeOf, shiftOfDue, caregiversOnShift } from '../../utils/adminTasks';
+import useSaving from '../../hooks/useSaving';
 
 const MAX_REPEAT = 31;
 
@@ -40,7 +41,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const days = editing ? 1 : Math.min(Math.max(Number(form.repeat) || 1, 1), MAX_REPEAT);
   const due = form.date && form.time ? dueFrom(form.date, form.time) : null;
@@ -96,7 +97,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
       document.getElementById(`task-${first}`)?.focus();
       return;
     }
-    setSaving(true);
+    if (!startSaving()) return;
     setSaveError('');
     const fields = {
       task: form.task.trim(),

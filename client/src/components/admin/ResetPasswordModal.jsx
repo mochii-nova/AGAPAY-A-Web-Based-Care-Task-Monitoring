@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { CircleAlert, Copy, Check } from 'lucide-react';
 import Modal from '../Modal';
 import { useStaff } from '../../context/StaffContext';
+import useSaving from '../../hooks/useSaving';
 
 // "Forgot password": confirm, then show the temporary password once so the admin can pass it on
 function ResetPassword({ person, onClose }) {
   const { resetPassword } = useStaff();
   const [password, setPassword] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy, startBusy] = useSaving();
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const firstName = person.name.split(' ')[0];
 
   const reset = async () => {
-    setBusy(true);
+    if (!startBusy()) return;
     setError('');
     try {
       setPassword(await resetPassword(person.id));

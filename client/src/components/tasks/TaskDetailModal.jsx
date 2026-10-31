@@ -5,6 +5,7 @@ import StatusPill from '../StatusPill';
 import TaskCategoryIcon from '../TaskCategoryIcon';
 import { getCategory } from '../../constants';
 import { formatTime } from '../../utils/format';
+import useSaving from '../../hooks/useSaving';
 
 const CHOICES = [
   { value: 'completed', label: 'Completed', icon: CircleCheck },
@@ -25,7 +26,7 @@ function TaskForm({ task, onSave, onCancel }) {
   const [note, setNote] = useState(task.note ?? '');
   const [reasonError, setReasonError] = useState('');
   const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ function TaskForm({ task, onSave, onCancel }) {
       document.getElementById('task-reason')?.focus();
       return;
     }
-    setSaving(true);
+    if (!startSaving()) return;
     setError('');
     try {
       await onSave(task, { status, reason: reason.trim(), note: note.trim() });

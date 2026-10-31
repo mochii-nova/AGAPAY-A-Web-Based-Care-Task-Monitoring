@@ -3,6 +3,7 @@ import { CircleAlert, CircleCheck } from 'lucide-react';
 import api from '../../api';
 import FormField from '../FormField';
 import CardHeader from '../CardHeader';
+import useSaving from '../../hooks/useSaving';
 
 const EMPTY = { current: '', next: '', confirm: '' };
 
@@ -24,7 +25,7 @@ export default function ChangePasswordForm({ employeeId }) {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [result, setResult] = useState(null); // { tone, text }
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy, startBusy] = useSaving();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,7 +43,7 @@ export default function ChangePasswordForm({ employeeId }) {
       return;
     }
 
-    setBusy(true);
+    if (!startBusy()) return;
     try {
       await api.patch('/users/me/password', { currentPassword: form.current, newPassword: form.next });
       setResult({ tone: 'success', text: 'Your password was changed. Use the new one next time you sign in.' });

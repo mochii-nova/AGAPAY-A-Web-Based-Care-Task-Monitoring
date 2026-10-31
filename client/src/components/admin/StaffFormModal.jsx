@@ -6,6 +6,7 @@ import SelectField from '../SelectField';
 import { useStaff } from '../../context/StaffContext';
 import { useToast } from '../../context/ToastContext';
 import { SHIFTS } from '../../constants';
+import useSaving from '../../hooks/useSaving';
 
 const SHIFT_OPTIONS = [{ value: '', label: 'Not set' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: `${s.label} · ${s.start} – ${s.end}` }))];
 const ROLE_OPTIONS = [
@@ -56,7 +57,7 @@ function StaffForm({ person, isMe, onClose }) {
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -72,7 +73,7 @@ function StaffForm({ person, isMe, onClose }) {
       document.getElementById(`staff-${first}`)?.focus();
       return;
     }
-    setSaving(true);
+    if (!startSaving()) return;
     setSaveError('');
     const adminDetails = { assignedShift: form.assignedShift || null, dateHired: form.dateHired || null, title: form.title.trim() };
     try {

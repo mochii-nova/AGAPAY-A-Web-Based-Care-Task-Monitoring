@@ -3,6 +3,7 @@ import { CircleAlert, CircleCheck, Send } from 'lucide-react';
 import api from '../../api';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
+import useSaving from '../../hooks/useSaving';
 
 // `website` is a hidden trap: people never see it, simple spam bots fill it in
 const EMPTY = { name: '', email: '', subject: '', message: '', website: '' };
@@ -22,7 +23,7 @@ export default function ContactSection() {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sentTo, setSentTo] = useState(null);
-  const [sending, setSending] = useState(false);
+  const [sending, setSending, startSending] = useSaving();
   const [sendError, setSendError] = useState('');
 
   const handleChange = (e) => {
@@ -38,7 +39,7 @@ export default function ContactSection() {
       document.getElementById(`contact-${Object.keys(found)[0]}`)?.focus();
       return;
     }
-    setSending(true);
+    if (!startSending()) return;
     setSendError('');
     try {
       // The backend keeps name, email and message, so the subject goes on top of the message

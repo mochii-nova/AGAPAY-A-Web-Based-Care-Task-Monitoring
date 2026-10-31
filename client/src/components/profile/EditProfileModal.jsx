@@ -5,6 +5,7 @@ import Avatar from '../Avatar';
 import FormField from '../FormField';
 import { useProfile } from '../../context/ProfileContext';
 import { useToast } from '../../context/ToastContext';
+import useSaving from '../../hooks/useSaving';
 
 const RELATIONSHIPS = ['Spouse', 'Parent', 'Son', 'Daughter', 'Sibling', 'Relative', 'Friend', 'Other'];
 const PHONE = /^09\d{9}$/;
@@ -36,7 +37,7 @@ function EditProfileForm({ onClose }) {
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,7 +53,7 @@ function EditProfileForm({ onClose }) {
       document.getElementById(`profile-${first}`)?.focus();
       return;
     }
-    setSaving(true);
+    if (!startSaving()) return;
     setSaveError('');
     try {
       await updateProfile({

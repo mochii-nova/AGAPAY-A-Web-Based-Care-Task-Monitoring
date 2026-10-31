@@ -9,6 +9,7 @@ import Modal from '../components/Modal';
 import { homeFor } from '../utils/roles';
 // Web-sized copy of the original register-photo.jpg (kept in design-reference/)
 import registerPhoto from '../assets/images/register-photo.webp';
+import useSaving from '../hooks/useSaving';
 
 const EMPTY = {
   firstName: '',
@@ -48,7 +49,7 @@ export default function Register() {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading, startLoading] = useSaving();
   const [termsOpen, setTermsOpen] = useState(false);
 
   if (user) return <Navigate to={homeFor(user)} replace />;
@@ -72,7 +73,7 @@ export default function Register() {
 
     // The backend's login name is the Employee ID. New accounts wait for an administrator to approve them.
     const username = form.employeeId.trim().toUpperCase();
-    setLoading(true);
+    if (!startLoading()) return;
     try {
       const { data } = await api.post('/auth/register', {
         firstName: form.firstName.trim(),

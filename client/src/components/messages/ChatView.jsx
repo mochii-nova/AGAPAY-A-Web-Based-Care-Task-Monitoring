@@ -6,6 +6,7 @@ import { LoadingState, ErrorState } from '../StateMessage';
 import { useMessages, MAX_MESSAGE } from '../../context/MessagesContext';
 import useApiData from '../../hooks/useApiData';
 import { formatTime, jobTitle } from '../../utils/format';
+import useSaving from '../../hooks/useSaving';
 
 const REFRESH = 15 * 1000; // replies show up while the chat is open
 
@@ -33,7 +34,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
   const messages = query.data ?? [];
   const [draft, setDraft] = useState(initialDraft);
   const [error, setError] = useState('');
-  const [sending, setSending] = useState(false);
+  const [sending, setSending, startSending] = useSaving();
   const listRef = useRef(null);
   const boxRef = useRef(null);
 
@@ -68,8 +69,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
     e.preventDefault();
     const text = draft.trim();
     if (!text) return setError('Type a message first.');
-    if (sending) return undefined;
-    setSending(true);
+    if (!startSending()) return undefined;
     setError('');
     try {
       const saved = await send(user.id, text);

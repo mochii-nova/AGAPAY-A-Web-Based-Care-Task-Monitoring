@@ -1,14 +1,14 @@
-import { useState } from 'react';
 import { CheckCheck, Inbox } from 'lucide-react';
 import CardHeader from '../CardHeader';
 import { EmptyState } from '../StateMessage';
 import { shiftLabel } from '../../constants';
 import { formatTime } from '../../utils/format';
 import { RESIDENT_STATUS, submittedLine } from '../../utils/handover';
+import useSaving from '../../hooks/useSaving';
 
 // The newest handover from someone else, with "Mark as read" to confirm you've seen it
 export default function LastShiftCard({ handover, myId, onAcknowledge }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy, startBusy] = useSaving();
 
   if (!handover) {
     return (
@@ -25,7 +25,7 @@ export default function LastShiftCard({ handover, myId, onAcknowledge }) {
   const myRead = handover.reads?.find((r) => r.userId === myId);
 
   const markRead = async () => {
-    setBusy(true);
+    if (!startBusy()) return;
     try {
       await onAcknowledge(handover);
     } finally {

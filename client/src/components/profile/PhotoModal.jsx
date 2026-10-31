@@ -5,6 +5,7 @@ import Avatar from '../Avatar';
 import { useProfile } from '../../context/ProfileContext';
 import { useToast } from '../../context/ToastContext';
 import { squarePhoto } from '../../utils/image';
+import useSaving from '../../hooks/useSaving';
 
 const MAX_MB = 5;
 
@@ -15,7 +16,7 @@ function PhotoForm({ onClose }) {
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -35,7 +36,7 @@ function PhotoForm({ onClose }) {
   };
 
   const save = async (photo, message) => {
-    setSaving(true);
+    if (!startSaving()) return;
     setError('');
     try {
       await updatePhoto(photo);

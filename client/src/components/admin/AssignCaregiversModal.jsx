@@ -3,6 +3,7 @@ import { CircleAlert } from 'lucide-react';
 import Modal from '../Modal';
 import Avatar from '../Avatar';
 import { SHIFTS } from '../../constants';
+import useSaving from '../../hooks/useSaving';
 
 // The caregivers to choose from, grouped by their assigned shift ("Shift not set" last)
 function groupByShift(caregivers) {
@@ -13,7 +14,7 @@ function groupByShift(caregivers) {
 
 function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
   const [chosen, setChosen] = useState(() => resident.caregivers.map((c) => c.id));
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
   const [error, setError] = useState('');
 
   // Active caregivers, plus anyone already assigned (so a deactivated one can be taken off)
@@ -22,7 +23,7 @@ function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
+    if (!startSaving()) return;
     setError('');
     try {
       await onSave(chosen);

@@ -5,6 +5,7 @@ import FormField from '../FormField';
 import SelectField from '../SelectField';
 import { TASK_CATEGORIES } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
+import useSaving from '../../hooks/useSaving';
 
 const GENDER_OPTIONS = [
   { value: '', label: 'Not set' },
@@ -49,7 +50,7 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -68,7 +69,7 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
       document.getElementById(`resident-${first}`)?.focus();
       return;
     }
-    setSaving(true);
+    if (!startSaving()) return;
     setSaveError('');
     try {
       await onSave({

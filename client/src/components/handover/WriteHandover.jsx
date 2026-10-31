@@ -8,6 +8,7 @@ import StatusPill from '../StatusPill';
 import Avatar from '../Avatar';
 import Modal from '../Modal';
 import { EmptyState } from '../StateMessage';
+import useSaving from '../../hooks/useSaving';
 
 const QUICK_TAGS = ['Supplies', 'Family / Visitor', 'Room / Equipment'];
 const EMPTY = { passOn: {}, residents: {}, other: '' };
@@ -39,7 +40,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
   const [checked, setChecked] = useState(false);
   const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [sending, setSending, startSending] = useSaving();
   const [sendError, setSendError] = useState('');
 
   const completed = shiftTasks.filter((t) => t.status === 'completed');
@@ -139,7 +140,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
   };
 
   const sendHandover = async () => {
-    setSending(true);
+    if (!startSending()) return;
     submitted.current = true; // stops any autosave from starting a new draft
     try {
       await submit(payload({ final: true }));
@@ -381,7 +382,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
               {draftState.status === 'error' && "Couldn't save the draft"}
             </p>
             <button type="button" className="btn btn--outline" onClick={handleSaveDraft} disabled={draftState.status === 'saving'}>
-              Save draft
+              {draftState.status === 'saving' ? 'Saving…' : 'Save draft'}
             </button>
             <button type="submit" className="btn btn--primary">Submit handover</button>
           </div>

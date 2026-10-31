@@ -8,6 +8,7 @@ import { SHIFTS, shiftTime } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
 import { WEEKDAYS, addMonths, monthTitle } from '../../utils/calendar';
 import { dayToDate } from '../../utils/adminTasks';
+import useSaving from '../../hooks/useSaving';
 
 const FULL_WEEKDAYS = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
 
@@ -29,7 +30,7 @@ function FillForm({ caregivers, startMonth, onDone, onClose }) {
   });
   const [offDays, setOffDays] = useState([]);
   const [clearOff, setClearOff] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving, startSaving] = useSaving();
   const [error, setError] = useState('');
 
   const person = active.find((c) => String(c.id) === form.userId);
@@ -61,7 +62,7 @@ function FillForm({ caregivers, startMonth, onDone, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!person || workDays.length === 0) return;
-    setSaving(true);
+    if (!startSaving()) return;
     setError('');
     try {
       await api.post('/shifts/bulk', { userId: person.id, from, to, shift: form.shift, skipWeekdays: offDays });

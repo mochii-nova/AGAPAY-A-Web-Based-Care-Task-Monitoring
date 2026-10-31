@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Inbox, Mail, Check } from 'lucide-react';
 import api from '../../api';
 import { useToast } from '../../context/ToastContext';
@@ -31,11 +31,15 @@ export default function ContactMessages() {
   const showToast = useToast();
   const [tab, setTab] = useState('new');
   const [busyId, setBusyId] = useState(null);
+  const saving = useRef(new Set()); // messages being marked right now
 
   const counts = Object.fromEntries(TABS.map((t) => [t.id, messages.filter(t.match).length]));
   const shown = messages.filter(TABS.find((t) => t.id === tab).match);
 
   const markHandled = async (m) => {
+    // A double-click is ignored while this message is being saved
+    if (saving.current.has(m.id)) return;
+    saving.current.add(m.id);
     setBusyId(m.id);
     try {
       await api.patch(`/contact/${m.id}/handled`);
@@ -44,6 +48,7 @@ export default function ContactMessages() {
     } catch (err) {
       showToast(err.response ? err.response.data?.message || "Couldn't save. Please try again." : "Can't reach the server. Please try again.", 'error');
     } finally {
+      saving.current.delete(m.id);
       setBusyId(null);
     }
   };
