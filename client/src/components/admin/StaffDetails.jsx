@@ -2,6 +2,7 @@ import { UserCheck } from 'lucide-react';
 import Avatar from '../Avatar';
 import { SHIFTS, shiftTime } from '../../constants';
 import { shortDate, longDate, roleLabel, STATUS_LABEL } from '../../utils/staff';
+import { jobTitle } from '../../utils/format';
 
 const TODAY_TONES = [
   ['completed', 'completed'],
@@ -49,7 +50,7 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, onEd
         <div><dt>Phone</dt><dd>{person.phone || notSet}</dd></div>
         <div><dt>Email</dt><dd className="staff-details__email">{person.email || notSet}</dd></div>
         <div><dt>Date hired</dt><dd>{person.dateHired ? longDate(person.dateHired) : notSet}</dd></div>
-        <div><dt>Job title</dt><dd>{person.title || notSet}</dd></div>
+        <div><dt>Job title</dt><dd>{jobTitle(person.title) || notSet}</dd></div>
         <div>
           <dt>Emergency contact</dt>
           <dd>

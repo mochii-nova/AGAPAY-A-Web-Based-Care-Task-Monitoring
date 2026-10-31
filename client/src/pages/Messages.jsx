@@ -15,8 +15,15 @@ import '../styles/messages.css';
 // "Search people" at the top of the list finds conversations and anyone you may start a chat with
 // (administrators: all active staff; caregivers: the administrators).
 export default function Messages() {
-  const { myId, conversations: talkedTo, markRead, status, error, reload } = useMessages();
+  const { myId, conversations: fromServer, markRead, status, error, reload } = useMessages();
   const staff = useStaff(); // only for administrators
+
+  // Profile photos: the conversation list from the server has no photos yet, so administrators get them
+  // from the staff list they already load. (Caregivers see initials until the server adds `photoUrl`.)
+  const photoOf = new Map((staff?.staff ?? []).map((u) => [u.id, u.photoUrl]));
+  const talkedTo = fromServer.map((c) =>
+    c.user.photoUrl || !photoOf.get(c.user.id) ? c : { ...c, user: { ...c.user, photoUrl: photoOf.get(c.user.id) } }
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const narrow = useMediaQuery('(max-width: 900px)');

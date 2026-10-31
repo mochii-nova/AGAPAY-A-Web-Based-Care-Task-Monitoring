@@ -12,6 +12,7 @@ import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS } from '../../constants';
 import { shiftOnDate } from '../../utils/shift';
 import { shortDate, roleLabel, STATUS_LABEL } from '../../utils/staff';
+import { jobTitle } from '../../utils/format';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
 import Modal from '../../components/Modal';
@@ -216,7 +217,7 @@ export default function ManageStaff() {
                             <Avatar name={u.name} photo={u.photoUrl} size={34} />
                             <span>
                               <strong>{u.name}</strong>
-                              <small>{u.status === 'pending' ? `Signed up ${shortDate(u.createdAt)}` : u.title || roleLabel(u)}</small>
+                              <small>{u.status === 'pending' ? `Signed up ${shortDate(u.createdAt)}` : jobTitle(u.title) || roleLabel(u)}</small>
                             </span>
                           </div>
                         </td>

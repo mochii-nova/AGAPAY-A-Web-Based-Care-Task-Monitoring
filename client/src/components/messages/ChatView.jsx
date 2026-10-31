@@ -5,7 +5,7 @@ import EmojiPicker from './EmojiPicker';
 import { LoadingState, ErrorState } from '../StateMessage';
 import { useMessages, MAX_MESSAGE } from '../../context/MessagesContext';
 import useApiData from '../../hooks/useApiData';
-import { formatTime } from '../../utils/format';
+import { formatTime, jobTitle } from '../../utils/format';
 
 const REFRESH = 15 * 1000; // replies show up while the chat is open
 
@@ -96,7 +96,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
   const lastMine = messages.findLast((m) => m.senderId === myId);
   // "Caregiver · Night lead" (the job title is left out when it just repeats the role)
   const role = user.role === 'admin' ? 'Administrator' : 'Caregiver';
-  const who = [role, user.title?.toLowerCase() === role.toLowerCase() ? null : user.title].filter(Boolean).join(' · ');
+  const who = [role, user.title?.toLowerCase() === role.toLowerCase() ? null : jobTitle(user.title)].filter(Boolean).join(' · ');
 
   return (
     <section className="chat-pane" aria-label={`Conversation with ${user.name}`}>
@@ -106,7 +106,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
             <ChevronLeft size={20} />
           </button>
         )}
-        <Avatar name={user.name} size={40} />
+        <Avatar name={user.name} photo={user.photoUrl} size={40} />
         <div className="chat-pane__who">
           <h2>{user.name}</h2>
           <small>{who}</small>

@@ -54,7 +54,7 @@ export default function SlotPanel({ slot, entries, caregivers, taskCount, busyId
           <ul className="slot-panel__list">
             {onIt.map((e) => (
               <li key={e.userId}>
-                <Avatar name={e.userName} size={34} />
+                <Avatar name={e.userName} photo={caregivers.find((c) => c.id === e.userId)?.photoUrl} size={34} />
                 <span className="assign__who"><strong>{e.userName}</strong></span>
                 <button
                   type="button"

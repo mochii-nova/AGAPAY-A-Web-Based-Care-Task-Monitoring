@@ -45,7 +45,7 @@ export default function ConversationList({ title = 'Administrators', conversatio
                     aria-current={user.id === selectedId ? 'true' : undefined}
                     onClick={() => onSelect(user.id)}
                   >
-                    <Avatar name={user.name} size={40} />
+                    <Avatar name={user.name} photo={user.photoUrl} size={40} />
                     <span className="convo__main">
                       <span className="convo__line">
                         <strong className="convo__name">{user.name}</strong>
@@ -72,7 +72,7 @@ export default function ConversationList({ title = 'Administrators', conversatio
             {newPeople.map((u) => (
               <li key={u.id}>
                 <button type="button" className="convo convo--person" onClick={() => onSelect(u.id)}>
-                  <Avatar name={u.name} size={36} />
+                  <Avatar name={u.name} photo={u.photoUrl} size={36} />
                   <span className="convo__main">
                     <strong className="convo__name">{u.name}</strong>
                     <small className="convo__preview">{u.role === 'admin' ? 'Administrator' : 'Caregiver'}</small>

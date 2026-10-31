@@ -27,6 +27,21 @@ export function telHref(phone = '') {
   return `tel:${digits.startsWith('0') ? `+63${digits.slice(1)}` : digits}`;
 }
 
+// Job titles on screen in sentence case: "Head of Care" -> "Head of care", "relief CAREGIVER" -> "Relief caregiver".
+// Abbreviations of 2–3 capital letters such as "RN" or "CNA" stay as they are. Only the display changes, never the saved title.
+export function jobTitle(title) {
+  if (!title) return title;
+  return title
+    .trim()
+    .split(/\s+/)
+    .map((word, i) => {
+      if (/^[A-Z]{2,3}$/.test(word)) return word;
+      const lower = word.toLowerCase();
+      return i === 0 ? lower.charAt(0).toUpperCase() + lower.slice(1) : lower;
+    })
+    .join(' ');
+}
+
 // "Claire River" -> "CR"
 export function initials(name = '') {
   return name
