@@ -20,7 +20,7 @@ const CAREGIVER_GROUPS = [
   {
     title: 'Today',
     items: [
-      { to: '/dashboard', label: 'Home', icon: House },
+      { to: '/dashboard', label: 'Dashboard', icon: House },
       { to: '/tasks', label: 'My Tasks', icon: ClipboardList },
       { to: '/schedule', label: 'My Schedule', icon: CalendarDays },
     ],

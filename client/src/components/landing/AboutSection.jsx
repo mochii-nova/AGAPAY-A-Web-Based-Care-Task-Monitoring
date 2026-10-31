@@ -17,7 +17,7 @@ export default function AboutSection() {
 
         <div className="about__text">
           <p className="eyebrow">About AGAPAY</p>
-          <h2 className="section-title">Care is better when it&apos;s shared.</h2>
+          <h2 className="section-title">Care is better when it&apos;s <span className="accent">shared.</span></h2>
           <p className="about__body">
             <strong>Agapay</strong> means to walk alongside someone. Our app helps caregivers organize the day, record each
             task, and pass on what matters, so no resident&apos;s care falls through the cracks between shifts.

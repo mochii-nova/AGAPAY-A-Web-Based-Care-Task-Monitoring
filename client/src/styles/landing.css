@@ -6,8 +6,8 @@
    because the photo under them does too.
    ===================================================================== */
 .site {
-  --site-on-photo-soft: #f2b49b;/* warm apricot "one shift at a time." over the darkened photo */
-  --site-overlay: rgba(20, 16, 26, 0.55);  /* neutral deep ink, so the photo keeps its own colours */
+  --site-on-photo-soft: var(--accent-on-dark);  /* warm apricot "one shift at a time." over the darkened photo */
+  --site-overlay: var(--photo-overlay);         /* neutral deep ink, so the photo keeps its own colours */
   --site-on-photo-line: rgba(255, 255, 255, 0.3);  /* thin lines between the hero facts */
   --site-plum: #67479a;         /* buttons on the photo */
   --site-plum-hover: #563a84;
@@ -22,13 +22,13 @@
    floating header: 16px gap + 64px bar + 24px breathing room. */
 html:has(.site) { scroll-padding-top: 104px; }
 
-/* Plum words in headings */
-.accent { color: var(--indigo); }
+/* The one warm (terracotta) phrase in a section title, e.g. "Better care, shared together." */
+.accent { color: var(--accent-text); }
 
-/* Small uppercase label above a heading, e.g. "HOW IT WORKS" (written in sentence case in the code) */
+/* Small uppercase label above a heading, e.g. "HOW IT WORKS" (written in sentence case in the code), in terracotta */
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--indigo);
+  color: var(--accent-text);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -84,7 +84,19 @@ html:has(.site) { scroll-padding-top: 104px; }
 }
 .site-nav__link:hover { background: var(--tint); color: var(--text); }
 /* The section you're looking at */
-.site-nav__link.is-active { background: var(--indigo-soft); color: var(--indigo); }
+.site-nav__link.is-active { position: relative; background: var(--indigo-soft); color: var(--indigo); }
+/* ...with a short apricot underline */
+.site-nav__link.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: translateX(-50%);
+}
 
 /* Header buttons. "Sign in" is always solid plum; "Create account" is a plum outline (white over the photo).
    Both fill plum with white text on hover. */
@@ -161,7 +173,7 @@ html:has(.site) { scroll-padding-top: 104px; }
 .section.how { padding: 112px 0 128px; }
 .how__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin: 48px 0 0; padding: 0; list-style: none; }
 .how__step { padding-top: 26px; border-top: 2px solid var(--text); }
-.how__label { margin: 0 0 8px; color: var(--indigo); font-size: 0.93rem; font-weight: 600; }
+.how__label { margin: 0 0 8px; color: var(--accent-text); font-size: 0.93rem; font-weight: 600; }
 .how__step h3 { margin: 0 0 8px; font-size: calc(18rem / 15); font-weight: 600; }
 .how__step p:last-child { margin: 0; color: var(--muted); line-height: 1.6; }
 
@@ -248,7 +260,7 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site-footer__list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; font-style: normal; list-style: none; }
 /* Footer links: 44px tall tap areas that overlap a little, so they still look like a tight list */
 .site-footer__link { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -11px; color: var(--muted); text-decoration: none; }
-.site-footer__link:hover { color: var(--text); text-decoration: underline; }
+.site-footer__link:hover { color: var(--indigo); text-decoration: underline; }
 .site-footer__bottom {
   display: flex;
   flex-wrap: wrap;

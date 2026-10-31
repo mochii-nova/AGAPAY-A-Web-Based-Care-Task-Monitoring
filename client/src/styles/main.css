@@ -25,6 +25,14 @@
   --apricot-soft: #fdf1ea;      /* warm background */
   --apricot-line: #f6dccf;
 
+  /* The 10% warm accent (theme rule: 60% cream/white, 30% plum/lilac, 10% apricot) */
+  --accent: #e08c6a;            /* shapes only: dots, underlines, small bars, badges (never text on light backgrounds) */
+  --on-accent: #2a2233;         /* dark text on --accent badges */
+  --accent-text: #a9502f;       /* terracotta: small accent text on cream/white (5.1:1 on cream) */
+  --accent-on-dark: #f2b49b;    /* accent text on dark backgrounds: photos, the sidebar */
+  --accent-tint: #fcede5;       /* info/reminder boxes and the Morning shift chip */
+  --on-accent-tint: #8a3f22;    /* text on --accent-tint */
+
   /* Warm surfaces, lightest to strongest */
   --bg: #fbf8f3;                /* cream: page background */
   --card: #ffffff;
@@ -73,9 +81,9 @@
   --overlay: rgba(36, 26, 48, 0.4);
 
   /* Text over a darkened photo (Sign in and Register panels). The same in dark mode. */
-  --photo-overlay: rgba(36, 26, 48, 0.58);
+  --photo-overlay: rgba(20, 16, 26, 0.55);  /* neutral deep ink, the same as the landing hero */
   --on-photo: #ffffff;
-  --on-photo-soft: #dccff5;     /* the second, lilac line of the welcome text */
+  --on-photo-soft: var(--accent-on-dark);  /* the second, apricot line of the welcome text */
 
   /* Shape and depth (soft plum shadows only; no glows, no coloured shadows) */
   --radius: 14px;               /* cards */
@@ -120,6 +128,13 @@
   --apricot-text: #f3b89f;
   --apricot-soft: #2c2129;
   --apricot-line: #47363e;
+
+  --accent: #f0a98a;
+  --on-accent: #2a2233;
+  --accent-text: #f2b49b;       /* in dark mode all accent text is the light apricot */
+  --accent-on-dark: #f2b49b;
+  --accent-tint: #33241f;
+  --on-accent-tint: #f2b49b;
 
   --bg: #15111b;
   --card: #1f1928;
@@ -1047,9 +1062,10 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   flex-direction: column;
   width: var(--sidebar-w);
   height: 100vh;
-  padding: 18px 12px;
+  padding: 10px 12px;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: auto;             /* only on very short screens (see .sidebar__nav) */
+  scrollbar-width: none;        /* scrollbars stay hidden until the pointer is over the menu */
   background: var(--navy);
   color: var(--on-navy);
   transition: width 0.2s var(--ease);
@@ -1061,14 +1077,14 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sidebar__close { display: none; color: var(--on-navy); }
 
 /* Profile card: photo + name + role · shift; the whole card opens the profile menu */
-.sidebar__menu { position: relative; margin: 18px 0 6px; }
+.sidebar__menu { position: relative; margin: 8px 0 6px; }
 .sidebar__profile {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 64px;
-  padding: 12px;
+  min-height: 52px;
+  padding: 6px 12px;
   border: 0;
   border-radius: var(--radius);
   background: var(--on-navy-hover);
@@ -1084,13 +1100,20 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sidebar__who strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar__who small { overflow: hidden; color: var(--on-navy-muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
 
-.sidebar__nav { flex: 1; }
-.sidebar__group { margin-bottom: 6px; }
+/* Tight spacing so the admin menu (12 links) fits a 768px-tall window. Messages, Notifications and Sign out
+   are pinned at the bottom: if the window is shorter, only this middle part scrolls (scrollbar shown on hover).
+   Below about 230px for the middle, the whole sidebar scrolls instead. */
+.sidebar__nav { flex: 1; min-height: 132px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.sidebar:hover,
+.sidebar__nav:hover,
+.sidebar__nav:focus-within { scrollbar-width: thin; scrollbar-color: var(--on-navy-line) transparent; }
+.sidebar__group { margin-bottom: 0; }
 .sidebar__group-title {
-  margin: 16px 12px 6px;
+  margin: 8px 12px 3px;
   color: var(--on-navy-muted);
   font-size: 0.72rem;
   font-weight: var(--fw-medium);
+  line-height: 14px;
   letter-spacing: 1px;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1103,7 +1126,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   width: 100%;
   min-height: var(--tap);
   padding: 0 12px;
-  margin-bottom: 2px;
+  margin-bottom: 0;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -1118,7 +1141,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 /* The page you are on: lilac with dark plum text (dark mode: a lighter plum with light text) */
 .sidebar__link.active { background: var(--sidebar-active); color: var(--on-sidebar-active); font-weight: var(--fw-medium); }
 .sidebar__link.active svg { opacity: 1; }
-.sidebar__bottom { padding-top: 10px; border-top: 1px solid var(--on-navy-line); }
+.sidebar__bottom { flex-shrink: 0; padding-top: 4px; border-top: 1px solid var(--on-navy-line); }
 
 /* Collapsed icon rail (laptops only; the phone drawer always shows the full menu) */
 @media (min-width: 901px) {
@@ -1131,6 +1154,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   .sidebar.is-rail .sidebar__who,
   .sidebar.is-rail .sidebar__group-title { display: none; }
   .sidebar.is-rail .sidebar__group { margin: 0 0 14px; }
+  .sidebar.is-rail .sidebar__nav { overflow: visible; }  /* the tooltips stick out to the right */
   .sidebar.is-rail .sidebar__link { justify-content: center; padding: 0; }
 
   /* The label becomes a tooltip next to the icon (on hover and keyboard focus).

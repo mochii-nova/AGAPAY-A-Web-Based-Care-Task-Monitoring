@@ -74,7 +74,7 @@ export default function FeaturesSection() {
       <div className="container">
         <header className="section-head section-head--center">
           <p className="eyebrow">Features</p>
-          <h2 className="section-title">Better care, shared together.</h2>
+          <h2 className="section-title">Better care, <span className="accent">shared together.</span></h2>
           <p className="section-sub">Everything a caregiver needs for the shift, in one calm place.</p>
         </header>
 
