@@ -376,9 +376,6 @@
   .reports .stat-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* Messages (admins): "New message to…" */
-.messages__new { width: 240px; }
-
 /* Print (Handover "Print"): only the handover details, on white */
 @media print {
   body:has(.handover-print) .sidebar,
@@ -444,7 +441,6 @@
   .report-table th[scope='row'] { white-space: normal; }
   .admin-handover__filters,
   .admin-handover__filters .select,
-  .messages__new { width: 100%; }
   .contact-item { padding: 14px; }
   .contact-item__actions .btn { flex: 1; }
   .admin-schedule__toolbar .date-nav { width: 100%; }

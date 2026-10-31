@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ChevronLeft, MessageSquare, Send, CircleAlert } from 'lucide-react';
 import Avatar from '../Avatar';
+import EmojiPicker from './EmojiPicker';
 import { LoadingState, ErrorState } from '../StateMessage';
 import { useMessages, MAX_MESSAGE } from '../../context/MessagesContext';
 import useApiData from '../../hooks/useApiData';
@@ -17,6 +18,12 @@ function dayLabel(iso) {
   return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+// Messages from the same person, on the same day and less than 10 minutes apart, form one group
+const GROUP_GAP = 10 * 60 * 1000;
+const sameGroup = (a, b) =>
+  a && b && a.senderId === b.senderId && dayLabel(a.createdAt) === dayLabel(b.createdAt)
+  && Math.abs(new Date(b.createdAt) - new Date(a.createdAt)) < GROUP_GAP;
+
 // Right column: the messages with one person, and the box to write a new one.
 // `initialDraft` fills in the box (e.g. a handover reminder); onSent() runs after a message is sent.
 export default function ChatView({ conversation, initialDraft = '', onSent, onBack }) {
@@ -28,6 +35,21 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef(null);
+  const boxRef = useRef(null);
+
+  // Put an emoji where the cursor is (or over the selected text), then keep typing after it
+  const insertEmoji = (emoji) => {
+    const box = boxRef.current;
+    const start = box?.selectionStart ?? draft.length;
+    const end = box?.selectionEnd ?? draft.length;
+    const next = (draft.slice(0, start) + emoji + draft.slice(end)).slice(0, MAX_MESSAGE);
+    setDraft(next);
+    setError('');
+    requestAnimationFrame(() => {
+      box?.focus();
+      box?.setSelectionRange(start + emoji.length, start + emoji.length);
+    });
+  };
 
   // Always show the newest message
   useEffect(() => {
@@ -105,18 +127,23 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
           messages.map((m, i) => {
             const mine = m.senderId === myId;
             const newDay = i === 0 || dayLabel(m.createdAt) !== dayLabel(messages[i - 1].createdAt);
+            const first = !sameGroup(messages[i - 1], m);
+            const last = !sameGroup(m, messages[i + 1]);
             return (
-              <div key={m.id} className="chat-item">
+              <div key={m.id} className={`chat-item ${first ? 'is-group-start' : ''}`}>
                 {newDay && <p className="chat-day"><span>{dayLabel(m.createdAt)}</span></p>}
-                <div className={`bubble-row ${mine ? 'bubble-row--mine' : ''}`}>
+                <div className={`bubble-row ${mine ? 'bubble-row--mine' : ''} ${first ? 'is-first' : ''} ${last ? 'is-last' : ''}`}>
                   <div className="bubble">
-                    <span className="sr-only">{mine ? 'You' : user.name}: </span>
+                    <span className="sr-only">{mine ? 'You' : user.name}, {formatTime(m.createdAt)}: </span>
                     <p>{m.body}</p>
                   </div>
-                  <small className="bubble__meta">
-                    <time dateTime={m.createdAt}>{formatTime(m.createdAt)}</time>
-                    {m === lastMine && <> · {m.readAt ? 'Seen' : 'Sent'}</>}
-                  </small>
+                  {/* The time once per group, under its last message; "Seen" under my last message */}
+                  {last && (
+                    <small className="bubble__meta" aria-hidden={m === lastMine ? undefined : 'true'}>
+                      <time dateTime={m.createdAt}>{formatTime(m.createdAt)}</time>
+                      {m === lastMine && <> · {m.readAt ? 'Seen' : 'Sent'}</>}
+                    </small>
+                  )}
                 </div>
               </div>
             );
@@ -127,7 +154,9 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
       <form className="composer" onSubmit={submit} noValidate>
         <label htmlFor="message-box" className="sr-only">Message to {user.name}</label>
         <div className="composer__row">
+          <EmojiPicker onPick={insertEmoji} />
           <textarea
+            ref={boxRef}
             id="message-box"
             className="field__input composer__input"
             rows={1}
