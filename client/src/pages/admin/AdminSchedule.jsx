@@ -10,6 +10,7 @@ import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS } from '../../constants';
 import { weekDays, monthGrid, addMonths, monthTitle, weekTitle, addDays as addDaysTo } from '../../utils/calendar';
 import { addDays, dayLabel, dayToDate, shiftOfDue } from '../../utils/adminTasks';
+import { activeCaregivers } from '../../utils/staff';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../../components/Modal';
 import RosterWeek from '../../components/admin/RosterWeek';
@@ -54,7 +55,7 @@ export default function AdminSchedule() {
   const tasksQuery = useApiData(`/tasks?from=${from}&to=${addDays(to, 1)}`);
   const entries = rosterQuery.data ?? [];
   const tasks = tasksQuery.data ?? [];
-  const caregivers = staff.filter((u) => u.role === 'caregiver');
+  const caregivers = activeCaregivers(staff);
 
   const peopleOn = (ymd, shift) =>
     entries.filter((e) => e.shiftDate === ymd && e.shift === shift.apiValue && (!who || String(e.userId) === who));

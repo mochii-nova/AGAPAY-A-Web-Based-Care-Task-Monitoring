@@ -11,6 +11,7 @@ import useMediaQuery from '../../hooks/useMediaQuery';
 import { isoDay } from '../../hooks/useShifts';
 import { TASK_CATEGORIES } from '../../constants';
 import { RESIDENT_STATUS, latestUpdate } from '../../utils/handover';
+import { activeCaregivers } from '../../utils/staff';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
 import Modal from '../../components/Modal';
@@ -54,7 +55,7 @@ export default function ManageResidents() {
   const [deleteError, setDeleteError] = useState('');
 
   const tasks = tasksQuery.data ?? [];
-  const caregivers = staff.filter((u) => u.role === 'caregiver');
+  const caregivers = activeCaregivers(staff);
   const latestOf = (r) => latestUpdate(handovers, r);
   const isFlagged = (r) => ['watch', 'urgent'].includes(latestOf(r)?.update.status);
 
@@ -268,7 +269,7 @@ export default function ManageResidents() {
       />
       <ConfirmModal
         open={!!deleteFor}
-        title="Delete this resident?"
+        title={deleteFor ? `Delete ${deleteFor.name}?` : 'Delete this resident?'}
         confirmLabel="Delete resident"
         danger
         busy={deleting}

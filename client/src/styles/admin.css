@@ -155,6 +155,12 @@
 
 /* Edit + Add task, top right of the resident details */
 .resident-details__top-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+/* Phones: Edit and Add task go under the name, so the ID and room keep one line */
+@media (max-width: 600px) {
+  .resident-details .staff-details__identity { flex-wrap: wrap; }
+  .resident-details__top-actions { width: 100%; }
+  .resident-details__top-actions .btn { flex: 1; }
+}
 
 /* Tasks & Care: day picker next to the tabs, filters underneath */
 .day-picker { display: flex; flex-shrink: 0; align-items: center; gap: 6px; }

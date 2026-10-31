@@ -17,7 +17,7 @@ const orNotSet = (value) => value || <span className="profile-unset">{NOT_SET}</
 
 export default function Profile() {
   const { profile, openPhoto, openEditProfile } = useProfile();
-  const shift = SHIFTS.find((s) => s.apiValue === profile.shift) ?? null;
+  const shift = (profile.role !== 'admin' && SHIFTS.find((s) => s.apiValue === profile.shift)) || null;
   const roleLabel = profile.role === 'admin' ? 'Administrator' : 'Caregiver';
   const contact = profile.emergencyContact;
 
@@ -46,7 +46,8 @@ export default function Profile() {
             <p className="small-label">Set by the administrator</p>
             <dl className="info-list">
               <div><dt>Employee ID</dt><dd>{profile.employeeId}</dd></div>
-              <div><dt>Shift</dt><dd>{shift ? shiftTime(shift) : orNotSet(null)}</dd></div>
+              {/* Administrators don't work shifts */}
+              {profile.role !== 'admin' && <div><dt>Shift</dt><dd>{shift ? shiftTime(shift) : orNotSet(null)}</dd></div>}
               <div><dt>Date hired</dt><dd>{profile.dateHired ? longDate(profile.dateHired) : orNotSet(null)}</dd></div>
               <div>
                 <dt>Status</dt>

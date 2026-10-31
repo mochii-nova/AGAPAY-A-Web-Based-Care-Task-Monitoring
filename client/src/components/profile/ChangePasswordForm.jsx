@@ -77,10 +77,11 @@ export default function ChangePasswordForm({ employeeId }) {
           <span>{result.text}</span>
         </div>
       )}
-      <form onSubmit={handleSubmit} noValidate className="password-form">
-        {/* Hidden, so password managers know which account this password belongs to */}
+      {/* autoComplete off: the browser shouldn't fill in the saved password by itself */}
+      <form onSubmit={handleSubmit} noValidate className="password-form" autoComplete="off">
+        {/* Hidden, so password managers know which account a new password belongs to */}
         <input type="text" name="username" autoComplete="username" value={employeeId} readOnly hidden />
-        {field('current', 'Current password', { autoComplete: 'current-password', placeholder: 'Your current password' })}
+        {field('current', 'Current password', { autoComplete: 'off', placeholder: 'Your current password' })}
         <div className="form-grid">
           {field('next', 'New password', {
             autoComplete: 'new-password',

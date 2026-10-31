@@ -13,12 +13,14 @@ function groupByShift(caregivers) {
 }
 
 function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
-  const [chosen, setChosen] = useState(() => resident.caregivers.map((c) => c.id));
+  // Only active caregivers can be chosen. Anyone still linked whose account is no longer active
+  // is left unticked, so saving takes them off.
+  const isActive = (id) => caregivers.some((c) => c.id === id);
+  const [chosen, setChosen] = useState(() => resident.caregivers.map((c) => c.id).filter(isActive));
   const [saving, setSaving, startSaving] = useSaving();
   const [error, setError] = useState('');
 
-  // Active caregivers, plus anyone already assigned (so a deactivated one can be taken off)
-  const options = caregivers.filter((c) => c.status === 'active' || chosen.includes(c.id));
+  const dropped = resident.caregivers.filter((c) => !isActive(c.id));
   const toggle = (id) => setChosen(chosen.includes(id) ? chosen.filter((x) => x !== id) : [...chosen, id]);
 
   const handleSubmit = async (e) => {
@@ -46,11 +48,16 @@ function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
       <p className="assign__intro">
         Assigned caregivers see {resident.name.split(' ')[0]} in My Residents and can write updates in their handovers.
       </p>
+      {dropped.length > 0 && (
+        <p className="field__hint">
+          {dropped.map((c) => c.name).join(', ')} {dropped.length === 1 ? 'is' : 'are'} no longer active and will be taken off when you save.
+        </p>
+      )}
 
-      {options.length === 0 ? (
+      {caregivers.length === 0 ? (
         <p className="staff-details__empty">There are no active caregivers yet. Add or approve one in Manage Staff.</p>
       ) : (
-        groupByShift(options).map((g) => (
+        groupByShift(caregivers).map((g) => (
           <fieldset key={g.key} className="assign__group">
             <legend className="small-label">{g.title}</legend>
             {g.people.map((c) => {
@@ -61,9 +68,7 @@ function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
                   <Avatar name={c.name} photo={c.photoUrl} size={32} />
                   <span className="assign__who">
                     <strong>{c.name}</strong>
-                    <small>
-                      {c.status === 'active' ? `${count} ${count === 1 ? 'resident' : 'residents'}` : 'Deactivated'}
-                    </small>
+                    <small>{`${count} ${count === 1 ? 'resident' : 'residents'}`}</small>
                   </span>
                 </label>
               );
@@ -81,7 +86,7 @@ function AssignForm({ resident, caregivers, residentCount, onSave, onClose }) {
 }
 
 // Pop-up to choose who looks after a resident.
-// `caregivers`: every caregiver account; residentCount(id): how many residents they have now;
+// `caregivers`: the active caregivers; residentCount(id): how many residents they have now;
 // onSave(ids) saves to the backend and throws if it fails.
 export default function AssignCaregiversModal({ resident, caregivers, residentCount, onSave, onClose }) {
   return (

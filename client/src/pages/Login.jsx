@@ -124,7 +124,7 @@ export default function Login() {
         <FormField
           id="login-username"
           label="Employee ID or email"
-          placeholder="e.g. CGV-2026-017"
+          placeholder="e.g. CGV-2026-000"
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}

@@ -26,7 +26,7 @@ export default function ConfirmModal({ open, title, children, confirmLabel, dang
       footer={
         <>
           <button type="button" className="btn btn--outline" onClick={onClose} disabled={busy}>Cancel</button>
-          <button type="button" className={`btn ${danger ? 'btn--danger' : 'btn--primary'}`} onClick={confirm} disabled={busy}>
+          <button type="button" className={`btn ${danger ? 'btn--danger-solid' : 'btn--primary'}`} onClick={confirm} disabled={busy}>
             {busy ? 'Saving…' : confirmLabel}
           </button>
         </>

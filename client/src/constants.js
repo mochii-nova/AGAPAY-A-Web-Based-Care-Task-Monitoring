@@ -2,11 +2,11 @@ import { Bath, Footprints, Utensils, BedDouble, Stethoscope, Gamepad2 } from 'lu
 
 // The 6 task categories. Used for task icons, resident care needs and the "All" filter dropdowns.
 export const TASK_CATEGORIES = [
-  { id: 'hygiene', label: 'Personal Hygiene', examples: 'Bath, brushing teeth, hair care', icon: Bath },
-  { id: 'mobility', label: 'Mobility Assistance', examples: 'Exercise, walking, transferring rooms', icon: Footprints },
-  { id: 'meal', label: 'Meal Assistance', examples: 'Eating, drinking', icon: Utensils },
-  { id: 'rest', label: 'Rest & Sleep', examples: 'Nap, sleep preparation', icon: BedDouble },
-  { id: 'medical', label: 'Medical Care', examples: 'Vitals, wound check, pills', icon: Stethoscope },
+  { id: 'hygiene', label: 'Personal hygiene', examples: 'Bath, brushing teeth, hair care', icon: Bath },
+  { id: 'mobility', label: 'Mobility assistance', examples: 'Exercise, walking, transferring rooms', icon: Footprints },
+  { id: 'meal', label: 'Meal assistance', examples: 'Eating, drinking', icon: Utensils },
+  { id: 'rest', label: 'Rest & sleep', examples: 'Nap, sleep preparation', icon: BedDouble },
+  { id: 'medical', label: 'Medical care', examples: 'Vitals, wound check, pills', icon: Stethoscope },
   { id: 'recreation', label: 'Recreation', examples: 'Leisure, social activities, crafts', icon: Gamepad2 },
 ];
 

@@ -10,6 +10,7 @@ import { normalizeTasks } from '../../utils/tasks';
 import { addDays, dayLabel, dayToDate } from '../../utils/adminTasks';
 import { monitorRows } from '../../utils/handoverMonitor';
 import { taskStats, handoverStats, percent } from '../../utils/reports';
+import { activeCaregivers } from '../../utils/staff';
 import PageHeader from '../../components/PageHeader';
 import CompletionChart from '../../components/admin/CompletionChart';
 import { LoadingState, ErrorState } from '../../components/StateMessage';
@@ -100,10 +101,10 @@ export default function Reports() {
       ? `Completion was ${percent(low.stats.rate)} on every day with tasks`
       : `Completion ranged from ${percent(low.stats.rate)} to ${percent(high.stats.rate)}`;
 
-  const caregivers = staff
-    .filter((u) => u.role === 'caregiver' && (u.status === 'active' || tasks.some((t) => t.assignedTo === u.id)))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const caregivers = activeCaregivers(staff);
   const unassigned = tasks.filter((t) => !t.assignedTo);
+  // Tasks of people who are no longer active, in one row so the totals still add up
+  const formerTasks = tasks.filter((t) => t.assignedTo && !caregivers.some((c) => c.id === t.assignedTo));
 
   // How often each resident was flagged in handovers from these days
   const flagsFor = (r) => {
@@ -224,6 +225,14 @@ export default function Reports() {
                       </tr>
                     );
                   })}
+                  {formerTasks.length > 0 && (
+                    <tr>
+                      <th scope="row" className="data-table__muted">No longer active</th>
+                      <TaskCells s={taskStats(formerTasks)} />
+                      <td className="num">–</td>
+                      <td className="num">–</td>
+                    </tr>
+                  )}
                   {unassigned.length > 0 && (
                     <tr>
                       <th scope="row" className="data-table__muted">Not assigned</th>

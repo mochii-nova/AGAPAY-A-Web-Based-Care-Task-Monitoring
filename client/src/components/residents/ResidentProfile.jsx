@@ -8,9 +8,6 @@ import { getCategory } from '../../constants';
 import { RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime, telHref } from '../../utils/format';
 
-// "Personal Hygiene" -> "Personal hygiene"
-const sentence = (label) => label.charAt(0) + label.slice(1).toLowerCase();
-
 // Everything about one resident: details, care needs, emergency contact, today's tasks and recent notes.
 // Used in the side panel (laptop) and in a pop-up (tablet / phone).
 // `status` = "watch" / "urgent" from the latest handover (if any).
@@ -79,7 +76,7 @@ export default function ResidentProfile({ resident, status, tasks, tasksLoading,
                 <span className="profile-task__time">{formatTime(t.dueAt)}</span>
                 <span className="profile-task__main">
                   <strong>{t.task}</strong>
-                  {getCategory(t.category) && <small>{sentence(getCategory(t.category).label)}</small>}
+                  {getCategory(t.category) && <small>{getCategory(t.category).label}</small>}
                 </span>
                 <StatusPill status={t.status} />
                 <button

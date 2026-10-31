@@ -30,7 +30,8 @@ const sameGroup = (a, b) =>
 export default function ChatView({ conversation, initialDraft = '', onSent, onBack }) {
   const { myId, send, markRead } = useMessages();
   const { user } = conversation;
-  const query = useApiData(`/messages/${user.id}`, { refreshEvery: REFRESH });
+  // A chat opened before shows straight away, then refreshes quietly
+  const query = useApiData(`/messages/${user.id}`, { refreshEvery: REFRESH, cache: true });
   const messages = query.data ?? [];
   const [draft, setDraft] = useState(initialDraft);
   const [error, setError] = useState('');

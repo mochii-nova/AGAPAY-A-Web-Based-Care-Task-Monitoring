@@ -32,7 +32,7 @@ function validate(form) {
   if (!form.phone.trim()) errors.phone = 'Please enter your phone number.';
   else if (!/^09\d{9}$/.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09, like 0917 555 0123.';
   if (!form.employeeId.trim()) errors.employeeId = 'Please enter your Employee ID.';
-  else if (!/^[A-Za-z0-9-]{3,20}$/.test(form.employeeId.trim())) errors.employeeId = 'Use only letters, numbers and dashes, like CGV-2026-017.';
+  else if (!/^[A-Za-z0-9-]{3,20}$/.test(form.employeeId.trim())) errors.employeeId = 'Use only letters, numbers and dashes, like CGV-2026-000.';
   if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/\d/.test(form.password)) {
     errors.password = 'Use at least 8 characters with a letter and a number.';
   }
@@ -137,7 +137,7 @@ export default function Register() {
           {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel' })}
         </div>
         {field('employeeId', 'Employee ID', {
-          placeholder: 'e.g. CGV-2026-017',
+          placeholder: 'e.g. CGV-2026-000',
           hint: 'You’ll use this to sign in.',
           autoComplete: 'username',
         })}

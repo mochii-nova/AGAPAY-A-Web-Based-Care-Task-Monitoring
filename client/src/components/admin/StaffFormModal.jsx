@@ -28,7 +28,7 @@ function validate(form, adding) {
   if (adding) {
     if (!form.firstName.trim()) errors.firstName = 'Please enter the first name.';
     if (!form.lastName.trim()) errors.lastName = 'Please enter the last name.';
-    if (!/^[A-Za-z0-9-]{3,20}$/.test(form.username.trim())) errors.username = 'Use only letters, numbers and dashes, like CGV-2026-019.';
+    if (!/^[A-Za-z0-9-]{3,20}$/.test(form.username.trim())) errors.username = 'Use only letters, numbers and dashes, like CGV-2026-000.';
     if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Please enter a valid email, like name@example.com.';
     if (form.phone.trim() && !PHONE.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09.';
     if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/\d/.test(form.password)) {
@@ -131,7 +131,7 @@ function StaffForm({ person, isMe, onClose }) {
             {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'off' })}
           </div>
           <div className="form-grid">
-            {field('username', 'Employee ID', { placeholder: 'e.g. CGV-2026-019', autoComplete: 'off' })}
+            {field('username', 'Employee ID', { placeholder: 'e.g. CGV-2026-000', autoComplete: 'off' })}
             {select('role', 'Role', ROLE_OPTIONS)}
           </div>
           <div className="form-grid">

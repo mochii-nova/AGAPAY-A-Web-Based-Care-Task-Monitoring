@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useStaff } from '../../context/StaffContext';
 import useApiData from '../../hooks/useApiData';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { isoDay } from '../../hooks/useShifts';
@@ -9,6 +10,7 @@ import { SHIFTS } from '../../constants';
 import { parseHandovers, readersOf } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
 import { addDays, dayLabel } from '../../utils/adminTasks';
+import { activeCaregivers } from '../../utils/staff';
 import { MONITOR_STATUS, monitorRows, flaggedText, reminderText, sentAt } from '../../utils/handoverMonitor';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../../components/Modal';
@@ -28,6 +30,7 @@ const RANGES = [
 // Did every shift hand over on time, and did the next shift read it?
 export default function HandoverMonitor() {
   const { user } = useAuth();
+  const { staff } = useStaff();
   const navigate = useNavigate();
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const now = new Date();
@@ -45,7 +48,8 @@ export default function HandoverMonitor() {
   const loading = handoversQuery.status === 'loading' || rosterQuery.status === 'loading';
   const failed = [handoversQuery, rosterQuery].find((q) => q.status === 'error');
   const all = loading || failed ? [] : monitorRows(handoversQuery.data, rosterQuery.data, from, today, now);
-  const people = [...new Map(all.map((r) => [r.userId, r.userName])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  // Every active caregiver, whether or not they have handovers in these days
+  const people = activeCaregivers(staff);
   const rows = all.filter((r) => (!shiftFilter || r.shift.id === shiftFilter) && (!who || String(r.userId) === who));
 
   const count = (s) => rows.filter((r) => r.status === s).length;
@@ -82,7 +86,7 @@ export default function HandoverMonitor() {
           <label htmlFor="ho-who" className="sr-only">Caregiver</label>
           <select id="ho-who" className="field__input select" value={who} onChange={(e) => setWho(e.target.value)}>
             <option value="">All caregivers</option>
-            {people.map(([id, name]) => <option key={id} value={String(id)}>{name}</option>)}
+            {people.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
           </select>
         </div>
       </PageHeader>

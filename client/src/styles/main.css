@@ -82,6 +82,8 @@
 
   /* Other colours */
   --danger: #b42318;
+  --danger-hover: #93180f;
+  --on-danger: #ffffff;         /* 6.5:1 on --danger */
   --badge: var(--apricot);      /* notification dots and counts (counts use --on-apricot text) */
   --overlay: rgba(36, 26, 48, 0.4);
 
@@ -175,6 +177,8 @@
   --overdue-tint: #261a24;
 
   --danger: #f28b82;
+  --danger-hover: #f6a39b;
+  --on-danger: #2a0f0c;         /* 8.4:1 on --danger */
   --badge: var(--apricot);
   --overlay: rgba(8, 5, 12, 0.65);
 
@@ -497,6 +501,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 /* Actions that take something away (deactivate, delete): red words on an outlined button */
 .btn--danger { background: var(--card); border-color: var(--border-strong); color: var(--danger); }
 .btn--danger:hover:not(:disabled) { background: var(--overdue-tint); border-color: var(--overdue-bg); }
+/* The final "yes, delete" in a confirm pop-up: solid red */
+.btn--danger-solid { background: var(--danger); color: var(--on-danger); }
+.btn--danger-solid:hover:not(:disabled) { background: var(--danger-hover); }
 .btn--sm { padding: 0 14px; font-size: 0.875rem; }
 .btn--lg { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
 

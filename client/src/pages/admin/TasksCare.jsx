@@ -10,6 +10,7 @@ import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS, TASK_CATEGORIES, getCategory } from '../../constants';
 import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
+import { activeCaregivers } from '../../utils/staff';
 import { addDays, dayLabel, shiftOfDue } from '../../utils/adminTasks';
 import PageHeader from '../../components/PageHeader';
 import StatusPill from '../../components/StatusPill';
@@ -60,7 +61,7 @@ export default function TasksCare() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  const caregivers = staff.filter((u) => u.role === 'caregiver');
+  const caregivers = activeCaregivers(staff);
   const goTo = (ymd) => {
     const next = new URLSearchParams(searchParams);
     if (ymd === today) next.delete('date');

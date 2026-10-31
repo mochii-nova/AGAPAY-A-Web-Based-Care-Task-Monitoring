@@ -9,6 +9,11 @@ export const STATUS_LABEL = {
   inactive: { label: 'Deactivated', tone: 'skipped' },
 };
 
+// Approved caregivers who can still sign in, A–Z: the people every picker and filter lists.
+// Pending, declined and deactivated accounts are left out.
+export const activeCaregivers = (staff) =>
+  staff.filter((u) => u.role === 'caregiver' && u.status === 'active').sort((a, b) => a.name.localeCompare(b.name));
+
 // "Oct 24"
 export const shortDate = (value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
