@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { CircleAlert, CircleCheck, Phone, Mail } from 'lucide-react';
+import { CircleAlert, CircleCheck, Phone, Mail, IdCard, Lock, LogIn } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
@@ -94,8 +94,8 @@ export default function Login() {
       panelTitleSoft="Today’s care is waiting."
       panelText="See your shift, your tasks and the latest handover."
     >
-      <h1 className="auth__title">Sign in</h1>
-      <p className="auth__subtitle">Use your Employee ID or email and your password.</p>
+      <h1 className="auth__title">Welcome back</h1>
+      <p className="auth__subtitle">Please enter your details to sign in.</p>
 
       {justRegistered && !error && (
         <div className="alert alert--success" role="status">
@@ -126,6 +126,7 @@ export default function Login() {
           label="Employee ID or email"
           placeholder="e.g. CGV-2026-000"
           autoComplete="username"
+          icon={IdCard}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           error={fieldErrors.username}
@@ -136,6 +137,7 @@ export default function Login() {
           type="password"
           placeholder="Your password"
           autoComplete="current-password"
+          icon={Lock}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={fieldErrors.password}
@@ -148,7 +150,7 @@ export default function Login() {
         </div>
 
         <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
+          <LogIn size={18} aria-hidden="true" /> {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 

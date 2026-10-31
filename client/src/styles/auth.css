@@ -111,6 +111,27 @@
 .auth__switch { margin: 18px 0 0; color: var(--muted); text-align: center; }
 .auth__switch a { color: var(--indigo); font-weight: var(--fw-bold); }
 
+/* Small line above "Create account": the approval note */
+.auth__note { margin: 4px 0 10px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+/* Sign in button: the log-in arrow before the text */
+.auth__submit svg { flex-shrink: 0; }
+
+/* Footer under the form: copyright and the Privacy pop-up */
+.auth__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 12px;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.auth__privacy { min-height: var(--tap); font-size: 0.82rem; }
+
+/* Team credit at the bottom of the photo panel: white at 80% */
+.auth__panel-text .auth__credit { margin-top: 18px; color: var(--on-photo); font-size: 0.82rem; opacity: 0.8; }
+
 /* Text inside the Forgot password and Terms pop-ups */
 .contact-lines { list-style: none; margin: 12px 0 0; padding: 0; }
 .contact-lines li { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
@@ -145,5 +166,6 @@
   .auth__logo { height: 34px !important; }
   .auth__panel-title { margin: 0; font-size: 1.45rem; }
   .auth__panel-text p { display: none; }
+  .auth__panel-text .auth__credit { display: block; margin-top: 6px; font-size: 0.75rem; }
   .auth__main { align-items: flex-start; padding: 20px 16px 32px; }
 }

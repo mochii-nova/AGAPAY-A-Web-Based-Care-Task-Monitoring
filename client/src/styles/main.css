@@ -294,6 +294,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
 @media (max-width: 600px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
 
+/* A field with a small icon inside the box, on the left */
+.field__control { position: relative; }
+.field__icon { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.field__control .field__input { padding-left: 46px; }
+
 /* Password box with the eye button inside */
 .password-input { position: relative; }
 .password-input .field__input { padding-right: 52px; }

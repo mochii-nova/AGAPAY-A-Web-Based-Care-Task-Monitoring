@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, UserRound, Mail, Phone, IdCard, Lock } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
@@ -118,7 +118,7 @@ export default function Register() {
       wide
     >
       <h1 className="auth__title">Create your account</h1>
-      <p className="auth__subtitle">For caregivers. An administrator reviews every new account.</p>
+      <p className="auth__subtitle">Fill in your details to get started.</p>
 
       {error && (
         <div className="alert alert--error" role="alert">
@@ -129,25 +129,27 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} noValidate className="auth__form">
         <div className="form-grid">
-          {field('firstName', 'First name', { placeholder: 'e.g. Juan', autoComplete: 'given-name' })}
-          {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'family-name' })}
+          {field('firstName', 'First name', { placeholder: 'e.g. Juan', autoComplete: 'given-name', icon: UserRound })}
+          {field('lastName', 'Last name', { placeholder: 'e.g. Dela Cruz', autoComplete: 'family-name', icon: UserRound })}
         </div>
         <div className="form-grid">
-          {field('email', 'Email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email' })}
-          {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel' })}
+          {field('email', 'Email', { type: 'email', placeholder: 'e.g. juan.delacruz@gmail.com', autoComplete: 'email', icon: Mail })}
+          {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel', icon: Phone })}
         </div>
         {field('employeeId', 'Employee ID', {
           placeholder: 'e.g. CGV-2026-000',
           hint: 'You’ll use this to sign in.',
           autoComplete: 'username',
+          icon: IdCard,
         })}
         <div className="form-grid">
           {field('password', 'Password', {
             type: 'password',
             placeholder: 'At least 8 characters',
             autoComplete: 'new-password',
+            icon: Lock,
           })}
-          {field('confirm', 'Confirm password', { type: 'password', placeholder: 'Type it again', autoComplete: 'new-password' })}
+          {field('confirm', 'Confirm password', { type: 'password', placeholder: 'Type it again', autoComplete: 'new-password', icon: Lock })}
         </div>
 
         <div className="field">
@@ -169,6 +171,7 @@ export default function Register() {
           {errors.agree && <p id="reg-agree-error" className="field__error">{errors.agree}</p>}
         </div>
 
+        <p className="auth__note">An administrator will review your account before you can sign in.</p>
         <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
           {loading ? 'Creating account…' : 'Create account'}
         </button>
