@@ -82,6 +82,19 @@
 .tag-list li { padding: 2px 10px; border-radius: var(--radius-pill); background: var(--tint); color: var(--muted); font-size: 0.82rem; }
 
 /* Add staff: the temporary password with its "New password" button */
+/* Task form: "Assign them too?" / "Add … to care needs?" (a ticked box on a soft background) */
+.task-form__offer {
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin: -4px 0 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--on-accent-tint);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.task-form__offer input[type='checkbox'] { flex-shrink: 0; }
 .staff-form__password { display: flex; align-items: flex-start; gap: 10px; }
 .staff-form__password .field { flex: 1; }
 .staff-form__password .btn { margin-top: 27px; flex-shrink: 0; }
@@ -94,12 +107,17 @@
 .admin-residents__toolbar { flex-wrap: wrap; }
 .admin-residents__toolbar .search-box { flex: 1 1 100%; }
 .admin-residents__toolbar .select { flex: 1 1 160px; width: auto; }
+/* Phones stack the toolbar: the 160px would become the height, so the dropdowns go full width instead */
+@media (max-width: 600px) {
+  .admin-residents__toolbar .select { flex: none; width: 100%; }
+}
 .resident-card__status { flex-shrink: 0; margin-left: auto; }
 .resident-card__ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .resident-details__gap { color: var(--overdue-text); font-weight: var(--fw-medium); }
 
 /* Resident details (panel and pop-up) */
 .resident-details__who { flex: 1; min-width: 0; }
+.resident-details__today { margin: -4px 0 16px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--tint); }
 .resident-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin: 0 0 4px; }
 .resident-facts dt { margin-bottom: 4px; }
 .resident-facts dd { margin: 0; }

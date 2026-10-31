@@ -14,6 +14,13 @@ export const STATUS_LABEL = {
 export const activeCaregivers = (staff) =>
   staff.filter((u) => u.role === 'caregiver' && u.status === 'active').sort((a, b) => a.name.localeCompare(b.name));
 
+// The residents none of whose active caregivers works `shift` (by each caregiver's usual shift in
+// Manage Staff, the same way the resident's "Assigned caregivers" list shows it)
+export const residentsWithoutShift = (residents, caregivers, shift) =>
+  residents.filter(
+    (r) => !r.caregivers.some((c) => caregivers.some((u) => u.id === c.id && u.assignedShift === shift.apiValue))
+  );
+
 // "Oct 24"
 export const shortDate = (value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 

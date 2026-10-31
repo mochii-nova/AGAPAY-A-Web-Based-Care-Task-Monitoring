@@ -51,6 +51,13 @@
 }
 .care-need--more { flex-shrink: 0; background: transparent; }
 
+/* "Today  Meals ● done  Medical care ● pending": today's tasks by category (hidden when there are none) */
+.today-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.82rem; }
+.today-line__label { color: var(--muted); font-size: 0.72rem; font-weight: var(--fw-bold); letter-spacing: 0.6px; text-transform: uppercase; }
+.today-line__item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.today-line__name { color: var(--text); }
+.today-line .status-pill { font-size: 0.8rem; }
+
 /* Profile side panel (laptops): stays in view while scrolling */
 .card.resident-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
 

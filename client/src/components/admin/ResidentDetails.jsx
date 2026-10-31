@@ -3,6 +3,7 @@ import { ClipboardList, Phone, Plus } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
 import CareNeeds from '../residents/CareNeeds';
+import TodayLine from '../residents/TodayLine';
 import { LoadingState, EmptyState } from '../StateMessage';
 import { SHIFTS, shiftLabel } from '../../constants';
 import { RESIDENT_STATUS } from '../../utils/handover';
@@ -43,6 +44,12 @@ export default function ResidentDetails({ resident, staff, tasks, tasksLoading, 
           </button>
         </div>
       </div>
+
+      {!tasksLoading && tasks.length > 0 && (
+        <div className="resident-details__today">
+          <TodayLine tasks={tasks} />
+        </div>
+      )}
 
       <dl className="resident-facts">
         <div><dt className="small-label">Age</dt><dd>{resident.age != null ? `${resident.age} years old` : notSet}</dd></div>

@@ -9,7 +9,9 @@ import { TASK_CATEGORIES, shiftLabel } from '../constants';
 import { useHandovers } from '../context/HandoverContext';
 import { useProfile } from '../context/ProfileContext';
 import { RESIDENT_STATUS, updateFor } from '../utils/handover';
-import { isToday, savedText } from '../utils/tasks';
+import { isToday, savedText, normalizeTasks } from '../utils/tasks';
+import useApiData from '../hooks/useApiData';
+import { isoDay } from '../hooks/useShifts';
 import PageHeader from '../components/PageHeader';
 import Modal from '../components/Modal';
 import ResidentCard from '../components/residents/ResidentCard';
@@ -54,6 +56,8 @@ export default function Residents() {
   const [search, setSearch] = useState('');
   const [need, setNeed] = useState('');
   const [openTaskId, setOpenTaskId] = useState(null);
+  const today = isoDay(new Date());
+  const dayQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
 
   const query = search.trim().toLowerCase();
   const shown = residents
@@ -70,6 +74,8 @@ export default function Residents() {
   const closePopup = () => setSearchParams({}, { replace: true });
 
   const tasksOf = (r) => tasks.filter((t) => t.residentId === r.id && isToday(t.dueAt));
+  // Everyone's tasks for the resident today (other shifts too), for the "Today" line
+  const dayOf = (r) => (dayQuery.data ?? []).filter((t) => t.residentId === r.id);
   // "Watch closely" / "Urgent" from the latest handover another caregiver wrote
   const latestReceived = handovers.find((h) => h.author?._id !== profileId);
   const statusOf = (r) => updateFor(latestReceived, r)?.status;
@@ -78,6 +84,7 @@ export default function Residents() {
       resident={selected}
       status={statusOf(selected)}
       tasks={tasksOf(selected)}
+      dayTasks={dayOf(selected)}
       tasksLoading={tasksStatus === 'loading'}
       notes={notesFor(selected, handovers, tasks)}
       onOpenTask={(t) => setOpenTaskId(t._id)}
@@ -88,6 +95,7 @@ export default function Residents() {
   const openTask = tasks.find((t) => t._id === openTaskId) ?? null;
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
+    dayQuery.reload({ silent: true });
     setOpenTaskId(null);
     showToast(savedText(task, changes));
   };
@@ -134,7 +142,7 @@ export default function Residents() {
                   <li key={r.id}>
                     <ResidentCard
                       resident={r}
-                      todayTasks={tasksOf(r)}
+                      todayTasks={dayOf(r)}
                       selected={selected?.id === r.id}
                       maxNeeds={isPhone ? 2 : 3}
                       onSelect={selectResident}

@@ -13,6 +13,7 @@ import { RESIDENT_STATUS, latestUpdate, readersOf } from '../../utils/handover';
 import { shiftOnDate, minutesToText } from '../../utils/shift';
 import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
+import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
 import { addDays, dayLabel, dayToDate, shiftOfDue } from '../../utils/adminTasks';
 import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay } from '../../utils/handoverMonitor';
 import { useProfile } from '../../context/ProfileContext';
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
   const showToast = useToast();
   const now = useNow();
   const { staff, pendingCount } = useStaff();
-  const { residents, status: residentsStatus } = useResidents();
+  const { residents, status: residentsStatus, setData: setResidents } = useResidents();
   const { handovers } = useHandovers();
   const { profile } = useProfile();
   const [creating, setCreating] = useState(false);
@@ -60,7 +61,7 @@ export default function AdminDashboard() {
   const ready = tasksQuery.status === 'ready' && rosterQuery.status === 'ready' && residentsStatus === 'ready';
   const failed = [tasksQuery, rosterQuery].find((q) => q.status === 'error');
   const roster = rosterQuery.data ?? [];
-  const caregivers = staff.filter((u) => u.role === 'caregiver');
+  const caregivers = activeCaregivers(staff);
   const shiftOf = (t) => shiftOfDue(t.dueAt);
   const tasks = (tasksQuery.data ?? []).filter((t) => shiftOf(t).shiftDate === day);
   const pending = tasks.filter((t) => t.status === 'pending');
@@ -73,11 +74,10 @@ export default function AdminDashboard() {
   const missing = rows.filter((r) => r.status === 'missing');
 
   const unassignedResidents = residents.filter((r) => r.caregivers.length === 0).length;
-  const activeCaregivers = caregivers.filter((c) => c.status === 'active').length;
 
   const tiles = [
     { label: 'Residents', value: residents.length, note: unassignedResidents ? `${unassignedResidents} without a caregiver` : 'All have caregivers', to: '/admin/residents' },
-    { label: 'Active caregivers', value: activeCaregivers, note: pendingCount ? `${pendingCount} waiting for approval` : 'No one waiting for approval', to: '/admin/staff' },
+    { label: 'Active caregivers', value: caregivers.length, note: pendingCount ? `${pendingCount} waiting for approval` : 'No one waiting for approval', to: '/admin/staff' },
     { label: 'Pending tasks', value: pending.length, note: 'Still to do on today’s shifts', to: '/admin/tasks' },
     { label: 'Overdue tasks', value: overdue.length, note: overdue.length ? 'Need follow-up' : 'Nothing late', tone: overdue.length ? 'overdue' : '', to: '/admin/tasks' },
     {
@@ -155,6 +155,20 @@ export default function AdminDashboard() {
       onClick: () => navigate('/admin/schedule'),
     });
   }
+  // Residents with nobody looking after them on a shift (none of their caregivers works it)
+  SHIFTS.forEach((s) => {
+    const n = residentsWithoutShift(residents, caregivers, s).length;
+    if (!n) return;
+    attention.push({
+      key: `uncovered-${s.id}`,
+      tone: 'overdue',
+      tag: 'No caregiver',
+      title: `${s.label} shift: ${plural(n, 'resident')} ${n === 1 ? 'has' : 'have'} no caregiver`,
+      sub: `None of their assigned caregivers works the ${s.label} shift`,
+      action: 'Assign',
+      onClick: () => navigate(`/admin/residents?gap=${s.id}`),
+    });
+  });
   if (pendingCount) {
     attention.push({ key: 'signups', tone: 'pending', tag: 'Sign-up', title: `${plural(pendingCount, 'caregiver')} waiting for approval`, sub: 'They can’t sign in until you approve them', action: 'Review', onClick: () => navigate('/admin/staff') });
   }
@@ -332,10 +346,16 @@ export default function AdminDashboard() {
         preset={{ date: isoDay(now) }}
         residents={residents}
         caregivers={caregivers}
-        onSaved={(saved, { offDays, partial }) => {
+        onSaved={(saved, { offDays, partial, also }) => {
           tasksQuery.reload({ silent: true });
-          if (!partial) showToast(saved.length === 1 ? `Created ${saved[0].task}.` : `Created ${saved.length} tasks.${offDays ? ` ${offDays} without a caregiver.` : ''}`);
+          if (!partial) {
+            showToast(
+              (saved.length === 1 ? `Created ${saved[0].task}.` : `Created ${saved.length} tasks.${offDays ? ` ${offDays} without a caregiver.` : ''}`) +
+                (also ? ` ${also}` : '')
+            );
+          }
         }}
+        onResidentSaved={(saved) => setResidents((list) => list.map((r) => (r.id === saved.id ? saved : r)))}
         onClose={() => setCreating(false)}
       />
     </div>

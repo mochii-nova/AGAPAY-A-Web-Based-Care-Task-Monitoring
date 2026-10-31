@@ -27,7 +27,7 @@ function validate(form, chosenOk) {
 
 // The form inside the pop-up: a new task (`task` empty) or changes to one.
 // `preset`: { residentId, date } to start a new task with.
-function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
+function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSaved, onClose }) {
   const editing = !!task;
   const [form, setForm] = useState({
     task: task?.task ?? '',
@@ -53,25 +53,36 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
   const rosterQuery = useApiData(`/shifts?from=${from}&to=${to}`);
   const roster = rosterQuery.data ?? [];
 
-  // Caregivers of the chosen resident go first
+  // Caregivers of the chosen resident go first, in their own group
   const resident = residents.find((r) => String(r.id) === form.residentId);
   const looksAfter = (c) => !!resident?.caregivers.some((x) => x.id === c.id);
-  const onShift = caregiversOnShift(caregivers, roster, shift, shiftDate).sort(
-    (a, b) => looksAfter(b.caregiver) - looksAfter(a.caregiver) || a.caregiver.name.localeCompare(b.caregiver.name)
-  );
+  const onShift = caregiversOnShift(caregivers, roster, shift, shiftDate).sort((a, b) => a.caregiver.name.localeCompare(b.caregiver.name));
   // When editing, the person it's already given to stays in the list even if their shift changed
   const keepCurrent =
     editing && task.assignedTo && String(task.assignedTo) === form.assignedTo && !onShift.some((o) => String(o.caregiver.id) === form.assignedTo);
   const chosenOk = !form.assignedTo || keepCurrent || onShift.some((o) => String(o.caregiver.id) === form.assignedTo);
 
+  const toOption = ({ caregiver: c, usual }) => ({ value: String(c.id), label: `${c.name} · ${shift.label}${usual ? ' (usual shift)' : ''}` });
+  const firstName = resident?.name.split(' ')[0];
   const caregiverOptions = [
     { value: '', label: 'Not assigned yet' },
-    ...onShift.map(({ caregiver: c, usual }) => ({
-      value: String(c.id),
-      label: `${c.name} · ${shift.label}${usual ? ' (usual shift)' : ''}${looksAfter(c) ? ` · looks after ${resident.name.split(' ')[0]}` : ''}`,
-    })),
+    ...(resident
+      ? [
+          { group: `Looks after ${firstName}`, options: onShift.filter((o) => looksAfter(o.caregiver)).map(toOption) },
+          { group: `Others on the ${shift.label} shift`, options: onShift.filter((o) => !looksAfter(o.caregiver)).map(toOption) },
+        ]
+      : onShift.map(toOption)),
     ...(keepCurrent ? [{ value: String(task.assignedTo), label: `${task.assignedToName} (not on this shift)` }] : []),
   ];
+
+  // Offers shown under the form, ticked by default: give the resident to the chosen caregiver too, and
+  // (new tasks) add the category to the resident's care needs
+  const chosenPerson = onShift.find((o) => String(o.caregiver.id) === form.assignedTo)?.caregiver;
+  const offerAssign = resident && chosenPerson && !looksAfter(chosenPerson) ? chosenPerson : null;
+  const category = TASK_CATEGORIES.find((c) => c.id === form.category);
+  const offerNeed = !editing && resident && category && !resident.careNeeds.includes(category.id) ? category : null;
+  const [alsoAssign, setAlsoAssign] = useState(true);
+  const [alsoNeed, setAlsoNeed] = useState(true);
 
   // Repeating: the days the chosen caregiver isn't on this shift (those tasks get no caregiver)
   const chosen = caregivers.find((c) => String(c.id) === form.assignedTo);
@@ -106,7 +117,22 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
       note: form.note.trim(),
     };
     const saved = [];
+    const done = []; // e.g. "Rosa is now assigned to Maria."
     try {
+      // The resident first, so the caregiver already has them when the task arrives.
+      // If this fails, nothing else is saved.
+      if (offerAssign && alsoAssign) {
+        const { data } = await api.put(`/residents/${resident.id}/caregivers`, {
+          caregiverIds: [...resident.caregivers.map((c) => c.id), offerAssign.id],
+        });
+        onResidentSaved?.(data);
+        done.push(`${offerAssign.name.split(' ')[0]} is now assigned to ${firstName}.`);
+      }
+      if (offerNeed && alsoNeed) {
+        const { data } = await api.put(`/residents/${resident.id}`, { careNeeds: [...resident.careNeeds, offerNeed.id] });
+        onResidentSaved?.(data);
+        done.push(`${offerNeed.label} is added to ${firstName}'s care needs.`);
+      }
       if (editing) {
         const { data } = await api.put(`/tasks/${task.id}`, { ...fields, dueAt: due.toISOString(), assignedTo: form.assignedTo ? Number(form.assignedTo) : null });
         saved.push(data);
@@ -119,7 +145,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
           saved.push(data);
         }
       }
-      onSaved(saved, { editing, offDays: offDays.length });
+      onSaved(saved, { editing, offDays: offDays.length, also: done.join(' ') });
       onClose();
     } catch (err) {
       const message = err.response ? err.response.data?.message || "Couldn't save. Please try again." : "Can't reach the server. Please try again.";
@@ -166,6 +192,12 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
           { required: true }
         )}
       </div>
+      {offerNeed && (
+        <label className="checkbox-row task-form__offer">
+          <input type="checkbox" checked={alsoNeed} onChange={(e) => setAlsoNeed(e.target.checked)} />
+          <span>Add {offerNeed.label} to {resident.name}'s care needs?</span>
+        </label>
+      )}
       <div className="form-grid">
         {field('date', editing ? 'Date' : 'Date (first day)', { type: 'date' })}
         {field('time', 'Due time', { type: 'time' })}
@@ -175,6 +207,12 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
         hint: rosterQuery.status === 'loading' ? 'Checking who is on shift…' : shiftHint,
         disabled: rosterQuery.status === 'loading',
       })}
+      {offerAssign && (
+        <label className="checkbox-row task-form__offer">
+          <input type="checkbox" checked={alsoAssign} onChange={(e) => setAlsoAssign(e.target.checked)} />
+          <span>{offerAssign.name} isn't assigned to {resident.name} yet. Assign them too?</span>
+        </label>
+      )}
 
       {!editing && (
         <>
@@ -227,12 +265,23 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onClose }) {
 }
 
 // Pop-up for "Create task" (no `task`) and "Edit".
-// `caregivers`: every caregiver account. onSaved(savedTasks, { editing, offDays, partial }) after saving.
-export default function TaskFormModal({ open, task, preset, residents, caregivers, onSaved, onClose }) {
+// `caregivers`: the active caregivers.
+// onSaved(savedTasks, { editing, offDays, partial, also }) after saving; `also` is extra toast text such as
+// "Rosa is now assigned to Maria." onResidentSaved(resident) when the resident changed too.
+export default function TaskFormModal({ open, task, preset, residents, caregivers, onSaved, onResidentSaved, onClose }) {
   return (
     <Modal open={open} onClose={onClose} title={task ? `Edit ${task.task}` : 'Create task'} size="lg">
       {open && (
-        <TaskForm key={task?.id ?? 'new'} task={task} preset={preset} residents={residents} caregivers={caregivers} onSaved={onSaved} onClose={onClose} />
+        <TaskForm
+          key={task?.id ?? 'new'}
+          task={task}
+          preset={preset}
+          residents={residents}
+          caregivers={caregivers}
+          onSaved={onSaved}
+          onResidentSaved={onResidentSaved}
+          onClose={onClose}
+        />
       )}
     </Modal>
   );

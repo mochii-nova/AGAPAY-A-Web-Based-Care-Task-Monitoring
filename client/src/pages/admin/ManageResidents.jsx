@@ -9,14 +9,16 @@ import useApiData from '../../hooks/useApiData';
 import useResidents from '../../hooks/useResidents';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { isoDay } from '../../hooks/useShifts';
-import { TASK_CATEGORIES } from '../../constants';
+import { SHIFTS, TASK_CATEGORIES } from '../../constants';
 import { RESIDENT_STATUS, latestUpdate } from '../../utils/handover';
-import { activeCaregivers } from '../../utils/staff';
+import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
+import { normalizeTasks } from '../../utils/tasks';
 import PageHeader from '../../components/PageHeader';
 import Avatar from '../../components/Avatar';
 import Modal from '../../components/Modal';
 import ConfirmModal from '../../components/ConfirmModal';
 import CareNeeds from '../../components/residents/CareNeeds';
+import TodayLine from '../../components/residents/TodayLine';
 import ResidentDetails from '../../components/admin/ResidentDetails';
 import ResidentFormModal, { nextResidentCode } from '../../components/admin/ResidentFormModal';
 import AssignCaregiversModal from '../../components/admin/AssignCaregiversModal';
@@ -29,6 +31,8 @@ const STATUS_FILTERS = [
   { value: '', label: 'All residents' },
   { value: 'flagged', label: 'Watch closely or urgent' },
   { value: 'unassigned', label: 'No caregiver yet' },
+  // "gap-night": nobody looks after them on the Night shift (the Dashboard's "Assign" opens that)
+  ...SHIFTS.map((s) => ({ value: `gap-${s.id}`, label: `No ${s.label} caregiver` })),
 ];
 
 // Add residents, keep their details up to date and choose who looks after them
@@ -38,13 +42,16 @@ export default function ManageResidents() {
   const { handovers } = useHandovers();
   const showToast = useToast();
   const today = isoDay(new Date());
-  const tasksQuery = useApiData(`/tasks?from=${today}&to=${today}`);
+  // Today's tasks, for the "Today" line on each resident (refreshes as caregivers tick tasks off)
+  const tasksQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 600px)');
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(() =>
+    SHIFTS.some((s) => s.id === searchParams.get('gap')) ? `gap-${searchParams.get('gap')}` : ''
+  );
   const [need, setNeed] = useState('');
   // { resident } for Edit, {} for Add (the Dashboard's "Add resident" opens it straight away)
   const [form, setForm] = useState(() => (location.state?.add ? {} : null));
@@ -56,13 +63,17 @@ export default function ManageResidents() {
 
   const tasks = tasksQuery.data ?? [];
   const caregivers = activeCaregivers(staff);
+  const tasksOf = (r) => tasks.filter((t) => t.residentId === r.id);
   const latestOf = (r) => latestUpdate(handovers, r);
   const isFlagged = (r) => ['watch', 'urgent'].includes(latestOf(r)?.update.status);
 
+  const gapShift = SHIFTS.find((s) => statusFilter === `gap-${s.id}`);
+  const uncovered = gapShift ? residentsWithoutShift(residents, caregivers, gapShift) : [];
   const query = search.trim().toLowerCase();
   const shown = residents
     .filter((r) => statusFilter !== 'flagged' || isFlagged(r))
     .filter((r) => statusFilter !== 'unassigned' || r.caregivers.length === 0)
+    .filter((r) => !gapShift || uncovered.includes(r))
     .filter((r) => !need || r.careNeeds.includes(need))
     .filter(
       (r) =>
@@ -126,7 +137,7 @@ export default function ManageResidents() {
     <ResidentDetails
       resident={selected}
       staff={staff}
-      tasks={tasks.filter((t) => t.residentId === selected.id).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))}
+      tasks={tasksOf(selected).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))}
       tasksLoading={tasksQuery.status === 'loading'}
       latest={latestOf(selected)}
       onEdit={() => setForm({ resident: selected })}
@@ -213,6 +224,7 @@ export default function ManageResidents() {
                             </span>
                           </span>
                           {r.careNeeds.length > 0 && <CareNeeds needs={r.careNeeds} max={isPhone ? 2 : 3} />}
+                          <TodayLine tasks={tasksOf(r)} short />
                         </span>
                       </button>
                     </li>
@@ -255,16 +267,18 @@ export default function ManageResidents() {
         preset={{ residentId: taskFor?.id, date: today }}
         residents={residents}
         caregivers={caregivers}
-        onSaved={(saved, { offDays, partial }) => {
+        onSaved={(saved, { offDays, partial, also }) => {
           tasksQuery.reload({ silent: true });
           if (!partial) {
             showToast(
-              saved.length === 1
+              (saved.length === 1
                 ? `Created ${saved[0].task} for ${taskFor.name}.`
-                : `Created ${saved.length} tasks for ${taskFor.name}.${offDays ? ` ${offDays} without a caregiver.` : ''}`
+                : `Created ${saved.length} tasks for ${taskFor.name}.${offDays ? ` ${offDays} without a caregiver.` : ''}`) +
+                (also ? ` ${also}` : '')
             );
           }
         }}
+        onResidentSaved={put}
         onClose={() => setTaskFor(null)}
       />
       <ConfirmModal

@@ -41,7 +41,7 @@ const EMPTY_TEXT = {
 // Create tasks, give them to the caregivers on shift, and follow up on anything late. One day at a time.
 export default function TasksCare() {
   const { staff } = useStaff();
-  const { residents } = useResidents();
+  const { residents, setData: setResidents } = useResidents();
   const showToast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const today = isoDay(new Date());
@@ -83,20 +83,23 @@ export default function TasksCare() {
 
   const viewTask = tasks.find((t) => t.id === viewId) ?? null;
 
-  const handleSaved = (saved, { editing, offDays, partial }) => {
+  const handleSaved = (saved, { editing, offDays, partial, also }) => {
     query.reload({ silent: true });
     if (partial) return;
     const first = saved[0];
-    if (editing) showToast(`Saved ${first.task}.`);
-    else if (saved.length === 1) showToast(`Created ${first.task} for ${dayLabel(isoDay(first.dueAt))}.`);
+    const extra = also ? ` ${also}` : '';
+    if (editing) showToast(`Saved ${first.task}.${extra}`);
+    else if (saved.length === 1) showToast(`Created ${first.task} for ${dayLabel(isoDay(first.dueAt))}.${extra}`);
     else {
       const last = saved[saved.length - 1];
       showToast(
         `Created ${saved.length} tasks: ${first.task}, ${dayLabel(isoDay(first.dueAt))} to ${dayLabel(isoDay(last.dueAt))}.` +
-          (offDays ? ` ${offDays} without a caregiver.` : '')
+          (offDays ? ` ${offDays} without a caregiver.` : '') +
+          extra
       );
     }
   };
+  const putResident = (saved) => setResidents((list) => list.map((r) => (r.id === saved.id ? saved : r)));
 
   const doDelete = async () => {
     setDeleting(true);
@@ -263,6 +266,7 @@ export default function TasksCare() {
         residents={residents}
         caregivers={caregivers}
         onSaved={handleSaved}
+        onResidentSaved={putResident}
         onClose={() => setForm(null)}
       />
       <ConfirmModal

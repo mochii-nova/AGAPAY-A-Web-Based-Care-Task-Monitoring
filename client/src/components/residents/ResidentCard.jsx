@@ -1,11 +1,10 @@
 import Avatar from '../Avatar';
 import CareNeeds from './CareNeeds';
+import TodayLine from './TodayLine';
 
-// One resident in the list: avatar on the left, then name + ID, room + tasks today,
-// and a few care-need tags. The whole card is a button that opens the profile.
+// One resident in the list: avatar on the left, then name + ID, room, a few care-need tags
+// and the "Today" line (today's tasks by category). The whole card is a button that opens the profile.
 export default function ResidentCard({ resident, todayTasks, selected, maxNeeds, onSelect }) {
-  const overdue = todayTasks.filter((t) => t.status === 'overdue').length;
-
   return (
     <button
       type="button"
@@ -21,10 +20,11 @@ export default function ResidentCard({ resident, todayTasks, selected, maxNeeds,
           <span className="resident-card__id">{resident.residentCode}</span>
         </span>
         <span className="resident-card__line resident-card__meta">
-          Room {resident.room} · {todayTasks.length} {todayTasks.length === 1 ? 'task' : 'tasks'} today
-          {overdue > 0 && <span className="status-pill status-pill--overdue">{overdue} overdue</span>}
+          Room {resident.room}
+          {todayTasks.length === 0 && ' · No tasks today'}
         </span>
         <CareNeeds needs={resident.careNeeds} max={maxNeeds} />
+        <TodayLine tasks={todayTasks} short />
       </span>
     </button>
   );

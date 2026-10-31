@@ -1,13 +1,14 @@
 import { Bath, Footprints, Utensils, BedDouble, Stethoscope, Gamepad2 } from 'lucide-react';
 
 // The 6 task categories. Used for task icons, resident care needs and the "All" filter dropdowns.
+// `short`: the word used on the small list cards.
 export const TASK_CATEGORIES = [
-  { id: 'hygiene', label: 'Personal hygiene', examples: 'Bath, brushing teeth, hair care', icon: Bath },
-  { id: 'mobility', label: 'Mobility assistance', examples: 'Exercise, walking, transferring rooms', icon: Footprints },
-  { id: 'meal', label: 'Meal assistance', examples: 'Eating, drinking', icon: Utensils },
-  { id: 'rest', label: 'Rest & sleep', examples: 'Nap, sleep preparation', icon: BedDouble },
-  { id: 'medical', label: 'Medical care', examples: 'Vitals, wound check, pills', icon: Stethoscope },
-  { id: 'recreation', label: 'Recreation', examples: 'Leisure, social activities, crafts', icon: Gamepad2 },
+  { id: 'hygiene', label: 'Personal hygiene', short: 'Hygiene', examples: 'Bath, brushing teeth, hair care', icon: Bath },
+  { id: 'mobility', label: 'Mobility assistance', short: 'Mobility', examples: 'Exercise, walking, transferring rooms', icon: Footprints },
+  { id: 'meal', label: 'Meal assistance', short: 'Meals', examples: 'Eating, drinking', icon: Utensils },
+  { id: 'rest', label: 'Rest & sleep', short: 'Rest', examples: 'Nap, sleep preparation', icon: BedDouble },
+  { id: 'medical', label: 'Medical care', short: 'Medical care', examples: 'Vitals, wound check, pills', icon: Stethoscope },
+  { id: 'recreation', label: 'Recreation', short: 'Recreation', examples: 'Leisure, social activities, crafts', icon: Gamepad2 },
 ];
 
 export const getCategory = (id) => TASK_CATEGORIES.find((c) => c.id === id);

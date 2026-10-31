@@ -1,7 +1,8 @@
 // A label, a dropdown, an optional hint and an error message, all linked for screen readers.
-// options: [{ value, label }]
+// options: [{ value, label }], or groups among them: { group: 'Heading', options: [{ value, label }] }
 export default function SelectField({ id, name, label, value, onChange, options, hint, error, required = false, disabled }) {
   const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+  const option = (o) => <option key={o.value} value={o.value}>{o.label}</option>;
   return (
     <div className="field">
       <label htmlFor={id} className="field__label">
@@ -18,9 +19,13 @@ export default function SelectField({ id, name, label, value, onChange, options,
         aria-invalid={!!error}
         aria-describedby={describedBy}
       >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
+        {options.map((o) =>
+          o.group ? (
+            o.options.length > 0 && <optgroup key={o.group} label={o.group}>{o.options.map(option)}</optgroup>
+          ) : (
+            option(o)
+          )
+        )}
       </select>
       {hint && !error && <p id={`${id}-hint`} className="field__hint">{hint}</p>}
       {error && <p id={`${id}-error`} className="field__error">{error}</p>}

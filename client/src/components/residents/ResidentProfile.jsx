@@ -3,6 +3,7 @@ import { Phone, ClipboardList, MessageSquareText } from 'lucide-react';
 import Avatar from '../Avatar';
 import StatusPill from '../StatusPill';
 import CareNeeds from './CareNeeds';
+import TodayLine from './TodayLine';
 import { LoadingState, EmptyState } from '../StateMessage';
 import { getCategory } from '../../constants';
 import { RESIDENT_STATUS } from '../../utils/handover';
@@ -11,7 +12,8 @@ import { formatTime, telHref } from '../../utils/format';
 // Everything about one resident: details, care needs, emergency contact, today's tasks and recent notes.
 // Used in the side panel (laptop) and in a pop-up (tablet / phone).
 // `status` = "watch" / "urgent" from the latest handover (if any).
-export default function ResidentProfile({ resident, status, tasks, tasksLoading, notes, onOpenTask, showName = true }) {
+// `tasks`: my tasks for them today; `dayTasks`: everyone's, for the "Today" line.
+export default function ResidentProfile({ resident, status, tasks, dayTasks = tasks, tasksLoading, notes, onOpenTask, showName = true }) {
   const firstName = resident.name.split(' ')[0];
   const flag = status && status !== 'normal' ? RESIDENT_STATUS[status] : null;
   const contact = resident.emergencyContact ?? {};
@@ -30,6 +32,7 @@ export default function ResidentProfile({ resident, status, tasks, tasksLoading,
         <div className="resident-profile__who">
           {showName && <h2 className="resident-profile__name">{resident.name}</h2>}
           <p className="resident-profile__sub">{details}</p>
+          <TodayLine tasks={dayTasks} />
         </div>
         {flag && <span className={`status-pill status-pill--${flag.tone}`}>{flag.label}</span>}
       </div>

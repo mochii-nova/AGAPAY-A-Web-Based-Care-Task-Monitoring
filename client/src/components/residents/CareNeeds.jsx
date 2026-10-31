@@ -1,15 +1,5 @@
 import { getCategory } from '../../constants';
 
-// Short words for the compact list cards
-const SHORT = {
-  hygiene: 'Hygiene',
-  mobility: 'Mobility',
-  meal: 'Meals',
-  medical: 'Medical care',
-  rest: 'Rest',
-  recreation: 'Recreation',
-};
-
 // Small text tags for a resident's care needs (uses the 6 task categories).
 // With `max` (list cards), only the first few are shown in short words, followed by "+2".
 export default function CareNeeds({ needs, max }) {
@@ -24,7 +14,7 @@ export default function CareNeeds({ needs, max }) {
     >
       {shown.map((id) => (
         <li key={id} className="care-need" aria-hidden={max ? 'true' : undefined}>
-          {max ? SHORT[id] ?? getCategory(id).label : getCategory(id).label}
+          {max ? getCategory(id).short : getCategory(id).label}
         </li>
       ))}
       {hidden > 0 && (
