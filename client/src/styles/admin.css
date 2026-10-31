@@ -189,6 +189,11 @@
 .roster-shift strong { font-weight: var(--fw-medium); }
 .roster-shift small { color: var(--muted); font-size: 0.78rem; }
 .roster--days .roster-shift { align-items: center; padding: 10px 4px; }
+/* Each shift's row (or column) label in its shift colour, the same as the caregiver schedule */
+.roster-shift--morning { background: var(--shift-morning-bg) !important; color: var(--shift-morning-text); }
+.roster-shift--noon { background: var(--shift-noon-bg) !important; color: var(--shift-noon-text); }
+.roster-shift--night { background: var(--shift-night-bg) !important; color: var(--shift-night-text); }
+.roster-shift[class*='roster-shift--'] small { color: inherit; }
 .roster-slot {
   display: flex;
   align-items: flex-start;
@@ -213,12 +218,18 @@
 .roster-month .month__day { min-height: 112px; gap: 6px; }
 .roster-month__lines { display: flex; flex-direction: column; gap: 2px; width: 100%; min-width: 0; }
 .roster-month__line { display: flex; gap: 4px; min-width: 0; font-size: 0.74rem; line-height: 1.35; }
-.roster-month__shift { flex-shrink: 0; width: 4.1em; color: var(--muted); }
+.roster-month__shift { flex-shrink: 0; width: 4.1em; padding: 0 3px; border-radius: 4px; font-weight: var(--fw-medium); }
+.roster-month__shift--morning { background: var(--shift-morning-bg); color: var(--shift-morning-text); }
+.roster-month__shift--noon { background: var(--shift-noon-bg); color: var(--shift-noon-text); }
+.roster-month__shift--night { background: var(--shift-night-bg); color: var(--shift-night-text); }
 .roster-month__names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .roster-month__line.is-gap .roster-month__names { color: var(--overdue-text); font-weight: var(--fw-medium); }
 .month__day.is-outside .roster-month__lines { opacity: 0.55; }
 .roster-month__dots { display: none; gap: 3px; }
 .roster-month__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo); }
+.roster-month__dot--morning { background: var(--shift-morning-mark); }
+.roster-month__dot--noon { background: var(--shift-noon-mark); }
+.roster-month__dot--night { background: var(--shift-night-mark); }
 .roster-month__dot.is-gap { background: var(--overdue-dot); }
 
 /* The selected shift (side panel / pop-up) */
@@ -290,7 +301,7 @@
 .shift-progress { display: flex; flex-direction: column; gap: 16px; list-style: none; margin: 0; padding: 0; }
 .shift-progress__line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 6px; color: var(--muted); font-size: 0.92rem; }
 .shift-progress__line strong { color: var(--text); font-weight: var(--fw-medium); }
-.shift-progress__track { height: 8px; overflow: hidden; border-radius: var(--radius-pill); background: var(--tint); }
+.shift-progress__track { height: 8px; overflow: hidden; border-radius: var(--radius-pill); background: var(--indigo-soft); }
 .shift-progress__track span { display: block; height: 100%; border-radius: var(--radius-pill); background: var(--indigo); transition: width 0.6s; }
 .attention-list { list-style: none; margin: 0; padding: 0; }
 .attention-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
@@ -320,7 +331,7 @@
 /* Bar chart (one series): rounded tops, a 4px-wide gap between bars, thin baseline */
 .bar-chart__plot { display: flex; align-items: flex-end; gap: 4px; height: 220px; padding-top: 22px; border-bottom: 1px solid var(--border-strong); }
 .bar-chart__col { position: relative; display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; border-radius: 4px 4px 0 0; outline-offset: 2px; }
-.bar-chart__col:hover, .bar-chart__col:focus-visible { background: var(--tint); }
+.bar-chart__col:hover, .bar-chart__col:focus-visible { background: var(--indigo-soft); }
 .bar-chart__bar { width: min(56px, 70%); border-radius: 4px 4px 0 0; background: var(--indigo); }
 .bar-chart__value { margin-bottom: 4px; color: var(--text); font-size: 0.8rem; font-weight: var(--fw-medium); font-variant-numeric: tabular-nums; }
 .bar-chart__none { margin-bottom: 4px; color: var(--faint); font-size: 0.8rem; }

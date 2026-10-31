@@ -47,7 +47,7 @@ export default function RosterWeek({ days, today, selected, peopleOn, onSelect, 
     </div>
   );
   const shiftHead = (shift) => (
-    <div key={shift.id} className="roster-shift">
+    <div key={shift.id} className={`roster-shift roster-shift--${shift.id}`}>
       <strong>{shift.label}</strong>
       {!transposed && <small>{shiftTime(shift)}</small>}
     </div>

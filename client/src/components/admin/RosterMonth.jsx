@@ -34,14 +34,14 @@ export default function RosterMonth({ month, today, selected, peopleOn, onSelect
               <span className="roster-month__lines" aria-hidden="true">
                 {rows.map(({ shift: s, people }) => (
                   <span key={s.id} className={`roster-month__line ${people.length ? '' : 'is-gap'}`}>
-                    <span className="roster-month__shift">{s.label}</span>
+                    <span className={`roster-month__shift roster-month__shift--${s.id}`}>{s.label}</span>
                     <span className="roster-month__names">{people.length ? people.map((p) => p.userName.split(' ')[0]).join(', ') : 'None'}</span>
                   </span>
                 ))}
               </span>
               <span className="roster-month__dots" aria-hidden="true">
                 {rows.map(({ shift: s, people }) => (
-                  <span key={s.id} className={`roster-month__dot ${people.length ? '' : 'is-gap'}`} />
+                  <span key={s.id} className={`roster-month__dot roster-month__dot--${s.id} ${people.length ? '' : 'is-gap'}`} />
                 ))}
               </span>
             </button>

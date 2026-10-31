@@ -53,10 +53,11 @@
   font-size: 0.93rem;
 }
 .shift-card__note a { display: inline-flex; align-items: center; min-height: var(--tap); color: inherit; font-weight: var(--fw-medium); text-underline-offset: 3px; }
-.shift-card__note--pending { background: var(--pending-bg); color: var(--pending-text); }
+/* Reminders ("Handover due in…", "Handover not submitted yet") use the warm apricot tint; "submitted" stays green */
+.shift-card__note--pending,
+.shift-card__note--overdue,
+.shift-card__note--neutral { background: var(--accent-tint); color: var(--on-accent-tint); }
 .shift-card__note--completed { background: var(--completed-bg); color: var(--completed-text); }
-.shift-card__note--overdue { background: var(--overdue-bg); color: var(--overdue-text); }
-.shift-card__note--neutral { background: var(--tint); color: var(--muted); }
 
 /* Priority alerts: residents to watch, then overdue tasks; each line opens it */
 .alerts-card__list { list-style: none; margin: -6px 0 0; padding: 0; }

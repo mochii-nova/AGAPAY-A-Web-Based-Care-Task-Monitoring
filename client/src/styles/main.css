@@ -33,6 +33,11 @@
   --accent-tint: #fcede5;       /* info/reminder boxes and the Morning shift chip */
   --on-accent-tint: #8a3f22;    /* text on --accent-tint */
 
+  /* Shift chips (caregiver and admin schedules): background, text, and the small mark / bar */
+  --shift-morning-bg: var(--accent-tint);  --shift-morning-text: var(--on-accent-tint);  --shift-morning-mark: var(--accent);
+  --shift-noon-bg: #efe7f7;                --shift-noon-text: #4f3577;                    --shift-noon-mark: #a994d6;
+  --shift-night-bg: #2f2440;               --shift-night-text: #ffffff;                   --shift-night-mark: #2f2440;
+
   /* Warm surfaces, lightest to strongest */
   --bg: #fbf8f3;                /* cream: page background */
   --card: #ffffff;
@@ -135,6 +140,10 @@
   --accent-on-dark: #f2b49b;
   --accent-tint: #33241f;
   --on-accent-tint: #f2b49b;
+
+  --shift-morning-bg: var(--accent-tint);  --shift-morning-text: var(--on-accent-tint);  --shift-morning-mark: var(--accent);
+  --shift-noon-bg: #33284a;                --shift-noon-text: #dccff5;                    --shift-noon-mark: #b9a6e0;
+  --shift-night-bg: #0f0b14;               --shift-night-text: #f1ebf6;                   --shift-night-mark: #8d79b8;
 
   --bg: #15111b;
   --card: #1f1928;
@@ -361,7 +370,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   font-weight: var(--fw-medium);
 }
 .segmented__btn:hover { color: var(--text); }
-.segmented__btn[aria-pressed='true'] { background: var(--card); color: var(--indigo); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
+.segmented__btn[aria-pressed='true'] { background: var(--indigo-soft); color: var(--indigo); box-shadow: 0 0 0 1px var(--lavender-line); }
 /* Full-width version: every button gets an equal share of one row */
 .segmented--fill { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
 .segmented--fill .segmented__btn { padding: 0 4px; font-size: 0.9rem; white-space: nowrap; }
@@ -454,7 +463,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .alert svg { flex-shrink: 0; margin-top: 2px; }
 .alert--error { background: var(--overdue-bg); color: var(--overdue-text); }
 .alert--success { background: var(--completed-bg); color: var(--completed-text); }
-.alert--info { background: var(--lavender); color: var(--label); }
+.alert--info { background: var(--accent-tint); color: var(--on-accent-tint); }
 .alert--warning { background: var(--pending-bg); color: var(--pending-text); }
 
 /* Buttons
@@ -622,8 +631,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .status-pill--pending   { color: var(--pending-text); }
 .status-pill--overdue   { color: var(--overdue-text); }
 .status-pill--skipped   { color: var(--skipped-text); }
-.status-pill--new       { color: var(--apricot-text); }
-.status-pill--new::before { background: var(--apricot); }
+.status-pill--new       { color: var(--accent-text); }
+.status-pill--new::before { background: var(--accent); }
 
 /* Image placeholders (until real pictures are added) */
 /* The AGAPAY logo (Logo.jsx): the white version replaces the dark one in dark mode */
@@ -661,8 +670,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--lavender);
-  color: var(--label);
+  background: var(--indigo-soft);  /* initials: lilac with plum letters */
+  color: var(--indigo);
   font-weight: var(--fw-medium);
   object-fit: cover;
 }
@@ -713,7 +722,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--label);
+  background: var(--accent);
   flex-shrink: 0;
 }
 
@@ -1140,6 +1149,18 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sidebar__link:hover { background: var(--on-navy-hover); }
 /* The page you are on: lilac with dark plum text (dark mode: a lighter plum with light text) */
 .sidebar__link.active { background: var(--sidebar-active); color: var(--on-sidebar-active); font-weight: var(--fw-medium); }
+/* ...with a small 3px apricot marker on its left edge */
+.sidebar__link.active::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
 .sidebar__link.active svg { opacity: 1; }
 .sidebar__bottom { flex-shrink: 0; padding-top: 4px; border-top: 1px solid var(--on-navy-line); }
 

@@ -6,7 +6,7 @@
 .tabs.tabs--header { gap: 2px; margin-bottom: 0; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
 .tabs--header .tab { min-height: var(--tap); padding: 0 16px; border-radius: 7px; }
 .tabs--header .tab[aria-selected='true'] { background: var(--card); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
-.tabs__new { color: var(--apricot-text); }
+.tabs__new { color: var(--accent-text); }
 
 /* Shift strip under the title */
 .shift-strip {

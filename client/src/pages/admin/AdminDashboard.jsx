@@ -174,7 +174,7 @@ export default function AdminDashboard() {
   return (
     <div className="admin-dash">
       <PageHeader
-        title={`${greeting(now)}, ${profile.name.split(' ')[0]}`}
+        title={`${greeting(now)}, ${profile.name.split(' ')[0]}.`}
         subtitle={`${today} · ${current.shift.label} shift is on now (${shiftTime(current.shift)})`}
       >
         <div className="admin-dash__actions">

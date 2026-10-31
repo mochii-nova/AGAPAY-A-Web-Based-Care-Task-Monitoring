@@ -48,24 +48,24 @@
 
 /* Shift bar: a small coloured line on days with a shift (one colour per shift) */
 .shift-bar { display: block; width: 100%; max-width: 64px; height: 4px; border-radius: var(--radius-pill); }
-.shift-bar--morning { background: var(--lavender-deep); }
-.shift-bar--noon { background: var(--apricot); }
-.shift-bar--night { background: var(--indigo); }
-/* Shift label on calendar days: a dot in the shift's colour + "Morning · 3 tasks" */
-.shift-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 1px 7px 1px 5px; border-radius: var(--radius-sm); background: var(--tint); color: var(--text); font-size: 0.74rem; font-weight: var(--fw-medium); line-height: 1.5; }
-.shift-chip__mark { flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; }
-.shift-chip--morning .shift-chip__mark { background: var(--lavender-deep); }
-.shift-chip--noon .shift-chip__mark { background: var(--apricot); }
-.shift-chip--night .shift-chip__mark { background: var(--indigo); }
+.shift-bar--morning { background: var(--shift-morning-mark); }
+.shift-bar--noon { background: var(--shift-noon-mark); }
+.shift-bar--night { background: var(--shift-night-mark); }
+/* Shift label on calendar days, coloured by shift: Morning apricot tint, Noon lilac, Night deep plum.
+   A dot in the text colour + "Morning · 3 tasks", so the word is always there too. */
+.shift-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 1px 7px 1px 5px; border-radius: var(--radius-sm); font-size: 0.74rem; font-weight: var(--fw-medium); line-height: 1.5; }
+.shift-chip__mark { flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.shift-chip--morning { background: var(--shift-morning-bg); color: var(--shift-morning-text); }
+.shift-chip--noon { background: var(--shift-noon-bg); color: var(--shift-noon-text); }
+.shift-chip--night { background: var(--shift-night-bg); color: var(--shift-night-text); }
 .shift-chip__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shift-chip__count { white-space: nowrap; }
 .shift-chip__count::before { content: '· '; }
-.month__day[aria-pressed='true'] .shift-chip { background: var(--card); }
 /* A day that's too narrow for "Morning · 10 tasks" on one line: the count goes underneath */
 .month__day { container-type: inline-size; }
 @container (max-width: 140px) {
   .month__day .shift-chip { display: inline-grid; grid-template-columns: auto auto; column-gap: 5px; align-items: center; }
-  .month__day .shift-chip__count { grid-column: 2; color: var(--muted); font-weight: var(--fw-regular); }
+  .month__day .shift-chip__count { grid-column: 2; font-weight: var(--fw-regular); }
   .month__day .shift-chip__count::before { content: none; }
 }
 .week__head .shift-chip { margin-top: 4px; }
@@ -92,7 +92,7 @@
 }
 .month__day:hover { background: var(--tint); }
 .month__day.is-outside { color: var(--faint); }
-/* The day you picked: a soft lavender cell */
+/* The day you picked: a soft lilac cell */
 .month__day[aria-pressed='true'] { background: var(--indigo-soft); }
 .month__date {
   display: inline-flex;
@@ -104,7 +104,7 @@
   border-radius: 50%;
   font-size: 0.92rem;
 }
-/* Today: an indigo circle on the date */
+/* Today: a plum circle on the date */
 .month__day.is-today .month__date { background: var(--indigo); color: var(--on-indigo); font-weight: var(--fw-medium); }
 .dots { display: flex; gap: 4px; }
 
@@ -241,6 +241,9 @@
   .month__day .shift-chip__text,
   .month__day .shift-chip__count { display: none; }
   .month__day .shift-chip__mark { width: 100%; height: 4px; border-radius: var(--radius-pill); }
+  .month__day .shift-chip--morning .shift-chip__mark { background: var(--shift-morning-mark); }
+  .month__day .shift-chip--noon .shift-chip__mark { background: var(--shift-noon-mark); }
+  .month__day .shift-chip--night .shift-chip__mark { background: var(--shift-night-mark); }
   .dots { gap: 2px; }
   .dots .dot { width: 6px; height: 6px; }
   .month__head span { font-size: 0.75rem; }
