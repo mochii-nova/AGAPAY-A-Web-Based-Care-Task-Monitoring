@@ -56,6 +56,13 @@ export default function TasksCare() {
   const [category, setCategory] = useState('');
   // ?open=<task id> opens that task (the Dashboard and task notifications link here like that)
   const [viewId, setViewId] = useState(() => Number(searchParams.get('open')) || null);
+  // A notification clicked while this page is already open changes ?open= too
+  const openParam = searchParams.get('open');
+  const [seenOpen, setSeenOpen] = useState(openParam);
+  if (openParam !== seenOpen) {
+    setSeenOpen(openParam);
+    if (openParam) setViewId(Number(openParam));
+  }
   const [form, setForm] = useState(null); // { task } for Edit, {} for Create
   const [deleteFor, setDeleteFor] = useState(null);
   const [deleting, setDeleting] = useState(false);

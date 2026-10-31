@@ -181,8 +181,13 @@ export default function Reports() {
             <>
               <div className="card reports__chart">
                 <h2 className="card__title">{chartTitle}</h2>
-                <p className="reports__chart-sub">Share of each day's due tasks marked Completed. Tasks still waiting for their time aren't counted.</p>
+                <p className="reports__chart-sub">Share of each day's due tasks marked Completed.</p>
                 <CompletionChart days={chartDays} />
+                <p className="reports__how">
+                  <strong>How to read this:</strong> Each bar is one day. It shows how many of that day's due tasks were marked
+                  Completed; the numbers under it are completed of due. A red line means tasks were due but none were completed.
+                  – means no tasks that day. Tasks still waiting for their time aren't counted.
+                </p>
               </div>
               <div className="card admin-table-card">
                 <table className="data-table report-table">

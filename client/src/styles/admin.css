@@ -358,7 +358,6 @@
 .bar-chart__col:hover, .bar-chart__col:focus-visible { background: var(--indigo-soft); }
 .bar-chart__bar { width: min(56px, 70%); border-radius: 4px 4px 0 0; background: var(--indigo); }
 .bar-chart__value { margin-bottom: 4px; color: var(--text); font-size: 0.8rem; font-weight: var(--fw-medium); font-variant-numeric: tabular-nums; }
-.bar-chart__none { margin-bottom: 4px; color: var(--faint); font-size: 0.8rem; }
 /* Tooltip: the numbers for that day */
 .bar-chart__col:is(:hover, :focus-visible)::after {
   content: attr(data-tip);
@@ -382,7 +381,13 @@
 }
 .bar-chart__col:first-child::after { left: 0; transform: none; }
 .bar-chart__col:last-child::after { right: 0; left: auto; transform: none; }
+/* 0%: a thin line on the baseline (a day with tasks, none completed) */
+.bar-chart__zero { width: min(56px, 70%); height: 3px; border-radius: 2px; background: var(--overdue-dot); }
 .bar-chart__axis { display: flex; gap: 4px; margin-top: 6px; }
+.bar-chart__counts { margin-top: 4px; }
+.bar-chart__counts span { color: var(--text); font-variant-numeric: tabular-nums; }
+.reports__how { margin: 14px 0 0; color: var(--muted); font-size: 0.88rem; }
+.reports__how strong { color: var(--text); font-weight: var(--fw-medium); }
 .bar-chart__axis span { flex: 1; min-width: 0; overflow: hidden; color: var(--muted); font-size: 0.78rem; text-align: center; white-space: nowrap; }
 
 /* Print (Reports "Print / Save as PDF"): the report only, black on white */

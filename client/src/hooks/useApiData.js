@@ -19,6 +19,7 @@ const cacheKey = (path) => `${localStorage.getItem('token') ?? ''} ${path}`;
 // `refreshEvery` (ms): also refresh quietly on a timer and when you come back to the window,
 // e.g. for notifications and messages.
 // `cache`: show the copy loaded earlier straight away (then refresh it quietly).
+// A `path` of null loads nothing (data stays null).
 export default function useApiData(path, { transform = asIs, refreshEvery, cache: useCache = false } = {}) {
   const [state, setState] = useState(() =>
     useCache && cache.has(cacheKey(path))
@@ -28,6 +29,7 @@ export default function useApiData(path, { transform = asIs, refreshEvery, cache
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    if (!path) return undefined; // nothing to load (yet)
     // Leaving the page, switching to another route or reloading cancels the request still running,
     // so an old answer can never land on the new screen
     const controller = new AbortController();

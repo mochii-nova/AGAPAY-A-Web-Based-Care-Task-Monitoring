@@ -75,14 +75,14 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
     ...(keepCurrent ? [{ value: String(task.assignedTo), label: `${task.assignedToName} (not on this shift)` }] : []),
   ];
 
-  // Offers shown under the form, ticked by default: give the resident to the chosen caregiver too, and
-  // (new tasks) add the category to the resident's care needs
+  // Offers shown in the form: give the resident to the chosen caregiver too (ticked), and (new tasks)
+  // add the category to the resident's care needs (unticked: care needs are long-term, so only on purpose)
   const chosenPerson = onShift.find((o) => String(o.caregiver.id) === form.assignedTo)?.caregiver;
   const offerAssign = resident && chosenPerson && !looksAfter(chosenPerson) ? chosenPerson : null;
   const category = TASK_CATEGORIES.find((c) => c.id === form.category);
   const offerNeed = !editing && resident && category && !resident.careNeeds.includes(category.id) ? category : null;
   const [alsoAssign, setAlsoAssign] = useState(true);
-  const [alsoNeed, setAlsoNeed] = useState(true);
+  const [alsoNeed, setAlsoNeed] = useState(false);
 
   // Repeating: the days the chosen caregiver isn't on this shift (those tasks get no caregiver)
   const chosen = caregivers.find((c) => String(c.id) === form.assignedTo);

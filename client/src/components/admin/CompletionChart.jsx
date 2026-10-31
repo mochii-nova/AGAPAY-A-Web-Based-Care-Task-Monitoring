@@ -1,11 +1,21 @@
 import { percent } from '../../utils/reports';
 
 // Bars: the share of each day's due tasks marked Completed (one series, so no legend;
-// the card title names it). Hover or focus a bar for the numbers; the table below has them all.
-// days: [{ ymd, short: 'Tue 27', long: 'Tue, Oct 27', stats }]
+// the card title names it). Under each bar: "3 of 10" (completed of due). A day with tasks but
+// nothing completed gets a thin line on the baseline, so it doesn't look like a day without tasks ("–").
+// Hover or focus a bar for all the numbers; the table below has them too.
+// days: [{ ymd, short: 'Tue 27', long: 'Tue, Oct 27', stats, labelled }]
 export default function CompletionChart({ days }) {
   // Many days: label every few so they don't collide
   const every = days.length > 16 ? 5 : days.length > 10 ? 2 : 1;
+  const labelled = (i) => i % every === 0 || i === days.length - 1;
+  // Up to a week "3 of 10"; up to two weeks "3/10"; longer ranges only under the labelled days
+  const countText = ({ completed, due }, i) => {
+    if (!due) return '–';
+    if (days.length <= 7) return `${completed} of ${due}`;
+    if (days.length <= 14 || labelled(i)) return `${completed}/${due}`;
+    return '';
+  };
 
   return (
     <div className="bar-chart" role="group" aria-label="Completion by day">
@@ -21,17 +31,25 @@ export default function CompletionChart({ days }) {
                 <>
                   {/* Short ranges label every bar; longer ones only the lowest and highest day */}
                   {d.labelled && <span className="bar-chart__value" aria-hidden="true">{percent(rate)}</span>}
-                  <span className="bar-chart__bar" style={{ height: `${Math.max(rate, 1)}%` }} aria-hidden="true" />
+                  {rate === 0 ? (
+                    <span className="bar-chart__zero" aria-hidden="true" />
+                  ) : (
+                    <span className="bar-chart__bar" style={{ height: `${rate}%` }} aria-hidden="true" />
+                  )}
                 </>
               )}
-              {rate == null && <span className="bar-chart__none" aria-hidden="true">–</span>}
             </div>
           );
         })}
       </div>
+      <div className="bar-chart__axis bar-chart__counts" aria-hidden="true">
+        {days.map((d, i) => (
+          <span key={d.ymd}>{countText(d.stats, i)}</span>
+        ))}
+      </div>
       <div className="bar-chart__axis" aria-hidden="true">
         {days.map((d, i) => (
-          <span key={d.ymd}>{i % every === 0 || i === days.length - 1 ? d.short : ''}</span>
+          <span key={d.ymd}>{labelled(i) ? d.short : ''}</span>
         ))}
       </div>
     </div>

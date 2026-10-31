@@ -868,6 +868,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: var(--tap);
   margin-top: 4px;
   border-top: 1px solid var(--border);
@@ -992,11 +993,13 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .notif-item__text strong { font-size: 0.92rem; font-weight: var(--fw-regular); }
 .notif-item.is-unread .notif-item__text strong { font-weight: var(--fw-bold); }
 .notif-item__text small { color: var(--muted); font-size: 0.82rem; }
-.notif-item__text time { color: var(--label); font-size: 0.75rem; margin-top: 2px; }
-.notif-item__time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+/* "TASK · 2 hr ago" above the title */
+.notif-item__meta { display: flex; align-items: center; gap: 6px; margin-bottom: 1px; color: var(--label); font-size: 0.75rem; }
+.notif-item__type { font-weight: var(--fw-bold); letter-spacing: 0.5px; text-transform: uppercase; }
+.notif-item__text .notif-item__due { margin-top: 2px; color: var(--text); }
+.notif-item__text .notif-item__due.is-passed { color: var(--overdue-text); font-weight: var(--fw-medium); }
 .notif-list--page { padding: 0; }
-.notif-list--page .notif-item { align-items: center; gap: 14px; padding: 14px 20px; border-radius: 0; }
-.notif-list--page .unread-dot { margin-top: 0; }
+.notif-list--page .notif-item { gap: 14px; padding: 14px 20px; border-radius: 0; }
 .notif-list--page li { border-top: 1px solid var(--border); }
 
 /* Notifications page: one card with the All / Unread tabs on top */

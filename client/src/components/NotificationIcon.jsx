@@ -1,4 +1,4 @@
-import { ClipboardCheck, Clock, FileText, CalendarDays, Mail } from 'lucide-react';
+import { ClipboardCheck, Clock, FileText, CalendarDays, Mail, UserPlus } from 'lucide-react';
 
 const ICONS = {
   task: ClipboardCheck,
@@ -6,6 +6,7 @@ const ICONS = {
   handover: FileText,
   schedule: CalendarDays,
   message: Mail,
+  signup: UserPlus,
 };
 
 // Icon in a soft round circle in front of each notification

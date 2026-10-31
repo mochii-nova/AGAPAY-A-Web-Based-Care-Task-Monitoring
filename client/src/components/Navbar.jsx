@@ -4,10 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
 import { useMessages } from '../context/MessagesContext';
-import { timeAgo } from '../utils/format';
 import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
-import NotificationIcon from './NotificationIcon';
+import NotificationItem from './NotificationItem';
 import ThemeToggle from './ThemeToggle';
 import { setTheme, useShownTheme, useTheme } from '../utils/theme';
 
@@ -56,36 +55,24 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
                 <div className="popover__header-actions">
                   {unreadCount > 0 && (
                     <button type="button" className="text-btn" onClick={markAllRead}>
-                      <CheckCheck size={16} /> Mark all read
+                      <CheckCheck size={16} /> Mark all as read
                     </button>
                   )}
                 </div>
               </div>
 
-              {/* The 4 newest only; the full list and the pop-up switch are on the Notifications page */}
+              {/* The 5 newest only; the full list and the pop-up switch are on the Notifications page */}
               {notifications.length === 0 && <p className="empty-text">No notifications yet.</p>}
               <ul className="notif-list">
-                {notifications.slice(0, 4).map((n) => (
+                {notifications.slice(0, 5).map((n) => (
                   <li key={n.id}>
-                    <Link
-                      to={n.link || '/notifications'}
-                      className={`notif-item ${n.read ? '' : 'is-unread'}`}
-                      onClick={() => { markRead(n.id); bell.setOpen(false); }}
-                    >
-                      <NotificationIcon type={n.type} />
-                      <span className="notif-item__text">
-                        <strong>{n.title}</strong>
-                        <small>{n.body}</small>
-                        <time dateTime={n.time}>{timeAgo(n.time)}</time>
-                      </span>
-                      {!n.read && <span className="unread-dot" aria-label="Unread" />}
-                    </Link>
+                    <NotificationItem n={n} onOpen={() => { markRead(n.id); bell.setOpen(false); }} />
                   </li>
                 ))}
               </ul>
 
               <Link to="/notifications" className="popover__footer" onClick={() => bell.setOpen(false)}>
-                View all{notifications.length > 4 ? ` ${notifications.length} notifications` : ' notifications'}
+                See all notifications <span aria-hidden="true">→</span>
               </Link>
             </div>
           )}

@@ -1,23 +1,27 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
-import NotificationIcon from '../components/NotificationIcon';
+import NotificationItem from '../components/NotificationItem';
 import PushToggle from '../components/PushToggle';
 import { LoadingState, ErrorState } from '../components/StateMessage';
 import { useNotifications } from '../context/NotificationContext';
-import { timeAgo } from '../utils/format';
+import { isAdmin } from '../utils/roles';
+import { useAuth } from '../context/AuthContext';
 
 // Full-page version of the bell dropdown
 export default function Notifications() {
   const { notifications, unreadCount, markRead, markAllRead, status, error, reload } = useNotifications();
+  const { user } = useAuth();
   const [filter, setFilter] = useState('all');
 
   const shown = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
 
   return (
     <div>
-      <PageHeader title="Notifications" subtitle="Task reminders, handovers, schedule changes and messages.">
+      <PageHeader
+        title="Notifications"
+        subtitle={isAdmin(user) ? 'Overdue tasks, handovers, messages and sign-ups.' : 'New and overdue tasks, handovers, schedule changes and messages.'}
+      >
         <button type="button" className="btn btn--outline" onClick={markAllRead} disabled={unreadCount === 0}>
           <Check size={18} aria-hidden="true" /> Mark all as read
         </button>
@@ -49,15 +53,7 @@ export default function Notifications() {
           <ul className="notif-list notif-list--page">
             {shown.map((n) => (
               <li key={n.id}>
-                <Link to={n.link || '/notifications'} className={`notif-item ${n.read ? '' : 'is-unread'}`} onClick={() => markRead(n.id)}>
-                  <NotificationIcon type={n.type} />
-                  <span className="notif-item__text">
-                    <strong>{n.title}</strong>
-                    <small>{n.body}</small>
-                  </span>
-                  <time dateTime={n.time} className="notif-item__time">{timeAgo(n.time)}</time>
-                  {n.read ? <span className="unread-dot unread-dot--space" aria-hidden="true" /> : <span className="unread-dot" aria-label="Unread" />}
-                </Link>
+                <NotificationItem n={n} onOpen={() => markRead(n.id)} />
               </li>
             ))}
           </ul>

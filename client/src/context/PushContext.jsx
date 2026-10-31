@@ -31,8 +31,9 @@ const writeWanted = (userId, on) => {
   }
 };
 
-// What the pop-ups are about, for the status line
-const topics = (user) => (isAdmin(user) ? 'new sign-ups, missing handovers and new messages' : 'overdue tasks and new handovers');
+// What the pop-ups are about, for the status line. Only what the server really sends today:
+// administrators get overdue tasks, new handovers and new messages (no sign-ups or missing handovers).
+const topics = (user) => (isAdmin(user) ? 'overdue tasks, new handovers and new messages' : 'overdue tasks and new handovers');
 
 const support = pushSupport();
 

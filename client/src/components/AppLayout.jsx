@@ -67,10 +67,14 @@ export default function AppLayout() {
       <HandoverProvider>
         <PushProvider>
           <MessagesProvider>
-            <NotificationProvider>
-              {/* The staff list is only loaded for administrators */}
-              {admin ? <StaffProvider>{page}</StaffProvider> : page}
-            </NotificationProvider>
+            {/* The staff list is only loaded for administrators (notifications use it for sign-ups) */}
+            {admin ? (
+              <StaffProvider>
+                <NotificationProvider>{page}</NotificationProvider>
+              </StaffProvider>
+            ) : (
+              <NotificationProvider>{page}</NotificationProvider>
+            )}
           </MessagesProvider>
         </PushProvider>
       </HandoverProvider>

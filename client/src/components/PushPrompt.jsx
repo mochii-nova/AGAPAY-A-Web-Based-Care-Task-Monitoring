@@ -41,7 +41,7 @@ export default function PushPrompt() {
         <h2 id="push-prompt-title">Turn on reminders</h2>
         <p>
           {isAdmin(user)
-            ? 'Get a pop-up for new sign-ups, missing handovers and new messages.'
+            ? 'Get a pop-up for overdue tasks, new handovers and new messages.'
             : 'Get a pop-up for overdue tasks and new handovers, even when AGAPAY is in the background.'}
         </p>
       </div>
