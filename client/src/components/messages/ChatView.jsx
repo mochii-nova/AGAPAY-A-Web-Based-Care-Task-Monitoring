@@ -95,9 +95,8 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
   };
 
   const lastMine = messages.findLast((m) => m.senderId === myId);
-  // "Caregiver · Night lead" (the job title is left out when it just repeats the role)
-  const role = user.role === 'admin' ? 'Administrator' : 'Caregiver';
-  const who = [role, user.title?.toLowerCase() === role.toLowerCase() ? null : jobTitle(user.title)].filter(Boolean).join(' · ');
+  // Under the name: their job title ("Relief caregiver"), or their role when they have none
+  const who = jobTitle(user.title) || (user.role === 'admin' ? 'Administrator' : 'Caregiver');
 
   return (
     <section className="chat-pane" aria-label={`Conversation with ${user.name}`}>

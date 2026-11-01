@@ -6,6 +6,7 @@ import { useHandovers } from '../../context/HandoverContext';
 import { useToast } from '../../context/ToastContext';
 import useApiData from '../../hooks/useApiData';
 import useResidents from '../../hooks/useResidents';
+import useOverdueTasks from '../../hooks/useOverdueTasks';
 import useNow from '../../hooks/useNow';
 import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS, shiftTime } from '../../constants';
@@ -73,7 +74,9 @@ export default function AdminDashboard() {
   const shiftOf = (t) => shiftOfDue(t.dueAt);
   const tasks = (tasksQuery.data ?? []).filter((t) => shiftOf(t).shiftDate === day);
   const pending = tasks.filter((t) => t.status === 'pending');
-  const overdue = tasks.filter((t) => t.status === 'overdue').sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+  // Every open overdue task, today's and earlier days' (the same list as Tasks & Care's Overdue tab)
+  const { overdue, reload: reloadOverdue } = useOverdueTasks();
+  const earlierOverdue = overdue.filter((t) => shiftOf(t).shiftDate < day).length;
 
   // Handovers for today's shifts, and yesterday's (for "missing")
   const rows = ready ? monitorRows(handovers, roster, addDays(day, -1), day, now) : [];
@@ -81,13 +84,28 @@ export default function AdminDashboard() {
   const nextDue = todayRows.filter((r) => r.status === 'notDue').sort((a, b) => a.end - b.end)[0];
   const missing = rows.filter((r) => r.status === 'missing');
 
+  // Residents card: nobody at all, else a shift nobody of theirs works (the same check as Needs attention)
   const unassignedResidents = residents.filter((r) => r.caregivers.length === 0).length;
+  const shiftGaps = SHIFTS.map((s) => ({ shift: s, n: residentsWithoutShift(residents, caregivers, s).length }))
+    .filter((g) => g.n)
+    .sort((a, b) => b.n - a.n);
+  const residentsNote = unassignedResidents
+    ? `${unassignedResidents} without a caregiver`
+    : shiftGaps.length
+      ? `${shiftGaps[0].n} missing a ${shiftGaps[0].shift.label} caregiver${shiftGaps.length > 1 ? ` (+${plural(shiftGaps.length - 1, 'more shift')})` : ''}`
+      : 'All have caregivers';
 
   const tiles = [
-    { label: 'Residents', value: residents.length, note: unassignedResidents ? `${unassignedResidents} without a caregiver` : 'All have caregivers', to: '/admin/residents' },
+    { label: 'Residents', value: residents.length, note: residentsNote, to: '/admin/residents' },
     { label: 'Active caregivers', value: caregivers.length, note: pendingCount ? `${pendingCount} waiting for approval` : 'No one waiting for approval', to: '/admin/staff' },
     { label: 'Pending tasks', value: pending.length, note: 'Still to do on today’s shifts', to: '/admin/tasks' },
-    { label: 'Overdue tasks', value: overdue.length, note: overdue.length ? 'Need follow-up' : 'Nothing late', tone: overdue.length ? 'overdue' : '', to: '/admin/tasks' },
+    {
+      label: 'Overdue tasks',
+      value: overdue.length,
+      note: earlierOverdue ? `${earlierOverdue} from earlier days` : overdue.length ? 'Need follow-up' : 'Nothing late',
+      tone: overdue.length ? 'overdue' : '',
+      to: '/admin/tasks?tab=overdue',
+    },
     {
       label: 'Handovers today',
       value: todayRows.filter((r) => r.handover).length,
@@ -106,17 +124,21 @@ export default function AdminDashboard() {
   // Needs attention, most urgent first: overdue tasks, missing handovers, shifts or residents with no
   // caregiver, residents to watch, sign-ups, website messages. The first 4 show; "View all (N)" the rest.
   const attention = [];
-  overdue.forEach((t) =>
+  overdue.forEach((t) => {
+    // Earlier days say which day; Tasks & Care opens on the day the task is on
+    const earlier = shiftOf(t).shiftDate < day;
     attention.push({
       key: `t${t.id}`,
       tone: 'overdue',
       tag: 'Overdue',
       title: t.task,
-      sub: [t.resident, t.room && `Rm ${t.room}`, t.assignedToName ?? 'not assigned', `due ${formatTime(t.dueAt)}`].filter(Boolean).join(' · '),
+      sub: [t.resident, t.room && `Rm ${t.room}`, t.assignedToName ?? 'not assigned', `due ${earlier ? `${dayLabel(isoDay(t.dueAt))}, ` : ''}${formatTime(t.dueAt)}`]
+        .filter(Boolean)
+        .join(' · '),
       action: 'View',
-      onClick: () => navigate(`/admin/tasks?open=${t.id}`),
-    })
-  );
+      onClick: () => navigate(`/admin/tasks?date=${isoDay(t.dueAt)}&open=${t.id}`),
+    });
+  });
   missing.forEach((row) =>
     attention.push({
       key: `m${row.key}`,
@@ -463,6 +485,7 @@ export default function AdminDashboard() {
         onSaved={(saved, { offDays, partial, also }) => {
           tasksQuery.reload({ silent: true });
           anyTaskQuery.reload({ silent: true });
+          reloadOverdue({ silent: true });
           if (!partial) {
             showToast(
               (saved.length === 1 ? `Created ${saved[0].task}.` : `Created ${saved.length} tasks.${offDays ? ` ${offDays} without a caregiver.` : ''}`) +

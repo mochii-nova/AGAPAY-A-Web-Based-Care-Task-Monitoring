@@ -6,6 +6,7 @@ import { useStaff } from '../../context/StaffContext';
 import { useToast } from '../../context/ToastContext';
 import useApiData from '../../hooks/useApiData';
 import useResidents from '../../hooks/useResidents';
+import useOverdueTasks from '../../hooks/useOverdueTasks';
 import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS, TASK_CATEGORIES, getCategory } from '../../constants';
 import { formatTime } from '../../utils/format';
@@ -51,7 +52,9 @@ export default function TasksCare() {
   const day = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') ?? '') ? searchParams.get('date') : today;
   const query = useApiData(`/tasks?from=${day}&to=${day}`, { transform: normalizeTasks });
   const tasks = query.data ?? [];
-  const [tab, setTab] = useState('all');
+  const { overdue: allOverdue, reload: reloadOverdue } = useOverdueTasks();
+  // ?tab=overdue (the Dashboard's "Overdue tasks" card) opens that tab
+  const [tab, setTab] = useState(() => (TABS.some((t) => t.id === searchParams.get('tab')) ? searchParams.get('tab') : 'all'));
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [shiftFilter, setShiftFilter] = useState('');
   // ?problem=offshift (the Dashboard's "Fix") starts on the tasks given to someone not on that shift
@@ -89,26 +92,32 @@ export default function TasksCare() {
 
   // Filters first; the tabs then split what's left
   const q = searchTerm(search);
-  const filtered = tasks
-    .filter((t) => !shiftFilter || shiftOfDue(t.dueAt).shift.id === shiftFilter)
-    .filter(
-      (t) =>
-        !caregiverFilter ||
-        (caregiverFilter === 'none' ? !t.assignedTo : caregiverFilter === 'offshift' ? offShift.has(t.id) : String(t.assignedTo) === caregiverFilter)
-    )
-    .filter((t) => !category || t.category === category)
-    .filter((t) => matchesSearch(q, t.task, t.resident, t.room))
-    .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
-  const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
-  const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
+  const applyFilters = (list) =>
+    list
+      .filter((t) => !shiftFilter || shiftOfDue(t.dueAt).shift.id === shiftFilter)
+      .filter(
+        (t) =>
+          !caregiverFilter ||
+          (caregiverFilter === 'none' ? !t.assignedTo : caregiverFilter === 'offshift' ? offShift.has(t.id) : String(t.assignedTo) === caregiverFilter)
+      )
+      .filter((t) => !category || t.category === category)
+      .filter((t) => matchesSearch(q, t.task, t.resident, t.room))
+      .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+  const filtered = applyFilters(tasks);
+  // The Overdue tab isn't limited to the day shown: every open overdue task, earlier days too,
+  // so its number is the same as the Dashboard's
+  const overdueShown = applyFilters(allOverdue);
+  const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, id === 'overdue' ? overdueShown.length : filtered.filter(match).length]));
+  const shown = tab === 'overdue' ? overdueShown : filtered.filter(TABS.find((t) => t.id === tab).match);
   const filtering = q || shiftFilter || caregiverFilter || category;
   // The search found nothing (as opposed to an empty tab)
   const noMatch = !!q && tasks.length > 0 && filtered.length === 0;
 
-  const viewTask = tasks.find((t) => t.id === viewId) ?? null;
+  const viewTask = tasks.find((t) => t.id === viewId) ?? allOverdue.find((t) => t.id === viewId) ?? null;
 
   const handleSaved = (saved, { editing, offDays, partial, also }) => {
     query.reload({ silent: true });
+    reloadOverdue({ silent: true });
     if (partial) return;
     const first = saved[0];
     const extra = also ? ` ${also}` : '';
@@ -131,6 +140,7 @@ export default function TasksCare() {
     try {
       await api.delete(`/tasks/${deleteFor.id}`);
       query.setData((list) => list.filter((t) => t.id !== deleteFor.id));
+      reloadOverdue({ silent: true });
       showToast(`${deleteFor.task} was deleted.`);
       setDeleteFor(null);
       setViewId(null);
@@ -221,7 +231,11 @@ export default function TasksCare() {
           )}
           {query.status === 'ready' && shown.length === 0 && !noMatch && (
             <EmptyState icon={ClipboardList}>
-              {tasks.length === 0 ? `No tasks on ${dayLabel(day)} yet. Press "Create task" to add one.` : EMPTY_TEXT[filtering && tab === 'all' ? 'all' : tab]}
+              {tab === 'overdue'
+                ? EMPTY_TEXT.overdue
+                : tasks.length === 0
+                  ? `No tasks on ${dayLabel(day)} yet. Press "Create task" to add one.`
+                  : EMPTY_TEXT[filtering && tab === 'all' ? 'all' : tab]}
             </EmptyState>
           )}
 
@@ -243,7 +257,8 @@ export default function TasksCare() {
                   <tr key={t.id} className="task-table__row is-clickable" onClick={() => setViewId(t.id)}>
                     <td className="task-table__time">
                       {formatTime(t.dueAt)}
-                      <small>{shiftOfDue(t.dueAt).shift.label}</small>
+                      {/* Overdue tasks from another day say which day */}
+                      <small>{isoDay(t.dueAt) !== day && `${dayLabel(isoDay(t.dueAt))} · `}{shiftOfDue(t.dueAt).shift.label}</small>
                     </td>
                     <td className="task-table__task">
                       <strong>{t.task}</strong>
@@ -287,9 +302,11 @@ export default function TasksCare() {
           )}
         </section>
 
-        {query.status === 'ready' && tasks.length > 0 && (
+        {query.status === 'ready' && (tab === 'overdue' ? shown.length > 0 : tasks.length > 0) && (
           <p className="admin-tasks__footer">
-            Showing {shown.length} of {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} on {day === today ? 'today' : dayLabel(day)}
+            {tab === 'overdue'
+              ? `Showing ${shown.length} overdue ${shown.length === 1 ? 'task' : 'tasks'}, from every day`
+              : `Showing ${shown.length} of ${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'} on ${day === today ? 'today' : dayLabel(day)}`}
           </p>
         )}
       </div>

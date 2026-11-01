@@ -1,4 +1,4 @@
-import { Camera } from 'lucide-react';
+import { Camera, Pencil } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { SHIFTS, shiftTime } from '../constants';
 import PhoneNumber from '../components/PhoneNumber';
@@ -23,9 +23,7 @@ export default function Profile() {
 
   return (
     <div>
-      <PageHeader title="My profile" subtitle="Your details, photo and password.">
-        <button type="button" className="btn btn--outline" onClick={openEditProfile}>Edit profile</button>
-      </PageHeader>
+      <PageHeader title="Profile" subtitle="Your details and password." />
 
       <div className="profile-layout">
         {/* Left: photo and details set by the administrator */}
@@ -43,7 +41,8 @@ export default function Profile() {
           <p className="profile-id__role">{roleLabel}{shift && ` · ${shift.label} shift`}</p>
 
           <div className="profile-id__admin">
-            <p className="small-label">Set by the administrator</p>
+            {/* Caregivers: these are set by an administrator. Administrators: just their account details. */}
+            <p className="small-label">{profile.role === 'admin' ? 'Account details' : 'Set by the administrator'}</p>
             <dl className="info-list">
               <div><dt>Employee ID</dt><dd>{profile.employeeId}</dd></div>
               {/* Administrators don't work shifts */}
@@ -60,7 +59,11 @@ export default function Profile() {
         {/* Right: personal details (read-only here, changed with "Edit profile") and password */}
         <div className="profile-main">
           <section className="card">
-            <CardHeader title="Personal details" />
+            <CardHeader title="Personal details">
+              <button type="button" className="btn btn--outline btn--sm" onClick={openEditProfile}>
+                <Pencil size={16} aria-hidden="true" /> Edit profile
+              </button>
+            </CardHeader>
             <dl className="detail-rows">
               <div><dt>First name</dt><dd>{orNotSet(profile.firstName)}</dd></div>
               <div><dt>Last name</dt><dd>{orNotSet(profile.lastName)}</dd></div>

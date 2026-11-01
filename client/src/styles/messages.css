@@ -54,15 +54,19 @@
 .chat-pane__who h2 { margin: 0; font-size: 1rem; }
 .chat-pane__who small { color: var(--muted); font-size: 0.82rem; }
 
-.chat-log { display: flex; flex: 1; flex-direction: column; gap: 2px; padding: 16px 20px; overflow-y: auto; background: var(--bg); }
+/* Extra room on top so the first date label ("Yesterday") is never cut off */
+.chat-log { display: flex; flex: 1; flex-direction: column; gap: 2px; padding: 24px 20px 16px; overflow-y: auto; background: var(--bg); }
 .chat-log:focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
+/* A long chat must scroll, never squeeze its messages (some browsers shrink them and clip the top) */
+.chat-log > * { flex-shrink: 0; }
 .chat-item { display: flex; flex-direction: column; }
 /* Messages in one group sit close together; a new group starts a little lower */
 .chat-item.is-group-start:not(:first-child) { margin-top: 10px; }
 /* Laptops with no chat open yet */
 .chat-pane--none { align-items: center; justify-content: center; background: var(--bg); }
 .chat-day { margin: 6px 0 12px; text-align: center; }
-.chat-day span { padding: 3px 10px; border-radius: var(--radius-pill); background: var(--indigo-soft); color: var(--label); font-size: 0.75rem; }
+/* inline-block: the pill's padding takes up room, so it can't stick out above the list */
+.chat-day span { display: inline-block; line-height: 1.5; padding: 3px 10px; border-radius: var(--radius-pill); background: var(--indigo-soft); color: var(--label); font-size: 0.75rem; }
 .chat-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: auto; color: var(--muted); text-align: center; }
 
 /* Their messages: white bubble with a thin border on the left. Mine: plum with white text on the right.
@@ -135,7 +139,7 @@
 @media (max-width: 600px) {
   .card.chat { min-height: 420px; }
   .chat-pane__head { padding: 10px 12px; gap: 8px; }
-  .chat-log { padding: 12px; }
+  .chat-log { padding: 20px 12px 12px; }
   .composer { padding: 10px 12px 12px; }
   .composer__send { padding: 0 14px; }
 }
