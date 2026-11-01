@@ -14,7 +14,7 @@ import { shiftPhase } from '../utils/shift';
 import { formatTime } from '../utils/format';
 import { addDays } from '../utils/calendar';
 import { savedText } from '../utils/tasks';
-import { handoverTiming, findMyShiftHandover, nextShift, readersOf, submittedLine } from '../utils/handover';
+import { handoverTiming, findMyShiftHandover, nextShift, readersOf, submittedLine, handoverForMe, handoverTarget, newHandovers } from '../utils/handover';
 import PageHeader from '../components/PageHeader';
 import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import WriteHandover from '../components/handover/WriteHandover';
@@ -67,7 +67,8 @@ export default function Handover() {
   const setTab = (id) => setSearchParams(id === 'write' ? {} : { tab: id }, { replace: true });
 
   // My shift now, from the roster (last night's Night shift counts until it ends). null = day off.
-  const shiftsQuery = useShifts(addDays(now, -1), now);
+  // A week ahead is loaded too, to know my next shift.
+  const shiftsQuery = useShifts(addDays(now, -1), addDays(now, 7));
   const current = shiftsQuery.currentShift(now);
   const shift = current?.shift ?? null;
   const shiftTimes = current?.times ?? null;
@@ -90,7 +91,25 @@ export default function Handover() {
 
   const myHandover = shiftTimes ? findMyShiftHandover(handovers, profile.id, shift, shiftTimes, shiftDate) : null;
   const received = handovers.filter((h) => h.author?._id !== profile.id);
-  const unread = received.filter((h) => !h.readByMe);
+  // "New": unread ones from the last 24 hours (the same count as the sidebar)
+  const unread = newHandovers(handovers, profile.id, now);
+  // The newest handover meant for my shift now or my next one. Received shows only this one;
+  // older ones are in History.
+  const upcoming = shiftsQuery.upcomingShift(now);
+  const forMe = handoverForMe(handovers, profile.id, [
+    current && { shift: current.shift.apiValue, shiftDate: current.shiftDate },
+    upcoming && { shift: upcoming.shift.apiValue, shiftDate: upcoming.shiftDate },
+  ]);
+  // "For your noon shift (now)" / "For your next shift: Morning, Nov 2"
+  const forShiftLabel = (() => {
+    const target = forMe && handoverTarget(forMe);
+    if (!target) return '';
+    if (current && target.shiftDate === current.shiftDate && target.shift === current.shift.apiValue) {
+      return `For your ${current.shift.label.toLowerCase()} shift (now)`;
+    }
+    const day = new Date(`${target.shiftDate}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return `For your next shift: ${shiftLabel(target.shift)}, ${day}`;
+  })();
 
   // My unfinished handover, saved in the database (null if there is none)
   const draftQuery = useApiData('/handovers/draft');
@@ -183,8 +202,13 @@ export default function Handover() {
                   <div className="card"><EmptyState icon={CalendarOff}>You have no shift today, so there's nothing to hand over.</EmptyState></div>
                 ) : myHandover ? (
                   <section className="card received">
+                    {/* No editing: the server has no way to change a handover after it's sent */}
                     <p className="submitted-note">
-                      <CircleCheck size={18} aria-hidden="true" /> Your handover for this shift was submitted. You can find it in History.
+                      <CircleCheck size={18} aria-hidden="true" />
+                      <span>
+                        <strong>Submitted at {formatTime(myHandover.submittedAt ?? myHandover.createdAt)}.</strong> This handover is
+                        read-only now, and you can't send a second one for this shift.
+                      </span>
                     </p>
                     <HandoverHead handover={myHandover} isMine />
                     <HandoverView handover={myHandover} />
@@ -217,7 +241,7 @@ export default function Handover() {
                   <div className="card">{handoversState}</div>
                 ) : (
                   <>
-                    <LastShiftCard handover={received[0]} myId={profile.id} onAcknowledge={handleAcknowledge} />
+                    <LastShiftCard handover={forMe} myId={profile.id} onAcknowledge={handleAcknowledge} />
                     <RecentHandovers handovers={handovers} myId={profile.id} onViewAll={() => setTab('history')} />
                   </>
                 )}
@@ -230,21 +254,28 @@ export default function Handover() {
           <div className="handover-feed">
             {handoversState ? (
               <div className="card">{handoversState}</div>
-            ) : received.length === 0 ? (
-              <div className="card"><EmptyState icon={Inbox}>No handovers from other caregivers yet.</EmptyState></div>
+            ) : !forMe ? (
+              <div className="card">
+                <EmptyState icon={Inbox}>No handover for your current or next shift yet.</EmptyState>
+              </div>
             ) : (
-              received.map((h) => (
-                <article key={h._id} className="card received">
-                  <HandoverHead handover={h} />
-                  <HandoverView handover={h} />
-                  <p className="submitted-line">{submittedLine(h)}</p>
-                  {!h.readByMe && (
-                    <div className="received__actions">
-                      <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as read</button>
-                    </div>
-                  )}
-                </article>
-              ))
+              <article className="card received">
+                {forShiftLabel && <p className="small-label received__for">{forShiftLabel}</p>}
+                <HandoverHead handover={forMe} />
+                <HandoverView handover={forMe} />
+                <p className="submitted-line">{submittedLine(forMe)}</p>
+                {!forMe.readByMe && (
+                  <div className="received__actions">
+                    <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(forMe)}>Mark as read</button>
+                  </div>
+                )}
+              </article>
+            )}
+            {!handoversState && received.some((h) => h !== forMe) && (
+              <p className="received__older">
+                Older handovers are in{' '}
+                <button type="button" className="link-btn" onClick={() => setTab('history')}>History</button>
+              </p>
             )}
           </div>
         )}
@@ -265,6 +296,11 @@ export default function Handover() {
                       </summary>
                       <div className="history-item__body">
                         <HandoverView handover={h} />
+                        {h.author?._id !== profile.id && !h.readByMe && (
+                          <div className="received__actions">
+                            <button type="button" className="btn btn--soft" onClick={() => handleAcknowledge(h)}>Mark as read</button>
+                          </div>
+                        )}
                       </div>
                     </details>
                   </li>

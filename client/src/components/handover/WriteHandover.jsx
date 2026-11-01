@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CircleAlert, ClipboardList, Info } from 'lucide-react';
 import { useHandovers } from '../../context/HandoverContext';
 import { useToast } from '../../context/ToastContext';
-import { buildSummary, RESIDENT_STATUS } from '../../utils/handover';
+import { buildSummary, cleanOtherNotes, RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
 import StatusPill from '../StatusPill';
 import Avatar from '../Avatar';
@@ -70,7 +70,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
   };
 
   // What the backend gets. A draft keeps notes as typed; a submitted handover
-  // leaves out notes for "Normal" residents and unused quick tags (e.g. just "Supplies:").
+  // leaves out notes for "Normal" residents and empty labels (e.g. just "Supplies:").
   const payload = ({ final }) => ({
     shift: shift.apiValue,
     shiftDate,
@@ -80,9 +80,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
       return { residentId: r.id, status: state.status, note: final && state.status === 'normal' ? '' : state.note.trim() };
     }),
     tasks: unfinished.map((t) => ({ taskId: t._id, note: (form.passOn[t._id] ?? '').trim() })),
-    otherNotes: final
-      ? form.other.split('\n').filter((line) => !QUICK_TAGS.some((tag) => line.trim() === `${tag}:`)).join('\n').trim()
-      : form.other,
+    otherNotes: final ? cleanOtherNotes(form.other) : form.other,
   });
 
   const storeDraft = async () => {

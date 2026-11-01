@@ -11,6 +11,7 @@ import { useMessages } from '../context/MessagesContext';
 import { useStaff } from '../context/StaffContext';
 import { SHIFTS } from '../constants';
 import { homeFor } from '../utils/roles';
+import { newHandovers } from '../utils/handover';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import markWhite from '../assets/images/agapay-mark-white.svg';
@@ -89,11 +90,11 @@ export default function Sidebar({ collapsed, onClose }) {
   const { profile } = useProfile();
   const groups = staff ? ADMIN_GROUPS : CAREGIVER_GROUPS;
 
-  // Handovers from others that I haven't marked as read yet
-  const newHandovers = handovers.filter((h) => h.author?._id !== profile.id && !h.readByMe).length;
+  // Handovers from others that I haven't marked as read yet, from the last 24 hours
+  const newHandoverCount = newHandovers(handovers, profile.id).length;
   const pending = staff?.pendingCount ?? 0;
   const badges = {
-    '/handover': newHandovers > 0 ? { text: `${newHandovers} new`, label: `${newHandovers} new`, tone: 'new' } : null,
+    '/handover': newHandoverCount > 0 ? { text: `${newHandoverCount} new`, label: `${newHandoverCount} new`, tone: 'new' } : null,
     '/admin/staff': pending > 0 ? { text: pending, label: `${pending} waiting for approval` } : null,
   };
 

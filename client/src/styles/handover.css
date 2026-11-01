@@ -156,7 +156,10 @@
 .received .handover-view,
 .received .handover-text { margin-top: 14px; }
 .received__actions { display: flex; justify-content: flex-end; margin-top: 14px; }
-.submitted-note { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: var(--completed-text); }
+.submitted-note { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 14px; color: var(--completed-text); line-height: 1.45; }
+.submitted-note svg { flex-shrink: 0; margin-top: 1px; }
+.received__for { margin: 0 0 8px; color: var(--indigo); }
+.received__older { margin: 0; color: var(--muted); font-size: 0.9rem; }
 
 .history-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
 .history-item { padding: 0; }

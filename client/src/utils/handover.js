@@ -65,6 +65,7 @@ export function parseHandover(h, myId) {
     } catch {
       // The details were damaged; the readable part still shows
     }
+    if (data) data.other = cleanOtherNotes(data.other ?? '');
     return { ...h, readByMe, text: notes.slice(0, at), data };
   }
 
@@ -83,7 +84,7 @@ export function parseHandover(h, myId) {
       // taskStatus: the task's status right now (pending / completed / skipped), so readers see if it got done
       passOn: h.tasks.map(({ taskId, task, resident, dueAt, note, taskStatus }) => ({ taskId, task, resident, dueAt, note: note ?? '', taskStatus })),
       residents: h.residents.map(({ residentId, name, room, status, note }) => ({ residentId, name, room, status, note: note ?? '' })),
-      other: h.otherNotes ?? '',
+      other: cleanOtherNotes(h.otherNotes ?? ''),
     },
   };
 }
@@ -134,6 +135,48 @@ export function handoverSummary(h) {
 
 // Morning -> Noon -> Night -> Morning
 export const nextShift = (shift) => SHIFTS[(SHIFTS.indexOf(shift) + 1) % SHIFTS.length];
+
+// "Other notes" without the labels nobody filled in (a line that is only "Supplies:")
+export const cleanOtherNotes = (text = '') =>
+  text
+    .split('\n')
+    .filter((line) => !/^[^:\n]{1,40}:\s*$/.test(line.trim()))
+    .join('\n')
+    .trim();
+
+const pad = (n) => String(n).padStart(2, '0');
+const dayText = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+// The shift a handover is meant for: the one right after it, e.g. Noon on Nov 1 -> Night on Nov 1,
+// Night on Nov 1 -> Morning on Nov 2. { shift: 'Night', shiftDate: '2026-11-01' } or null.
+// (Older handovers have no shift date: it comes from when the handover was sent.)
+export function handoverTarget(h) {
+  const shift = SHIFTS.find((s) => s.apiValue === h.shift);
+  if (!shift) return null;
+  const date = h.shiftDate
+    ? new Date(`${h.shiftDate}T12:00:00`)
+    : shiftWindow(shift, new Date(h.submittedAt ?? h.createdAt)).start;
+  const next = nextShift(shift);
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate() + (next === SHIFTS[0] ? 1 : 0));
+  return { shift: next.apiValue, shiftDate: dayText(day) };
+}
+
+// The newest handover from someone else meant for one of my shifts (`targets`: my current and
+// next shift, as { shift, shiftDate }), or undefined. `handovers` newest first.
+export const handoverForMe = (handovers, myId, targets) =>
+  handovers.find((h) => {
+    if (h.author?._id === myId) return false;
+    const t = handoverTarget(h);
+    return !!t && targets.some((m) => m && m.shift === t.shift && m.shiftDate === t.shiftDate);
+  });
+
+// Sent in the last 24 hours
+export const isRecentHandover = (h, now = new Date()) =>
+  now - new Date(h.submittedAt ?? h.createdAt) < 24 * 3600000;
+
+// Handovers from others I haven't read, from the last 24 hours (the "new" count)
+export const newHandovers = (handovers, myId, now = new Date()) =>
+  handovers.filter((h) => h.author?._id !== myId && !h.readByMe && isRecentHandover(h, now));
 
 // My handover for this shift: written by me, for this shift and shift date.
 // (Older handovers have no shift date: then one sent from 12 hours before the shift

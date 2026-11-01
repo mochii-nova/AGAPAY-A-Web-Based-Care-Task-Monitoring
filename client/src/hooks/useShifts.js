@@ -14,6 +14,7 @@ export const isoDay = (date) => {
 // currentShift(now) gives the shift I'm in today: last night's Night shift while it's
 // still going, otherwise today's shift. { shift, times: { start, end }, shiftDate } or null.
 // (For currentShift, load from yesterday: useShifts(addDays(now, -1), now).)
+// upcomingShift(now) gives my next shift that hasn't started yet (load a few days ahead for it).
 export default function useShifts(from, to) {
   const query = useApiData(`/shifts?from=${isoDay(from)}&to=${isoDay(to)}`);
   const list = query.data;
@@ -37,5 +38,16 @@ export default function useShifts(from, to) {
     return today ? { shift: today, times: shiftOnDate(today, now), shiftDate: isoDay(now) } : null;
   };
 
-  return { ...query, shiftOn, currentShift };
+  // My first shift that starts after `now` (within the loaded dates): { shift, shiftDate } or null
+  const upcomingShift = (now) => {
+    for (const entry of [...(list ?? [])].sort((a, b) => a.shiftDate.localeCompare(b.shiftDate))) {
+      const shift = SHIFTS.find((s) => s.apiValue === entry.shift);
+      if (shift && shiftOnDate(shift, new Date(`${entry.shiftDate}T12:00:00`)).start > now) {
+        return { shift, shiftDate: entry.shiftDate };
+      }
+    }
+    return null;
+  };
+
+  return { ...query, shiftOn, currentShift, upcomingShift };
 }

@@ -6,7 +6,7 @@ import useNow from '../hooks/useNow';
 import { useProfile } from '../context/ProfileContext';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
-import { findMyShiftHandover, latestUpdate } from '../utils/handover';
+import { findMyShiftHandover, latestUpdate, handoverForMe, isRecentHandover } from '../utils/handover';
 import { shiftLabel } from '../constants';
 import { isToday } from '../utils/tasks';
 import { shiftPhase } from '../utils/shift';
@@ -49,7 +49,7 @@ export default function Dashboard() {
   const now = useNow();
   const showToast = useToast();
   const tasksQuery = useTasks();
-  const shiftsQuery = useShifts(addDays(now, -1), now);
+  const shiftsQuery = useShifts(addDays(now, -1), addDays(now, 7)); // a week ahead, for my next shift
   const residentsQuery = useResidents();
   const handoversQuery = useHandovers();
   const [marking, setMarking] = useState(false);
@@ -65,7 +65,14 @@ export default function Dashboard() {
   const left = todayTasks.filter((t) => t.status === 'pending' || t.status === 'overdue').length;
 
   const { handovers, acknowledge } = handoversQuery;
-  const latestHandover = handovers.find((h) => h.author?._id !== profile.id);
+  // The handover meant for my shift now or my next one (the same one as on Handover > Received),
+  // else the newest from someone else
+  const upcoming = shiftsQuery.upcomingShift(now);
+  const forMe = handoverForMe(handovers, profile.id, [
+    current && { shift: current.shift.apiValue, shiftDate: current.shiftDate },
+    upcoming && { shift: upcoming.shift.apiValue, shiftDate: upcoming.shiftDate },
+  ]);
+  const latestHandover = forMe ?? handovers.find((h) => h.author?._id !== profile.id);
   const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes, current.shiftDate);
 
 
@@ -102,7 +109,8 @@ export default function Dashboard() {
   // "Start here": the one thing that matters most right now, in this order:
   // an unread handover, then overdue tasks, then the next task, else a friendly line
   const startHere = (() => {
-    if (latestHandover && !latestHandover.readByMe) {
+    // (only an unread one from the last 24 hours, so an old one never keeps asking)
+    if (latestHandover && !latestHandover.readByMe && isRecentHandover(latestHandover, now)) {
       const name = latestHandover.author?.name ?? 'the last shift';
       return {
         text: `${name} handed over the ${shiftLabel(latestHandover.shift)} shift. Read it before you start.`,

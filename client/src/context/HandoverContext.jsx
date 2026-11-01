@@ -25,8 +25,12 @@ export function HandoverProvider({ children }) {
 
   // payload: { shift, shiftDate, summary, residents: [{ residentId, status, note }],
   //            tasks: [{ taskId, note }], otherNotes }. My saved draft becomes this handover.
+  // It goes into the list straight away, so the Write tab switches to "Submitted" at once
+  // (and the form can't be sent a second time while the list reloads).
   const submit = async (payload) => {
     const { data } = await api.post('/handovers', payload);
+    const added = parseHandover(data, myId);
+    query.setData((list) => [added, ...(list ?? []).filter((h) => h._id !== added._id)]);
     query.reload({ silent: true });
     return data;
   };
