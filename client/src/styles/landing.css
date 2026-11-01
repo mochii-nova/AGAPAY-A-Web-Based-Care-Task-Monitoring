@@ -186,9 +186,10 @@ html:has(.site) { scroll-padding-top: 104px; }
 /* ---------- Who uses AGAPAY: two equal cards ---------- */
 .section.who { padding: 0 0 112px; }
 .who__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; max-width: 960px; margin: 48px auto 0; padding: 0; list-style: none; }
-.who__card { padding: 32px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
-.who__icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
-.who__card h3 { margin: 16px 0 12px; font-size: calc(20rem / 15); font-weight: 600; }
+/* Same 36px inside padding as the Contact cards; the title starts right at the top (grid rows keep
+   both cards the same height) */
+.who__card { padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.who__card h3 { margin: 0 0 12px; font-size: calc(20rem / 15); font-weight: 600; }
 .who__list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .who__list li { display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
 .who__list svg { flex-shrink: 0; margin-top: 2px; color: var(--completed-text); }
@@ -277,7 +278,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 .contact__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: 28px; }
 /* Both cards are always the same height: the photo fills the bottom of the left card,
    and the message box grows to fill the form card */
-.contact__panel { display: flex; flex-direction: column; padding: 36px; border-radius: var(--radius); background: var(--indigo-soft); }
+/* (an invisible 1px border, the same as the form card's real one, so both start their content at
+   exactly the same height and "CONTACT" lines up with "Your name") */
+.contact__panel { display: flex; flex-direction: column; padding: 36px; border: 1px solid transparent; border-radius: var(--radius); background: var(--indigo-soft); }
 .contact__title { margin: 0 0 14px; font-size: clamp(2rem, 3.4vw, calc(44rem / 15)); font-weight: 700; letter-spacing: -0.02em; }
 .contact__intro { margin: 0 0 32px; color: var(--muted); font-size: calc(17rem / 15); }
 /* Contact details: a small label above each value */
@@ -295,12 +298,12 @@ html:has(.site) { scroll-padding-top: 104px; }
 
 .contact__form-wrap { display: flex; padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
 .contact__form { display: flex; flex-direction: column; width: 100%; }
-/* About 160px, so the form is no taller than the details card next to it */
-.contact__message textarea.field__input { height: 160px; min-height: 160px; resize: vertical; }
-/* The email with a small "Copy" next to it */
+/* The Message field takes all the leftover height, so the "Send message" row sits at the bottom of the
+   card, level with the bottom of the photo on the left (at least 160px tall) */
+.contact__form .contact__message { display: flex; flex: 1; flex-direction: column; }
+.contact__message textarea.field__input { flex: 1; height: 100%; min-height: 160px; resize: none; }
+/* The email with a small "Copy" next to it (CopyButton) */
 .contact__email { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; }
-.contact__copy { gap: 4px; font-size: 0.85rem; text-decoration: none; }
-.contact__copy:hover { text-decoration: underline; }
 .contact__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
 .contact__hint { margin: 0; color: var(--muted); font-size: var(--fs-small); }
 /* Spam trap field: off screen, so people never see or reach it */
@@ -390,13 +393,16 @@ html:has(.site) { scroll-padding-top: 104px; }
   .section.who { padding: 0 0 72px; }
   .section.start,
   .section.faq { padding: 72px 0; }
-  .who__card { padding: 24px; }
+  .who__card { padding: 24px 20px; }
   .feature-row { grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 56px; }
   .feature-row--reverse .feature-row__text { order: 0; }
   .browser { margin-top: 48px; }
   .feature-more { margin-top: 56px; padding-top: 40px; }
 
   .contact__grid { grid-template-columns: minmax(0, 1fr); }
+  /* Stacked cards: nothing to line up with, so the message box is simply 160px */
+  .contact__form .contact__message { flex: none; }
+  .contact__message textarea.field__input { flex: none; height: 160px; }
 }
 
 @media (max-width: 600px) {

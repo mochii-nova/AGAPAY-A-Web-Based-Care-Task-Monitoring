@@ -133,9 +133,9 @@
 .auth__panel-text .auth__credit { margin-top: 18px; color: var(--on-photo); font-size: 0.82rem; opacity: 0.8; }
 
 /* Text inside the Forgot password and Terms pop-ups */
-.contact-lines { list-style: none; margin: 12px 0 0; padding: 0; }
-.contact-lines li { display: flex; align-items: center; gap: 10px; min-height: var(--tap); }
-.contact-lines a { color: var(--ink); font-weight: var(--fw-medium); }
+/* "Need help? Email … [Copy]" in the Forgot password pop-up */
+.forgot-help { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; }
+.forgot-help a { color: var(--ink); font-weight: var(--fw-medium); overflow-wrap: anywhere; }
 .terms-list { margin: 0; padding-left: 20px; }
 .terms-list li { margin-bottom: 10px; }
 

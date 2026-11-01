@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { CircleAlert, CircleCheck, Phone, Mail, IdCard, Lock, LogIn } from 'lucide-react';
+import { CircleAlert, CircleCheck, IdCard, Lock, LogIn } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import Modal from '../components/Modal';
 import GoogleButton from '../components/GoogleButton';
-import PhoneNumber from '../components/PhoneNumber';
+import CopyButton from '../components/CopyButton';
 import { homeFor } from '../utils/roles';
 // Web-sized copy of the original signin-photo.jpg (kept in design-reference/)
 import signinPhoto from '../assets/images/signin-photo.webp';
+
+// Who to email for help (the team's address)
+const HELP_EMAIL = 'ctrlsiapray123@gmail.com';
 
 // Why api.js signed the person out (e.g. "Your account is inactive."), shown once
 function readSignedOutReason() {
@@ -169,12 +172,11 @@ export default function Login() {
       <Modal open={forgotOpen} onClose={() => setForgotOpen(false)} title="Forgot your password?" size="sm"
         footer={<button type="button" className="btn btn--primary" onClick={() => setForgotOpen(false)}>Got it</button>}
       >
-        <p>For your security, passwords are reset by the facility administrator.</p>
-        <p>Please contact the administrator and tell them your Employee ID:</p>
-        <ul className="contact-lines">
-          <li><Phone size={18} aria-hidden="true" /> <PhoneNumber phone="(075) 529 0256" /></li>
-          <li><Mail size={18} aria-hidden="true" /> <a href="mailto:ctrlsiapray123@gmail.com">ctrlsiapray123@gmail.com</a></li>
-        </ul>
+        <p>Ask your administrator to reset your password from Manage Staff.</p>
+        <p className="forgot-help">
+          <span>Need help? Email <a href={`mailto:${HELP_EMAIL}`}>{HELP_EMAIL}</a>.</span>
+          <CopyButton text={HELP_EMAIL} />
+        </p>
       </Modal>
     </AuthLayout>
   );

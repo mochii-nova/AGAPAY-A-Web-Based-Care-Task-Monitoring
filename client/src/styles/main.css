@@ -342,6 +342,10 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .tour__nav { display: flex; gap: 8px; margin-left: auto; }
 @media (prefers-reduced-motion: reduce) { .tour__spot { transition: none; } }
 
+/* "Copy" next to an email address (CopyButton.jsx) */
+.copy-btn { gap: 4px; font-size: 0.85rem; text-decoration: none; }
+.copy-btn:hover { text-decoration: underline; }
+
 /* A field with a small icon inside the box, on the left */
 .field__control { position: relative; }
 .field__icon { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--muted); transform: translateY(-50%); pointer-events: none; }

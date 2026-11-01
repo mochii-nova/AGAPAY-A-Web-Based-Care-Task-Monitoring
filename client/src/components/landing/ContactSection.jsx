@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { CircleAlert, CircleCheck, Send, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+import { CircleAlert, CircleCheck, Send } from 'lucide-react';
 import api from '../../api';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
 import useSaving from '../../hooks/useSaving';
-import { copyText } from '../../utils/clipboard';
+import CopyButton from '../CopyButton';
 
 const EMAIL = 'ctrlsiapray123@gmail.com';
 
@@ -28,15 +28,6 @@ export default function ContactSection() {
   const [sentTo, setSentTo] = useState(null);
   const [sending, setSending, startSending] = useSaving();
   const [sendError, setSendError] = useState('');
-  const [copied, setCopied] = useState(false);
-
-  // "Copy" next to the email shows "Copied" for 2 seconds
-  useEffect(() => {
-    if (!copied) return undefined;
-    const timer = setTimeout(() => setCopied(false), 2000);
-    return () => clearTimeout(timer);
-  }, [copied]);
-  const copyEmail = async () => setCopied(await copyText(EMAIL));
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -109,10 +100,7 @@ export default function ContactSection() {
               <dt>Email</dt>
               <dd className="contact__email">
                 <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-                <button type="button" className="link-btn contact__copy" onClick={copyEmail} aria-label={copied ? `Copied ${EMAIL}` : `Copy ${EMAIL}`}>
-                  {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                  <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
-                </button>
+                <CopyButton text={EMAIL} />
               </dd>
             </div>
             <div>
