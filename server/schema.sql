@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   status              ENUM('pending','completed','skipped') NOT NULL DEFAULT 'pending',
   skip_reason         VARCHAR(200) NULL,
   note                TEXT         NULL,
+  instructions        TEXT         NULL,
   done                BOOLEAN      NOT NULL DEFAULT FALSE,
   done_at             DATETIME     NULL,
   completed_by        INT          NULL,
@@ -99,6 +100,7 @@ CREATE TABLE IF NOT EXISTS shifts (
   user_id    INT NOT NULL,
   shift_date DATE NOT NULL,
   shift      ENUM('Morning','Afternoon','Night') NOT NULL,
+  missing_handover_notified_at DATETIME NULL,
   UNIQUE (user_id, shift_date),
   INDEX idx_date (shift_date),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -162,7 +164,7 @@ CREATE TABLE IF NOT EXISTS handover_reads (
 CREATE TABLE IF NOT EXISTS notifications (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   user_id    INT NOT NULL,
-  type       ENUM('task','overdue','handover','schedule','message') NOT NULL,
+  type       ENUM('task','overdue','handover','schedule','message','signup','contact') NOT NULL,
   title      VARCHAR(120) NOT NULL,
   body       VARCHAR(200) NULL,
   link       VARCHAR(200) NULL,

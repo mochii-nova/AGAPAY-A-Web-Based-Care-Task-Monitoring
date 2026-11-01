@@ -36,7 +36,8 @@ const toTask = (r) => ({
   assignedToName: r.assigned_name ?? null,
   status: statusOf(r), // 'pending' | 'completed' | 'skipped' | 'overdue'
   skipReason: r.skip_reason,
-  note: r.note,
+  instructions: r.instructions, // written by the admin
+  note: r.note, // written by the caregiver
   done: r.status === 'completed',
   doneAt: r.done_at,
   completedBy: r.completed_by ? { _id: r.completed_by, id: r.completed_by, name: r.completed_name } : null,
@@ -92,7 +93,8 @@ async function readTaskFields(b, existing = null) {
       out.assigned_to = null;
     }
   }
-  if (has('note')) out.note = clean(b.note, 2000);
+  if (has('instructions')) out.instructions = clean(b.instructions, 2000);
+  else if (has('note')) out.instructions = clean(b.note, 2000);
   return { values: out };
 }
 

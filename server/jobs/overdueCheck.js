@@ -4,6 +4,7 @@
 //  - Assigned task  -> that caregiver + the admins
 //  - Unassigned     -> every active caregiver + the admins
 const pool = require('../db');
+const { shiftTimes, shiftAt, addDays } = require('../utils/shifts');
 const { notify, idsWithRole } = require('../utils/notify');
 
 const EVERY_MS = 5 * 60 * 1000;
@@ -44,9 +45,63 @@ async function checkOverdueTasks() {
   }
 }
 
-function startOverdueCheck() {
-  setTimeout(checkOverdueTasks, 10 * 1000); // shortly after the server starts
-  return setInterval(checkOverdueTasks, EVERY_MS);
+const GRACE_MS = 15 * 60 * 1000;
+
+async function checkMissingHandovers() {
+  try {
+    const today = shiftAt().shiftDate;
+    const [shifts] = await pool.query(
+      `SELECT s.id, s.user_id, s.shift, s.shift_date FROM shifts s
+       JOIN users u ON u.id = s.user_id AND u.role = 'caregiver' AND u.status = 'active'
+       WHERE s.missing_handover_notified_at IS NULL AND s.shift_date BETWEEN ? AND ?`,
+      [addDays(today, -2), today]
+    );
+    const now = Date.now();
+    let admins = null;
+
+    for (const s of shifts) {
+      const endsAt = Date.parse(shiftTimes(s.shift_date, s.shift).endsAt);
+      if (now < endsAt + GRACE_MS) continue; // not over yet (or still in the 15 minutes)
+
+      // Mark first, so this shift is never alerted twice
+      const [marked] = await pool.query(
+        'UPDATE shifts SET missing_handover_notified_at = NOW() WHERE id = ? AND missing_handover_notified_at IS NULL',
+        [s.id]
+      );
+      if (marked.affectedRows === 0) continue;
+
+      // Shifts that ended long ago (e.g. the server was off) are only marked, not alerted
+      if (now - endsAt > 12 * 3600 * 1000) continue;
+
+      const [[sent]] = await pool.query(
+        "SELECT id FROM handovers WHERE author_id = ? AND shift = ? AND shift_date = ? AND status = 'submitted' LIMIT 1",
+        [s.user_id, s.shift, s.shift_date]
+      );
+      if (sent) continue;
+
+      admins ??= await idsWithRole('admin');
+      await notify(admins, {
+        type: 'handover',
+        title: 'Handover not submitted',
+        body: 'A shift ended without a handover.',
+        link: '/admin/handover',
+        tag: `missing-handover-${s.id}`,
+      });
+    }
+  } catch (err) {
+    console.error('Missing handover check failed:', err.message);
+  }
 }
 
-module.exports = { startOverdueCheck, checkOverdueTasks };
+// Every 5 minutes: overdue tasks, then shifts that ended without a handover
+async function runChecks() {
+  await checkOverdueTasks();
+  await checkMissingHandovers();
+}
+
+function startOverdueCheck() {
+  setTimeout(runChecks, 10 * 1000); // shortly after the server starts
+  return setInterval(runChecks, EVERY_MS);
+}
+
+module.exports = { startOverdueCheck, checkOverdueTasks, checkMissingHandovers };

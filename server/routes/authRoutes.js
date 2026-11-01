@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
+const { notifyLater, idsWithRole } = require('../utils/notify');
 const pool = require('../db');
 const { fullUser, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
 
@@ -51,6 +52,14 @@ router.post('/register', async (req, res) => {
      VALUES (?, ?, ?, ?, ?, 'caregiver', 'pending', ?, ?)`,
     [fullName, first, last, employeeId, hashed, email, phone]
   );
+
+  notifyLater(idsWithRole('admin'), {
+        type: 'signup',
+        title: 'New sign-up to approve',
+        body: 'A new caregiver account is waiting for your approval.',
+        link: '/admin/staff',
+        tag: `signup-${result.insertId}`,
+      });
 
   res.status(201).json({
     message: 'Account created. An administrator needs to approve it before you can sign in.',

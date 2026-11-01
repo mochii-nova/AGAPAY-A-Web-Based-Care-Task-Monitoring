@@ -3,6 +3,7 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const rateLimit = require('../utils/rateLimit');
+const { notifyLater, idsWithRole } = require('../utils/notify');
 const { validEmail, clean } = require('../utils/users');
 
 const router = express.Router();
@@ -28,6 +29,13 @@ router.post('/', contactLimit, async (req, res) => {
   if (message.length > 2000) return res.status(400).json({ message: 'Message is longer than 2000 characters.' });
 
   await pool.query('INSERT INTO contact_messages (name, email, message, ip) VALUES (?, ?, ?, ?)', [name, email, message, req.ip]);
+  notifyLater(idsWithRole('admin'), {
+       type: 'contact',
+       title: 'New website message',
+       body: 'Someone sent a message through the contact form.',
+       link: '/admin/contact',
+       tag: 'contact',
+     });
   res.status(201).json({ message: 'Thank you! We will get back to you soon.' });
 });
 

@@ -17,6 +17,9 @@ const SELECT_HANDOVERS = `
   LEFT JOIN users k ON k.id = h.acknowledged_by
 `;
 
+// Helper for date comparison in PATCH
+const manilaDay = (d) => new Date(new Date(d).getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+
 // Turns handover rows into the shape the frontend expects, with the resident updates,
 // passed-on tasks and read receipts (3 queries for the whole list, not 3 per handover).
 async function toHandovers(rows, me) {
@@ -256,6 +259,13 @@ router.post('/', async (req, res) => {
   if (v.error) return res.status(400).json({ message: v.error });
 
   const id = await inTransaction(async (conn) => {
+    // Check if user already submitted a handover for this shift
+    const [[already]] = await conn.query(
+      "SELECT id FROM handovers WHERE author_id = ? AND status = 'submitted' AND shift = ? AND shift_date = ? LIMIT 1 FOR UPDATE",
+      [req.user.id, v.shift, v.shiftDate]
+    );
+    if (already) return null;
+
     const [[draft]] = await conn.query(
       "SELECT id FROM handovers WHERE author_id = ? AND status = 'draft' ORDER BY id DESC LIMIT 1 FOR UPDATE",
       [req.user.id]
@@ -281,6 +291,8 @@ router.post('/', async (req, res) => {
     return handoverId;
   });
 
+  if (id === null) return res.status(409).json({ message: 'You already submitted a handover for this shift.' });
+
   const handover = await findOne('h.id = ?', [id], req.user);
 
   // Tell the next shift. No resident names in the pop-up, just a count.
@@ -294,6 +306,29 @@ router.post('/', async (req, res) => {
   });
 
   res.status(201).json(handover);
+});
+
+router.patch('/:id', async (req, res) => {
+  const [[h]] = await pool.query("SELECT * FROM handovers WHERE id = ? AND status = 'submitted'", [req.params.id]);
+  if (!h) return res.status(404).json({ message: 'Handover not found' });
+  if (h.author_id !== req.user.id) return res.status(403).json({ message: 'You can only edit your own handover.' });
+  if (manilaDay(h.submitted_at ?? h.created_at) !== manilaDay(new Date())) {
+    return res.status(403).json({ message: 'A handover can only be edited on the day it was sent.' });
+  }
+
+  const v = await readBody({ ...req.body, shift: h.shift, shiftDate: h.shift_date }, { forSubmit: true });
+  if (v.error) return res.status(400).json({ message: v.error });
+
+  await inTransaction(async (conn) => {
+    await conn.query('UPDATE handovers SET summary = ?, other_notes = ?, notes = ? WHERE id = ?', [
+      v.summary,
+      v.otherNotes,
+      v.notes,
+      h.id,
+    ]);
+    await saveDetails(conn, h.id, v);
+  });
+  res.json(await findOne('h.id = ?', [h.id], req.user));
 });
 
 // PATCH /api/handovers/:id/acknowledge  ->  adds my read receipt
