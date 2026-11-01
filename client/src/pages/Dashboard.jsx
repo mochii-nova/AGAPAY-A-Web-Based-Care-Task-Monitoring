@@ -49,7 +49,7 @@ export default function Dashboard() {
   const now = useNow();
   const showToast = useToast();
   const tasksQuery = useTasks();
-  const shiftsQuery = useShifts(addDays(now, -1), addDays(now, 7)); // a week ahead, for my next shift
+  const shiftsQuery = useShifts(addDays(now, -1), now);
   const residentsQuery = useResidents();
   const handoversQuery = useHandovers();
   const [marking, setMarking] = useState(false);
@@ -65,14 +65,11 @@ export default function Dashboard() {
   const left = todayTasks.filter((t) => t.status === 'pending' || t.status === 'overdue').length;
 
   const { handovers, acknowledge } = handoversQuery;
-  // The handover meant for my shift now or my next one: the same rule as Handover > Received.
-  // Never an older one (then the card says there's none yet).
-  const upcoming = shiftsQuery.upcomingShift(now);
-  const forMe = handoverForMe(handovers, profile.id, [
-    current && { shift: current.shift.apiValue, shiftDate: current.shiftDate },
-    upcoming && { shift: upcoming.shift.apiValue, shiftDate: upcoming.shiftDate },
-  ]);
-  const latestHandover = forMe;
+  // Only the handover for my shift today (from the shift right before it). Never an older one or
+  // tomorrow's; on a day off there is none (then the card says there's none yet).
+  const latestHandover = current
+    ? handoverForMe(handovers, profile.id, [{ shift: current.shift.apiValue, shiftDate: current.shiftDate }])
+    : undefined;
   const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes, current.shiftDate);
 
 

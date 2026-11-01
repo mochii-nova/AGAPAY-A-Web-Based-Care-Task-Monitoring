@@ -15,7 +15,9 @@
   --indigo: #67479a;            /* plum, THE accent: buttons, links, selected tabs, checkboxes, focus (6.7:1 on cream) */
   --indigo-hover: #563a84;
   --on-indigo: #ffffff;         /* text on the plum button (7.1:1) */
-  --indigo-soft: #efe7f7;       /* lilac: selected tabs, today's highlight (plum text 5.9:1) */
+  --marker: #67479a;            /* numbered markers on the landing screenshot: plum in both themes (white numbers 7.1:1) */
+  --on-marker: #ffffff;         /* the white numbers (and ring) on those markers */
+  --indigo-soft: #efe7f7;      /* lilac: selected tabs, today's highlight (plum text 5.9:1) */
   --display-lavender: #765aa3;  /* big plum-lilac words (5.6:1 on white) */
   --lavender-deep: #a994d6;     /* decoration only (the logo's lilac, Morning shift marks): never for text */
   --label: #6b6274;             /* small uppercase labels (5.5:1 on cream) */

@@ -16,6 +16,15 @@ const MORE = [
   { title: 'Reports', text: 'See how many tasks were done each day, ready to print.' },
 ];
 
+// Numbered markers on the dashboard screenshot, placed at the top-left corner of each card.
+// x / y are percentages of the picture (1440 × 900), so they stay put when it scales.
+// After retaking the screenshot: x = card's left edge ÷ 1440 × 100, y = card's top edge ÷ 900 × 100.
+const MARKERS = [
+  { n: 1, label: 'Your shift', x: 46.1, y: 20.1 },
+  { n: 2, label: 'Today’s progress', x: 19.4, y: 20.1 },
+  { n: 3, label: 'Handover from the last shift', x: 72.5, y: 20.1 },
+];
+
 // A sample of the My Tasks list: tabs, then three tasks with their status
 function SampleTasks() {
   return (
@@ -79,11 +88,22 @@ export default function FeaturesSection() {
           <p className="section-sub">Everything a caregiver needs for the shift, in one calm place.</p>
         </header>
 
-        {/* Our real dashboard (light mode, real data) in a simple browser window */}
+        {/* Our real dashboard (light mode, real data) in a simple browser window,
+            with numbered markers on three cards and a legend underneath */}
         <div className="browser">
           <div className="browser__bar" aria-hidden="true"><span /><span /><span /></div>
-          <ImageSlot image={images.featuresLaptop} alt="The AGAPAY caregiver dashboard" className="browser__shot" />
+          <div className="browser__view">
+            <ImageSlot image={images.featuresLaptop} alt="The AGAPAY caregiver dashboard" className="browser__shot" />
+            {MARKERS.map(({ n, x, y }) => (
+              <span key={n} className="shot-marker" style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true">{n}</span>
+            ))}
+          </div>
         </div>
+        <ol className="shot-legend" aria-label="What the numbers show">
+          {MARKERS.map(({ n, label }) => (
+            <li key={n}><span className="shot-marker shot-marker--inline" aria-hidden="true">{n}</span> {label}</li>
+          ))}
+        </ol>
 
         <div className="feature-row">
           <div className="feature-row__text">
