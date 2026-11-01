@@ -2,25 +2,7 @@ import { useEffect, useState } from 'react';
 import { Phone, Copy, Check } from 'lucide-react';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { telHref } from '../utils/format';
-
-// Puts text on the clipboard; the older way is for browsers that block the clipboard on plain http
-async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const box = document.createElement('textarea');
-    box.value = text;
-    box.setAttribute('readonly', '');
-    box.style.position = 'fixed';
-    box.style.opacity = '0';
-    document.body.appendChild(box);
-    box.select();
-    const ok = document.execCommand('copy');
-    box.remove();
-    return ok;
-  }
-}
+import { copyText } from '../utils/clipboard';
 
 // A phone number. Phones and tablets (touch): a tap-to-call link. Laptops and desktops (no touch,
 // so a tel: link would open a calling app nobody uses): the number as text with a small "Copy" button.

@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
-import { Inbox, Mail, Check } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Inbox, Mail, Check, Copy } from 'lucide-react';
 import api from '../../api';
 import { useToast } from '../../context/ToastContext';
 import useApiData from '../../hooks/useApiData';
 import { formatTime } from '../../utils/format';
+import { copyText } from '../../utils/clipboard';
 import PageHeader from '../../components/PageHeader';
 import { LoadingState, ErrorState, EmptyState } from '../../components/StateMessage';
 import '../../styles/tasks.css';
@@ -24,6 +25,24 @@ function split(text) {
   return match ? { subject: match[1].trim(), body: match[2].trim() } : { subject: '', body: text };
 }
 
+const QUOTE_LENGTH = 300; // the start of their message, quoted under the reply
+
+// Gmail's "new message" page in the browser, with the address, "Re: <subject>" and a short quote of
+// their message filled in. (A mailto: link does nothing on a laptop without an email app.)
+function gmailReplyLink(m, subject, body) {
+  const short = body.length > QUOTE_LENGTH ? `${body.slice(0, QUOTE_LENGTH).trimEnd()}…` : body;
+  const quote = short.split('\n').map((line) => `> ${line}`).join('\n');
+  const text = `Hi ${m.name.split(' ')[0]},\n\n\n\nOn ${when(m.createdAt)}, you wrote:\n${quote}`;
+  const params = [
+    ['view', 'cm'],
+    ['fs', '1'],
+    ['to', m.email],
+    ['su', `Re: ${subject || 'Your message to Orchid Carehome'}`],
+    ['body', text],
+  ];
+  return `https://mail.google.com/mail/?${params.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')}`;
+}
+
 // Messages sent from the website's "Get in touch" form. Reply by email, then mark them handled.
 export default function ContactMessages() {
   const query = useApiData('/contact', { refreshEvery: 60 * 1000 });
@@ -32,6 +51,18 @@ export default function ContactMessages() {
   const [tab, setTab] = useState('new');
   const [busyId, setBusyId] = useState(null);
   const saving = useRef(new Set()); // messages being marked right now
+  const [copiedId, setCopiedId] = useState(null); // "Copied" shows on that message's button for 2 s
+
+  useEffect(() => {
+    if (!copiedId) return undefined;
+    const timer = setTimeout(() => setCopiedId(null), 2000);
+    return () => clearTimeout(timer);
+  }, [copiedId]);
+
+  const copyEmail = async (m) => {
+    if (await copyText(m.email)) setCopiedId(m.id);
+    else showToast("Couldn't copy. Select the address and copy it instead.", 'error');
+  };
 
   const counts = Object.fromEntries(TABS.map((t) => [t.id, messages.filter(t.match).length]));
   const shown = messages.filter(TABS.find((t) => t.id === tab).match);
@@ -87,7 +118,7 @@ export default function ContactMessages() {
             <ul className="contact-list">
               {shown.map((m) => {
                 const { subject, body } = split(m.message);
-                const reply = `mailto:${m.email}?subject=${encodeURIComponent(`Re: ${subject || 'Your message to Orchid Carehome'}`)}`;
+                const reply = gmailReplyLink(m, subject, body);
                 return (
                   <li key={m.id} className="contact-item">
                     <div className="contact-item__head">
@@ -103,9 +134,24 @@ export default function ContactMessages() {
                     {subject && <p className="contact-item__subject">{subject}</p>}
                     <p className="contact-item__body">{body}</p>
                     <div className="contact-item__actions">
-                      <a className="btn btn--outline btn--sm btn--row" href={reply}>
+                      <a
+                        className="btn btn--outline btn--sm btn--row"
+                        href={reply}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Reply to ${m.name} by email (opens Gmail in a new tab)`}
+                      >
                         <Mail size={16} aria-hidden="true" /> Reply by email
                       </a>
+                      <button
+                        type="button"
+                        className="btn btn--outline btn--sm btn--row"
+                        onClick={() => copyEmail(m)}
+                        aria-label={copiedId === m.id ? `Copied ${m.email}` : `Copy ${m.email}`}
+                      >
+                        {copiedId === m.id ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+                        <span aria-live="polite">{copiedId === m.id ? 'Copied' : 'Copy email'}</span>
+                      </button>
                       {!m.handled && (
                         <button type="button" className="btn btn--outline btn--sm btn--row" disabled={busyId === m.id} onClick={() => markHandled(m)}>
                           <Check size={16} aria-hidden="true" /> {busyId === m.id ? 'Saving…' : 'Mark as handled'}
