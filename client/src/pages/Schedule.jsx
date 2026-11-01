@@ -48,7 +48,9 @@ export default function Schedule() {
   const [statuses, setStatuses] = useState(STATUS_FILTERS.map((s) => s.id));
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
-  const [shiftFilter, setShiftFilter] = useState('');
+  // The side panel's shift buttons start on my own shift that day (All day on a day off).
+  // A pick only lasts for the day it was made on.
+  const [shiftPick, setShiftPick] = useState({ day: null, id: '' });
   const [openTaskId, setOpenTaskId] = useState(null);
 
   const toggleStatus = (id) =>
@@ -67,9 +69,15 @@ export default function Schedule() {
     (tasksByDay[dayKey(t.dueAt)] ??= []).push(t);
   });
 
-  const dayTasks = (tasksByDay[dayKey(selected)] ?? []).filter(
-    (t) => !shiftFilter || shiftOfTime(SHIFTS, t.dueAt)?.id === shiftFilter
-  );
+  const selectedKey = dayKey(selected);
+  const shiftFilter = shiftPick.day === selectedKey ? shiftPick.id : shiftOn(selected)?.id ?? '';
+  const setShiftFilter = (id) => setShiftPick({ day: selectedKey, id });
+  const allDayTasks = tasksByDay[selectedKey] ?? [];
+  const dayTasks = allDayTasks.filter((t) => !shiftFilter || shiftOfTime(SHIFTS, t.dueAt)?.id === shiftFilter);
+
+  // Days with tasks for me but no shift on the roster (all my tasks, whatever the filters)
+  const taskDays = new Set(tasks.map((t) => dayKey(t.dueAt)));
+  const noShiftWarning = (day) => taskDays.has(dayKey(day)) && !shiftOn(day);
 
   // ‹ › move one month or one week; the selected day moves with it
   const move = (step) => {
@@ -146,13 +154,14 @@ export default function Schedule() {
         <div className={`schedule-layout schedule-layout--${view}`}>
           <div className="card schedule-calendar">
             {view === 'month' ? (
-              <MonthView selected={selected} today={today} tasksByDay={tasksByDay} shiftOn={shiftOn} onSelect={setSelected} />
+              <MonthView selected={selected} today={today} tasksByDay={tasksByDay} shiftOn={shiftOn} noShiftWarning={noShiftWarning} onSelect={setSelected} />
             ) : (
               <WeekView
                 selected={selected}
                 today={today}
                 tasksByDay={tasksByDay}
                 shiftOn={shiftOn}
+                noShiftWarning={noShiftWarning}
                 onSelect={setSelected}
                 onOpenTask={(t) => setOpenTaskId(t._id)}
               />
@@ -169,6 +178,8 @@ export default function Schedule() {
             date={selected}
             shift={shiftOn(selected)}
             tasks={dayTasks}
+            hiddenCount={allDayTasks.length - dayTasks.length}
+            noShiftWarning={noShiftWarning(selected)}
             shiftFilter={shiftFilter}
             onShiftFilter={setShiftFilter}
             onOpenTask={(t) => setOpenTaskId(t._id)}

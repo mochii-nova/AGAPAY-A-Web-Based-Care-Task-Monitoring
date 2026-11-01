@@ -1,8 +1,9 @@
+import { TriangleAlert } from 'lucide-react';
 import { weekDays, sameDay, dayKey } from '../../utils/calendar';
 import { formatTime } from '../../utils/format';
 
 // Seven columns, one per day, listing each task with its time
-export default function WeekView({ selected, today, tasksByDay, shiftOn, onSelect, onOpenTask }) {
+export default function WeekView({ selected, today, tasksByDay, shiftOn, noShiftWarning, onSelect, onOpenTask }) {
   return (
     <div className="week">
       {weekDays(selected).map((day) => {
@@ -25,6 +26,12 @@ export default function WeekView({ selected, today, tasksByDay, shiftOn, onSelec
                   <span className="shift-chip__mark" aria-hidden="true" />
                   <span className="shift-chip__text">{shift.label}</span>
                   <span className="sr-only"> shift</span>
+                </span>
+              ) : noShiftWarning(day) ? (
+                <span className="no-shift-chip" title="You have tasks but no shift this day.">
+                  <TriangleAlert size={12} aria-hidden="true" />
+                  <span className="no-shift-chip__text">No shift</span>
+                  <span className="sr-only">: you have tasks but no shift this day</span>
                 </span>
               ) : (
                 <span className="week__off">Day off</span>

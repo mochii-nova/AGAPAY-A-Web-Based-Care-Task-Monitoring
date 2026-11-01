@@ -84,6 +84,28 @@ export function describe(n, { tasks = [], handovers = [], conversations = [], no
   return base;
 }
 
+// "Your schedule changed" for the same day, many times (e.g. Noon, day off, Noon again): only the
+// newest one is kept, with `mergedIds` (all of that day's notifications, so opening it marks them all
+// read) and `read` only when all are read. The server's body starts with the day: "Sun, Nov 1: Noon shift".
+export function mergeScheduleChanges(list) {
+  const dayOf = (n) => (n.type === 'schedule' ? (n.body ?? '').match(/^([A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}):/)?.[1] : null);
+  const groups = new Map();
+  list.forEach((n) => {
+    const day = dayOf(n);
+    if (day) groups.set(day, [...(groups.get(day) ?? []), n]);
+  });
+  const merged = [...groups.values()].map((group) => {
+    const [newest] = [...group].sort((a, b) => new Date(b.time) - new Date(a.time));
+    return {
+      ...newest,
+      read: group.every((n) => n.read),
+      mergedIds: group.map((n) => n.id),
+      body: group.length > 1 ? `${newest.body} (changed ${group.length} times, latest shown)` : newest.body,
+    };
+  });
+  return [...list.filter((n) => !dayOf(n)), ...merged];
+}
+
 // Pending sign-ups, shown to administrators as notifications (the server doesn't send these yet)
 export const signupNotifications = (staff, readIds) =>
   staff

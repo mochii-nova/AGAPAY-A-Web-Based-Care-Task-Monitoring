@@ -169,23 +169,31 @@
 .day-panel { position: sticky; top: 84px; }
 .day-panel__title { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-bold); }
 .day-panel__shift-line { margin: 2px 0 14px; color: var(--muted); }
-.day-panel__gcal { padding: 4px 4px 4px 12px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
-/* Google Calendar (GoogleCalendarBox.jsx): one compact line, notes underneath only when needed */
-.gcal { display: flex; flex-direction: column; gap: 6px; }
-.gcal__line { display: flex; align-items: center; gap: 8px; min-height: var(--tap); }
+.day-panel__gcal { padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
+/* Google Calendar (GoogleCalendarBox.jsx): "Google Calendar · Connected" on one line, the buttons
+   underneath (lined up with the text), notes below only when needed */
+.gcal { display: flex; flex-direction: column; gap: 8px; }
+.gcal__line { display: flex; align-items: center; gap: 8px; }
 .gcal__icon { flex-shrink: 0; color: var(--muted); }
-/* "Google Calendar" with its state in small text underneath, so it fits next to the button */
-.gcal__status { display: flex; flex: 1; flex-direction: column; min-width: 0; margin: 0; line-height: 1.3; }
-.gcal__status strong { color: var(--text); font-size: 0.9rem; font-weight: var(--fw-medium); white-space: nowrap; }
-.gcal__state { overflow: hidden; color: var(--muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
-.gcal__state.is-on { color: var(--completed-text); }
-.gcal__actions { display: flex; flex-shrink: 0; align-items: center; gap: 2px; }
-.gcal__error { display: flex; align-items: flex-start; gap: 6px; margin: 0 8px 8px 0; color: var(--danger); font-size: 0.85rem; }
+.gcal__status { flex: 1; min-width: 0; margin: 0; font-size: 0.9rem; line-height: 1.4; }
+.gcal__status strong { color: var(--text); font-weight: var(--fw-medium); }
+.gcal__sep { color: var(--muted); }
+.gcal__state { color: var(--muted); }
+.gcal__state.is-on { color: var(--completed-text); font-weight: var(--fw-medium); }
+.gcal__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-left: 26px; }
+.gcal__error { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 0.85rem; }
 .gcal__error svg { flex-shrink: 0; margin-top: 2px; }
-.gcal__tz { display: flex; align-items: flex-start; gap: 6px; margin: 0 8px 8px 0; color: var(--muted); font-size: 0.82rem; }
+.gcal__tz { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--muted); font-size: 0.82rem; }
 .gcal__tz svg { flex-shrink: 0; margin-top: 2px; }
 .gcal__tz strong { color: var(--text); font-weight: var(--fw-medium); }
 .day-panel__filter { margin-bottom: 6px; }
+/* "You have tasks but no shift this day" (panel) and "No shift" (calendar days) */
+.day-panel__warning { display: flex; align-items: flex-start; gap: 8px; margin: -4px 0 14px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--pending-bg); color: var(--pending-text); font-size: 0.9rem; }
+.day-panel__warning svg { flex-shrink: 0; margin-top: 2px; }
+.no-shift-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 1px 6px; border-radius: var(--radius-sm); background: var(--pending-bg); color: var(--pending-text); font-size: 0.74rem; font-weight: var(--fw-medium); line-height: 1.5; white-space: nowrap; }
+.no-shift-chip svg { flex-shrink: 0; }
+.week__head .no-shift-chip { margin-top: 4px; }
+.day-panel__more { margin: 8px 0 0; color: var(--muted); font-size: 0.88rem; }
 .day-panel__list { list-style: none; margin: 0; padding: 0; }
 .day-panel__list li + li { border-top: 1px solid var(--border); }
 /* One task: time | name + resident, status underneath | View */
@@ -244,6 +252,9 @@
   .month__day .shift-chip--morning .shift-chip__mark { background: var(--shift-morning-mark); }
   .month__day .shift-chip--noon .shift-chip__mark { background: var(--shift-noon-mark); }
   .month__day .shift-chip--night .shift-chip__mark { background: var(--shift-night-mark); }
+  /* Phones: the "No shift" warning is just its icon (the day panel says it in full) */
+  .month__day .no-shift-chip { padding: 1px 3px; }
+  .month__day .no-shift-chip__text { display: none; }
   .dots { gap: 2px; }
   .dots .dot { width: 6px; height: 6px; }
   .month__head span { font-size: 0.75rem; }

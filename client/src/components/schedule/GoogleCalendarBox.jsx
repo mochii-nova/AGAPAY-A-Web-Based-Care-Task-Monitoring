@@ -5,8 +5,8 @@ import { useToast } from '../../context/ToastContext';
 import { googleCalendarLink } from '../../utils/shift';
 import { sameOffsetAsManila, shiftStartIn, utcOffset } from '../../utils/googleCalendar';
 
-// Google Calendar in the day panel, as one compact line: "Google Calendar · Connected" plus the
-// action that fits (Connect / Reconnect / Add shift / Added). Problems show underneath only when they happen.
+// Google Calendar in the day panel: one line "Google Calendar · Connected", with the action that
+// fits (Connect / Reconnect / Add shift / Added) underneath. Problems show below only when they happen.
 // `shift` is null on a day off (then only the connection is shown).
 export default function GoogleCalendarBox({ shift, date }) {
   const gcal = useGoogleCalendar();
@@ -54,7 +54,7 @@ export default function GoogleCalendarBox({ shift, date }) {
   const connected = gcal.status === 'connected';
   const privacy = 'Only your shift name and times are sent to Google, never resident details.';
 
-  // One line: "Google Calendar · Connected" and the one action that fits right now
+  // "Google Calendar · Connected" and the one action that fits right now
   let status;
   let action = null;
   if (!gcal.configured) {
@@ -100,11 +100,14 @@ export default function GoogleCalendarBox({ shift, date }) {
         <CalendarDays size={18} aria-hidden="true" className="gcal__icon" />
         <p className="gcal__status" aria-live="polite">
           <strong>Google Calendar</strong>
-          <span className="sr-only"> · </span>
+          <span className="gcal__sep"> · </span>
           <span className={`gcal__state ${connected ? 'is-on' : ''}`}>{status}</span>
         </p>
         <span id="gcal-privacy" hidden>{privacy}</span>
-        <span className="gcal__actions">
+      </div>
+
+      {(action || connected) && (
+        <div className="gcal__actions">
           {action}
           {connected && (
             <button
@@ -117,8 +120,8 @@ export default function GoogleCalendarBox({ shift, date }) {
               <Unlink size={16} />
             </button>
           )}
-        </span>
-      </div>
+        </div>
+      )}
 
       {/* Only when there is something to fix */}
       {connected && shift && !sameOffsetAsManila(gcal.calendarTz) && (

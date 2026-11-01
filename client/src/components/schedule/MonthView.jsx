@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react';
 import { WEEKDAYS, monthGrid, sameDay, dayKey } from '../../utils/calendar';
 
 const STATUS_WORD = { pending: 'pending', completed: 'completed', overdue: 'overdue', skipped: 'skipped' };
@@ -14,7 +15,8 @@ function describe(list) {
 
 // Month grid. Days with a shift get a small coloured bar (one colour per shift, see the legend);
 // tasks show as coloured dots. The full details are read out to screen readers.
-export default function MonthView({ selected, today, tasksByDay, shiftOn, onSelect }) {
+// noShiftWarning(day): true when I have tasks that day but no shift, shown as a small "No shift" warning.
+export default function MonthView({ selected, today, tasksByDay, shiftOn, noShiftWarning, onSelect }) {
   const days = monthGrid(selected);
 
   return (
@@ -29,9 +31,10 @@ export default function MonthView({ selected, today, tasksByDay, shiftOn, onSele
           const outside = day.getMonth() !== selected.getMonth();
           const isSelected = sameDay(day, selected);
           const isToday = sameDay(day, today);
+          const warn = noShiftWarning(day);
           const label = `${day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}${
             isToday ? ' (today)' : ''
-          }. ${shift ? `${shift.label} shift` : 'Day off'}. ${describe(list)}.`;
+          }. ${shift ? `${shift.label} shift` : 'Day off'}. ${describe(list)}.${warn ? ' You have tasks but no shift this day.' : ''}`;
 
           return (
             <button
@@ -50,6 +53,12 @@ export default function MonthView({ selected, today, tasksByDay, shiftOn, onSele
                   <span className="shift-chip__text">{shift.label}</span>
                   {/* Moves under the shift name when the day is too narrow for one line */}
                   {list.length > 0 && <span className="shift-chip__count">{list.length} {list.length === 1 ? 'task' : 'tasks'}</span>}
+                </span>
+              )}
+              {warn && (
+                <span className="no-shift-chip" aria-hidden="true" title="You have tasks but no shift this day.">
+                  <TriangleAlert size={12} />
+                  <span className="no-shift-chip__text">No shift</span>
                 </span>
               )}
               {list.length > 0 && (

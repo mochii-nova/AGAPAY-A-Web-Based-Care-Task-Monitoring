@@ -9,7 +9,7 @@ import { useMessages } from './MessagesContext';
 import { useStaff } from './StaffContext';
 import { linkFor, isAdmin } from '../utils/roles';
 import { addDays } from '../utils/adminTasks';
-import { describe, signupNotifications, taskIdOf } from '../utils/notifications';
+import { describe, mergeScheduleChanges, signupNotifications, taskIdOf } from '../utils/notifications';
 
 const NotificationContext = createContext();
 
@@ -51,7 +51,8 @@ export function NotificationProvider({ children }) {
   const notifications = [
     ...signups,
     // Administrators get the admin page for each link (e.g. a new handover opens Handover monitoring)
-    ...list.map((n) => describe({ ...n, link: linkFor(user, n.link) }, context)),
+    // Several "Your schedule changed" for the same day show as one (the newest)
+    ...mergeScheduleChanges(list).map((n) => describe({ ...n, link: linkFor(user, n.link) }, context)),
   ].sort((a, b) => new Date(b.time) - new Date(a.time));
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -64,11 +65,14 @@ export function NotificationProvider({ children }) {
   };
 
   // Shown as read straight away; the backend is told in the background
+  // (A merged schedule change marks all of that day's notifications read)
   const markRead = (id) => {
     if (String(id).startsWith('signup-')) return rememberSignups([id]);
-    if (list.find((n) => n.id === id)?.read) return undefined;
-    query.setData((all) => all.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    api.patch(`/notifications/${id}/read`).catch(() => query.reload({ silent: true }));
+    const ids = notifications.find((n) => n.id === id)?.mergedIds ?? [id];
+    const unread = ids.filter((one) => list.some((n) => n.id === one && !n.read));
+    if (unread.length === 0) return undefined;
+    query.setData((all) => all.map((n) => (unread.includes(n.id) ? { ...n, read: true } : n)));
+    Promise.all(unread.map((one) => api.patch(`/notifications/${one}/read`))).catch(() => query.reload({ silent: true }));
     return undefined;
   };
 
