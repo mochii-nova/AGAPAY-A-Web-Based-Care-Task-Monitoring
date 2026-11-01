@@ -81,7 +81,7 @@ export default function SlotPanel({ slot, entries, caregivers, tasks, tasksLoadi
                 <span className="assign__who"><strong>{e.userName}</strong></span>
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm btn--row"
+                  className="btn btn--outline btn--sm btn--compact"
                   disabled={busyId === e.userId}
                   onClick={() => onDayOff(e)}
                   aria-label={`Give ${e.userName} the day off`}
@@ -106,20 +106,26 @@ export default function SlotPanel({ slot, entries, caregivers, tasks, tasksLoadi
               const person = caregivers.find((c) => c.id === g.userId);
               const first = g.name.split(' ')[0];
               return (
-                <div key={g.userId} className="alert alert--warning slot-warn" role="status">
-                  <TriangleAlert size={18} aria-hidden="true" />
-                  <div className="slot-warn__body">
-                    <p>
-                      {g.count === 1 ? '1 task is' : `${g.count} tasks are`} given to {first}, who isn’t on this shift.
-                    </p>
-                    <div className="slot-warn__actions">
-                      {person && (
-                        <button type="button" className="btn btn--outline btn--sm" disabled={busyId === person.id} onClick={() => onAssign(person)}>
-                          {busyId === person.id ? 'Saving…' : `Add ${first} to this shift`}
-                        </button>
-                      )}
-                      <Link to={`/admin/tasks?date=${date}&problem=offshift`} className="btn btn--outline btn--sm">Open in Tasks & Care</Link>
-                    </div>
+                <div key={g.userId} className="slot-warn" role="status">
+                  <p className="slot-warn__text">
+                    <TriangleAlert size={16} aria-hidden="true" />
+                    <span>{first} isn’t on this shift · {plural(g.count, 'task')}</span>
+                  </p>
+                  <div className="slot-warn__actions">
+                    {person && (
+                      <button
+                        type="button"
+                        className="btn btn--primary btn--sm btn--compact"
+                        disabled={busyId === person.id}
+                        onClick={() => onAssign(person)}
+                        aria-label={`Add ${g.name} to the ${shift.label} shift`}
+                      >
+                        {busyId === person.id ? 'Saving…' : 'Add to shift'}
+                      </button>
+                    )}
+                    <Link to={`/admin/tasks?date=${date}&problem=offshift`} className="slot-warn__link" aria-label={`View ${first}'s tasks in Tasks & Care`}>
+                      View tasks
+                    </Link>
                   </div>
                 </div>
               );
@@ -162,7 +168,7 @@ export default function SlotPanel({ slot, entries, caregivers, tasks, tasksLoadi
             </select>
             <button
               type="button"
-              className="btn btn--primary btn--sm slot-add__btn"
+              className="btn btn--primary slot-add__btn"
               disabled={busyId === chosen.caregiver.id}
               onClick={() => onAssign(chosen.caregiver)}
               aria-label={`Assign ${chosen.caregiver.name} to the ${shift.label} shift`}
