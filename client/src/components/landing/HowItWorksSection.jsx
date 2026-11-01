@@ -25,6 +25,11 @@ export default function HowItWorksSection() {
           <p className="eyebrow">How it works</p>
           <h2 className="section-title">How a shift works in AGAPAY</h2>
           <p className="section-sub">The same three steps every shift, so nothing gets lost when caregivers change over.</p>
+          {/* Plain words for anyone who doesn't work in a care home */}
+          <p className="how__terms">
+            A <strong>shift</strong> is one work period: Morning, Noon or Night. A <strong>handover</strong> is the short note a
+            caregiver leaves for the next shift.
+          </p>
         </header>
 
         <ol className="how__steps">

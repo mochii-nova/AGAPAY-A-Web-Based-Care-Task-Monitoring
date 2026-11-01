@@ -108,6 +108,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site-header.is-clear .site-header__toggle { color: #ffffff; }
 .site-header.is-clear .site-nav__link:hover,
 .site-header.is-clear .site-header__toggle:hover { background: rgba(255, 255, 255, 0.14); color: #ffffff; }
+/* The section you're on, over the photo: white text with only the apricot underline (no lilac pill,
+   which would be hard to read on the photo). The pill comes back once the bar is white. */
+.site-header.is-clear .site-nav__link.is-active { background: transparent; color: #ffffff; }
 .site-header.is-clear .site-header__signin { background: var(--site-plum); color: var(--site-white); }
 .site-header.is-clear .site-header__signin:hover { background: var(--site-plum-hover); }
 .site-header.is-clear .site-header__create { border-color: var(--site-white); color: var(--site-white); }
@@ -176,6 +179,57 @@ html:has(.site) { scroll-padding-top: 104px; }
 .how__label { margin: 0 0 8px; color: var(--accent-text); font-size: 0.93rem; font-weight: 600; }
 .how__step h3 { margin: 0 0 8px; font-size: calc(18rem / 15); font-weight: 600; }
 .how__step p:last-child { margin: 0; color: var(--muted); line-height: 1.6; }
+/* "A shift is… A handover is…": plain words for visitors */
+.how__terms { margin: 12px 0 0; padding: 12px 16px; border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--tint); color: var(--text); line-height: 1.6; }
+.how__terms strong { font-weight: 600; }
+
+/* ---------- Who uses AGAPAY: two equal cards ---------- */
+.section.who { padding: 0 0 112px; }
+.who__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; max-width: 960px; margin: 48px auto 0; padding: 0; list-style: none; }
+.who__card { padding: 32px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.who__icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
+.who__card h3 { margin: 16px 0 12px; font-size: calc(20rem / 15); font-weight: 600; }
+.who__list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.who__list li { display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+.who__list svg { flex-shrink: 0; margin-top: 2px; color: var(--completed-text); }
+.who__note { margin: 28px 0 0; color: var(--muted); text-align: center; }
+.who__note a { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -12px; color: var(--indigo); font-weight: 500; }
+
+/* ---------- Getting started: three numbered steps, then two buttons ---------- */
+.section.start { padding: 112px 0; }
+.start__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin: 48px 0 0; padding: 0; list-style: none; }
+.start__step { text-align: center; }
+.start__number { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--indigo); color: var(--on-indigo); font-size: 1.15rem; font-weight: 700; }
+.start__step h3 { margin: 16px 0 6px; font-size: calc(18rem / 15); font-weight: 600; }
+.start__step p { max-width: 22em; margin: 0 auto; color: var(--muted); line-height: 1.6; }
+.start__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 40px; }
+
+/* ---------- Questions: a short accordion on a linen band ---------- */
+.section.faq { padding: 112px 0; background: var(--tint); }
+.faq__list { max-width: 760px; margin: 40px auto 0; padding: 0; list-style: none; }
+.faq__item { border-bottom: 1px solid var(--border-strong); }
+.faq__item:first-child { border-top: 1px solid var(--border-strong); }
+.faq__q { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.faq__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 4px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.faq__button:hover { color: var(--indigo); }
+.faq__chevron { flex-shrink: 0; color: var(--muted); transition: transform 0.2s var(--ease); }
+.faq__item.is-open .faq__chevron { transform: rotate(180deg); }
+.faq__a p { margin: 0; padding: 0 4px 18px; color: var(--muted); line-height: 1.6; }
+@media (prefers-reduced-motion: reduce) { .faq__chevron { transition: none; } }
 
 /* ---------- Features: a full-width linen band ---------- */
 .section.features { padding: 112px 0; background: var(--tint); }
@@ -241,8 +295,12 @@ html:has(.site) { scroll-padding-top: 104px; }
 
 .contact__form-wrap { display: flex; padding: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
 .contact__form { display: flex; flex-direction: column; width: 100%; }
-.contact__form .contact__message { flex: 1; }
-.contact__message textarea.field__input { flex: 1; min-height: 150px; resize: none; }
+/* About 160px, so the form is no taller than the details card next to it */
+.contact__message textarea.field__input { height: 160px; min-height: 160px; resize: vertical; }
+/* The email with a small "Copy" next to it */
+.contact__email { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; }
+.contact__copy { gap: 4px; font-size: 0.85rem; text-decoration: none; }
+.contact__copy:hover { text-decoration: underline; }
 .contact__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
 .contact__hint { margin: 0; color: var(--muted); font-size: var(--fs-small); }
 /* Spam trap field: off screen, so people never see or reach it */
@@ -261,12 +319,14 @@ html:has(.site) { scroll-padding-top: 104px; }
 /* Footer links: 44px tall tap areas that overlap a little, so they still look like a tight list */
 .site-footer__link { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -11px; color: var(--muted); text-decoration: none; }
 .site-footer__link:hover { color: var(--indigo); text-decoration: underline; }
+/* "AGAPAY is a student project…": one line above the copyright */
+.site-footer__disclaimer { margin: 48px 0 0; font-size: 0.88rem; }
 .site-footer__bottom {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 24px;
-  margin-top: 48px;
+  margin-top: 16px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
   font-size: 0.88rem;
@@ -324,7 +384,13 @@ html:has(.site) { scroll-padding-top: 104px; }
   .section.how { padding: 72px 0 80px; }
   .section.features { padding: 72px 0; }
   .how__steps,
-  .feature-more { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .feature-more,
+  .who__grid,
+  .start__steps { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .section.who { padding: 0 0 72px; }
+  .section.start,
+  .section.faq { padding: 72px 0; }
+  .who__card { padding: 24px; }
   .feature-row { grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 56px; }
   .feature-row--reverse .feature-row__text { order: 0; }
   .browser { margin-top: 48px; }
@@ -356,6 +422,7 @@ html:has(.site) { scroll-padding-top: 104px; }
   .contact__panel,
   .contact__form-wrap { padding: 20px; }
   .contact__actions .btn { width: 100%; }
+  .start__actions .btn { flex: 1 1 100%; }
 
   .site-footer__top { grid-template-columns: minmax(0, 1fr); }
   .site-footer__bottom { flex-direction: column; }

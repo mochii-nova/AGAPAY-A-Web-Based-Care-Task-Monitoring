@@ -18,6 +18,8 @@ export default function SiteFooter() {
           <ul className="site-footer__list">
             <li><a href="#how" className="site-footer__link">How it works</a></li>
             <li><a href="#features" className="site-footer__link">Features</a></li>
+            <li><a href="#start" className="site-footer__link">Getting started</a></li>
+            <li><a href="#faq" className="site-footer__link">FAQ</a></li>
             <li><Link to="/login" className="site-footer__link">Sign in</Link></li>
           </ul>
         </nav>
@@ -41,6 +43,9 @@ export default function SiteFooter() {
 
       {/* Inside the container (not on it), so its line only spans the columns and keeps its top margin */}
       <div className="container">
+        <p className="site-footer__disclaimer">
+          AGAPAY is a student project for Systems Integration and Architecture. Not affiliated with Orchid Care Home, Inc.
+        </p>
         <div className="site-footer__bottom">
           <p>© 2026 AGAPAY. All rights reserved.</p>
           <p>CTRL + SIA + PRAY · BSIT, Universidad de Dagupan</p>

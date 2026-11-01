@@ -9,10 +9,11 @@ const SAMPLE_TASKS = [
   { time: 'Yesterday', task: 'Wound dressing', resident: 'Juan Cruz', status: 'overdue' },
 ];
 
+// Three things not mentioned anywhere else on the page
 const MORE = [
-  { title: 'Resident profiles', text: 'Care needs, recent notes and tasks for each resident on one page.' },
-  { title: 'Schedule and Google Calendar', text: 'See your Morning, Noon or Night shifts and add them to your calendar.' },
-  { title: 'Reminders', text: 'Get notified about due tasks and new handovers, even with the tab closed.' },
+  { title: 'Resident profiles', text: 'Each resident’s care needs and notes in one place.' },
+  { title: 'Messages', text: 'Chat between caregivers and administrators, right inside AGAPAY.' },
+  { title: 'Reports', text: 'See how many tasks were done each day, ready to print.' },
 ];
 
 // A sample of the My Tasks list: tabs, then three tasks with their status

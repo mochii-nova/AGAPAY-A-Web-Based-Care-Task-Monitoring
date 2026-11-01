@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { CircleAlert, CircleCheck, Send } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CircleAlert, CircleCheck, Send, Copy, Check } from 'lucide-react';
 import api from '../../api';
 import ImageSlot from '../ImageSlot';
 import { images } from '../../assets/images';
 import useSaving from '../../hooks/useSaving';
-import PhoneNumber from '../PhoneNumber';
+import { copyText } from '../../utils/clipboard';
+
+const EMAIL = 'ctrlsiapray123@gmail.com';
 
 // `website` is a hidden trap: people never see it, simple spam bots fill it in
 const EMPTY = { name: '', email: '', subject: '', message: '', website: '' };
@@ -26,6 +28,15 @@ export default function ContactSection() {
   const [sentTo, setSentTo] = useState(null);
   const [sending, setSending, startSending] = useSaving();
   const [sendError, setSendError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  // "Copy" next to the email shows "Copied" for 2 seconds
+  useEffect(() => {
+    if (!copied) return undefined;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const copyEmail = async () => setCopied(await copyText(EMAIL));
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,7 +67,7 @@ export default function ContactSection() {
       setSendError(
         err.response
           ? err.response.data?.message || "Your message couldn't be sent. Please try again."
-          : "Your message couldn't be sent right now. Please try again later, or call or email us instead."
+          : "Your message couldn't be sent right now. Please try again later, or email us instead."
       );
     } finally {
       setSending(false);
@@ -92,18 +103,21 @@ export default function ContactSection() {
           <p className="eyebrow">Contact</p>
           <h2 className="contact__title">Get in touch</h2>
           <p className="contact__intro">Questions about AGAPAY? Send us a message.</p>
+          {/* Only the team's own details (the phone and street address belong to the reference facility) */}
           <dl className="contact__list">
             <div>
-              <dt>Phone</dt>
-              <dd><PhoneNumber phone="(075) 529 0256" /></dd>
-            </div>
-            <div>
-              <dt>Address</dt>
-              <dd><address>301 Bolosan Old Road, Dagupan City, Pangasinan</address></dd>
-            </div>
-            <div>
               <dt>Email</dt>
-              <dd><a href="mailto:ctrlsiapray123@gmail.com">ctrlsiapray123@gmail.com</a></dd>
+              <dd className="contact__email">
+                <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+                <button type="button" className="link-btn contact__copy" onClick={copyEmail} aria-label={copied ? `Copied ${EMAIL}` : `Copy ${EMAIL}`}>
+                  {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                  <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+              </dd>
+            </div>
+            <div>
+              <dt>Where we are</dt>
+              <dd><address>Universidad de Dagupan, Dagupan City</address></dd>
             </div>
           </dl>
           <ImageSlot image={images.contact} className="contact__photo" />
