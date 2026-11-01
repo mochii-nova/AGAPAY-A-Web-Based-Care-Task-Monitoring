@@ -106,7 +106,7 @@ export default function Tasks() {
                 id="task-search"
                 type="search"
                 className="field__input"
-                placeholder="Search task, resident or room"
+                placeholder="Search tasks or residents"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

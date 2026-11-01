@@ -13,9 +13,10 @@
 
 /* Resident cards: one column, all the same height and layout */
 .resident-list { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+/* The initials circle sits at the top, beside the name (not in the middle of a tall card) */
 .resident-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   width: 100%;
   padding: 16px 18px;
@@ -29,6 +30,9 @@
 }
 .resident-card:hover { border-color: var(--lavender-line); }
 .resident-card[aria-pressed='true'] { border-color: var(--indigo); background: var(--indigo-soft); }
+/* On the selected (lilac) card the lilac circle would disappear, so it gets the card colour */
+.resident-card[aria-pressed='true'] .avatar { background: var(--card); }
+.resident-card > .avatar { flex-shrink: 0; }
 /* Name, ID line, care-need chips and the Today line, about 8px apart */
 .resident-card__body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
 /* The condition badge (Watch closely / Normal) sits in the top-right corner */

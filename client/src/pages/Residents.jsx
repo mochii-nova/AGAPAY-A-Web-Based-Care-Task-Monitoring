@@ -42,7 +42,17 @@ function notesFor(resident, handovers, tasks) {
       time: t.dueAt,
       text: t.skipReason ? `Skipped: ${t.skipReason}${t.note ? `. ${t.note}` : ''}` : t.note,
     }));
-  return [...fromHandovers, ...fromTasks].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 3);
+  // The same text only once (e.g. a daily task with the same note every day): the newest one
+  const seen = new Set();
+  return [...fromHandovers, ...fromTasks]
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .filter((n) => {
+      const key = n.text.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
 }
 
 export default function Residents() {
