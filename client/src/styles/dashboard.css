@@ -36,6 +36,8 @@
 .dash-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .dash-card .small-label { margin: 0 0 4px; }
 .dash-card__big { margin: 0; overflow: hidden; font-size: 1.25rem; font-weight: var(--fw-bold); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+/* A sentence (e.g. "No handover from the last shift yet.") may wrap instead of being cut */
+.dash-card__big--wrap { overflow: visible; white-space: normal; }
 .dash-card__sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
 .dash-card__line { display: -webkit-box; margin: 6px 0 0; overflow: hidden; font-size: 0.9rem; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .dash-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; }

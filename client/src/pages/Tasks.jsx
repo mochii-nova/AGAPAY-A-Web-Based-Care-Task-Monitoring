@@ -50,18 +50,20 @@ export default function Tasks() {
   const openTaskById = (id) => setSearchParams({ open: id });
   const closeTask = () => setSearchParams({}, { replace: true });
 
-  // Date, search and category filters first; the tabs then split what's left
+  // Search and category filters first, then the date; the tabs split what's left.
+  // Overdue ignores "Today": it always lists overdue tasks from every day (the same count as the Dashboard).
   const query = searchTerm(search);
-  const filtered = tasks
-    .filter((t) => scope === 'all' || isToday(t.dueAt))
+  const searched = tasks
     .filter((t) => !category || t.category === category)
     .filter((t) => matchesSearch(query, t.task, t.resident, t.room))
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+  const filtered = searched.filter((t) => scope === 'all' || isToday(t.dueAt));
+  const listFor = (id) => (id === 'overdue' ? searched : filtered).filter(TABS.find((t) => t.id === id).match);
 
-  const counts = Object.fromEntries(TABS.map(({ id, match }) => [id, filtered.filter(match).length]));
-  const shown = filtered.filter(TABS.find((t) => t.id === tab).match);
+  const counts = Object.fromEntries(TABS.map(({ id }) => [id, listFor(id).length]));
+  const shown = listFor(tab);
   // The search found nothing (as opposed to an empty tab)
-  const noMatch = !!query && tasks.length > 0 && filtered.length === 0;
+  const noMatch = !!query && tasks.length > 0 && searched.length === 0;
 
   const handleSave = async (task, changes) => {
     await updateTask(task, changes);
@@ -131,7 +133,7 @@ export default function Tasks() {
             <EmptyState icon={ClipboardList}>
               {tasks.length === 0
                 ? 'No tasks are assigned to you yet.'
-                : scope === 'today' && filtered.length === 0 && !query && !category
+                : scope === 'today' && tab !== 'overdue' && filtered.length === 0 && !query && !category
                   ? 'No tasks for today. Switch to “All dates” to see other days.'
                   : EMPTY_TEXT[tab]}
             </EmptyState>
@@ -155,7 +157,7 @@ export default function Tasks() {
                     // The whole row opens the task (the View button stays for keyboards and screen readers)
                     <tr key={t._id} className="task-table__row is-clickable" onClick={() => openTaskById(t._id)}>
                       <td className="task-table__time">
-                        {scope === 'all' && !isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
+                        {!isToday(t.dueAt) && <small>{shortDate(t.dueAt)}</small>}
                         {formatTime(t.dueAt)}
                       </td>
                       <td className="task-table__task">

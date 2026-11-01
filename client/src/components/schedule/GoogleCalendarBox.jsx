@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react';
-import { CalendarDays, CalendarPlus, CalendarCheck, CircleAlert, ExternalLink, Globe, Link2, Unlink } from 'lucide-react';
+import { CircleAlert, ExternalLink, Globe, Unlink } from 'lucide-react';
 import useGoogleCalendar from '../../hooks/useGoogleCalendar';
 import { useToast } from '../../context/ToastContext';
 import { googleCalendarLink } from '../../utils/shift';
@@ -63,7 +63,7 @@ export default function GoogleCalendarBox({ shift, date }) {
     if (shift) {
       action = (
         <a className="btn btn--soft btn--sm" href={googleCalendarLink(shift, date)} target="_blank" rel="noopener noreferrer">
-          <CalendarPlus size={16} aria-hidden="true" /> Add<span className="sr-only"> this shift to Google Calendar (opens in a new tab)</span>
+          Add<span className="sr-only"> this shift to Google Calendar (opens in a new tab)</span>
         </a>
       );
     }
@@ -72,14 +72,13 @@ export default function GoogleCalendarBox({ shift, date }) {
     if (shift && saved) {
       action = (
         <a className="btn btn--outline btn--sm" href={saved.htmlLink} target="_blank" rel="noopener noreferrer">
-          <CalendarCheck size={16} aria-hidden="true" /> Added<span className="sr-only">. Open it in Google Calendar (opens in a new tab)</span>
+          Added<span className="sr-only">. Open it in Google Calendar (opens in a new tab)</span>
           <ExternalLink size={14} aria-hidden="true" />
         </a>
       );
     } else if (shift) {
       action = (
         <button type="button" className="btn btn--soft btn--sm" onClick={add} disabled={busy === 'add' || saved === undefined}>
-          <CalendarPlus size={16} aria-hidden="true" />
           {busy === 'add' ? 'Adding…' : saved === undefined ? 'Checking…' : 'Add shift'}
         </button>
       );
@@ -88,7 +87,6 @@ export default function GoogleCalendarBox({ shift, date }) {
     status = gcal.status === 'expired' ? 'Disconnected' : 'Not connected';
     action = (
       <button type="button" className="btn btn--soft btn--sm" onClick={connect} disabled={!gcal.ready || busy === 'connect'} aria-describedby="gcal-privacy">
-        <Link2 size={16} aria-hidden="true" />
         {busy === 'connect' ? 'Waiting…' : !gcal.ready && !gcal.loadError ? 'Loading…' : gcal.status === 'expired' ? 'Reconnect' : 'Connect'}
       </button>
     );
@@ -96,32 +94,33 @@ export default function GoogleCalendarBox({ shift, date }) {
 
   return (
     <div className="gcal">
+      {/* Status on the left, a compact text-only button on the right; if they don't fit side by
+          side, the button wraps underneath, starting at the same left edge */}
       <div className="gcal__line" title={connected ? `Connected as ${gcal.email || 'your Google account'}. ${privacy}` : privacy}>
-        <CalendarDays size={18} aria-hidden="true" className="gcal__icon" />
         <p className="gcal__status" aria-live="polite">
           <strong>Google Calendar</strong>
           <span className="gcal__sep"> · </span>
           <span className={`gcal__state ${connected ? 'is-on' : ''}`}>{status}</span>
         </p>
         <span id="gcal-privacy" hidden>{privacy}</span>
-      </div>
 
-      {(action || connected) && (
-        <div className="gcal__actions">
-          {action}
-          {connected && (
-            <button
-              type="button"
-              className="icon-btn icon-btn--sm"
-              onClick={() => { gcal.disconnect(); setError(''); }}
-              aria-label={`Disconnect Google Calendar (${gcal.email || 'your Google account'})`}
-              title="Disconnect"
-            >
-              <Unlink size={16} />
-            </button>
-          )}
-        </div>
-      )}
+        {(action || connected) && (
+          <span className="gcal__actions">
+            {action}
+            {connected && (
+              <button
+                type="button"
+                className="icon-btn icon-btn--sm"
+                onClick={() => { gcal.disconnect(); setError(''); }}
+                aria-label={`Disconnect Google Calendar (${gcal.email || 'your Google account'})`}
+                title="Disconnect"
+              >
+                <Unlink size={16} />
+              </button>
+            )}
+          </span>
+        )}
+      </div>
 
       {/* Only when there is something to fix */}
       {connected && shift && !sameOffsetAsManila(gcal.calendarTz) && (

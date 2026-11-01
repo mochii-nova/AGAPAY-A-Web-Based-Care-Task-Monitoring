@@ -8,14 +8,14 @@ import { handoverSummary } from '../../utils/handover';
 const when = (date) =>
   `${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${formatTime(date)}`;
 
-// Handover status: the last handover I received (from whom, when, read or not),
-// with the same "Mark as read" as on the Handover page.
+// Handover status: the handover from the shift before mine (from whom, when, read or not),
+// with the same "Mark as read" as on the Handover page. None yet: says so (never an older one).
 export default function RecentHandoverCard({ handover, myId, onMarkRead, busy }) {
   if (!handover) {
     return (
       <section className="card dash-card">
         <p className="small-label">Handover status</p>
-        <p className="dash-card__big">No handovers yet</p>
+        <p className="dash-card__big dash-card__big--wrap">No handover from the last shift yet.</p>
         <p className="dash-card__sub">When the shift before yours hands over, it shows here.</p>
       </section>
     );

@@ -39,11 +39,11 @@
 .status-filter:has(input:not(:checked)) .dot { opacity: 0.35; }
 
 .schedule-toolbar__filters { display: flex; flex: 1 1 auto; justify-content: flex-end; gap: 8px; min-width: 0; }
-.schedule-toolbar .search-box { flex: 0 1 190px; min-width: 120px; }
+.schedule-toolbar .search-box { flex: 0 1 250px; min-width: 240px; } /* fits "Search tasks or residents" */
 .schedule-toolbar .select { flex: 0 0 165px; width: 165px; }
 
 /* Calendar + side panel */
-.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 20px; align-items: start; }
+.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
 .card.schedule-calendar { overflow: hidden; padding: 0; }
 
 /* Shift bar: a small coloured line on days with a shift (one colour per shift) */
@@ -170,17 +170,19 @@
 .day-panel__title { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-bold); }
 .day-panel__shift-line { margin: 2px 0 14px; color: var(--muted); }
 .day-panel__gcal { padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
-/* Google Calendar (GoogleCalendarBox.jsx): "Google Calendar · Connected" on one line, the buttons
-   underneath (lined up with the text), notes below only when needed */
+/* Google Calendar (GoogleCalendarBox.jsx): "Google Calendar · Disconnected" on the left and a compact
+   button on the right, centred on one row. When the row is too narrow the button wraps underneath,
+   starting at the same left edge (no indent). Notes below only when needed. */
 .gcal { display: flex; flex-direction: column; gap: 8px; }
-.gcal__line { display: flex; align-items: center; gap: 8px; }
-.gcal__icon { flex-shrink: 0; color: var(--muted); }
-.gcal__status { flex: 1; min-width: 0; margin: 0; font-size: 0.9rem; line-height: 1.4; }
+.gcal__line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px; }
+.gcal__status { margin: 0; font-size: 0.86rem; line-height: 1.4; white-space: nowrap; }
 .gcal__status strong { color: var(--text); font-weight: var(--fw-medium); }
 .gcal__sep { color: var(--muted); }
 .gcal__state { color: var(--muted); }
 .gcal__state.is-on { color: var(--completed-text); font-weight: var(--fw-medium); }
-.gcal__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-left: 26px; }
+.gcal__actions { display: flex; align-items: center; gap: 4px; }
+/* Compact: a little shorter and narrower than the usual small button */
+.gcal__actions .btn { min-height: 36px; padding: 0 10px; gap: 6px; font-size: 0.82rem; }
 .gcal__error { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 0.85rem; }
 .gcal__error svg { flex-shrink: 0; margin-top: 2px; }
 .gcal__tz { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--muted); font-size: 0.82rem; }
@@ -221,8 +223,8 @@
   .schedule-layout--week .day-panel { position: static; }
 }
 
-/* Tablets: two rows (arrows + checkboxes, then search + category) */
-@media (max-width: 1280px) {
+/* Laptops and tablets: two rows (arrows + checkboxes, then search + category) */
+@media (max-width: 1440px) {
   .schedule-toolbar { flex-wrap: wrap; }
   .schedule-toolbar__filters { flex-basis: 100%; justify-content: stretch; }
   .schedule-toolbar .search-box { flex: 1 1 auto; }

@@ -134,7 +134,7 @@ export default function Schedule() {
               id="schedule-search"
               type="search"
               className="field__input"
-              placeholder="Search…"
+              placeholder="Search tasks or residents"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

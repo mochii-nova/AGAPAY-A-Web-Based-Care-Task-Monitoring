@@ -65,14 +65,14 @@ export default function Dashboard() {
   const left = todayTasks.filter((t) => t.status === 'pending' || t.status === 'overdue').length;
 
   const { handovers, acknowledge } = handoversQuery;
-  // The handover meant for my shift now or my next one (the same one as on Handover > Received),
-  // else the newest from someone else
+  // The handover meant for my shift now or my next one: the same rule as Handover > Received.
+  // Never an older one (then the card says there's none yet).
   const upcoming = shiftsQuery.upcomingShift(now);
   const forMe = handoverForMe(handovers, profile.id, [
     current && { shift: current.shift.apiValue, shiftDate: current.shiftDate },
     upcoming && { shift: upcoming.shift.apiValue, shiftDate: upcoming.shiftDate },
   ]);
-  const latestHandover = forMe ?? handovers.find((h) => h.author?._id !== profile.id);
+  const latestHandover = forMe;
   const submitted = !!shift && !!findMyShiftHandover(handovers, profile.id, shift, shiftTimes, current.shiftDate);
 
 
