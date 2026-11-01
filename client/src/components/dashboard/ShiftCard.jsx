@@ -2,10 +2,14 @@ import { Link } from 'react-router-dom';
 import { shiftTime } from '../../constants';
 import { minutesToText } from '../../utils/shift';
 
-// What to say about today's handover, depending on where we are in the shift
+// What to say about today's handover, depending on where we are in the shift.
+// During the shift: the clock time ("due at 2:00 PM"), and a countdown in the last hour ("due in 45 min").
 function handoverNote(phase, submitted, shift, minutesLeft) {
   if (submitted) return { text: 'Handover submitted', tone: 'completed' };
-  if (phase === 'on') return { text: `Handover due in ${minutesToText(minutesLeft)}`, tone: 'pending', write: true };
+  if (phase === 'on') {
+    const text = minutesLeft <= 60 ? `Handover due in ${minutesToText(minutesLeft)}` : `Handover due at ${shift.end}`;
+    return { text, tone: 'pending', write: true };
+  }
   if (phase === 'ended') return { text: 'Handover not submitted yet', tone: 'overdue', write: true };
   return { text: `Handover due at ${shift.end}`, tone: 'neutral' };
 }

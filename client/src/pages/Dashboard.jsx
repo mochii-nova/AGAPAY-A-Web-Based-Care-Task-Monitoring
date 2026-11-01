@@ -39,7 +39,7 @@ function helpfulLine(phase, shift, total, left, earlier) {
     if (total === 0) return 'No tasks scheduled for today.';
     if (phase === 'ended') return left ? `Your shift has ended. ${count(left)} still open today.` : 'Your shift has ended. Thank you for today.';
     if (!left) return 'All of today’s tasks are done. Great work.';
-    return `You have ${count(left)} left before your handover at ${shift.end}.`;
+    return `You have ${count(left)} left before your ${shift.end} handover.`;
   })();
   return earlier ? `${line} ${earlier} overdue from earlier days.` : line;
 }
@@ -108,10 +108,12 @@ export default function Dashboard() {
   const startHere = (() => {
     // (only an unread one from the last 24 hours, so an old one never keeps asking)
     if (latestHandover && !latestHandover.readByMe && isRecentHandover(latestHandover, now)) {
-      const name = latestHandover.author?.name ?? 'the last shift';
+      const first = latestHandover.author?.name?.split(' ')[0];
+      const which = `${shiftLabel(latestHandover.shift).toLowerCase()} handover`;
       return {
-        text: `${name} handed over the ${shiftLabel(latestHandover.shift)} shift. Read it before you start.`,
-        action: { label: `Read ${name.split(' ')[0]}'s handover`, to: '/handover?tab=received' },
+        // "Ben's night handover is ready."
+        text: `${first ? `${first}'s ${which}` : `The ${which}`} is ready. Read it before you start.`,
+        action: { label: first ? `Read ${first}'s handover` : 'Read the handover', to: '/handover?tab=received' },
       };
     }
     const overdueCount = overdueToday.length + earlierOverdue;

@@ -48,7 +48,8 @@ export default function ProgressCard({ tasks, earlierOverdue = 0 }) {
           ) : (
             <ul className="progress-legend">
               {PARTS.filter(({ key }) => key !== 'skipped' || counts.skipped > 0).map(({ key, label }) => (
-                <li key={key} className={`status-pill status-pill--${key}`}>{counts[key]} {label}</li>
+                // A zero is grey ("0 overdue" is good news, so never red)
+                <li key={key} className={`status-pill status-pill--${counts[key] ? key : 'skipped'}`}>{counts[key]} {label}</li>
               ))}
             </ul>
           )}

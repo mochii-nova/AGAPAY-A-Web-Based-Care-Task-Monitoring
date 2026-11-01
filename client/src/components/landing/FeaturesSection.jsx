@@ -2,11 +2,11 @@ import ImageSlot from '../ImageSlot';
 import StatusPill from '../StatusPill';
 import { images } from '../../assets/images';
 
-// The sample cards below are static pictures of the app, not real data
+// The sample cards below are static pictures of the app with made-up people (never names from our data)
 const SAMPLE_TASKS = [
-  { time: '6:30 AM', task: 'Vital signs', resident: 'Maria Santos', status: 'completed' },
-  { time: '8:00 AM', task: 'Morning medication', resident: 'Remedios Garcia', status: 'pending' },
-  { time: 'Yesterday', task: 'Wound dressing', resident: 'Juan Cruz', status: 'overdue' },
+  { time: '6:30 AM', task: 'Vital signs', resident: 'Felisa Navarro', status: 'completed' },
+  { time: '8:00 AM', task: 'Morning medication', resident: 'Ramon Aquino', status: 'pending' },
+  { time: 'Yesterday', task: 'Wound dressing', resident: 'Corazon Ocampo', status: 'overdue' },
 ];
 
 // Three things not mentioned anywhere else on the page
@@ -16,14 +16,34 @@ const MORE = [
   { title: 'Reports', text: 'See how many tasks were done each day, ready to print.' },
 ];
 
-// Numbered markers on the dashboard screenshot, placed at the top-left corner of each card.
-// x / y are percentages of the picture (1440 × 900), so they stay put when it scales.
-// After retaking the screenshot: x = card's left edge ÷ 1440 × 100, y = card's top edge ÷ 900 × 100.
-const MARKERS = [
-  { n: 1, label: 'Your shift', x: 46.1, y: 20.1 },
-  { n: 2, label: 'Today’s progress', x: 19.4, y: 20.1 },
-  { n: 3, label: 'Handover from the last shift', x: 72.5, y: 20.1 },
+// Labels around the dashboard screenshot, joined to their spot by a thin line (a labelled diagram).
+// `at` = the spot on the picture in its own pixels (1440 × 900); `row` = the label's height, in % of the
+// picture's height (the same three rows on both sides). The picture is 72% wide and centred, so a
+// spot's x in the diagram is 14 + 72 × (x ÷ 1440) %. After retaking the screenshot, update `at`.
+const SHOT_LEFT = 14; // % of the diagram, left of the picture
+const SHOT_WIDTH = 72;
+const CALLOUTS = [
+  { side: 'left', label: 'Your menu', at: [215, 250], row: 22 },
+  { side: 'left', label: 'Today’s progress', at: [283, 330], row: 42 },
+  { side: 'left', label: 'Up next', at: [283, 560], row: 62 },
+  { side: 'right', label: 'Read this first', at: [1395, 217], row: 22 },
+  { side: 'right', label: 'Handover from the last shift', at: [1395, 330], row: 42 },
+  { side: 'right', label: 'Residents to watch', at: [1395, 560], row: 62 },
 ];
+const LABEL_EDGE = { left: 12.5, right: 87.5 }; // where the lines leave the labels (% of the diagram)
+const ELBOW = 2; // the short angled piece at the end of each line (% of the diagram's width)
+
+// In % of the diagram: the spot, and the line (straight across from the label, then a short angle in)
+const calloutGeometry = ({ side, at: [x, y], row }) => {
+  const tx = SHOT_LEFT + (SHOT_WIDTH * x) / 1440;
+  const ty = (100 * y) / 900;
+  const start = LABEL_EDGE[side];
+  const elbow = side === 'left' ? tx - ELBOW : tx + ELBOW;
+  return { tx, ty, points: `${start},${row} ${elbow},${row} ${tx},${ty}` };
+};
+
+// Under 1100px wide the labels are replaced by this one line under the picture
+const SHOT_LIST = ['Your menu', 'Read this first', 'Today’s progress', 'Your shift', 'Handover', 'Up next'];
 
 // A sample of the My Tasks list: tabs, then three tasks with their status
 function SampleTasks() {
@@ -59,19 +79,19 @@ function SampleHandover() {
       <div aria-hidden="true">
         <div className="sample-handover__head">
           <span>
-            <strong>Handover from Rosa Lim</strong>
+            <strong>Handover from Ben Tolentino</strong>
             <small>Night shift → Morning shift · 5:52 AM</small>
           </span>
           <span className="status-pill status-pill--completed">Read</span>
         </div>
         <p className="sample-handover__note">
-          Maria slept later than usual and ate a light dinner. Please watch her closely. Juan&apos;s wound dressing was not
+          Felisa slept later than usual and ate a light dinner. Please watch her closely. Corazon&apos;s wound dressing was not
           done, so it&apos;s passed on to you.
         </p>
         <div className="sample-handover__passed">
           <strong>Passed on to the next shift</strong>
-          <span>Wound dressing · Juan Cruz</span>
-          <span>Check appetite at lunch · Maria Santos</span>
+          <span>Wound dressing · Corazon Ocampo</span>
+          <span>Check appetite at lunch · Felisa Navarro</span>
         </div>
       </div>
     </figure>
@@ -87,24 +107,47 @@ export default function FeaturesSection() {
           <h2 className="section-title">Better care, <span className="accent">shared together.</span></h2>
           <p className="section-sub">Everything a caregiver needs for the shift, in one calm place.</p>
         </header>
+      </div>
 
-        {/* Our real dashboard (light mode, real data) in a simple browser window,
-            with numbered markers on three cards and a legend underneath */}
+      {/* The dashboard (light mode, made-up data) in a simple browser window, with labels on both
+          sides joined by thin lines. Wider than the text, so the labels have room. The labels are
+          decoration (the picture's alt text describes it); under 1100px a one-line list replaces them. */}
+      <div className="shot-diagram">
         <div className="browser">
           <div className="browser__bar" aria-hidden="true"><span /><span /><span /></div>
-          <div className="browser__view">
-            <ImageSlot image={images.featuresLaptop} alt="The AGAPAY caregiver dashboard" className="browser__shot" />
-            {MARKERS.map(({ n, x, y }) => (
-              <span key={n} className="shot-marker" style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true">{n}</span>
-            ))}
-          </div>
+          <ImageSlot
+            image={images.featuresLaptop}
+            alt="The AGAPAY caregiver dashboard: the menu, a Start here card, today's progress, the shift, the handover from the last shift, the next tasks and residents to watch"
+            className="browser__shot"
+          />
         </div>
-        <ol className="shot-legend" aria-label="What the numbers show">
-          {MARKERS.map(({ n, label }) => (
-            <li key={n}><span className="shot-marker shot-marker--inline" aria-hidden="true">{n}</span> {label}</li>
-          ))}
-        </ol>
 
+        {/* Lines, dots and labels share one layer the size of the picture (so % stay right as it scales) */}
+        <div className="shot-callouts" aria-hidden="true">
+          <svg className="shot-callouts__lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {CALLOUTS.map((c) => (
+              <polyline key={c.label} points={calloutGeometry(c).points} vectorEffect="non-scaling-stroke" />
+            ))}
+          </svg>
+          {CALLOUTS.map((c) => {
+            const { tx, ty } = calloutGeometry(c);
+            return <span key={c.label} className="shot-callouts__dot" style={{ left: `${tx}%`, top: `${ty}%` }} />;
+          })}
+          {CALLOUTS.map(({ side, label, row }) => (
+            <span key={label} className={`shot-callouts__label shot-callouts__label--${side}`} style={{ top: `${row}%` }}>
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <p className="shot-list">
+          {SHOT_LIST.map((item, i) => (
+            <span key={item}>{i > 0 && ' · '}<span className="shot-list__item">{item}</span></span>
+          ))}
+        </p>
+      </div>
+
+      <div className="container">
         <div className="feature-row">
           <div className="feature-row__text">
             <h3>Tasks that don&apos;t get lost</h3>

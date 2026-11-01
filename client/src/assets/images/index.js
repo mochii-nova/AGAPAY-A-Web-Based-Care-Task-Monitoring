@@ -9,8 +9,9 @@
 // `size` = the file to make (2× the size on screen, so it's sharp on phones).
 // The full list with details is in design-reference/IMAGE-PLACEHOLDERS.md.
 // (The logo is real now: agapay-logo*.svg in this folder, shown by components/Logo.jsx.)
-// The Features screenshot is real too: Claire River's dashboard (light mode, real data), 1440 × 900.
-// So is the About photo (about-caregiver.jpg). The hero photo is imported by HeroSection.jsx,
+// The Features screenshot is the real caregiver dashboard with made-up people and tasks (Nina Robles,
+// light mode, Thu Nov 5, 10:30 AM), 1440 × 900. Taken with the API answered inside a test browser.
+// The About photo is real too (about-caregiver.jpg). The hero photo is imported by HeroSection.jsx,
 // and the Sign In / Register photos (signin-photo.webp, register-photo.webp) by Login.jsx and Register.jsx.
 
 import featuresDashboard from './features-dashboard.webp';
