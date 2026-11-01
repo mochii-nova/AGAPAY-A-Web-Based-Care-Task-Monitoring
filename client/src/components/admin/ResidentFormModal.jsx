@@ -3,12 +3,12 @@ import { CircleAlert } from 'lucide-react';
 import Modal from '../Modal';
 import FormField from '../FormField';
 import SelectField from '../SelectField';
-import { TASK_CATEGORIES } from '../../constants';
+import { TASK_CATEGORIES, relationshipOptions } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
 import useSaving from '../../hooks/useSaving';
 
 const GENDER_OPTIONS = [
-  { value: '', label: 'Not set' },
+  { value: '', label: 'Choose…' },
   { value: 'Female', label: 'Female' },
   { value: 'Male', label: 'Male' },
 ];
@@ -153,8 +153,15 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
 
       <h3 className="small-label resident-form__group">Emergency contact</h3>
       <div className="form-grid">
-        {field('contactName', 'Name', { required: false, placeholder: 'e.g. Teresa Bautista-Uy', autoComplete: 'off' })}
-        {field('contactRelationship', 'Relationship', { required: false, placeholder: 'e.g. Daughter', autoComplete: 'off' })}
+        {field('contactName', 'Full name', { required: false, placeholder: 'e.g. Liza Villanueva', autoComplete: 'off' })}
+        <SelectField
+          id="resident-contactRelationship"
+          name="contactRelationship"
+          label="Relationship"
+          value={form.contactRelationship}
+          onChange={handleChange}
+          options={relationshipOptions(form.contactRelationship)}
+        />
       </div>
       {field('contactPhone', 'Phone number', { type: 'tel', required: false, placeholder: 'e.g. 0917 123 4567', autoComplete: 'off' })}
 

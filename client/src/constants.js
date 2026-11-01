@@ -26,5 +26,15 @@ export const getShift = (id) => SHIFTS.find((s) => s.id === id);
 // { start: '6:00 AM', end: '2:00 PM' } -> "6:00 AM – 2:00 PM"
 export const shiftTime = (shift) => `${shift.start} – ${shift.end}`;
 
+// Emergency contact relationships (Edit profile, Add/Edit resident)
+export const RELATIONSHIPS = ['Spouse', 'Parent', 'Son', 'Daughter', 'Sibling', 'Relative', 'Friend', 'Other'];
+
+// For a dropdown: "Choose…" first, then the list. A relationship saved earlier that isn't in the list
+// (typed in by hand before) stays choosable, so editing doesn't lose it.
+export const relationshipOptions = (current = '') => [
+  { value: '', label: 'Choose…' },
+  ...[...RELATIONSHIPS, ...(current && !RELATIONSHIPS.includes(current) ? [current] : [])].map((r) => ({ value: r, label: r })),
+];
+
 // "Afternoon" (from the backend) -> "Noon" (on screen)
 export const shiftLabel = (apiValue) => SHIFTS.find((s) => s.apiValue === apiValue)?.label ?? apiValue;

@@ -8,11 +8,13 @@ import { useToast } from '../../context/ToastContext';
 import { SHIFTS } from '../../constants';
 import useSaving from '../../hooks/useSaving';
 
-const SHIFT_OPTIONS = [{ value: '', label: 'Not set' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: `${s.label} · ${s.start} – ${s.end}` }))];
+// Dropdowns start on "Choose…" (no value picked for you)
+const SHIFT_OPTIONS = [{ value: '', label: 'Choose…' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: `${s.label} · ${s.start} – ${s.end}` }))];
 const ROLE_OPTIONS = [
   { value: 'caregiver', label: 'Caregiver' },
   { value: 'admin', label: 'Administrator' },
 ];
+const NEW_ROLE_OPTIONS = [{ value: '', label: 'Choose…' }, ...ROLE_OPTIONS];
 const PHONE = /^09\d{9}$/;
 
 // e.g. "agapay-4k7m2" : easy to read out loud, always has letters and numbers
@@ -29,6 +31,7 @@ function validate(form, adding) {
     if (!form.firstName.trim()) errors.firstName = 'Please enter the first name.';
     if (!form.lastName.trim()) errors.lastName = 'Please enter the last name.';
     if (!/^[A-Za-z0-9-]{3,20}$/.test(form.username.trim())) errors.username = 'Use only letters, numbers and dashes, like CGV-2026-000.';
+    if (!form.role) errors.role = 'Please choose a role.';
     if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Please enter a valid email, like name@example.com.';
     if (form.phone.trim() && !PHONE.test(form.phone.replace(/[\s-]/g, ''))) errors.phone = 'Use 11 digits starting with 09.';
     if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/\d/.test(form.password)) {
@@ -50,7 +53,7 @@ function StaffForm({ person, isMe, onClose }) {
     email: '',
     phone: '',
     password: adding ? temporaryPassword() : '',
-    role: person?.role ?? 'caregiver',
+    role: person?.role ?? '', // a new account: "Choose…" until picked
     assignedShift: person?.assignedShift ?? '',
     dateHired: person?.dateHired ?? '',
     title: person?.title ?? '',
@@ -136,7 +139,7 @@ function StaffForm({ person, isMe, onClose }) {
           </div>
           <div className="form-grid">
             {field('username', 'Employee ID', { placeholder: 'e.g. CGV-2026-000', autoComplete: 'off' })}
-            {select('role', 'Role', ROLE_OPTIONS)}
+            {select('role', 'Role', NEW_ROLE_OPTIONS, { required: true, error: errors.role })}
           </div>
           <div className="form-grid">
             {field('email', 'Email', { type: 'email', required: false, placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'off' })}

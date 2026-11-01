@@ -173,7 +173,7 @@ export default function Login() {
         <p>Please contact the administrator and tell them your Employee ID:</p>
         <ul className="contact-lines">
           <li><Phone size={18} aria-hidden="true" /> <PhoneNumber phone="(075) 529 0256" /></li>
-          <li><Mail size={18} aria-hidden="true" /> <a href="mailto:ctrlsiapray@gmail.com">ctrlsiapray@gmail.com</a></li>
+          <li><Mail size={18} aria-hidden="true" /> <a href="mailto:ctrlsiapray123@gmail.com">ctrlsiapray123@gmail.com</a></li>
         </ul>
       </Modal>
     </AuthLayout>

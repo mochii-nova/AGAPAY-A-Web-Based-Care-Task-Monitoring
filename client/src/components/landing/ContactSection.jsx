@@ -103,7 +103,7 @@ export default function ContactSection() {
             </div>
             <div>
               <dt>Email</dt>
-              <dd><a href="mailto:ctrlsiapray@gmail.com">ctrlsiapray@gmail.com</a></dd>
+              <dd><a href="mailto:ctrlsiapray123@gmail.com">ctrlsiapray123@gmail.com</a></dd>
             </div>
           </dl>
           <ImageSlot image={images.contact} className="contact__photo" />
@@ -134,7 +134,7 @@ export default function ContactSection() {
                 <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={handleChange} />
               </div>
               <div className="form-grid">
-                {field('name', 'Your name', { placeholder: 'e.g. Paolo Villanueva', autoComplete: 'name' })}
+                {field('name', 'Your name', { placeholder: 'e.g. Liza Villanueva', autoComplete: 'name' })}
                 {field('email', 'Your email', { type: 'email', placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'email' })}
               </div>
               {field('subject', 'Subject', { placeholder: 'e.g. Question about AGAPAY' })}
