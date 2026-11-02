@@ -11,7 +11,7 @@ import { parseHandovers, readersOf } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
 import { addDays, dayLabel } from '../../utils/adminTasks';
 import { activeCaregivers } from '../../utils/staff';
-import { MONITOR_STATUS, monitorRows, flaggedText, reminderText, sentAt } from '../../utils/handoverMonitor';
+import { MONITOR_STATUS, monitorRows, flaggedText, reminderText, sentAt, nextShiftAfter, namesOn, listNames } from '../../utils/handoverMonitor';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../../components/Modal';
 import HandoverDetails from '../../components/admin/HandoverDetails';
@@ -43,7 +43,8 @@ export default function HandoverMonitor() {
   const from = addDays(today, -(days - 1));
   const transform = useMemo(() => (list) => parseHandovers(list, user.id), [user.id]);
   const handoversQuery = useApiData('/handovers?limit=500', { transform, refreshEvery: 60 * 1000 });
-  const rosterQuery = useApiData(`/shifts?from=${from}&to=${today}`);
+  // One day more than shown, for who takes over after tonight's Night shift (tomorrow's Morning)
+  const rosterQuery = useApiData(`/shifts?from=${from}&to=${addDays(today, 1)}`);
 
   const loading = handoversQuery.status === 'loading' || rosterQuery.status === 'loading';
   const failed = [handoversQuery, rosterQuery].find((q) => q.status === 'error');
@@ -51,6 +52,12 @@ export default function HandoverMonitor() {
   // Every active caregiver, whether or not they have handovers in these days
   const people = activeCaregivers(staff);
   const rows = all.filter((r) => (!shiftFilter || r.shift.id === shiftFilter) && (!who || String(r.userId) === who));
+
+  // Who takes over from a row's shift: the people on the next shift, from the roster
+  const nextOf = (r) => {
+    const next = nextShiftAfter(r.shift, r.shiftDate);
+    return listNames(namesOn(rosterQuery.data ?? [], next.shift, next.shiftDate));
+  };
 
   const count = (s) => rows.filter((r) => r.status === s).length;
   const totals = [
@@ -114,11 +121,11 @@ export default function HandoverMonitor() {
                   <thead>
                     <tr>
                       <th scope="col">Shift</th>
-                      <th scope="col">Caregiver</th>
+                      <th scope="col">Caregiver → next shift</th>
                       <th scope="col" className="data-table__wide-only">Submitted</th>
                       <th scope="col">Status</th>
-                      <th scope="col" className="data-table__wide-only">Flagged</th>
-                      <th scope="col" className="data-table__wide-only">Read by</th>
+                      <th scope="col" className="data-table__xwide-only">Flagged</th>
+                      <th scope="col" className="data-table__xwide-only">Read by</th>
                       <th scope="col"><span className="sr-only">Open</span></th>
                     </tr>
                   </thead>
@@ -137,15 +144,25 @@ export default function HandoverMonitor() {
                               </span>
                             </div>
                           </td>
-                          <td>{r.userName}</td>
+                          {/* The caregiver, and under it who takes over: "→ Rosa Lim" */}
+                          <td className="data-table__handoff">
+                            <span className="handoff-cell">
+                              <span>{r.userName}</span>
+                              <small>
+                                <span className="handoff__arrow" aria-hidden="true">→ </span>
+                                <span className="sr-only">hands over to </span>
+                                {nextOf(r) ? <span className="handoff__next">{nextOf(r)}</span> : <span className="resident-details__gap">No one scheduled</span>}
+                              </small>
+                            </span>
+                          </td>
                           <td className="data-table__wide-only data-table__muted data-table__nowrap">
                             {r.handover ? formatTime(sentAt(r.handover)) : r.status === 'notDue' ? `Due ${formatTime(r.end)}` : 'Not submitted'}
                           </td>
                           <td><span className={`status-pill status-pill--${st.tone}`}>{st.label}</span></td>
-                          <td className="data-table__wide-only">
+                          <td className="data-table__xwide-only">
                             {!r.handover ? '–' : flagged ? <span className="status-pill status-pill--pending">{flagged}</span> : <span className="data-table__muted">None</span>}
                           </td>
-                          <td className="data-table__wide-only data-table__muted">
+                          <td className="data-table__xwide-only data-table__muted">
                             {!r.handover ? '–' : reader ? `${reader.name.split(' ')[0]} · ${formatTime(reader.readAt)}` : <span className="resident-details__gap">Not read yet</span>}
                           </td>
                           <td className="data-table__action">

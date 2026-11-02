@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import useTasks from '../hooks/useTasks';
 import useShifts from '../hooks/useShifts';
+import useNextShift from '../hooks/useNextShift';
 import useResidents from '../hooks/useResidents';
 import useNow from '../hooks/useNow';
 import { useProfile } from '../context/ProfileContext';
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const shiftTimes = current?.times ?? { start: now, end: now };
   const phase = shift ? shiftPhase(shiftTimes, now) : 'off';
   const minutesLeft = (shiftTimes.end - now) / 60000;
+  const nextUp = useNextShift(current); // who works after me (null: not known, so not shown)
 
   const todayTasks = tasksQuery.tasks.filter((t) => isToday(t.dueAt, now));
   const left = todayTasks.filter((t) => t.status === 'pending' || t.status === 'overdue').length;
@@ -165,7 +167,7 @@ export default function Dashboard() {
         </div>
         <div className="span-4">
           {shiftsQuery.status === 'ready' ? (
-            <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} />
+            <ShiftCard shift={shift} phase={phase} submitted={submitted} minutesLeft={minutesLeft} nextUp={nextUp} />
           ) : (
             <section className="card">
               {shiftsQuery.status === 'loading' ? (

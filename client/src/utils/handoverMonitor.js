@@ -62,6 +62,22 @@ export function monitorRows(handovers, roster, from, to, now = new Date()) {
   return rows.sort((a, b) => b.start - a.start || a.userName.localeCompare(b.userName));
 }
 
+// The shift right after this one: Morning -> Noon (same day), Noon -> Night (same day),
+// Night -> Morning (next day). Shift dates are Manila dates, as on the roster.
+export function nextShiftAfter(shift, shiftDate) {
+  const next = SHIFTS[(SHIFTS.indexOf(shift) + 1) % SHIFTS.length];
+  const [y, m, d] = shiftDate.split('-').map(Number);
+  return { shift: next, shiftDate: next === SHIFTS[0] ? isoDay(new Date(y, m - 1, d + 1)) : shiftDate };
+}
+
+// Names of the people on the roster for one shift and day
+export const namesOn = (roster, shift, shiftDate) =>
+  roster.filter((e) => e.shift === shift.apiValue && e.shiftDate === shiftDate).map((e) => e.userName);
+
+// "Rosa Lim", "Rosa Lim and Ella Ramos", "A, B and C"
+export const listNames = (names) =>
+  names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+
 // "1 watch, 1 urgent" from the resident updates, or '' when nobody was flagged
 export function flaggedText(h) {
   const residents = h?.data?.residents ?? [];

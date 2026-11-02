@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CalendarOff, Inbox, History, CircleCheck } from 'lucide-react';
+import { CalendarOff, Inbox, History, CircleCheck, Send } from 'lucide-react';
 import { useHandovers } from '../context/HandoverContext';
 import { useToast } from '../context/ToastContext';
 import useTasks from '../hooks/useTasks';
 import useShifts from '../hooks/useShifts';
+import useNextShift from '../hooks/useNextShift';
 import useResidents from '../hooks/useResidents';
 import useApiData from '../hooks/useApiData';
 import useNow from '../hooks/useNow';
@@ -13,6 +14,7 @@ import { shiftLabel, shiftTime } from '../constants';
 import { shiftPhase } from '../utils/shift';
 import { formatTime } from '../utils/format';
 import { addDays } from '../utils/calendar';
+import { listNames } from '../utils/handoverMonitor';
 import { savedText } from '../utils/tasks';
 import { handoverTiming, findMyShiftHandover, nextShift, readersOf, submittedLine, handoverForMe, handoverTarget, newHandovers } from '../utils/handover';
 import PageHeader from '../components/PageHeader';
@@ -74,6 +76,8 @@ export default function Handover() {
   const shiftTimes = current?.times ?? null;
   const shiftDate = current?.shiftDate ?? null;
   const next = shift ? nextShift(shift) : null;
+  // Who receives it (null until the server can tell us: then the line just doesn't show)
+  const nextUp = useNextShift(current);
 
   // My tasks in this shift's hours, and the residents they are for
   const shiftTasks = shiftTimes
@@ -177,6 +181,18 @@ export default function Handover() {
         {tab === 'write' && (
           <>
             <div className="card shift-strip">
+              {nextUp && (
+                <p className="shift-strip__to">
+                  <Send size={16} aria-hidden="true" />
+                  {nextUp.names.length ? (
+                    <span>
+                      This handover goes to: <strong>{listNames(nextUp.names)}</strong>, {nextUp.shift.label} shift ({shiftTime(nextUp.shift)})
+                    </span>
+                  ) : (
+                    <span>No one is scheduled for the next shift yet. The admin will still see your handover.</span>
+                  )}
+                </p>
+              )}
               <div>
                 <p className="small-label">Your shift</p>
                 <p className="shift-strip__value">{shift ? `${shift.label} · ${shiftTime(shift)}` : 'No shift today'}</p>

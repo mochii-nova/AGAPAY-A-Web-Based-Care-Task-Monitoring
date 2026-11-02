@@ -19,6 +19,10 @@
 }
 .shift-strip p { margin: 0; }
 .shift-strip__value { margin-top: 2px !important; font-weight: var(--fw-medium); }
+/* "This handover goes to: …" across the top of the strip */
+.shift-strip__to { display: flex; align-items: flex-start; gap: 8px; grid-column: 1 / -1; padding-bottom: 14px; border-bottom: 1px solid var(--border); line-height: 1.45; }
+.shift-strip__to svg { flex-shrink: 0; margin-top: 3px; color: var(--indigo); }
+.shift-strip__to strong { font-weight: var(--fw-medium); }
 
 /* Form + right column */
 .handover-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }

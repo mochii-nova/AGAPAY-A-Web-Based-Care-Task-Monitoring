@@ -268,6 +268,20 @@
 .slot-panel__section { margin-top: 14px; }
 .slot-panel__section .small-label { margin-bottom: 6px; }
 .slot-panel__list { list-style: none; margin: 0; padding: 0; }
+/* "Claire River → Rosa Lim": who hands over, and who takes over on the next shift */
+.handoff { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.handoff__arrow { color: var(--indigo); font-weight: var(--fw-medium); }
+.handoff__next { color: var(--muted); }
+/* Handover monitoring: the name, with "→ next caregiver" in small text underneath (keeps the column narrow) */
+.data-table__handoff { max-width: 200px; }
+/* Flagged and Read by need a wide screen; below 1500px they're only in the details panel next to the table */
+@media (max-width: 1499px) { .data-table__xwide-only { display: none; } }
+.handoff-cell { display: flex; flex-direction: column; }
+.handoff-cell small { font-size: 0.82rem; line-height: 1.4; }
+.admin-dash__handoffs-title { margin: 16px 0 6px; padding-top: 14px; border-top: 1px solid var(--border); }
+.handoffs { list-style: none; margin: 0; padding: 0; }
+.handoffs li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 6px 0; font-size: 0.92rem; }
+.handoffs__shift { color: var(--muted); font-weight: var(--fw-medium); }
 .slot-panel__list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
 .slot-panel__list li + li { border-top: 1px solid var(--border); }
 .slot-panel__list .assign__who { flex: 1; }

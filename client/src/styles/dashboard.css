@@ -64,6 +64,7 @@
 
 /* Your shift: the handover reminder is the card's footer */
 .dash-card__foot.shift-card__note { padding-top: 4px; }
+.shift-card__next { margin-top: 4px !important; }
 .shift-card__note {
   display: flex;
   align-items: center;

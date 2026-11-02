@@ -16,7 +16,7 @@ import { formatTime } from '../../utils/format';
 import { normalizeTasks } from '../../utils/tasks';
 import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
 import { addDays, dayLabel, dayToDate, shiftOfDue, offShiftTasks } from '../../utils/adminTasks';
-import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay } from '../../utils/handoverMonitor';
+import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay, nextShiftAfter, namesOn, listNames } from '../../utils/handoverMonitor';
 import { useProfile } from '../../context/ProfileContext';
 import PageHeader from '../../components/PageHeader';
 import PushPrompt from '../../components/PushPrompt';
@@ -119,6 +119,11 @@ export default function AdminDashboard() {
   const onShift = roster.filter((e) => e.shiftDate === day && e.shift === current.shift.apiValue);
   const leftFor = (userId) =>
     tasks.filter((t) => t.assignedTo === userId && shiftOf(t).shift.id === current.shift.id && (t.status === 'pending' || t.status === 'overdue')).length;
+  // Today's handovers, one per shift: who hands over → who takes over (from the roster)
+  const handoffs = SHIFTS.map((s) => {
+    const next = nextShiftAfter(s, day);
+    return { shift: s, from: listNames(namesOn(roster, s, day)), to: listNames(namesOn(roster, next.shift, next.shiftDate)) };
+  });
   const residentsOf = (userId) => residents.filter((r) => r.caregivers.some((c) => c.id === userId)).map((r) => r.name.split(' ')[0]);
 
   // Needs attention, most urgent first: overdue tasks, missing handovers, shifts or residents with no
@@ -405,6 +410,21 @@ export default function AdminDashboard() {
                     })}
                   </ul>
                 )}
+
+                <h3 className="small-label admin-dash__handoffs-title">Today’s handovers</h3>
+                <ul className="handoffs">
+                  {handoffs.map(({ shift, from, to }) => (
+                    <li key={shift.id}>
+                      <span className="handoffs__shift">{shift.label}</span>
+                      <span className="handoff">
+                        {from || <span className="resident-details__gap">No one</span>}
+                        <span className="handoff__arrow" aria-hidden="true">→</span>
+                        <span className="sr-only">, hands over to </span>
+                        {to ? <span className="handoff__next">{to}</span> : <span className="resident-details__gap">No one scheduled</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </section>
             </div>
           </div>
