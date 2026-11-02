@@ -2,7 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
-const { SHIFT_LABEL, isShift, isDate, addDays, shiftTimes, shiftAt } = require('../utils/shifts');
+const { SHIFT_LABEL, isShift, isDate, addDays, shiftTimes, shiftAt, nextShift } = require('../utils/shifts');
 
 const router = express.Router();
 router.use(protect);
@@ -99,6 +99,20 @@ router.put('/', allowRoles('admin'), async (req, res) => {
     [user.id, shiftDate]
   );
   res.json(toShift(row));
+});
+
+router.get('/next', async (req, res) => {
+  const base = req.query.shift ? { shift: req.query.shift, shiftDate: req.query.shiftDate } : shiftAt();
+  if (!isShift(base.shift) || !isDate(base.shiftDate)) {
+    return res.status(400).json({ message: 'Give shift (Morning, Afternoon or Night) and shiftDate like 2026-10-31.' });
+  }
+  const next = nextShift(base.shift, base.shiftDate);
+  const [rows] = await pool.query(
+    `SELECT s.user_id, u.name FROM shifts s JOIN users u ON u.id = s.user_id
+     WHERE s.shift_date = ? AND s.shift = ? AND u.status = 'active' ORDER BY u.name`,
+    [next.shiftDate, next.shift]
+  );
+  res.json({ ...next, ...shiftTimes(next.shiftDate, next.shift), staff: rows.map((r) => ({ userId: r.user_id, name: r.name })) });
 });
 
 // POST /api/shifts/bulk  (admin)  { userId, from, to, shift, skipWeekdays: [3] }
