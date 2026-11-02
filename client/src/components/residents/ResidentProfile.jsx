@@ -10,7 +10,8 @@ import { RESIDENT_STATUS } from '../../utils/handover';
 import { formatTime } from '../../utils/format';
 import PhoneNumber from '../PhoneNumber';
 
-// Everything about one resident: details, care needs, emergency contact, today's tasks and recent notes.
+// Everything about one resident: details, care needs, emergency contact, today's tasks (with the
+// admin's instructions under each one) and recent notes from caregivers.
 // Used in the side panel (laptop) and in a pop-up (tablet / phone).
 // `status` = "watch" / "urgent" from the latest handover (if any).
 // `tasks`: my tasks for them today; `dayTasks`: everyone's, for the "Today" line.
@@ -79,6 +80,11 @@ export default function ResidentProfile({ resident, status, tasks, dayTasks = ta
                 <span className="profile-task__main">
                   <strong>{t.task}</strong>
                   {getCategory(t.category) && <small>{getCategory(t.category).label}</small>}
+                  {t.instructions && (
+                    <small className="profile-task__instructions">
+                      <span>Instructions:</span> {t.instructions}
+                    </small>
+                  )}
                 </span>
                 <StatusPill status={t.status} />
                 <button
@@ -96,16 +102,14 @@ export default function ResidentProfile({ resident, status, tasks, dayTasks = ta
       </section>
 
       <section className="profile-section">
+        <h3 className="small-label profile-section__title">Notes from caregivers</h3>
         {notes.length === 0 ? (
-          <>
-            <h3 className="small-label">Latest notes</h3>
-            <EmptyState icon={MessageSquareText}>No recent notes about {firstName}.</EmptyState>
-          </>
+          <EmptyState icon={MessageSquareText}>No recent notes about {firstName}.</EmptyState>
         ) : (
           <ul className="profile-notes">
-            {notes.map((n, i) => (
+            {notes.map((n) => (
               <li key={n.id} className="profile-note">
-                <p className="small-label">{i === 0 ? `Latest note · ${n.source}` : n.source}</p>
+                <p className="small-label">{n.source}</p>
                 <p className="profile-note__text">{n.text}</p>
                 <p className="submitted-line">
                   {n.author ? `Submitted by ${n.author} · ` : ''}{formatTime(n.time)}

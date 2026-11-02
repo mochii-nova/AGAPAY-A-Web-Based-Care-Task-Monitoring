@@ -21,8 +21,9 @@ import TaskDetailModal from '../components/tasks/TaskDetailModal';
 import { EmptyState, LoadingState, ErrorState, NoMatchState } from '../components/StateMessage';
 import '../styles/residents.css';
 
-// Notes about this resident: their update in each handover (or, for older plain-text handovers,
-// any handover that mentions their first name), plus task notes and skip reasons.
+// Notes from caregivers about this resident: their update in each handover (or, for older plain-text
+// handovers, any handover that mentions their first name), plus caregivers' task notes and skip reasons.
+// (The admin's instructions are not notes: they show under each of today's tasks instead.)
 function notesFor(resident, handovers, tasks) {
   const firstName = resident.name.split(' ')[0].toLowerCase();
   const fromHandovers = handovers.flatMap((h) => {

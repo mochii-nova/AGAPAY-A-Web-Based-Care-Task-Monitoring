@@ -37,7 +37,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
     time: task ? timeOf(task.dueAt) : '08:00',
     assignedTo: String(task?.assignedTo ?? ''),
     repeat: '1',
-    note: task?.note ?? '',
+    instructions: task?.instructions ?? '',
   });
   const [errors, setErrors] = useState({});
   const [saveError, setSaveError] = useState('');
@@ -113,7 +113,7 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
       task: form.task.trim(),
       category: form.category,
       residentId: Number(form.residentId),
-      note: form.note.trim(),
+      instructions: form.instructions.trim(),
     };
     const saved = [];
     const done = []; // e.g. "Rosa is now assigned to Maria."
@@ -239,19 +239,19 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
       )}
 
       <div className="field">
-        <label htmlFor="task-note" className="field__label">Instructions</label>
+        <label htmlFor="task-instructions" className="field__label">Instructions (optional)</label>
         <textarea
-          id="task-note"
-          name="note"
+          id="task-instructions"
+          name="instructions"
           className="field__input"
           rows={3}
           maxLength={2000}
           placeholder="e.g. Soft food only. Offer water after."
-          value={form.note}
+          value={form.instructions}
           onChange={handleChange}
-          aria-describedby="task-note-hint"
+          aria-describedby="task-instructions-hint"
         />
-        <p id="task-note-hint" className="field__hint">The caregiver sees this when they open the task.</p>
+        <p id="task-instructions-hint" className="field__hint">The caregiver sees this at the top when they open the task.</p>
       </div>
 
       <div className="modal__footer modal__footer--inline">

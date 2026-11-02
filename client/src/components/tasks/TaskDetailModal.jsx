@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleCheck, Clock, CircleSlash, CircleAlert, StickyNote } from 'lucide-react';
+import { CircleCheck, Clock, CircleSlash, CircleAlert, ClipboardList } from 'lucide-react';
 import Modal from '../Modal';
 import StatusPill from '../StatusPill';
 import TaskCategoryIcon from '../TaskCategoryIcon';
@@ -23,9 +23,8 @@ function TaskForm({ task, onSave, onCancel }) {
   // "Overdue" isn't something you pick; it means "pending, but late"
   const [status, setStatus] = useState(task.status === 'overdue' ? 'pending' : task.status);
   const [reason, setReason] = useState(task.skipReason ?? '');
-  // A new note only. The task's current note (often the admin's instructions) is shown
-  // read-only above, and is only replaced if you type a new one.
-  const [note, setNote] = useState('');
+  // My own note on the task. The admin's instructions are separate (read-only, at the top).
+  const [note, setNote] = useState(task.note ?? '');
   const [reasonError, setReasonError] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving, startSaving] = useSaving();
@@ -67,11 +66,11 @@ function TaskForm({ task, onSave, onCancel }) {
         <StatusPill status={task.status} />
       </div>
 
-      {task.note && (
+      {task.instructions && (
         <div className="task-note-current">
-          <StickyNote size={18} aria-hidden="true" />
+          <ClipboardList size={18} aria-hidden="true" />
           <p>
-            <span className="task-note-current__label">Note on this task:</span> {task.note}
+            <span className="task-note-current__label">Instructions from the admin:</span> {task.instructions}
           </p>
         </div>
       )}
@@ -132,7 +131,7 @@ function TaskForm({ task, onSave, onCancel }) {
       )}
 
       <div className="field">
-        <label htmlFor="task-note" className="field__label">Note (optional)</label>
+        <label htmlFor="task-note" className="field__label">Your note (optional)</label>
         <textarea
           id="task-note"
           className="field__input"
@@ -140,13 +139,7 @@ function TaskForm({ task, onSave, onCancel }) {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Anything the next caregiver should know?"
-          aria-describedby={task.note ? 'task-note-hint' : undefined}
         />
-        {task.note && (
-          <p id="task-note-hint" className="field__hint">
-            Leave this empty to keep the note above. A new note replaces it.
-          </p>
-        )}
       </div>
 
       <div className="modal__footer modal__footer--inline">

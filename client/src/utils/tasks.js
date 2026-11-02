@@ -25,6 +25,9 @@ export function normalizeTask(task) {
 
 export const normalizeTasks = (tasks) => tasks.map(normalizeTask);
 
+// The small flag on a task row: "Instructions", "Your note" or "Instructions · Your note" ('' for none)
+export const taskTextsLabel = (t) => [t.instructions && 'Instructions', t.note && 'Your note'].filter(Boolean).join(' · ');
+
 export const isToday = (date, now = new Date()) => new Date(date).toDateString() === now.toDateString();
 
 // Toast text after saving, e.g. "Sponge Bath marked as completed."

@@ -9,8 +9,7 @@ export default function useTasks() {
 
   // What the task pop-up calls when you press Save: complete, skip (with a reason),
   // undo (back to pending) and the note. Only what changed is sent.
-  // The note is only sent when a new one was typed: the task has one note, which may be the
-  // admin's instructions, so saving a status must never erase it.
+  // `note` is the caregiver's own note (the admin's instructions are separate and never sent here).
   const updateTask = async (task, { status, reason, note }) => {
     const current = task.status === 'overdue' ? 'pending' : task.status;
     const body = {};
@@ -18,7 +17,7 @@ export default function useTasks() {
       body.status = status;
       if (status === 'skipped') body.reason = reason;
     }
-    if (note && note !== (task.note ?? '')) body.note = note;
+    if (note !== (task.note ?? '')) body.note = note;
     if (Object.keys(body).length === 0) return;
 
     const { data } = await api.patch(`/tasks/${task._id}`, body);

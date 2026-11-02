@@ -5,6 +5,7 @@ import GoogleCalendarBox from './GoogleCalendarBox';
 import { SHIFTS, shiftTime } from '../../constants';
 import { dayTitle } from '../../utils/calendar';
 import { formatTime } from '../../utils/format';
+import { taskTextsLabel } from '../../utils/tasks';
 
 // Side panel for the selected day: my shift, Google Calendar, and that day's tasks.
 // hiddenCount: that day's tasks the shift buttons hide; noShiftWarning: tasks but no shift that day.
@@ -53,9 +54,9 @@ export default function DayPanel({ date, shift, tasks, hiddenCount = 0, noShiftW
                 <span className="day-task__main">
                   <strong>{t.task}</strong>
                   <small>{t.resident}{room && ` · Room ${room}`}</small>
-                  {t.note && (
+                  {taskTextsLabel(t) && (
                     <small className="day-task__note">
-                      <StickyNote size={13} aria-hidden="true" /> Has a note
+                      <StickyNote size={13} aria-hidden="true" /> {taskTextsLabel(t)}
                     </small>
                   )}
                 </span>

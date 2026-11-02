@@ -5,7 +5,7 @@ import useTasks from '../hooks/useTasks';
 import { useToast } from '../context/ToastContext';
 import { TASK_CATEGORIES } from '../constants';
 import { formatTime } from '../utils/format';
-import { isToday, savedText } from '../utils/tasks';
+import { isToday, savedText, taskTextsLabel } from '../utils/tasks';
 import { searchTerm, matchesSearch } from '../utils/search';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../components/StatusPill';
@@ -163,9 +163,9 @@ export default function Tasks() {
                       <td className="task-table__task">
                         <strong>{t.task}</strong>
                         {t.skipReason && <small>Reason: {t.skipReason}</small>}
-                        {t.note && (
-                          <small className="note-flag" title={t.note}>
-                            <StickyNote size={13} aria-hidden="true" /> Has a note
+                        {taskTextsLabel(t) && (
+                          <small className="note-flag" title={[t.instructions, t.note].filter(Boolean).join('\n')}>
+                            <StickyNote size={13} aria-hidden="true" /> {taskTextsLabel(t)}
                           </small>
                         )}
                       </td>

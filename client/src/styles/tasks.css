@@ -66,7 +66,7 @@
 .task-detail__resident span { color: var(--muted); font-weight: var(--fw-regular); }
 .task-detail__time { color: var(--muted); }
 .task-detail__done { color: var(--completed-text); }
-/* The task's current note, read-only, above the status choices */
+/* The admin's instructions, read-only, above the status choices (caregiver pop-up) */
 .task-note-current {
   display: flex;
   align-items: flex-start;
@@ -81,6 +81,14 @@
 .task-note-current svg { flex-shrink: 0; margin-top: 2px; color: var(--indigo); }
 .task-note-current p { margin: 0; overflow-wrap: anywhere; }
 .task-note-current__label { font-weight: var(--fw-medium); }
+/* Admin task details: Instructions (admin) and Caregiver note, as two separate parts */
+.task-texts { display: grid; gap: 10px; margin-top: 16px; }
+.task-text { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.task-text--instructions { border-left: 3px solid var(--indigo); }
+.task-text__title { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font-size: 0.9rem; font-weight: var(--fw-medium); }
+.task-text__title svg { color: var(--indigo); }
+.task-text__title small { color: var(--muted); font-size: 0.8rem; font-weight: var(--fw-regular); }
+.task-text p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
 
 /* Laptops and tablets: filters go under the tabs (one row only fits on wide screens) */
 @media (max-width: 1440px) {
