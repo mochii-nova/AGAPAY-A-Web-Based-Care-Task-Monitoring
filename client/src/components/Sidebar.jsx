@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
@@ -78,9 +79,34 @@ function SideLink({ to, end, label, icon: Icon, badge, badgeLabel, tone, onClick
   );
 }
 
+// How long the sidebar slides (the same as the width transition on .sidebar in main.css)
+const SLIDE_MS = 220;
+
 // Left navigation shared by every page inside the app.
 // `collapsed` (laptops only): a narrow rail with icons; ☰ in the top bar switches it.
+// The change happens in steps, so nothing flashes, squeezes or jumps while it slides:
+//   collapsing: the width slides; the words and the full logo fade out quickly (cut off by the edge).
+//   rail (only once the slide has finished): the "A" icon fades in, and the labels become tooltips,
+//         which only show after the mouse moves over the menu (tips-ready), never during the slide.
+//   expanding: the width slides and the words fade in straight away (150ms), so they're there when it's open.
+// Every click starts its phase again, so fast clicks back and forth always end in the right state.
 export default function Sidebar({ collapsed, onClose }) {
+  const [phase, setPhase] = useState(collapsed ? 'rail' : 'open'); // open | collapsing | rail | expanding
+  const [lastCollapsed, setLastCollapsed] = useState(collapsed);
+  const [tipsReady, setTipsReady] = useState(false);
+  if (collapsed !== lastCollapsed) {
+    // Changed while rendering, so the slide starts in the same frame as the click
+    setLastCollapsed(collapsed);
+    setPhase(collapsed ? 'collapsing' : 'expanding');
+    setTipsReady(false);
+  }
+  useEffect(() => {
+    if (phase !== 'collapsing' && phase !== 'expanding') return undefined;
+    const timer = setTimeout(() => setPhase(phase === 'collapsing' ? 'rail' : 'open'), SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
+  const rail = phase === 'rail'; // the finished icon rail
+  const state = phase === 'open' ? '' : `is-${phase}`;
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
@@ -107,10 +133,14 @@ export default function Sidebar({ collapsed, onClose }) {
   const shiftLabel = SHIFTS.find((s) => s.apiValue === profile.shift)?.label;
 
   return (
-    <aside className={`sidebar ${collapsed ? 'is-rail' : ''}`} aria-label="Main menu">
+    <aside
+      className={`sidebar ${state} ${rail && tipsReady ? 'tips-ready' : ''}`}
+      aria-label="Main menu"
+      onPointerMove={rail && !tipsReady ? () => setTipsReady(true) : undefined}
+    >
       <div className="sidebar__top">
         <Link to={homeFor(user)} className="sidebar__logo" onClick={onClose} aria-label="AGAPAY home">
-          {collapsed ? <img src={markWhite} alt="" className="sidebar__mark" /> : <Logo tone="white" height={32} />}
+          {rail ? <img src={markWhite} alt="" className="sidebar__mark" /> : <Logo tone="white" height={32} />}
         </Link>
         <button type="button" className="icon-btn sidebar__close" onClick={onClose} aria-label="Close menu">
           <X size={20} />
@@ -120,7 +150,7 @@ export default function Sidebar({ collapsed, onClose }) {
       {/* Profile card: opens My profile (the account menu lives only on the avatar, top right) */}
       <div className="sidebar__menu">
         <NavLink to="/profile" className="sidebar__profile" onClick={onClose} aria-label={`${profile.name}, ${roleLabel}. Open my profile`}>
-          <Avatar name={profile.name} photo={profile.photo} size={collapsed ? 36 : 40} />
+          <Avatar name={profile.name} photo={profile.photo} size={40} />
           <span className="sidebar__who" aria-hidden="true">
             <strong>{profile.name}</strong>
             <small>{roleLabel}{shiftLabel && ` · ${shiftLabel}`}</small>

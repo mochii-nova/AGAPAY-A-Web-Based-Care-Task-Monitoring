@@ -1190,11 +1190,13 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   scrollbar-width: none;        /* scrollbars stay hidden until the pointer is over the menu */
   background: var(--navy);
   color: var(--on-navy);
-  transition: width 0.2s var(--ease);
+  transition: width 0.22s var(--ease); /* 220ms, the same as SLIDE_MS in Sidebar.jsx */
 }
 .sidebar__top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 6px; }
 /* 44px tall tap area; the negative margins keep the logo where it was */
-.sidebar__logo { display: inline-flex; align-items: center; min-height: var(--tap); margin-block: -6px; border-radius: var(--radius-sm); text-decoration: none; }
+.sidebar__logo { display: inline-flex; flex-shrink: 0; align-items: center; min-height: var(--tap); margin-block: -6px; border-radius: var(--radius-sm); text-decoration: none; }
+/* Both logos always keep their own size: never squeezed when the sidebar narrows (the edge cuts them off) */
+.sidebar__logo img { flex-shrink: 0; max-width: none; }
 .sidebar__mark { display: block; height: 34px; width: auto; }
 .sidebar__close { display: none; color: var(--on-navy); }
 
@@ -1277,22 +1279,49 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .sidebar__link.active svg { opacity: 1; }
 .sidebar__bottom { flex-shrink: 0; padding-top: 4px; border-top: 1px solid var(--on-navy-line); }
 
-/* Collapsed icon rail (laptops only; the phone drawer always shows the full menu) */
+/* Collapsed icon rail (laptops only; the phone drawer always shows the full menu).
+   Sidebar.jsx changes it in two steps so nothing flashes or jumps while it slides:
+   - .is-collapsing (220ms): the width slides. Words and the full logo fade out fast, stay on one line and
+     are clipped by the sidebar; icons and the photo glide to their new place (padding transitions).
+   - .is-expanding (220ms): the same in reverse, and the words fade in right away (150ms) during the slide.
+     The layout stays the same height, so nothing moves up or down.
+   - .is-rail (after the slide): labels become tooltips, shown only on hover once the mouse has moved
+     over the menu (.tips-ready), or on keyboard focus. */
 @media (min-width: 901px) {
-  .sidebar.is-rail { width: var(--rail-w); padding: 18px 14px; overflow: visible; }
-  .sidebar.is-rail .sidebar__top { justify-content: center; padding: 0; }
-  .sidebar.is-rail .sidebar__menu { margin: 16px 0 10px; }
-  .sidebar.is-rail .sidebar__profile { justify-content: center; min-height: var(--tap); padding: 4px; background: transparent; }
+  .sidebar__link,
+  .sidebar__profile { transition: padding 0.22s var(--ease), background-color 0.15s; }
+  .sidebar__label,
+  .sidebar__who,
+  .sidebar__group-title,
+  .sidebar__link .count-badge { transition: opacity 0.15s; }
+
+  /* Rail width, and the rail's padding (so icons and the photo are centred in the 72px rail) */
+  .sidebar.is-collapsing,
+  .sidebar.is-rail { width: var(--rail-w); }
+  .sidebar:is(.is-collapsing, .is-rail) .sidebar__link { padding-left: 15px; }  /* icon centred: 12 + 15 + 9 = 36 */
+  .sidebar:is(.is-collapsing, .is-rail) .sidebar__profile { padding-left: 4px; padding-right: 4px; background: transparent; }
+  .sidebar__profile .avatar { flex-shrink: 0; } /* the photo never gets squeezed while the card narrows */
   .sidebar.is-rail .sidebar__profile:hover,
   .sidebar.is-rail .sidebar__profile.active { background: var(--on-navy-hover); }
-  .sidebar.is-rail .sidebar__who,
-  .sidebar.is-rail .sidebar__group-title { display: none; }
-  .sidebar.is-rail .sidebar__group { margin: 0 0 14px; }
-  .sidebar.is-rail .sidebar__nav { overflow: visible; }  /* the tooltips stick out to the right */
-  .sidebar.is-rail .sidebar__link { justify-content: center; padding: 0; }
+  .sidebar__profile { overflow: hidden; }
 
-  /* The label becomes a tooltip next to the icon (on hover and keyboard focus).
-     It sits clear of the sidebar's edge, with a border and shadow, so it never blends into the navy rail. */
+  /* While sliding (and in the rail): words faded out, still on one line and in place */
+  .sidebar:is(.is-collapsing, .is-rail) :is(.sidebar__label, .sidebar__who, .sidebar__group-title),
+  .sidebar.is-collapsing .sidebar__link .count-badge { opacity: 0; }
+  .sidebar.is-collapsing :is(.sidebar__label, .sidebar__who, .sidebar__group-title, .count-badge) { transition-duration: 0.1s; }
+  .sidebar__logo img { transition: opacity 0.1s; }
+  .sidebar.is-collapsing .sidebar__logo img { opacity: 0; } /* the full logo fades out; the "A" fades in after */
+  .sidebar.is-rail .sidebar__group-title { visibility: hidden; }  /* keeps its height: icons don't move */
+  .sidebar.is-rail .sidebar__who { visibility: hidden; }
+
+  /* The finished rail */
+  .sidebar.is-rail { overflow: visible; }
+  .sidebar.is-rail .sidebar__top { justify-content: center; padding: 0; }
+  .sidebar.is-rail .sidebar__nav { overflow: visible; }  /* the tooltips stick out to the right */
+  .sidebar__logo > * { animation: sidebar-fade 0.15s var(--ease); } /* the logo swap fades in */
+
+  /* The label becomes a tooltip next to the icon. It sits clear of the sidebar's edge, with a border
+     and shadow, so it never blends into the navy rail. It only fades in on hover, never on its own. */
   .sidebar.is-rail .sidebar__label {
     position: absolute;
     left: calc(100% + 22px);
@@ -1307,19 +1336,22 @@ textarea.field__input { resize: vertical; min-height: 96px; }
     font-size: 0.9rem;
     font-weight: var(--fw-medium);
     white-space: nowrap;
-    opacity: 0;
     pointer-events: none;
     transform: translate(-4px, -50%);
+    transition: none;
+  }
+  .sidebar.is-rail.tips-ready .sidebar__link:hover .sidebar__label,
+  .sidebar.is-rail .sidebar__link:focus-visible .sidebar__label {
+    opacity: 1;
+    transform: translate(0, -50%);
     transition: opacity 0.15s, transform 0.15s;
   }
-  .sidebar.is-rail .sidebar__link:hover .sidebar__label,
-  .sidebar.is-rail .sidebar__link:focus-visible .sidebar__label { opacity: 1; transform: translate(0, -50%); }
 
   /* Badges shrink to a small dot on the icon */
   .sidebar.is-rail .count-badge {
     position: absolute;
     top: 9px;
-    left: 26px;
+    left: 28px;
     min-width: 0;
     width: 9px;
     height: 9px;
@@ -1331,6 +1363,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   }
   .sidebar.is-rail .sidebar__link.active .count-badge { box-shadow: 0 0 0 2px var(--sidebar-active); }
 }
+@keyframes sidebar-fade { from { opacity: 0; } }
 
 .sidebar-backdrop { display: none; }
 
