@@ -272,12 +272,8 @@
 .handoff { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
 .handoff__arrow { color: var(--indigo); font-weight: var(--fw-medium); }
 .handoff__next { color: var(--muted); }
-/* Handover monitoring: the name, with "→ next caregiver" in small text underneath (keeps the column narrow) */
-.data-table__handoff { max-width: 200px; }
 /* Flagged and Read by need a wide screen; below 1500px they're only in the details panel next to the table */
 @media (max-width: 1499px) { .data-table__xwide-only { display: none; } }
-.handoff-cell { display: flex; flex-direction: column; }
-.handoff-cell small { font-size: 0.82rem; line-height: 1.4; }
 .admin-dash__handoffs-title { margin: 16px 0 6px; padding-top: 14px; border-top: 1px solid var(--border); }
 .handoffs { list-style: none; margin: 0; padding: 0; }
 .handoffs li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 6px 0; font-size: 0.92rem; }
@@ -374,14 +370,54 @@
 .stat-card__value--overdue { color: var(--overdue-text); }
 .admin-handover__layout { grid-template-columns: minmax(0, 1fr) 380px; }
 .admin-handover__list .cell-person small { white-space: nowrap; }
+/* Handover monitoring table: fixed columns, 72px rows, everything centred.
+   Main line 15px ink, second line 13px secondary; nothing wraps (long text ends in "…"). */
+.hm-table { table-layout: fixed; }
+.hm-table th { overflow: hidden; font-size: 12px; text-overflow: ellipsis; }
+.hm-table td { height: 72px; padding: 10px 12px; overflow: hidden; }
+.hm-main,
+.hm-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-main { color: var(--text); font-size: 15px; font-weight: var(--fw-medium); line-height: 1.4; }
+.hm-sub { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.hm-table .status-pill { max-width: 100%; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.hm-table .btn--row { width: 88px; min-width: 88px; padding: 0; } /* View and Remind: the same width */
+/* Widths: 5 columns below 1500px, 7 from 1500px (Flagged and Read by); Open takes what's left */
+.hm-col--shift { width: 16%; }
+.hm-col--who { width: 27%; }
+.hm-col--sent { width: 17%; }
+.hm-col--status { width: 21%; }
+@media (min-width: 1500px) {
+  .hm-table th,
+  .hm-table td { padding-left: 8px; padding-right: 8px; }
+  .hm-col--shift { width: 12%; }
+  .hm-col--who { width: 19%; }
+  .hm-col--sent { width: 13%; }
+  .hm-col--status { width: 16%; }
+  .hm-col--flagged { width: 11%; }
+  .hm-col--read { width: 13%; }
+}
 .handover-details .day-panel__shift-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+/* Details panel text sizes: labels 12px uppercase secondary, name 20px, the Submitted line 14px,
+   and every piece of body text 15px (resident notes, "No changes", Other notes, Tasks this shift, Read by) */
+.handover-details .small-label { color: var(--muted); font-size: 12px; }
+.handover-details .day-panel__title { font-size: 20px; font-weight: 600; }
+.handover-details .day-panel__shift-line,
+.handover-details .day-panel__shift-line .status-pill { font-size: 14px; }
+.handover-details .hv-list p,
+.handover-details .hv-muted,
+.handover-details .hv-other,
+.handover-details .handover-details__readers,
+.handover-details .handover-details__unread,
+.handover-details__empty { font-size: 15px; }
+.handover-details .hv-line .hv-muted { font-size: 13px; } /* "Room 102" next to the name */
 .handover-details__empty { margin: 0 0 14px; color: var(--muted); }
 .handover-details__reads { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border); }
 .handover-details__reads .small-label { margin-bottom: 6px; }
 .handover-details__readers { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--completed-bg); color: var(--completed-text); font-size: 0.92rem; }
 .handover-details__readers li { display: flex; align-items: center; gap: 8px; }
-.handover-details__unread { margin: 0; color: var(--overdue-text); font-size: 0.92rem; }
+.handover-details__unread { margin: 0; color: var(--muted); font-size: 0.92rem; } /* not red: Missing is the red one */
 .handover-details__actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+.handover-details__actions .btn { padding: 0 12px; } /* Message and Print: same size, side by side */
 
 /* Contact messages */
 .contact-list { list-style: none; margin: 0; padding: 0; }

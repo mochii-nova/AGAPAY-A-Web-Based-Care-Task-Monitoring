@@ -62,7 +62,7 @@ export default function HandoverDetails({ row, onRemind, onMessage, showTitle = 
           </section>
 
           <div className="handover-details__actions no-print">
-            <button type="button" className="btn btn--soft" onClick={onMessage}>
+            <button type="button" className="btn btn--outline" onClick={onMessage}>
               <MessageSquare size={18} aria-hidden="true" /> Message {row.userName.split(' ')[0]}
             </button>
             <button type="button" className="btn btn--outline" onClick={() => window.print()}>

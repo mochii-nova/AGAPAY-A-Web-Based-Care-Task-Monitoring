@@ -550,6 +550,7 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease),
     transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
+.btn svg { flex-shrink: 0; } /* an icon never gets squeezed when the words are long */
 .btn:is(:hover, :focus-visible):not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-btn); }
 .btn--primary { background: var(--indigo); color: var(--on-indigo); }
 .btn--primary:hover:not(:disabled) { background: var(--indigo-hover); }

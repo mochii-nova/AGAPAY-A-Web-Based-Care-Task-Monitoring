@@ -117,16 +117,18 @@ export default function HandoverMonitor() {
               {rows.length === 0 ? (
                 <EmptyState icon={FileText}>No shifts on the roster and no handovers for these days.</EmptyState>
               ) : (
-                <table className="data-table">
+                // Fixed column widths (admin.css, "Handover monitoring table"); every cell is one main
+                // line (15px) and an optional second line (13px, secondary). Long text ends in "…".
+                <table className="data-table hm-table">
                   <thead>
                     <tr>
-                      <th scope="col">Shift</th>
-                      <th scope="col">Caregiver → next shift</th>
-                      <th scope="col" className="data-table__wide-only">Submitted</th>
-                      <th scope="col">Status</th>
-                      <th scope="col" className="data-table__xwide-only">Flagged</th>
-                      <th scope="col" className="data-table__xwide-only">Read by</th>
-                      <th scope="col"><span className="sr-only">Open</span></th>
+                      <th scope="col" className="hm-col--shift">Shift</th>
+                      <th scope="col" className="hm-col--who">Caregiver → next<span className="sr-only"> shift</span></th>
+                      <th scope="col" className="hm-col--sent data-table__wide-only">Submitted</th>
+                      <th scope="col" className="hm-col--status">Status</th>
+                      <th scope="col" className="hm-col--flagged data-table__xwide-only">Flagged</th>
+                      <th scope="col" className="hm-col--read data-table__xwide-only">Read by</th>
+                      <th scope="col" className="hm-col--open"><span className="sr-only">Open</span></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,33 +139,42 @@ export default function HandoverMonitor() {
                       return (
                         <tr key={r.key} className={`data-table__row ${selected?.key === r.key ? 'is-selected' : ''}`}>
                           <td>
-                            <div className="cell-person">
-                              <span>
-                                <strong>{r.shift.label}</strong>
-                                <small>{dayLabel(r.shiftDate)}</small>
-                              </span>
-                            </div>
+                            <span className="hm-main">{r.shift.label}</span>
+                            <span className="hm-sub">{dayLabel(r.shiftDate)}</span>
                           </td>
                           {/* The caregiver, and under it who takes over: "→ Rosa Lim" */}
-                          <td className="data-table__handoff">
-                            <span className="handoff-cell">
-                              <span>{r.userName}</span>
-                              <small>
-                                <span className="handoff__arrow" aria-hidden="true">→ </span>
-                                <span className="sr-only">hands over to </span>
-                                {nextOf(r) ? <span className="handoff__next">{nextOf(r)}</span> : <span className="resident-details__gap">No one scheduled</span>}
-                              </small>
+                          <td>
+                            <span className="hm-main" title={r.userName}>{r.userName}</span>
+                            <span className="hm-sub" title={nextOf(r) ? `Hands over to ${nextOf(r)}` : undefined}>
+                              <span className="handoff__arrow" aria-hidden="true">→ </span>
+                              <span className="sr-only">hands over to </span>
+                              {nextOf(r) || 'No one scheduled'}
                             </span>
                           </td>
-                          <td className="data-table__wide-only data-table__muted data-table__nowrap">
-                            {r.handover ? formatTime(sentAt(r.handover)) : r.status === 'notDue' ? `Due ${formatTime(r.end)}` : 'Not submitted'}
+                          <td className="data-table__wide-only">
+                            {r.handover ? (
+                              <span className="hm-main">{formatTime(sentAt(r.handover))}</span>
+                            ) : (
+                              <span className="hm-sub">{r.status === 'notDue' ? `Due ${formatTime(r.end)}` : 'Not submitted'}</span>
+                            )}
                           </td>
                           <td><span className={`status-pill status-pill--${st.tone}`}>{st.label}</span></td>
                           <td className="data-table__xwide-only">
-                            {!r.handover ? '–' : flagged ? <span className="status-pill status-pill--pending">{flagged}</span> : <span className="data-table__muted">None</span>}
+                            {flagged ? (
+                              <span className="status-pill status-pill--pending" title={flagged}>{flagged}</span>
+                            ) : (
+                              <span className="hm-sub">{r.handover ? 'None' : '–'}</span>
+                            )}
                           </td>
-                          <td className="data-table__xwide-only data-table__muted">
-                            {!r.handover ? '–' : reader ? `${reader.name.split(' ')[0]} · ${formatTime(reader.readAt)}` : <span className="resident-details__gap">Not read yet</span>}
+                          <td className="data-table__xwide-only">
+                            {reader ? (
+                              <>
+                                <span className="hm-main" title={reader.name}>{reader.name.split(' ')[0]}</span>
+                                <span className="hm-sub">{formatTime(reader.readAt)}</span>
+                              </>
+                            ) : (
+                              <span className="hm-sub">{r.handover ? 'Not read yet' : '–'}</span>
+                            )}
                           </td>
                           <td className="data-table__action">
                             {r.status === 'missing' ? (
