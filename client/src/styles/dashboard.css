@@ -1,0 +1,164 @@
+/* =====================================================================
+   Caregiver Dashboard (Dashboard.jsx + components/dashboard/)
+   Colours come only from the variables in main.css.
+   ===================================================================== */
+.page-header.dash-greeting { align-items: flex-end; }
+.dash-greeting__date { margin: 0; color: var(--muted); }
+
+/* One 12-column grid for both dashboards (caregiver and admin). Every row below the stat cards is
+   8 + 4 columns, so the left and right edges of all cards line up; cards in a row stretch to the
+   same height. The gap (24px) is the same between cards and between rows. */
+.dash-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: stretch; gap: 24px; margin-bottom: 24px; }
+/* Each cell holds one card and stretches it to the row's height */
+.dash-grid > * { display: flex; flex-direction: column; min-width: 0; }
+.dash-grid > * > * { flex: 1; margin: 0; }
+.dash-grid > .span-4 { grid-column: span 4; }
+.dash-grid > .span-8 { grid-column: span 8; }
+.dash-grid > .span-12 { grid-column: 1 / -1; }
+.dashboard .push-prompt, .admin-dash .push-prompt { margin-bottom: 24px; }
+
+/* "Start here" (StartHere.jsx): one line and one plum button, under the greeting */
+.card.start-here { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 24px; padding: 16px 20px; border-left: 4px solid var(--indigo); }
+.start-here--calm.card { border-left-color: var(--completed-dot); }
+.start-here__icon { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
+.start-here--calm .start-here__icon { background: var(--completed-bg); color: var(--completed-text); }
+.start-here__text { flex: 1 1 200px; min-width: 0; }
+.start-here__text .small-label { margin: 0 0 2px; }
+.start-here__text p { margin: 0; font-size: 1rem; }
+.start-here__btn { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .card.start-here { margin-bottom: 16px; }
+  .start-here__btn { width: 100%; justify-content: center; }
+}
+
+/* The compact cards of row 1: label, a big line, a small line, and a footer kept at the bottom */
+.card.dash-card { display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; }
+.dash-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dash-card .small-label { margin: 0 0 4px; }
+.dash-card__big { margin: 0; overflow: hidden; font-size: 1.25rem; font-weight: var(--fw-bold); line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+/* A sentence (e.g. "No handover from the last shift yet.") may wrap instead of being cut */
+.dash-card__big--wrap { overflow: visible; white-space: normal; }
+.dash-card__sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.dash-card__line { display: -webkit-box; margin: 6px 0 0; overflow: hidden; font-size: 0.9rem; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dash-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 12px; }
+.dash-card__done { display: inline-flex; align-items: center; gap: 6px; color: var(--completed-text); font-size: 0.9rem; font-weight: var(--fw-medium); }
+.dash-card__foot .card__link { display: inline-flex; align-items: center; min-height: var(--tap); }
+
+/* Today's progress: ring + legend, and earlier days' overdue tasks underneath */
+.progress-card__body { display: flex; align-items: center; gap: 18px; }
+.progress-card__earlier { min-height: var(--tap); color: inherit; text-decoration: none; }
+.progress-card__earlier:hover .card__link { text-decoration-color: currentColor; }
+.ring { position: relative; flex-shrink: 0; width: 92px; height: 92px; }
+.ring svg { width: 100%; height: 100%; }
+.ring__track,
+.ring__fill { fill: none; stroke-width: 9; }
+.ring__track { stroke: var(--indigo-soft); }
+.ring__fill { stroke: var(--indigo); stroke-linecap: round; animation: ring-fill 0.6s var(--ease) both; }
+/* The ring fills up when the page opens */
+@keyframes ring-fill { from { stroke-dashoffset: var(--ring-length); } }
+.ring__label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring__label strong { font-size: 1.35rem; font-weight: var(--fw-bold); line-height: 1.1; }
+.ring__label small { color: var(--muted); font-size: 0.75rem; }
+.progress-card__text { min-width: 0; }
+.progress-legend { display: flex; flex-direction: column; gap: 2px; list-style: none; margin: 0; padding: 0; }
+
+/* Your shift: the handover reminder is the card's footer */
+.dash-card__foot.shift-card__note { padding-top: 4px; }
+.shift-card__next { margin-top: 4px !important; }
+.shift-card__note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 4px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.93rem;
+}
+.shift-card__note a { display: inline-flex; align-items: center; min-height: var(--tap); color: inherit; font-weight: var(--fw-medium); text-underline-offset: 3px; }
+/* Reminders ("Handover due in…", "Handover not submitted yet") use the warm apricot tint; "submitted" stays green */
+.shift-card__note--pending,
+.shift-card__note--overdue,
+.shift-card__note--neutral { background: var(--accent-tint); color: var(--on-accent-tint); }
+.shift-card__note--completed { background: var(--completed-bg); color: var(--completed-text); }
+
+/* Priority alerts: residents to watch, then overdue tasks; each line opens it */
+.alerts-card__list { list-style: none; margin: -6px 0 0; padding: 0; }
+.alerts-card__list li + li { border-top: 1px solid var(--border); }
+.alerts-card__item { display: flex; align-items: center; gap: 10px; min-height: var(--tap); padding: 8px 6px; margin: 0 -6px; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; transition: background-color 0.15s; }
+.alerts-card__item:hover { background: var(--tint); }
+.alerts-card__item .status-pill { flex-shrink: 0; min-width: 70px; }
+.alerts-card__text { display: flex; flex-direction: column; min-width: 0; }
+.alerts-card__text strong { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
+.alerts-card__text small { overflow: hidden; color: var(--muted); font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; }
+.alerts-card__clear { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--completed-text); }
+.alerts-card__clear svg { flex-shrink: 0; margin-top: 2px; }
+
+/* Up next */
+.next-empty { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 0 2px; border-top: 1px solid var(--border); color: var(--muted); }
+.next-empty svg { flex-shrink: 0; margin-top: 2px; color: var(--completed-text); }
+.task-rows { list-style: none; margin: 0; padding: 0; }
+.task-row {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.task-row__time { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+.task-row__main { display: flex; flex-direction: column; min-width: 0; }
+.task-row__main strong { font-weight: var(--fw-medium); }
+.task-row__main span { color: var(--muted); font-size: 0.85rem; }
+
+/* My residents */
+.dash-residents { margin-top: 4px; }
+.dash-residents__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.dash-residents__head h2 { margin: 0; font-size: var(--fs-card-title); font-weight: var(--fw-medium); }
+.dash-residents__head .card__link { margin-left: auto; }
+.resident-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; list-style: none; margin: 0; padding: 0; }
+.resident-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.resident-tile:hover { border-color: var(--lavender-line); }
+.resident-tile__main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.resident-tile__main strong { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.resident-tile__main small { color: var(--muted); }
+
+/* Smaller screens */
+@media (max-width: 1280px) {
+  .resident-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* The 4-column cards get too narrow below this: every 8 + 4 row stacks, full width.
+   The caregiver's three top cards go two by two (the last one full width). */
+@media (max-width: 1200px) {
+  .dash-grid > .span-8, .dash-grid > .span-4 { grid-column: 1 / -1; }
+  .dash-grid--tiles > .span-4 { grid-column: span 6; }
+  .dash-grid--tiles > .span-4:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .dash-grid { gap: 16px; margin-bottom: 16px; }
+  .dash-grid--tiles > .span-4 { grid-column: 1 / -1; }
+  .task-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'main open'
+      'meta open';
+    row-gap: 4px;
+  }
+  .task-row__main { grid-area: main; }
+  .task-row__time { grid-area: meta; }
+  .task-row .status-pill { grid-area: meta; justify-self: end; margin-right: 8px; }
+  .task-row .btn { grid-area: open; }
+  .resident-tiles { grid-template-columns: minmax(0, 1fr); }
+}

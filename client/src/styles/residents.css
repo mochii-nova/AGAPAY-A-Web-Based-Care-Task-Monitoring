@@ -1,0 +1,126 @@
+/* =====================================================================
+   My Residents (Residents.jsx + components/residents/)
+   Colours come only from the variables in main.css.
+   ===================================================================== */
+/* Laptops: compact list on the left, profile on the right (it stays in view while you scroll) */
+.residents-layout { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+.residents-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* Search row: no box around it, so it lines up with the title and the cards */
+.residents-toolbar { display: flex; gap: 10px; }
+.residents-toolbar .search-box { flex: 1 1 auto; min-width: 0; }
+.residents-toolbar .select { flex: 0 0 200px; width: 200px; }
+
+/* Resident cards: one column, all the same height and layout */
+.resident-list { display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; padding: 0; }
+/* The initials circle sits at the top, beside the name (not in the middle of a tall card) */
+.resident-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.resident-card:hover { border-color: var(--lavender-line); }
+.resident-card[aria-pressed='true'] { border-color: var(--indigo); background: var(--indigo-soft); }
+/* On the selected (lilac) card the lilac circle would disappear, so it gets the card colour */
+.resident-card[aria-pressed='true'] .avatar { background: var(--card); }
+.resident-card > .avatar { flex-shrink: 0; }
+/* Name, ID line, care-need chips and the Today line, about 8px apart */
+.resident-card__body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+/* The condition badge (Watch closely / Normal) sits in the top-right corner */
+.resident-card__status { flex-shrink: 0; margin-left: auto; }
+.resident-card__line { display: flex; align-items: center; gap: 10px; min-height: 22px; white-space: nowrap; }
+.resident-card__name { overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; }
+.resident-card__meta { gap: 8px; color: var(--muted); font-size: 0.88rem; }
+
+/* Care need tags (text only) */
+.care-needs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.care-needs--one-row { flex-wrap: nowrap; overflow: hidden; }
+.care-need {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--tint);
+  color: var(--muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.care-need--more { flex-shrink: 0; background: transparent; }
+
+/* "Today  Meals ● done  Medical care ● pending": today's tasks by category (hidden when there are none) */
+.today-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.82rem; }
+.today-line__label { color: var(--muted); font-size: 0.72rem; font-weight: var(--fw-bold); letter-spacing: 0.6px; text-transform: uppercase; }
+.today-line__item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.today-line__name { color: var(--text); }
+.today-line .status-pill { font-size: 0.8rem; }
+
+/* Profile side panel (laptops): stays in view while scrolling */
+.card.resident-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+
+/* Profile content (panel and pop-up) */
+.resident-profile__identity { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.resident-profile__who { flex: 1; min-width: 0; }
+.resident-profile__identity .status-pill { align-self: flex-start; margin-top: 6px; }
+.resident-profile__name { margin: 0; font-size: 1.35rem; font-weight: var(--fw-bold); }
+.resident-profile__sub { margin: 2px 0 0; color: var(--muted); }
+
+/* Care needs next to the emergency contact */
+.resident-profile__columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+.resident-profile__columns .small-label { margin-bottom: 8px; }
+.resident-profile__contact { margin: 0 0 10px; color: var(--muted); }
+.resident-profile__contact strong { color: var(--text); font-weight: var(--fw-medium); }
+.resident-profile__note { margin: 10px 0 0; font-size: 0.93rem; }
+
+.profile-section { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--border); }
+.profile-section .small-label { margin-bottom: 10px; }
+.profile-section__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.profile-section__head .small-label { margin-bottom: 0; }
+
+/* Today's tasks: time | task + category | status | View */
+.profile-tasks { list-style: none; margin: 0; padding: 0; }
+.profile-tasks li + li { border-top: 1px solid var(--border); }
+.profile-task { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; }
+.profile-task__time { color: var(--muted); font-size: 0.9rem; }
+.profile-task__main { display: flex; flex-direction: column; min-width: 0; }
+.profile-task__main strong { font-weight: var(--fw-medium); }
+.profile-task__main small { color: var(--muted); font-size: 0.82rem; }
+/* The admin's instructions under a task, in the normal text colour so they're easy to read */
+.profile-task__main .profile-task__instructions { margin-top: 2px; color: var(--text); line-height: 1.45; overflow-wrap: anywhere; }
+.profile-task__instructions span { font-weight: var(--fw-medium); }
+.profile-section__title { margin: 0 0 10px; }
+
+/* Latest notes, signed by hand */
+.profile-notes { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.profile-note { padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); }
+.profile-note p { margin: 0; }
+.profile-note .small-label { margin-bottom: 6px; }
+.profile-note__text { line-height: 1.55; }
+.profile-note .submitted-line { margin-top: 6px; }
+
+.resident-profile .state-msg { padding: 16px; }
+
+/* Tablets and phones: the list takes the full width; the profile opens as a pop-up */
+@media (max-width: 1100px) {
+  .residents-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .residents-toolbar { flex-direction: column; }
+  .residents-toolbar .select { flex: none; width: 100%; }
+  .resident-card { gap: 12px; padding: 14px; }
+  .resident-profile__columns { grid-template-columns: minmax(0, 1fr); }
+  .profile-task { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main view' 'meta view'; row-gap: 2px; }
+  .profile-task__main { grid-area: main; }
+  .profile-task__time { grid-area: meta; }
+  .profile-task .status-pill { grid-area: meta; justify-self: end; margin-right: 8px; }
+  .profile-task .btn { grid-area: view; }
+}

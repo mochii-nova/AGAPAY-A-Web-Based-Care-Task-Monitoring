@@ -1,0 +1,521 @@
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Plus, UserPlus, CalendarPlus, CircleCheck } from 'lucide-react';
+import { useStaff } from '../../context/StaffContext';
+import { useHandovers } from '../../context/HandoverContext';
+import { useToast } from '../../context/ToastContext';
+import useApiData from '../../hooks/useApiData';
+import useResidents from '../../hooks/useResidents';
+import useOverdueTasks from '../../hooks/useOverdueTasks';
+import useNow from '../../hooks/useNow';
+import { isoDay } from '../../hooks/useShifts';
+import { SHIFTS, shiftTime } from '../../constants';
+import { RESIDENT_STATUS, latestUpdate, readersOf } from '../../utils/handover';
+import { shiftOnDate, minutesToText } from '../../utils/shift';
+import { formatTime } from '../../utils/format';
+import { normalizeTasks } from '../../utils/tasks';
+import { activeCaregivers, residentsWithoutShift } from '../../utils/staff';
+import { addDays, dayLabel, dayToDate, shiftOfDue, offShiftTasks } from '../../utils/adminTasks';
+import { MONITOR_STATUS, monitorRows, reminderText, sentAt, handoverDay, nextShiftAfter, namesOn, listNames } from '../../utils/handoverMonitor';
+import { useProfile } from '../../context/ProfileContext';
+import PageHeader from '../../components/PageHeader';
+import PushPrompt from '../../components/PushPrompt';
+import StartHere from '../../components/StartHere';
+import GettingStarted from '../../components/admin/GettingStarted';
+import { useTour } from '../../context/TourContext';
+import CardHeader from '../../components/CardHeader';
+import Avatar from '../../components/Avatar';
+import TaskFormModal from '../../components/admin/TaskFormModal';
+import { LoadingState, ErrorState } from '../../components/StateMessage';
+import '../../styles/dashboard.css';
+import '../../styles/admin.css';
+
+function greeting(now) {
+  const hour = now.getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+// The shift happening at `now` and the day it started (a Night shift after midnight started yesterday)
+function currentShift(now) {
+  const { shift, shiftDate } = shiftOfDue(now);
+  return { shift, shiftDate, ...shiftOnDate(shift, dayToDate(shiftDate)) };
+}
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+// The administrator's home: today at a glance, and what needs a decision
+export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const showToast = useToast();
+  const now = useNow();
+  const { staff, pendingCount } = useStaff();
+  const { residents, status: residentsStatus, setData: setResidents } = useResidents();
+  const { handovers } = useHandovers();
+  const { profile } = useProfile();
+  const [creating, setCreating] = useState(false);
+  const [allAttention, setAllAttention] = useState(false); // "View all" in Needs attention
+  const { setupHidden, setSetupDone, hideSetup } = useTour();
+
+  const current = currentShift(now);
+  const day = current.shiftDate; // "today" for shifts: until 6:00 AM that's still yesterday's Night shift
+  const tasksQuery = useApiData(`/tasks?from=${day}&to=${addDays(day, 1)}`, { transform: normalizeTasks, live: true });
+  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${addDays(day, 6)}`, { live: true });
+  const contactQuery = useApiData('/contact', { live: true });
+  // Getting started, "Create the first task": any task in the 60 days around today. Loaded even while
+  // the card is hidden, so the Help menu knows whether there is anything left to show.
+  const anyTaskQuery = useApiData(`/tasks?from=${addDays(day, -60)}&to=${addDays(day, 60)}`);
+
+  const ready = tasksQuery.status === 'ready' && rosterQuery.status === 'ready' && residentsStatus === 'ready';
+  const failed = [tasksQuery, rosterQuery].find((q) => q.status === 'error');
+  const roster = rosterQuery.data ?? [];
+  const caregivers = activeCaregivers(staff);
+  const shiftOf = (t) => shiftOfDue(t.dueAt);
+  const tasks = (tasksQuery.data ?? []).filter((t) => shiftOf(t).shiftDate === day);
+  const pending = tasks.filter((t) => t.status === 'pending');
+  // Every open overdue task, today's and earlier days' (the same list as Tasks & Care's Overdue tab)
+  const { overdue, reload: reloadOverdue } = useOverdueTasks();
+  const earlierOverdue = overdue.filter((t) => shiftOf(t).shiftDate < day).length;
+
+  // Handovers for today's shifts, and yesterday's (for "missing")
+  const rows = ready ? monitorRows(handovers, roster, addDays(day, -1), day, now) : [];
+  const todayRows = rows.filter((r) => r.shiftDate === day);
+  const nextDue = todayRows.filter((r) => r.status === 'notDue').sort((a, b) => a.end - b.end)[0];
+  const missing = rows.filter((r) => r.status === 'missing');
+
+  // Residents card: nobody at all, else a shift nobody of theirs works (the same check as Needs attention)
+  const unassignedResidents = residents.filter((r) => r.caregivers.length === 0).length;
+  const shiftGaps = SHIFTS.map((s) => ({ shift: s, n: residentsWithoutShift(residents, caregivers, s).length }))
+    .filter((g) => g.n)
+    .sort((a, b) => b.n - a.n);
+  const residentsNote = unassignedResidents
+    ? `${unassignedResidents} without a caregiver`
+    : shiftGaps.length
+      ? `${shiftGaps[0].n} missing a ${shiftGaps[0].shift.label} caregiver${shiftGaps.length > 1 ? ` (+${plural(shiftGaps.length - 1, 'more shift')})` : ''}`
+      : 'All have caregivers';
+
+  const tiles = [
+    { label: 'Residents', value: residents.length, note: residentsNote, to: '/admin/residents' },
+    { label: 'Active caregivers', value: caregivers.length, note: pendingCount ? `${pendingCount} waiting for approval` : 'No one waiting for approval', to: '/admin/staff' },
+    { label: 'Pending tasks', value: pending.length, note: 'Still to do on today’s shifts', to: '/admin/tasks' },
+    {
+      label: 'Overdue tasks',
+      value: overdue.length,
+      note: earlierOverdue ? `${earlierOverdue} from earlier days` : overdue.length ? 'Need follow-up' : 'Nothing late',
+      tone: overdue.length ? 'overdue' : '',
+      to: '/admin/tasks?tab=overdue',
+    },
+    {
+      label: 'Handovers today',
+      value: todayRows.filter((r) => r.handover).length,
+      of: todayRows.length,
+      note: nextDue ? `${nextDue.shift.label} due at ${formatTime(nextDue.end)}` : todayRows.length ? 'All of today’s shifts have ended' : 'Nobody on the roster',
+      to: '/admin/handover',
+    },
+  ];
+
+  // Who is working right now, with what they still have to do
+  const onShift = roster.filter((e) => e.shiftDate === day && e.shift === current.shift.apiValue);
+  const leftFor = (userId) =>
+    tasks.filter((t) => t.assignedTo === userId && shiftOf(t).shift.id === current.shift.id && (t.status === 'pending' || t.status === 'overdue')).length;
+  // Today's handovers, one per shift: who hands over → who takes over (from the roster)
+  const handoffs = SHIFTS.map((s) => {
+    const next = nextShiftAfter(s, day);
+    return { shift: s, from: listNames(namesOn(roster, s, day)), to: listNames(namesOn(roster, next.shift, next.shiftDate)) };
+  });
+  const residentsOf = (userId) => residents.filter((r) => r.caregivers.some((c) => c.id === userId)).map((r) => r.name.split(' ')[0]);
+
+  // Needs attention, most urgent first: overdue tasks, missing handovers, shifts or residents with no
+  // caregiver, residents to watch, sign-ups, website messages. The first 4 show; "View all (N)" the rest.
+  const attention = [];
+  overdue.forEach((t) => {
+    // Earlier days say which day; Tasks & Care opens on the day the task is on
+    const earlier = shiftOf(t).shiftDate < day;
+    attention.push({
+      key: `t${t.id}`,
+      tone: 'overdue',
+      tag: 'Overdue',
+      title: t.task,
+      sub: [t.resident, t.room && `Rm ${t.room}`, t.assignedToName ?? 'not assigned', `due ${earlier ? `${dayLabel(isoDay(t.dueAt))}, ` : ''}${formatTime(t.dueAt)}`]
+        .filter(Boolean)
+        .join(' · '),
+      action: 'View',
+      onClick: () => navigate(`/admin/tasks?date=${isoDay(t.dueAt)}&open=${t.id}`),
+    });
+  });
+  missing.forEach((row) =>
+    attention.push({
+      key: `m${row.key}`,
+      tone: 'overdue',
+      tag: 'Missing',
+      title: `${row.shift.label} handover, ${dayLabel(row.shiftDate)}`,
+      sub: `${row.userName} hasn't submitted it`,
+      action: 'Remind',
+      onClick: () => navigate(`/messages?with=${row.userId}&text=${encodeURIComponent(reminderText(row))}`),
+    })
+  );
+  const gaps = [];
+  for (let i = 0; i < 7; i += 1) {
+    const d = addDays(day, i);
+    SHIFTS.forEach((s) => {
+      if (i === 0 && shiftOnDate(s, dayToDate(d)).end < now) return; // already over
+      if (!roster.some((e) => e.shiftDate === d && e.shift === s.apiValue)) gaps.push({ d, s });
+    });
+  }
+  if (gaps.length) {
+    attention.push({
+      key: 'gap',
+      tone: 'overdue',
+      tag: 'No caregiver',
+      title: `${gaps[0].s.label} shift on ${dayLabel(gaps[0].d)}`,
+      sub: gaps.length > 1 ? `Nobody is assigned yet, and ${plural(gaps.length - 1, 'more shift')} this week` : 'Nobody is assigned yet',
+      action: 'Assign',
+      onClick: () => navigate('/admin/schedule'),
+    });
+  }
+  // Residents with nobody looking after them on a shift (none of their caregivers works it)
+  SHIFTS.forEach((s) => {
+    const n = residentsWithoutShift(residents, caregivers, s).length;
+    if (!n) return;
+    attention.push({
+      key: `uncovered-${s.id}`,
+      tone: 'overdue',
+      tag: 'No caregiver',
+      title: `${s.label} shift: ${plural(n, 'resident')} ${n === 1 ? 'has' : 'have'} no caregiver`,
+      sub: `None of their assigned caregivers works the ${s.label} shift`,
+      action: 'Assign',
+      onClick: () => navigate(`/admin/residents?gap=${s.id}`),
+    });
+  });
+  // Today's open tasks given to someone who isn't scheduled on that shift
+  const offShift = offShiftTasks(tasks, roster);
+  if (offShift.length) {
+    const n = offShift.length;
+    attention.push({
+      key: 'offshift',
+      tone: 'overdue',
+      tag: 'Wrong shift',
+      title: `${plural(n, 'task')} ${n === 1 ? 'is' : 'are'} assigned to someone not working that shift`,
+      sub: 'Give them to someone on the shift, or change the Schedule',
+      action: 'Fix',
+      onClick: () => navigate(`/admin/tasks?date=${day}&problem=offshift`),
+    });
+  }
+  // Residents marked Urgent / Watch closely in their latest handover update (Urgent first)
+  residents
+    .map((r) => ({ r, latest: latestUpdate(handovers, r) }))
+    .filter(({ latest }) => latest && latest.update.status !== 'normal')
+    .sort((a, b) => (b.latest.update.status === 'urgent') - (a.latest.update.status === 'urgent'))
+    .forEach(({ r, latest }) => {
+      const st = RESIDENT_STATUS[latest.update.status];
+      attention.push({
+        key: `r${r.id}`,
+        tone: st.tone,
+        tag: st.label === 'Watch closely' ? 'Watch' : st.label,
+        title: `${r.name} marked "${st.label}"`,
+        sub: `${latest.handover.author?.name ?? 'Handover'} · ${dayLabel(handoverDay(latest.handover))}`,
+        action: 'View',
+        onClick: () => navigate(`/admin/residents?open=${r.residentCode}`),
+      });
+    });
+  if (pendingCount) {
+    attention.push({ key: 'signups', tone: 'pending', tag: 'Sign-up', title: `${plural(pendingCount, 'caregiver')} waiting for approval`, sub: 'They can’t sign in until you approve them', action: 'Review', onClick: () => navigate('/admin/staff') });
+  }
+  const newContact = (contactQuery.data ?? []).filter((m) => !m.handled).length;
+  if (newContact) {
+    attention.push({ key: 'contact', tone: 'pending', tag: 'Website', title: `${plural(newContact, 'new message')} from the website`, sub: 'Sent through the contact form', action: 'Open', onClick: () => navigate('/admin/contact') });
+  }
+
+  // "Start here": the one thing that matters most right now, in this order:
+  // missing handovers, then sign-ups, then residents with no caregiver on a shift, else all is well
+  const firstGap = SHIFTS.find((s) => residentsWithoutShift(residents, caregivers, s).length);
+  const startHere = missing.length
+    ? {
+        text: 'Some shifts ended without a handover. Check them and remind the caregivers.',
+        action: { label: `Review ${plural(missing.length, 'missing handover')}`, to: '/admin/handover' },
+      }
+    : pendingCount
+      ? {
+          text: 'New caregivers are waiting. They can’t sign in until you approve them.',
+          action: { label: `Approve ${plural(pendingCount, 'new sign-up')}`, to: '/admin/staff' },
+        }
+      : firstGap
+        ? {
+            text: `Some residents have nobody looking after them on the ${firstGap.label} shift.`,
+            action: { label: 'Assign caregivers', to: `/admin/residents?gap=${firstGap.id}` },
+          }
+        : { text: 'Everything’s on track. Nothing needs you right now.', action: null };
+
+  // Getting started: the five setup steps, ticked from real data
+  const setupSteps = [
+    {
+      key: 'residents',
+      title: 'Add residents',
+      text: 'Their room, care needs and emergency contact.',
+      done: residents.length > 0,
+      action: { label: 'Add resident', onClick: () => navigate('/admin/residents', { state: { add: true } }) },
+    },
+    {
+      key: 'staff',
+      title: 'Approve or add staff',
+      text: pendingCount ? `${plural(pendingCount, 'caregiver')} waiting for approval.` : 'Caregivers sign up themselves, or you add them.',
+      done: caregivers.length > 0 && !pendingCount,
+      action: { label: pendingCount ? 'Review' : 'Add staff', onClick: () => navigate('/admin/staff', pendingCount ? undefined : { state: { add: true } }) },
+    },
+    {
+      key: 'schedule',
+      title: 'Fill the schedule',
+      text: 'Put caregivers on the Morning, Noon and Night shifts.',
+      done: roster.some((e) => e.shiftDate >= day),
+      action: { label: 'Fill a month', onClick: () => navigate('/admin/schedule', { state: { add: true } }) },
+    },
+    {
+      key: 'assign',
+      title: 'Assign caregivers to residents',
+      text: 'So each caregiver sees their residents.',
+      done: residents.length > 0 && residents.every((r) => r.caregivers.length > 0),
+      action: { label: 'Assign', onClick: () => navigate('/admin/residents') },
+    },
+    {
+      key: 'task',
+      title: 'Create the first task',
+      text: 'A meal, a bath or a check, at a set time.',
+      done: (anyTaskQuery.data ?? []).length > 0,
+      action: { label: 'Create task', onClick: () => setCreating(true) },
+    },
+  ];
+  const setupChecked = ready && anyTaskQuery.status === 'ready';
+  const setupAllDone = setupSteps.every((s) => s.done);
+  const showSetup = setupChecked && !setupHidden && !setupAllDone;
+  // Tell the Help menu whether "Show getting started" would show anything
+  useEffect(() => {
+    if (setupChecked) setSetupDone(setupAllDone);
+  }, [setupChecked, setupAllDone, setSetupDone]);
+
+  const recent = handovers.slice(0, 3);
+  const timingOf = (h) => {
+    const s = SHIFTS.find((x) => x.apiValue === h.shift);
+    return s && sentAt(h) > shiftOnDate(s, dayToDate(handoverDay(h))).end ? MONITOR_STATUS.late : MONITOR_STATUS.onTime;
+  };
+
+  const minutesLeft = (current.end - now) / 60000;
+  const today = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  return (
+    <div className="admin-dash">
+      <PageHeader
+        title={`${greeting(now)}, ${profile.name.split(' ')[0]}.`}
+        subtitle={`${today} · ${current.shift.label} shift is on now (${shiftTime(current.shift)})`}
+      >
+        <div className="admin-dash__actions">
+          <button type="button" className="btn btn--soft" onClick={() => navigate('/admin/residents', { state: { add: true } })}>
+            <UserPlus size={18} aria-hidden="true" /> Add resident
+          </button>
+          <button type="button" className="btn btn--soft" onClick={() => navigate('/admin/staff', { state: { add: true } })}>
+            <UserPlus size={18} aria-hidden="true" /> Add staff
+          </button>
+          <button type="button" className="btn btn--soft" onClick={() => navigate('/admin/schedule', { state: { add: true } })}>
+            <CalendarPlus size={18} aria-hidden="true" /> Fill a month
+          </button>
+          <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
+            <Plus size={18} aria-hidden="true" /> Create task
+          </button>
+        </div>
+      </PageHeader>
+
+      {ready && <StartHere {...startHere} />}
+      {showSetup && <GettingStarted steps={setupSteps} onHide={hideSetup} />}
+
+      <PushPrompt />
+
+      {failed && <div className="card"><ErrorState message={failed.error} onRetry={() => { tasksQuery.reload(); rosterQuery.reload(); }} /></div>}
+      {!ready && !failed && <div className="card"><LoadingState label="Loading today…" /></div>}
+
+      {ready && (
+        <>
+          <ul className="stat-row stat-row--five" aria-label="Today at a glance">
+            {tiles.map((t) => (
+              <li key={t.label}>
+                <Link to={t.to} className="card stat-card stat-card--link">
+                  <span className="small-label">{t.label}</span>
+                  <strong className={`stat-card__value ${t.tone ? `stat-card__value--${t.tone}` : ''}`}>
+                    {t.value}
+                    {t.of != null && <small className="stat-card__of"> of {t.of}</small>}
+                  </strong>
+                  <small className="stat-card__note">{t.note}</small>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {/* Rows on the 12-column grid: 8 + 4 columns, cards in a row the same height */}
+          <div className="dash-grid">
+            <div className="span-8">
+              <section className="card">
+                <CardHeader title="Today's task progress" linkTo="/admin/tasks" linkLabel="Open Tasks & Care" />
+                <ul className="shift-progress">
+                  {SHIFTS.map((s) => {
+                    const list = tasks.filter((t) => shiftOf(t).shift.id === s.id);
+                    const done = list.filter((t) => t.status === 'completed').length;
+                    const late = list.filter((t) => t.status === 'overdue').length;
+                    const { start, end } = shiftOnDate(s, dayToDate(day));
+                    const right =
+                      now < start
+                        ? `Starts ${s.start} · ${plural(list.length, 'task')}`
+                        : list.length === 0
+                          ? `No tasks${now >= end ? ' · ended' : ''}`
+                          : `${done} of ${list.length} completed${late ? ` · ${late} overdue` : ''}${now >= end ? ' · ended' : ''}`;
+                    const pct = list.length ? Math.round((done / list.length) * 100) : 0;
+                    return (
+                      <li key={s.id}>
+                        <div className="shift-progress__line">
+                          <span><strong>{s.label}</strong> · {shiftTime(s)}</span>
+                          <span>{right}</span>
+                        </div>
+                        <div className="shift-progress__track" role="progressbar" aria-label={`${s.label} shift`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-valuetext={`${done} of ${list.length} completed`}>
+                          <span style={{ width: `${pct}%` }} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            </div>
+
+            <div className="span-4">
+              <section className="card">
+                <CardHeader title="On shift now" linkTo="/admin/schedule" linkLabel="Schedule" />
+                <p className="admin-dash__shift-line">
+                  {current.shift.label} · {shiftTime(current.shift)} · ends in {minutesToText(minutesLeft)}
+                </p>
+                {onShift.length === 0 ? (
+                  <p className="resident-details__gap">Nobody is on this shift. Assign someone in Schedule.</p>
+                ) : (
+                  <ul className="slot-panel__list">
+                    {onShift.map((e) => {
+                      const left = leftFor(e.userId);
+                      const person = staff.find((u) => u.id === e.userId);
+                      const theirs = residentsOf(e.userId);
+                      return (
+                        <li key={e.userId}>
+                          <Avatar name={e.userName} photo={person?.photoUrl} size={36} />
+                          <span className="assign__who">
+                            <strong>{e.userName}</strong>
+                            <small>{theirs.length ? theirs.join(', ') : 'No residents assigned'}</small>
+                          </span>
+                          <span className="admin-dash__left">{left ? `${plural(left, 'task')} left` : 'All done'}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+
+                <h3 className="small-label admin-dash__handoffs-title">Today’s handovers</h3>
+                <ul className="handoffs">
+                  {handoffs.map(({ shift, from, to }) => (
+                    <li key={shift.id}>
+                      <span className="handoffs__shift">{shift.label}</span>
+                      <span className="handoff">
+                        {from || <span className="resident-details__gap">No one</span>}
+                        <span className="handoff__arrow" aria-hidden="true">→</span>
+                        <span className="sr-only">, hands over to </span>
+                        {to ? <span className="handoff__next">{to}</span> : <span className="resident-details__gap">No one scheduled</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+          </div>
+
+          <div className="dash-grid">
+            <div className="span-8">
+              <section className="card">
+                <CardHeader title="Needs attention" />
+                {attention.length === 0 ? (
+                  <p className="admin-dash__clear"><CircleCheck size={18} aria-hidden="true" /> Nothing needs your attention right now.</p>
+                ) : (
+                  <>
+                  <ul className="attention-list" id="attention-list">
+                    {(allAttention ? attention : attention.slice(0, 4)).map((a) => (
+                      <li key={a.key}>
+                        <span className="attention-list__tag"><span className={`status-pill status-pill--${a.tone}`}>{a.tag}</span></span>
+                        <span className="attention-list__text">
+                          <strong>{a.title}</strong>
+                          <small>{a.sub}</small>
+                        </span>
+                        <button type="button" className="btn btn--outline btn--sm btn--row" onClick={a.onClick} aria-label={`${a.action}: ${a.title}`}>
+                          {a.action}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {attention.length > 4 && (
+                    <button
+                      type="button"
+                      className="link-btn card-more"
+                      aria-expanded={allAttention}
+                      aria-controls="attention-list"
+                      onClick={() => setAllAttention(!allAttention)}
+                    >
+                      {allAttention ? 'Show less' : `View all (${attention.length})`}
+                    </button>
+                  )}
+                  </>
+                )}
+              </section>
+            </div>
+
+            <div className="span-4">
+              <section className="card">
+                <CardHeader title="Recent handovers" linkTo="/admin/handover" />
+                {recent.length === 0 ? (
+                  <p className="staff-details__empty">No handovers yet.</p>
+                ) : (
+                  <ul className="attention-list">
+                    {recent.map((h) => {
+                      const st = timingOf(h);
+                      const reader = readersOf(h)[0];
+                      return (
+                        <li key={h.id}>
+                          <span className="attention-list__text">
+                            <strong>{SHIFTS.find((s) => s.apiValue === h.shift)?.label ?? h.shift} · {dayLabel(handoverDay(h))}</strong>
+                            <small>
+                              {h.author?.name} · {formatTime(sentAt(h))} · {reader ? `read by ${reader.name}` : 'not read yet'}
+                            </small>
+                          </span>
+                          <span className={`status-pill status-pill--${st.tone}`}>{st.label}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+            </div>
+          </div>
+        </>
+      )}
+
+      <TaskFormModal
+        open={creating}
+        preset={{ date: isoDay(now) }}
+        residents={residents}
+        caregivers={caregivers}
+        onSaved={(saved, { offDays, partial, also }) => {
+          tasksQuery.reload({ silent: true });
+          anyTaskQuery.reload({ silent: true });
+          reloadOverdue({ silent: true });
+          if (!partial) {
+            showToast(
+              (saved.length === 1 ? `Created ${saved[0].task}.` : `Created ${saved.length} tasks.${offDays ? ` ${offDays} without a caregiver.` : ''}`) +
+                (also ? ` ${also}` : '')
+            );
+          }
+        }}
+        onResidentSaved={(saved) => setResidents((list) => list.map((r) => (r.id === saved.id ? saved : r)))}
+        onClose={() => setCreating(false)}
+      />
+    </div>
+  );
+}

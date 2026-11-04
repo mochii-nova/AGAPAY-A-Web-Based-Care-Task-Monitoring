@@ -1,0 +1,99 @@
+import { useId } from 'react';
+import { Bell, BellRing, CircleAlert, CircleCheck, Info } from 'lucide-react';
+import { usePush } from '../context/PushContext';
+
+const ICONS = { success: CircleCheck, info: Info, warning: CircleAlert, error: CircleAlert };
+
+function Message({ tone, text }) {
+  const Icon = ICONS[tone] ?? Info;
+  return (
+    <div className={`alert alert--${tone}`} role={tone === 'error' || tone === 'warning' ? 'alert' : 'status'}>
+      <Icon size={18} aria-hidden="true" />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+// "Allow notifications" switch. `compact` = the small version in the bell dropdown.
+// The full version (Notifications page) also has the test button and its messages;
+// its status line (Off / On / a warning) sits under the title instead of in a box.
+export default function PushToggle({ compact = false }) {
+  const push = usePush();
+  const id = useId();
+  // The dropdown has room for one line, so a fresh message replaces the status there
+  const line = compact && push.notice ? push.notice : push.status;
+
+  const row = (
+    <div className="push-toggle__row">
+      <BellRing size={compact ? 18 : 20} aria-hidden="true" className="push-toggle__icon" />
+      <div className="push-toggle__text">
+        <span id={`${id}-label`} className="push-toggle__label">Allow notifications</span>
+        {(compact || line.tone === 'muted') && (
+          <small id={`${id}-status`} className={`push-toggle__status push-toggle__status--${line.tone}`} aria-live="polite">
+            {line.text}
+          </small>
+        )}
+      </div>
+      <button
+        type="button"
+        role="switch"
+        className="switch"
+        aria-checked={push.on}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={`${id}-status`}
+        disabled={push.disabled}
+        onClick={push.toggle}
+      >
+        <span className="switch__track" aria-hidden="true" />
+      </button>
+    </div>
+  );
+
+  if (compact) return <div className="push-toggle push-toggle--compact">{row}</div>;
+
+  // Full version: icon · title and status · "Send a test" · switch, all on one row
+  return (
+    <div className="push-toggle">
+      <div className="push-toggle__row">
+        <span className="push-toggle__badge" aria-hidden="true"><Bell size={18} /></span>
+        <div className="push-toggle__text">
+          <span id={`${id}-label`} className="push-toggle__label">Pop-up notifications</span>
+          {push.blocked ? (
+            // Blocked in the browser: plain steps to allow them again
+            <div id={`${id}-status`} className="push-blocked" role="status">
+              <strong>Pop-ups are turned off in your browser</strong>
+              <ol>
+                <li>Click the ⓘ or lock icon on the left of the website address at the top of your browser.</li>
+                <li>Find “Notifications” and choose “Allow”.</li>
+                <li>Refresh this page.</li>
+              </ol>
+            </div>
+          ) : (
+            <small id={`${id}-status`} className={`push-toggle__status push-toggle__status--${push.status.tone}`} aria-live="polite">
+              {push.status.text}
+            </small>
+          )}
+        </div>
+        <button type="button" className="btn btn--outline btn--sm" onClick={push.sendTest} disabled={!push.canTest || push.busy}>
+          Send a test
+        </button>
+        <button
+          type="button"
+          role="switch"
+          className="switch"
+          aria-checked={push.on}
+          aria-labelledby={`${id}-label`}
+          aria-describedby={`${id}-status`}
+          disabled={push.disabled}
+          onClick={push.toggle}
+        >
+          <span className="switch__track" aria-hidden="true" />
+        </button>
+      </div>
+      {push.notice && <Message {...push.notice} />}
+      <p className="field__hint push-toggle__privacy">
+        Pop-ups never show resident names or health details, because they can appear on a locked screen.
+      </p>
+    </div>
+  );
+}

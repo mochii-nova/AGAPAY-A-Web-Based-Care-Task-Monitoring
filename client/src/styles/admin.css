@@ -1,0 +1,627 @@
+/* =====================================================================
+   Admin pages (pages/admin/ + components/admin/)
+   Same look as the caregiver side; colours come only from the variables in main.css.
+   (.card.x selectors are written specifically, because main.css loads after this file.)
+   ===================================================================== */
+
+/* "2 caregivers are waiting for approval" */
+.admin-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  background: var(--pending-bg);
+  color: var(--text);
+}
+.admin-banner p { margin: 0; }
+
+/* Table on the left, details panel on the right (it stays in view while you scroll) */
+.admin-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.card.admin-panel { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; }
+
+/* One card: filters on top, the table underneath */
+.card.admin-table-card { padding: 0; overflow: hidden; }
+.admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.admin-toolbar .search-box { flex: 1 1 220px; min-width: 0; }
+.admin-toolbar .select { flex: 0 0 170px; width: 170px; }
+
+/* Tables (same look as My Tasks) */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.data-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--label);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background-color 0.15s; }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table__row:hover td { background: var(--tint); }
+.data-table__row.is-selected td { background: var(--indigo-soft); }
+.data-table__muted { color: var(--muted); }
+.data-table__nowrap { white-space: nowrap; }
+.data-table__action { width: 1%; text-align: right; white-space: nowrap; }
+
+/* Avatar + name + a small line under it */
+.cell-person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cell-person > span { display: flex; flex-direction: column; min-width: 0; }
+.cell-person strong { font-weight: var(--fw-medium); }
+.cell-person small { color: var(--muted); font-size: 0.82rem; }
+.cell-person .avatar { font-size: 0.75rem; }
+
+/* Staff details (panel and pop-up) */
+.staff-details__identity { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.staff-details__identity > div { min-width: 0; }
+.staff-details__name { margin: 0; font-size: 1.25rem; font-weight: var(--fw-bold); }
+.staff-details__sub { margin: 2px 0 6px; color: var(--muted); font-size: 0.9rem; }
+.staff-details__pending { padding: 14px; margin-bottom: 16px; border-radius: var(--radius-sm); background: var(--pending-bg); }
+.staff-details__pending p { margin: 0 0 12px; color: var(--text); font-size: 0.92rem; }
+.staff-details__list { margin-bottom: 4px; }
+.staff-details__list dt { flex-shrink: 0; white-space: nowrap; }
+.staff-details__list dd { min-width: 0; overflow-wrap: anywhere; }
+.staff-details__line { display: block; color: var(--muted); font-size: 0.85rem; font-weight: var(--fw-regular); }
+.staff-details__section { padding-top: 14px; margin-top: 10px; border-top: 1px solid var(--border); }
+.staff-details__section .small-label { margin-bottom: 8px; }
+.staff-details__empty { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.staff-details__today { display: flex; flex-wrap: wrap; gap: 6px 16px; list-style: none; margin: 0; padding: 0; }
+.staff-details__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.staff-details__actions--grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border); }
+.staff-details__actions--grid .btn:only-child,
+.staff-details__wide { grid-column: 1 / -1; }
+
+/* Small text tags (assigned residents) */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.tag-list li { padding: 2px 10px; border-radius: var(--radius-pill); background: var(--tint); color: var(--muted); font-size: 0.82rem; }
+
+/* Add staff: the temporary password with its "New password" button */
+/* Task form: "Assign them too?" / "Add … to care needs?" (a ticked box on a soft background) */
+.task-form__offer {
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin: -4px 0 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--on-accent-tint);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.task-form__offer input[type='checkbox'] { flex-shrink: 0; }
+.staff-form__password { display: flex; align-items: flex-start; gap: 10px; }
+.staff-form__password .field { flex: 1; }
+.staff-form__password .btn { margin-top: 27px; flex-shrink: 0; }
+
+/* Reset password: the temporary password, large and easy to read out */
+.temp-password { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; margin: 4px 0 12px; border-radius: var(--radius-sm); background: var(--tint); }
+.temp-password code { font-size: 1.2rem; font-weight: var(--fw-bold); letter-spacing: 0.04em; overflow-wrap: anywhere; }
+
+/* Manage Residents: the list cards (layout and card look come from residents.css) */
+.admin-residents__toolbar { flex-wrap: wrap; }
+.admin-residents__toolbar .search-box { flex: 1 1 100%; }
+.admin-residents__toolbar .select { flex: 1 1 160px; width: auto; }
+/* Phones stack the toolbar: the 160px would become the height, so the dropdowns go full width instead */
+@media (max-width: 600px) {
+  .admin-residents__toolbar .select { flex: none; width: 100%; }
+}
+.resident-card__ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.resident-details__gap { color: var(--overdue-text); font-weight: var(--fw-medium); }
+
+/* Resident details (panel and pop-up) */
+.resident-details__who { flex: 1; min-width: 0; }
+.resident-details__today { margin: -4px 0 16px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--tint); }
+.resident-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin: 0 0 4px; }
+.resident-facts dt { margin-bottom: 4px; }
+.resident-facts dd { margin: 0; }
+.resident-details__note { margin: 10px 0 0; font-size: 0.93rem; }
+.resident-details__note span { color: var(--muted); }
+.resident-details__columns { display: grid; grid-template-columns: minmax(0, 1fr); }
+.resident-details__list { margin-bottom: 12px; }
+.resident-details__list div { padding: 9px 0; }
+.resident-details__list dt { flex-shrink: 0; }
+.resident-details__list dd { min-width: 0; overflow-wrap: anywhere; }
+.resident-details__phone { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); color: var(--indigo); }
+.resident-details__wide { width: 100%; }
+.resident-details__tasks { list-style: none; margin: 0; padding: 0; }
+.resident-details__tasks li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; color: var(--muted); font-size: 0.92rem; }
+.resident-details__tasks li + li { border-top: 1px solid var(--border); }
+.resident-details__tasks strong { color: var(--text); font-weight: var(--fw-medium); }
+.resident-details__tasks .status-pill { flex-shrink: 0; }
+.resident-details .state-msg { padding: 16px; }
+.resident-details__handover { padding: 14px 16px; margin-top: 16px; border-radius: var(--radius-sm); background: var(--tint); }
+.resident-details__handover p { margin: 0; }
+.resident-details__handover .small-label { margin-bottom: 6px; }
+
+/* Add / edit resident: care needs as tick boxes */
+.need-picker { margin: 0 0 16px; padding: 0; border: 0; }
+.need-picker__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.need-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.need-picker__option:hover { background: var(--tint); }
+.need-picker__option:has(input:checked) { border-color: var(--indigo); background: var(--indigo-soft); }
+.need-picker__option input,
+.assign__option input { width: 18px; height: 18px; margin: 0; flex-shrink: 0; accent-color: var(--indigo); cursor: pointer; }
+.resident-form__group { margin: 4px 0 10px; }
+
+/* Choose caregivers */
+.assign__intro { margin: 0 0 16px; color: var(--muted); }
+.assign__group { margin: 0 0 14px; padding: 0; border: 0; }
+.assign__group .small-label { margin-bottom: 6px; padding: 0; }
+.assign__option { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+.assign__option:hover { background: var(--tint); }
+.assign__option:has(input:checked) { background: var(--indigo-soft); }
+.assign__who { display: flex; flex-direction: column; min-width: 0; }
+.assign__who strong { font-weight: var(--fw-medium); }
+.assign__who small { color: var(--muted); font-size: 0.82rem; }
+
+/* Edit + Add task, top right of the resident details */
+.resident-details__top-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+/* Phones: Edit and Add task go under the name, so the ID and room keep one line */
+@media (max-width: 600px) {
+  .resident-details .staff-details__identity { flex-wrap: wrap; }
+  .resident-details__top-actions { width: 100%; }
+  .resident-details__top-actions .btn { flex: 1; }
+}
+
+/* Tasks & Care: day picker next to the tabs, filters underneath */
+.day-picker { display: flex; flex-shrink: 0; align-items: center; gap: 6px; }
+.field__input.day-picker__input { width: 160px; }
+.card .admin-tasks__filters { border-bottom: 1px solid var(--border); }
+.admin-tasks__filters .select { flex: 0 0 170px; width: 170px; }
+.admin-task-table .task-table__time { width: 100px; }
+.admin-task-table .task-table__resident small,
+.admin-task-table .task-table__time small { display: block; }
+.admin-tasks__footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
+.task-view__list dd { max-width: 65%; overflow-wrap: anywhere; }
+
+/* Schedule: toolbar (arrows + title, Week/Month, caregiver, Google Calendar note) */
+.schedule-toolbar.admin-schedule__toolbar { flex-wrap: wrap; }
+.admin-schedule__title { margin: 0 0 0 8px; font-size: 1rem; font-weight: var(--fw-medium); white-space: nowrap; }
+.admin-schedule__toolbar .select { flex: 0 0 190px; width: 190px; }
+.admin-schedule__gcal { display: flex; align-items: center; gap: 6px; margin: 0 0 0 auto; color: var(--muted); font-size: 0.85rem; }
+.admin-schedule__gcal svg { flex-shrink: 0; }
+.admin-schedule__gaps { margin: 0; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
+
+/* Roster grid: shifts down the side, days across (phones: days down the side, shifts across) */
+.roster { display: grid; gap: 1px; background: var(--border); }
+.roster--week { grid-template-columns: 128px repeat(7, minmax(0, 1fr)); }
+.roster--days { grid-template-columns: 64px repeat(3, minmax(0, 1fr)); }
+.roster > * { background: var(--card); }
+.roster-corner { background: var(--tint) !important; }
+.roster-head { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 4px; background: var(--tint) !important; }
+.roster-head__weekday { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); text-transform: uppercase; }
+.roster-head__date { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-weight: var(--fw-medium); }
+.roster-head.is-today .roster-head__date { background: var(--indigo); color: var(--on-indigo); }
+.roster-shift { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 10px 12px; background: var(--tint) !important; }
+.roster-shift strong { font-weight: var(--fw-medium); }
+.roster-shift small { color: var(--muted); font-size: 0.78rem; }
+.roster--days .roster-shift { align-items: center; padding: 10px 4px; }
+/* Each shift's row (or column) label in its shift colour, the same as the caregiver schedule */
+.roster-shift--morning { background: var(--shift-morning-bg) !important; color: var(--shift-morning-text); }
+.roster-shift--noon { background: var(--shift-noon-bg) !important; color: var(--shift-noon-text); }
+.roster-shift--night { background: var(--shift-night-bg) !important; color: var(--shift-night-text); }
+.roster-shift[class*='roster-shift--'] small { color: inherit; }
+.roster-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  min-height: 84px;
+  padding: 8px;
+  border: 0;
+  color: var(--text);
+  text-align: left;
+  transition: background-color 0.15s;
+}
+.roster-slot:hover { background: var(--tint); }
+.roster-slot[aria-pressed='true'] { background: var(--indigo-soft); box-shadow: inset 0 0 0 2px var(--indigo); }
+.roster-people { display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0; list-style: none; margin: 0; padding: 0; }
+.roster-chip { min-width: 0; padding: 3px 8px; overflow: hidden; border-radius: var(--radius-sm); background: var(--tint); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
+.roster-gap { padding: 3px 8px; border-radius: var(--radius-sm); background: var(--overdue-bg); color: var(--overdue-text); font-size: 0.8rem; font-weight: var(--fw-medium); }
+/* "3 tasks" under the names */
+.roster-count { color: var(--muted); font-size: 0.75rem; font-weight: var(--fw-medium); }
+.roster--days .roster-slot { min-height: 56px; padding: 6px; }
+.roster--days .roster-chip { padding: 3px 6px; }
+.roster--days .roster-gap { font-size: 0.75rem; }
+
+/* Month roster: three short lines per day (phones: three dots) */
+.roster-month .month__day { min-height: 112px; gap: 6px; }
+.roster-month__lines { display: flex; flex-direction: column; gap: 2px; width: 100%; min-width: 0; }
+.roster-month__line { display: flex; gap: 4px; min-width: 0; font-size: 0.74rem; line-height: 1.35; }
+.roster-month__shift { flex-shrink: 0; width: 4.1em; padding: 0 3px; border-radius: 4px; font-weight: var(--fw-medium); }
+.roster-month__shift--morning { background: var(--shift-morning-bg); color: var(--shift-morning-text); }
+.roster-month__shift--noon { background: var(--shift-noon-bg); color: var(--shift-noon-text); }
+.roster-month__shift--night { background: var(--shift-night-bg); color: var(--shift-night-text); }
+.roster-month__names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-month__line.is-gap .roster-month__names { color: var(--overdue-text); font-weight: var(--fw-medium); }
+/* The number of tasks on that shift, at the end of its line */
+.roster-month__count { flex-shrink: 0; margin-left: auto; padding: 0 5px; border-radius: var(--radius-pill); background: var(--tint); color: var(--muted); font-weight: var(--fw-medium); }
+.month__day.is-outside .roster-month__lines { opacity: 0.55; }
+.roster-month__dots { display: none; gap: 3px; }
+.roster-month__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo); }
+.roster-month__dot--morning { background: var(--shift-morning-mark); }
+.roster-month__dot--noon { background: var(--shift-noon-mark); }
+.roster-month__dot--night { background: var(--shift-night-mark); }
+.roster-month__dot.is-gap { background: var(--overdue-dot); }
+
+/* The selected shift (side panel / pop-up) */
+.slot-panel .small-label { margin-bottom: 4px; }
+.segmented.slot-panel__shifts { display: flex; margin-bottom: 14px; }
+.slot-panel__shifts .segmented__btn { flex: 1; }
+.slot-panel__section { margin-top: 14px; }
+.slot-panel__section .small-label { margin-bottom: 6px; }
+.slot-panel__list { list-style: none; margin: 0; padding: 0; }
+/* "Claire River → Rosa Lim": who hands over, and who takes over on the next shift */
+.handoff { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.handoff__arrow { color: var(--indigo); font-weight: var(--fw-medium); }
+.handoff__next { color: var(--muted); }
+/* Flagged and Read by need a wide screen; below 1500px they're only in the details panel next to the table */
+@media (max-width: 1499px) { .data-table__xwide-only { display: none; } }
+.admin-dash__handoffs-title { margin: 16px 0 6px; padding-top: 14px; border-top: 1px solid var(--border); }
+.handoffs { list-style: none; margin: 0; padding: 0; }
+.handoffs li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 6px 0; font-size: 0.92rem; }
+.handoffs__shift { color: var(--muted); font-weight: var(--fw-medium); }
+.slot-panel__list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.slot-panel__list li + li { border-top: 1px solid var(--border); }
+.slot-panel__list .assign__who { flex: 1; }
+.slot-panel__list .btn { flex-shrink: 0; }
+.slot-panel__hint { margin-top: 8px; }
+/* Tasks & Care: the caregiver isn't scheduled on the task's shift */
+.offshift { display: flex; flex-direction: column; gap: 0; margin-top: 4px; cursor: default; }
+.offshift__text { display: inline-flex; align-items: flex-start; gap: 4px; color: var(--overdue-text); font-size: 0.82rem; font-weight: var(--fw-medium); }
+.offshift__text svg { flex-shrink: 0; margin-top: 2px; }
+.offshift__actions { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.offshift__actions .link-btn { padding: 0; font-size: 0.82rem; }
+
+/* The panel on laptops: stays in view and scrolls by itself. Its wrapper takes no height of its own
+   (contain: size), so the row is as tall as the calendar; the panel is at most the window's height. */
+.admin-schedule__panel-wrap { contain: size; align-self: stretch; }
+.admin-schedule__panel-wrap .card.day-panel { max-height: min(max(100%, 520px), calc(100vh - 104px)); overflow-y: auto; overscroll-behavior: contain; }
+
+/* Manage Staff: an active caregiver with no shift on this week's Schedule */
+.staff-offweek { display: block; margin-top: 2px; color: var(--pending-text); font-size: 0.8rem; font-weight: var(--fw-medium); }
+.staff-offweek a { color: var(--indigo); }
+
+/* "Add a caregiver": one dropdown and the Assign button */
+/* One row: the dropdown fills the space, Assign on its right; both exactly 44px tall, 8px apart */
+.slot-add { display: flex; align-items: stretch; gap: 8px; }
+.slot-add .select { flex: 1; width: auto; min-width: 0; height: var(--tap); min-height: var(--tap); }
+.slot-add__btn { flex-shrink: 0; height: var(--tap); min-height: var(--tap); padding: 0 18px; }
+/* Very narrow screens: Assign moves under the dropdown, full width */
+@media (max-width: 360px) {
+  .slot-add { flex-direction: column; }
+  .slot-add__btn { width: 100%; }
+}
+
+/* Small controls in the side panel (Day off, Assign, Add to shift): 36px tall; phones keep 44px to tap */
+.slot-panel .btn--compact { min-height: 36px; padding: 0 12px; }
+@media (max-width: 600px) {
+  .slot-panel .btn--compact { min-height: var(--tap); }
+}
+
+/* One small box per caregiver who has tasks here but isn't on this shift:
+   "Veronica isn't on this shift · 3 tasks", then [Add to shift] View tasks */
+.slot-warn { margin-bottom: 8px; padding: 12px; border-radius: var(--radius-sm); background: var(--pending-bg); color: var(--pending-text); }
+.slot-warn__text { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 0.9rem; font-weight: var(--fw-medium); }
+.slot-warn__text svg { flex-shrink: 0; }
+.slot-warn__text span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot-warn__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+.slot-warn__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  color: var(--indigo);
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+  text-decoration-color: var(--lavender-line);
+  text-underline-offset: 3px;
+}
+.slot-warn__link:hover { text-decoration-color: currentColor; }
+@media (max-width: 600px) {
+  .slot-warn__link { min-height: var(--tap); }
+}
+
+/* Tasks on the selected shift: one tight row each (time · name · status dot, resident underneath) */
+.slot-tasks { list-style: none; margin: 0; padding: 0; }
+.slot-tasks li + li { border-top: 1px solid var(--border); }
+.slot-tasks__row { display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); padding: 6px 4px; margin: 0 -4px; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.slot-tasks__row:hover { background: var(--tint); }
+.slot-tasks__line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.slot-tasks__time { flex-shrink: 0; width: 64px; color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.slot-tasks__name { flex: 1; min-width: 0; overflow: hidden; font-weight: var(--fw-medium); text-overflow: ellipsis; white-space: nowrap; }
+.slot-tasks__dot { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; }
+.slot-tasks__dot--pending { background: var(--pending-dot); }
+.slot-tasks__dot--completed { background: var(--completed-dot); }
+.slot-tasks__dot--overdue { background: var(--overdue-dot); }
+.slot-tasks__dot--skipped { background: var(--skipped-dot); }
+.slot-tasks__resident { padding-left: 72px; color: var(--muted); font-size: 0.8rem; }
+/* Fill a month */
+.weekday-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.need-picker__option.weekday-picker__day { justify-content: center; gap: 6px; padding: 6px 4px; font-size: 0.88rem; }
+.fill-month__clear { margin: -6px 0 10px; }
+.fill-month__summary { margin: 0; }
+
+/* Handover monitoring: filters in the header, four totals, then the table + details */
+.admin-handover__filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-handover__filters .select { width: 160px; }
+.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; list-style: none; margin: 0 0 20px; padding: 0; }
+.card.stat-card { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px; }
+.stat-card__value { font-size: 1.9rem; font-weight: var(--fw-bold); line-height: 1.1; }
+.stat-card__value--completed { color: var(--completed-text); }
+.stat-card__value--pending { color: var(--pending-text); }
+.stat-card__value--overdue { color: var(--overdue-text); }
+.admin-handover__layout { grid-template-columns: minmax(0, 1fr) 380px; }
+.admin-handover__list .cell-person small { white-space: nowrap; }
+/* Handover monitoring table: fixed columns, 72px rows, everything centred.
+   Main line 15px ink, second line 13px secondary; nothing wraps (long text ends in "…"). */
+.hm-table { table-layout: fixed; }
+.hm-table th { overflow: hidden; font-size: 12px; text-overflow: ellipsis; }
+.hm-table td { height: 72px; padding: 10px 12px; overflow: hidden; }
+.hm-main,
+.hm-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-main { color: var(--text); font-size: 15px; font-weight: var(--fw-medium); line-height: 1.4; }
+.hm-sub { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.hm-table .status-pill { max-width: 100%; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.hm-table .btn--row { width: 88px; min-width: 88px; padding: 0; } /* View and Remind: the same width */
+/* Widths: 5 columns below 1500px, 7 from 1500px (Flagged and Read by); Open takes what's left */
+.hm-col--shift { width: 16%; }
+.hm-col--who { width: 27%; }
+.hm-col--sent { width: 17%; }
+.hm-col--status { width: 21%; }
+@media (min-width: 1500px) {
+  .hm-table th,
+  .hm-table td { padding-left: 8px; padding-right: 8px; }
+  .hm-col--shift { width: 12%; }
+  .hm-col--who { width: 19%; }
+  .hm-col--sent { width: 13%; }
+  .hm-col--status { width: 16%; }
+  .hm-col--flagged { width: 11%; }
+  .hm-col--read { width: 13%; }
+}
+.handover-details .day-panel__shift-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+/* Details panel text sizes: labels 12px uppercase secondary, name 20px, the Submitted line 14px,
+   and every piece of body text 15px (resident notes, "No changes", Other notes, Tasks this shift, Read by) */
+.handover-details .small-label { color: var(--muted); font-size: 12px; }
+.handover-details .day-panel__title { font-size: 20px; font-weight: 600; }
+.handover-details .day-panel__shift-line,
+.handover-details .day-panel__shift-line .status-pill { font-size: 14px; }
+.handover-details .hv-list p,
+.handover-details .hv-muted,
+.handover-details .hv-other,
+.handover-details .handover-details__readers,
+.handover-details .handover-details__unread,
+.handover-details__empty { font-size: 15px; }
+.handover-details .hv-line .hv-muted { font-size: 13px; } /* "Room 102" next to the name */
+.handover-details__empty { margin: 0 0 14px; color: var(--muted); }
+.handover-details__reads { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border); }
+.handover-details__reads .small-label { margin-bottom: 6px; }
+.handover-details__readers { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--completed-bg); color: var(--completed-text); font-size: 0.92rem; }
+.handover-details__readers li { display: flex; align-items: center; gap: 8px; }
+.handover-details__unread { margin: 0; color: var(--muted); font-size: 0.92rem; } /* not red: Missing is the red one */
+.handover-details__actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+.handover-details__actions .btn { padding: 0 12px; } /* Message and Print: same size, side by side */
+
+/* Contact messages */
+.contact-list { list-style: none; margin: 0; padding: 0; }
+.contact-item { padding: 16px 20px; }
+.contact-item + .contact-item { border-top: 1px solid var(--border); }
+.contact-item__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.contact-item__head strong { display: block; font-weight: var(--fw-medium); }
+.contact-item__email { color: var(--indigo); font-size: 0.9rem; overflow-wrap: anywhere; }
+.contact-item__meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.85rem; }
+.contact-item__subject { margin: 10px 0 0; font-weight: var(--fw-medium); }
+.contact-item__body { margin: 4px 0 0; white-space: pre-line; overflow-wrap: anywhere; }
+.contact-item__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.contact-item__actions .btn--row { margin-left: 0; }
+
+/* Totals: a small note under the number; tiles that open a page */
+.stat-row--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.stat-row > li { display: flex; min-width: 0; }
+.stat-card__note { color: var(--muted); font-size: 0.82rem; }
+.stat-card__of { color: var(--muted); font-size: 1rem; font-weight: var(--fw-regular); }
+.card.stat-card--link { flex: 1; color: var(--text); text-decoration: none; transition: border-color 0.15s, background-color 0.15s; }
+.card.stat-card--link:hover { border-color: var(--lavender-line); background: var(--tint); }
+
+/* Admin dashboard */
+.admin-dash__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Dashboard stat cards: the same 24px gap as the dashboard grid below them, all the same height */
+.admin-dash .stat-row { align-items: stretch; gap: 24px; margin-bottom: 24px; }
+.admin-dash__shift-line { margin: -4px 0 6px; color: var(--muted); }
+.admin-dash__left { flex-shrink: 0; color: var(--muted); font-size: 0.88rem; }
+.admin-dash__clear { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--completed-text); }
+.shift-progress { display: flex; flex-direction: column; gap: 16px; list-style: none; margin: 0; padding: 0; }
+.shift-progress__line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 6px; color: var(--muted); font-size: 0.92rem; }
+.shift-progress__line strong { color: var(--text); font-weight: var(--fw-medium); }
+.shift-progress__track { height: 8px; overflow: hidden; border-radius: var(--radius-pill); background: var(--indigo-soft); }
+.shift-progress__track span { display: block; height: 100%; border-radius: var(--radius-pill); background: var(--indigo); transition: width 0.6s; }
+/* "Getting started" (GettingStarted.jsx): five setup steps that tick themselves */
+.card.getting-started { margin-bottom: 24px; }
+.getting-started__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.getting-started__head .card__title { margin: 0; }
+.getting-started__count { margin: 2px 0 0; color: var(--muted); font-size: 0.88rem; }
+.getting-started__bar { height: 8px; margin: 12px 0 6px; overflow: hidden; border-radius: var(--radius-pill); background: var(--indigo-soft); }
+.getting-started__bar span { display: block; height: 100%; border-radius: var(--radius-pill); background: var(--indigo); transition: width 0.6s; }
+.getting-started__list { list-style: none; margin: 0; padding: 0; }
+.getting-started__list li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.getting-started__list li:last-child { border-bottom: 0; }
+.getting-started__mark { flex-shrink: 0; color: var(--border-strong); }
+.is-done .getting-started__mark { color: var(--completed-text); }
+.getting-started__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.getting-started__text strong { font-weight: var(--fw-medium); }
+.is-done .getting-started__text strong { color: var(--muted); text-decoration: line-through; }
+.getting-started__text small { color: var(--muted); font-size: 0.85rem; }
+.getting-started__done { flex-shrink: 0; min-width: 96px; color: var(--completed-text); font-size: 0.875rem; font-weight: var(--fw-medium); text-align: center; }
+.attention-list { list-style: none; margin: 0; padding: 0; }
+.attention-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.attention-list li + li { border-top: 1px solid var(--border); }
+/* The labels sit in a fixed-width column, so every row's text starts at the same place */
+.attention-list__tag { flex: 0 0 112px; }
+.attention-list__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.attention-list__text strong { font-weight: var(--fw-medium); }
+.attention-list__text small { color: var(--muted); font-size: 0.85rem; }
+.attention-list .btn { flex-shrink: 0; }
+
+/* Reports */
+.reports__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 10px; }
+.reports__actions .select { width: 170px; }
+.reports__hint { flex-basis: 100%; margin: 0; color: var(--muted); font-size: 0.82rem; text-align: right; }
+.card.reports__tabs { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px 16px; margin-bottom: 20px; }
+.reports__range { color: var(--muted); font-size: 0.9rem; }
+.card.reports__chart { margin-bottom: 20px; }
+.reports__chart .card__title { margin: 0; }
+.reports__chart-sub { margin: 4px 0 16px; color: var(--muted); font-size: 0.9rem; }
+.report-table th[scope='row'] { font-weight: var(--fw-medium); text-align: left; text-transform: none; letter-spacing: 0; color: var(--text); font-size: 0.95rem; border-bottom: 1px solid var(--border); padding: 12px 14px; white-space: nowrap; }
+.report-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.report-table tfoot th, .report-table tfoot td { border-top: 2px solid var(--border-strong); border-bottom: 0; font-weight: var(--fw-bold); }
+.report-table td strong { font-weight: var(--fw-medium); }
+.print-only { display: none; }
+.reports .card.admin-table-card { overflow-x: auto; }
+
+/* Bar chart (one series): rounded tops, a 4px-wide gap between bars, thin baseline */
+.bar-chart__plot { display: flex; align-items: flex-end; gap: 4px; height: 220px; padding-top: 22px; border-bottom: 1px solid var(--border-strong); }
+.bar-chart__col { position: relative; display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; border-radius: 4px 4px 0 0; outline-offset: 2px; }
+.bar-chart__col:hover, .bar-chart__col:focus-visible { background: var(--indigo-soft); }
+.bar-chart__bar { width: min(56px, 70%); border-radius: 4px 4px 0 0; background: var(--indigo); }
+.bar-chart__value { margin-bottom: 4px; color: var(--text); font-size: 0.8rem; font-weight: var(--fw-medium); font-variant-numeric: tabular-nums; }
+/* Tooltip: the numbers for that day */
+.bar-chart__col:is(:hover, :focus-visible)::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% - 14px);
+  left: 50%;
+  z-index: 2;
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  white-space: normal;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.bar-chart__col:first-child::after { left: 0; transform: none; }
+.bar-chart__col:last-child::after { right: 0; left: auto; transform: none; }
+/* 0%: a thin line on the baseline (a day with tasks, none completed) */
+.bar-chart__zero { width: min(56px, 70%); height: 3px; border-radius: 2px; background: var(--overdue-dot); }
+.bar-chart__axis { display: flex; gap: 4px; margin-top: 6px; }
+.bar-chart__counts { margin-top: 4px; }
+.bar-chart__counts span { color: var(--text); font-variant-numeric: tabular-nums; }
+.reports__how { margin: 14px 0 0; color: var(--muted); font-size: 0.88rem; }
+.reports__how strong { color: var(--text); font-weight: var(--fw-medium); }
+.bar-chart__axis span { flex: 1; min-width: 0; overflow: hidden; color: var(--muted); font-size: 0.78rem; text-align: center; white-space: nowrap; }
+
+/* Print (Reports "Print / Save as PDF"): the report only, black on white */
+@media print {
+  body:has(.reports) .sidebar,
+  body:has(.reports) .topbar,
+  body:has(.reports) .no-print,
+  body:has(.reports) .toasts { display: none !important; }
+  body:has(.reports) .app-layout,
+  body:has(.reports) .app-main { display: block; padding: 0; margin: 0; }
+  body:has(.reports) .print-only { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
+  body:has(.reports) .page-header { margin-bottom: 8px; }
+  body:has(.reports) .card { break-inside: avoid; box-shadow: none; }
+  body:has(.reports), body:has(.handover-print) { background: none; }
+  .reports .stat-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Print (Handover "Print"): only the handover details, on white */
+@media print {
+  body:has(.handover-print) .sidebar,
+  body:has(.handover-print) .topbar,
+  body:has(.handover-print) .page-header,
+  body:has(.handover-print) .stat-row,
+  body:has(.handover-print) .admin-handover__list,
+  body:has(.handover-print) .no-print,
+  body:has(.handover-print) .toasts { display: none !important; }
+  body:has(.handover-print) .admin-layout { display: block; }
+  body:has(.handover-print) .card.admin-panel { position: static; max-height: none; overflow: visible; border: 0; box-shadow: none; }
+  body:has(.handover-print) .app-layout,
+  body:has(.handover-print) .app-main { display: block; padding: 0; margin: 0; }
+}
+
+/* Smaller screens: the table takes the full width; details open as a pop-up */
+@media (max-width: 1240px) {
+  .stat-row--five { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1100px) {
+  .admin-layout { grid-template-columns: minmax(0, 1fr); }
+  .resident-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .resident-details__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+}
+@media (max-width: 760px) {
+  .data-table__wide-only { display: none; }
+  .admin-toolbar .select { flex: 1 1 140px; width: auto; }
+  .resident-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resident-details__columns { grid-template-columns: minmax(0, 1fr); }
+  .card .admin-tasks__filters { padding: 0 0 14px; border: 0; }
+  .admin-tasks__filters .select { flex: 1 1 140px; width: auto; }
+  .day-picker { width: 100%; }
+  .field__input.day-picker__input { flex: 1; width: auto; }
+  /* Each task as a small card: task + status / time + caregiver / resident / View */
+  .admin-task-table .task-table__row { grid-template-areas: 'task status' 'time caregiver' 'resident resident' 'action action'; }
+  .admin-task-table .task-table__task { grid-area: task; }
+  .admin-task-table .task-table__status { grid-area: status; align-self: start; }
+  .admin-task-table .task-table__time { grid-area: time; width: auto; }
+  .admin-task-table .task-table__time small { display: inline; }
+  .admin-task-table .task-table__time small::before { content: ' · '; }
+  .admin-task-table .task-table__caregiver { grid-area: caregiver; justify-self: end; color: var(--muted); }
+  .admin-task-table .task-table__resident { grid-area: resident; }
+  .admin-task-table .task-table__resident small { display: inline; }
+  .admin-task-table .task-table__resident small::before { content: ' · '; }
+  .admin-task-table .task-table__action { grid-area: action; }
+  .admin-tasks__footer { padding: 4px 0 0; border: 0; }
+}
+@media (max-width: 600px) {
+  .admin-banner .btn { width: 100%; }
+  .data-table th, .data-table td { padding: 10px 8px; }
+  .staff-form__password { flex-direction: column; gap: 0; }
+  .staff-form__password .btn { margin: 0 0 12px; }
+  .need-picker__options { grid-template-columns: minmax(0, 1fr); }
+  .weekday-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stat-row, .stat-row--five { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .admin-dash .stat-row { gap: 16px; margin-bottom: 16px; }
+  .admin-dash .stat-row--five > li:last-child { grid-column: 1 / -1; }
+  .admin-dash__actions .btn { flex: 1 1 calc(50% - 4px); }
+  .reports__actions, .reports__actions .select, .reports__actions .btn { width: 100%; }
+  .reports__hint { text-align: left; }
+  .bar-chart__plot { height: 180px; }
+  .attention-list li { flex-wrap: wrap; }
+  .attention-list__text { flex-basis: calc(100% - 120px); }
+  .report-table th[scope='row'] { white-space: normal; }
+  .admin-handover__filters,
+  .admin-handover__filters .select,
+  .contact-item { padding: 14px; }
+  .contact-item__actions .btn { flex: 1; }
+  .admin-schedule__toolbar .date-nav { width: 100%; }
+  .admin-schedule__toolbar .segmented,
+  .admin-schedule__toolbar .select { flex: 1 1 140px; width: auto; }
+  .admin-schedule__gcal { margin: 0; }
+  .roster-month .month__day { min-height: 60px; }
+  .roster-month__lines { display: none; }
+  .roster-month__dots { display: flex; }
+  .resident-details__tasks li { align-items: flex-start; }
+}

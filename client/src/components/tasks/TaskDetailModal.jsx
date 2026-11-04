@@ -1,0 +1,162 @@
+import { useState } from 'react';
+import { CircleCheck, Clock, CircleSlash, CircleAlert, ClipboardList } from 'lucide-react';
+import Modal from '../Modal';
+import StatusPill from '../StatusPill';
+import TaskCategoryIcon from '../TaskCategoryIcon';
+import { getCategory } from '../../constants';
+import { formatTime } from '../../utils/format';
+import useSaving from '../../hooks/useSaving';
+
+const CHOICES = [
+  { value: 'completed', label: 'Completed', icon: CircleCheck },
+  { value: 'pending', label: 'Pending', icon: Clock },
+  { value: 'skipped', label: 'Skipped', icon: CircleSlash },
+];
+
+const QUICK_REASONS = ['Resident refused', 'Resident was asleep', 'Resident not feeling well', 'Resident was away (visit or appointment)'];
+
+const longDate = (date) =>
+  new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+// The form inside the pop-up. Its own component so it starts fresh for each task.
+function TaskForm({ task, onSave, onCancel }) {
+  // "Overdue" isn't something you pick; it means "pending, but late"
+  const [status, setStatus] = useState(task.status === 'overdue' ? 'pending' : task.status);
+  const [reason, setReason] = useState(task.skipReason ?? '');
+  // My own note on the task. The admin's instructions are separate (read-only, at the top).
+  const [note, setNote] = useState(task.note ?? '');
+  const [reasonError, setReasonError] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving, startSaving] = useSaving();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (status === 'skipped' && !reason.trim()) {
+      setReasonError('Please write why this task was skipped.');
+      document.getElementById('task-reason')?.focus();
+      return;
+    }
+    if (!startSaving()) return;
+    setError('');
+    try {
+      await onSave(task, { status, reason: reason.trim(), note: note.trim() });
+    } catch (err) {
+      setError(err.response?.data?.message || "Couldn't save. Please check that the server is running and try again.");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form id="task-form" className="task-form" onSubmit={handleSubmit} noValidate>
+      <div className="task-detail">
+        <TaskCategoryIcon category={task.category} size={20} />
+        <div className="task-detail__main">
+          <p className="small-label">{getCategory(task.category)?.label ?? 'Care task'}</p>
+          <p className="task-detail__resident">
+            {task.resident}
+            {task.room && <span> · Room {task.room}</span>}
+          </p>
+          <p className="task-detail__time">
+            Due {formatTime(task.dueAt)}, {longDate(task.dueAt)}
+          </p>
+          {task.status === 'completed' && task.doneAt && (
+            <p className="task-detail__done">Completed at {formatTime(task.doneAt)}</p>
+          )}
+        </div>
+        <StatusPill status={task.status} />
+      </div>
+
+      {task.instructions && (
+        <div className="task-note-current">
+          <ClipboardList size={18} aria-hidden="true" />
+          <p>
+            <span className="task-note-current__label">Instructions from the admin:</span> {task.instructions}
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="alert alert--error" role="alert">
+          <CircleAlert size={18} aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <fieldset className="choice-group">
+        <legend className="field__label">Update status</legend>
+        <div className="choice-group__options">
+          {CHOICES.map(({ value, label, icon: Icon }) => (
+            <label key={value} className={`choice choice--${value}`}>
+              <input type="radio" name="status" value={value} checked={status === value} onChange={() => setStatus(value)} />
+              <Icon size={18} aria-hidden="true" />
+              {label}
+            </label>
+          ))}
+        </div>
+        {task.status !== 'pending' && task.status !== 'overdue' && (
+          <p className="field__hint">Changed your mind? Pick Pending to undo.</p>
+        )}
+      </fieldset>
+
+      {status === 'skipped' && (
+        <div className="field">
+          <label htmlFor="task-reason" className="field__label">
+            Why was it skipped? <span className="field__required" aria-hidden="true">*</span>
+          </label>
+          <div className="chip-row">
+            {QUICK_REASONS.map((r) => (
+              <button
+                key={r}
+                type="button"
+                className={`chip ${reason === r ? 'is-active' : ''}`}
+                onClick={() => { setReason(r); setReasonError(''); }}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+          <textarea
+            id="task-reason"
+            className="field__input"
+            rows={2}
+            value={reason}
+            onChange={(e) => { setReason(e.target.value); setReasonError(''); }}
+            placeholder="Pick a reason above or write your own"
+            required
+            aria-invalid={!!reasonError}
+            aria-describedby={reasonError ? 'task-reason-error' : undefined}
+          />
+          {reasonError && <p id="task-reason-error" className="field__error">{reasonError}</p>}
+        </div>
+      )}
+
+      <div className="field">
+        <label htmlFor="task-note" className="field__label">Your note (optional)</label>
+        <textarea
+          id="task-note"
+          className="field__input"
+          rows={2}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Anything the next caregiver should know?"
+        />
+      </div>
+
+      <div className="modal__footer modal__footer--inline">
+        <button type="button" className="btn btn--outline" onClick={onCancel}>Cancel</button>
+        <button type="submit" className="btn btn--primary" disabled={saving}>
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Pop-up that opens when you click "View" on a task
+export default function TaskDetailModal({ task, onSave, onClose }) {
+  return (
+    <Modal open={!!task} onClose={onClose} title={task?.task ?? ''}>
+      {task && <TaskForm key={task._id} task={task} onSave={onSave} onCancel={onClose} />}
+    </Modal>
+  );
+}

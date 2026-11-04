@@ -1,0 +1,203 @@
+import { useEffect, useState } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import {
+  House, ClipboardList, CalendarDays, UserRound, FileText, Users,
+  Bell, Mail, LogOut, X, Inbox, ChartColumn,
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
+import { useHandovers } from '../context/HandoverContext';
+import { useProfile } from '../context/ProfileContext';
+import { useMessages } from '../context/MessagesContext';
+import { useStaff } from '../context/StaffContext';
+import { SHIFTS } from '../constants';
+import { homeFor } from '../utils/roles';
+import { newHandovers } from '../utils/handover';
+import Avatar from './Avatar';
+import Logo from './Logo';
+import markWhite from '../assets/images/agapay-mark-white.svg';
+
+// Menu groups for caregivers
+const CAREGIVER_GROUPS = [
+  {
+    title: 'Today',
+    items: [
+      { to: '/dashboard', label: 'Dashboard', icon: House },
+      { to: '/tasks', label: 'My Tasks', icon: ClipboardList },
+      { to: '/schedule', label: 'My Schedule', icon: CalendarDays },
+    ],
+  },
+  {
+    title: 'Care',
+    items: [
+      { to: '/residents', label: 'My Residents', icon: UserRound },
+      { to: '/handover', label: 'Handover', icon: FileText },
+    ],
+  },
+];
+
+// Menu groups for administrators. `end`: only selected on that exact page (every admin page starts with /admin)
+const ADMIN_GROUPS = [
+  {
+    title: 'Overview',
+    items: [{ to: '/admin', label: 'Dashboard', icon: House, end: true }],
+  },
+  {
+    title: 'People',
+    items: [
+      { to: '/admin/staff', label: 'Manage Staff', icon: Users },
+      { to: '/admin/residents', label: 'Manage Residents', icon: UserRound },
+    ],
+  },
+  {
+    title: 'Care operations',
+    items: [
+      { to: '/admin/tasks', label: 'Tasks & Care', icon: ClipboardList },
+      { to: '/admin/schedule', label: 'Schedule', icon: CalendarDays },
+      { to: '/admin/handover', label: 'Handover', icon: FileText },
+    ],
+  },
+  {
+    title: 'Insights',
+    items: [{ to: '/admin/reports', label: 'Reports', icon: ChartColumn }],
+  },
+  {
+    title: 'Website',
+    items: [{ to: '/admin/contact', label: 'Contact messages', icon: Inbox }],
+  },
+];
+
+// One menu link. When the sidebar is collapsed, only the icon shows and the label
+// becomes a tooltip; a badge turns into a small dot.
+function SideLink({ to, end, label, icon: Icon, badge, badgeLabel, tone, onClick }) {
+  return (
+    <NavLink to={to} end={end} className="sidebar__link" onClick={onClick} aria-label={badge ? `${label}, ${badgeLabel}` : label}>
+      <Icon size={18} aria-hidden="true" />
+      <span className="sidebar__label" aria-hidden="true">{label}</span>
+      {badge && <span className={`count-badge ${tone === 'new' ? 'count-badge--new' : ''}`} aria-hidden="true">{badge}</span>}
+    </NavLink>
+  );
+}
+
+// How long the sidebar slides (the same as the width transition on .sidebar in main.css)
+const SLIDE_MS = 220;
+
+// Left navigation shared by every page inside the app.
+// `collapsed` (laptops only): a narrow rail with icons; ☰ in the top bar switches it.
+// The change happens in steps, so nothing flashes, squeezes or jumps while it slides:
+//   collapsing: the width slides; the words and the full logo fade out quickly (cut off by the edge).
+//   rail (only once the slide has finished): the "A" icon fades in, and the labels become tooltips,
+//         which only show after the mouse moves over the menu (tips-ready), never during the slide.
+//   expanding: the width slides and the words fade in straight away (150ms), so they're there when it's open.
+// Every click starts its phase again, so fast clicks back and forth always end in the right state.
+export default function Sidebar({ collapsed, onClose }) {
+  const [phase, setPhase] = useState(collapsed ? 'rail' : 'open'); // open | collapsing | rail | expanding
+  const [lastCollapsed, setLastCollapsed] = useState(collapsed);
+  const [tipsReady, setTipsReady] = useState(false);
+  if (collapsed !== lastCollapsed) {
+    // Changed while rendering, so the slide starts in the same frame as the click
+    setLastCollapsed(collapsed);
+    setPhase(collapsed ? 'collapsing' : 'expanding');
+    setTipsReady(false);
+  }
+  useEffect(() => {
+    if (phase !== 'collapsing' && phase !== 'expanding') return undefined;
+    const timer = setTimeout(() => setPhase(phase === 'collapsing' ? 'rail' : 'open'), SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
+  const rail = phase === 'rail'; // the finished icon rail
+  const state = phase === 'open' ? '' : `is-${phase}`;
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
+  const { unreadCount: unreadMessages } = useMessages();
+  const { handovers } = useHandovers();
+  const staff = useStaff(); // only for administrators
+  const { profile } = useProfile();
+  const groups = staff ? ADMIN_GROUPS : CAREGIVER_GROUPS;
+
+  // Handovers from others that I haven't marked as read yet, from the last 24 hours
+  const newHandoverCount = newHandovers(handovers, profile.id).length;
+  const pending = staff?.pendingCount ?? 0;
+  const badges = {
+    '/handover': newHandoverCount > 0 ? { text: `${newHandoverCount} new`, label: `${newHandoverCount} new`, tone: 'new' } : null,
+    '/admin/staff': pending > 0 ? { text: pending, label: `${pending} waiting for approval` } : null,
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const roleLabel = profile.role === 'admin' ? 'Administrator' : 'Caregiver';
+  const shiftLabel = SHIFTS.find((s) => s.apiValue === profile.shift)?.label;
+
+  return (
+    <aside
+      className={`sidebar ${state} ${rail && tipsReady ? 'tips-ready' : ''}`}
+      aria-label="Main menu"
+      onPointerMove={rail && !tipsReady ? () => setTipsReady(true) : undefined}
+    >
+      <div className="sidebar__top">
+        <Link to={homeFor(user)} className="sidebar__logo" onClick={onClose} aria-label="AGAPAY home">
+          {rail ? <img src={markWhite} alt="" className="sidebar__mark" /> : <Logo tone="white" height={32} />}
+        </Link>
+        <button type="button" className="icon-btn sidebar__close" onClick={onClose} aria-label="Close menu">
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Profile card: opens My profile (the account menu lives only on the avatar, top right) */}
+      <div className="sidebar__menu">
+        <NavLink to="/profile" className="sidebar__profile" onClick={onClose} aria-label={`${profile.name}, ${roleLabel}. Open my profile`}>
+          <Avatar name={profile.name} photo={profile.photo} size={40} />
+          <span className="sidebar__who" aria-hidden="true">
+            <strong>{profile.name}</strong>
+            <small>{roleLabel}{shiftLabel && ` · ${shiftLabel}`}</small>
+          </span>
+        </NavLink>
+      </div>
+
+      <nav className="sidebar__nav">
+        {groups.map((group) => (
+          <div key={group.title} className="sidebar__group">
+            <p className="sidebar__group-title">{group.title}</p>
+            {group.items.map((item) => (
+              <SideLink
+                key={item.to}
+                {...item}
+                badge={badges[item.to]?.text}
+                badgeLabel={badges[item.to]?.label}
+                tone={badges[item.to]?.tone}
+                onClick={onClose}
+              />
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <div className="sidebar__bottom">
+        <SideLink
+          to="/messages"
+          label="Messages"
+          icon={Mail}
+          badge={unreadMessages > 0 ? unreadMessages : null}
+          badgeLabel={`${unreadMessages} unread`}
+          onClick={onClose}
+        />
+        <SideLink
+          to="/notifications"
+          label="Notifications"
+          icon={Bell}
+          badge={unreadCount > 0 ? unreadCount : null}
+          badgeLabel={`${unreadCount} unread`}
+          onClick={onClose}
+        />
+        <button type="button" className="sidebar__link" onClick={handleLogout} aria-label="Sign out">
+          <LogOut size={18} aria-hidden="true" />
+          <span className="sidebar__label" aria-hidden="true">Sign out</span>
+        </button>
+      </div>
+    </aside>
+  );
+}

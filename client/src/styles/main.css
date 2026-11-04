@@ -1,191 +1,1451 @@
-/* AGAPAY - simple design */
+/* =====================================================================
+   AGAPAY design system
+   ALL colours live here as variables. Never write a colour anywhere else;
+   use var(--name). Dark mode only redefines these values.
+   Look: the same as the website: cream pages, white cards, a deep plum sidebar,
+   one plum accent and a tiny apricot accent. Inter for all text. No gradients, glass or glows.
+   (Some names are older than the colours: --navy is now the deep plum sidebar, --indigo is plum.)
+   ===================================================================== */
 :root {
-  --primary: #7b4b94;
-  --primary-dark: #603a74;
-  --primary-light: #efe6f4;
-  --bg: #f6f2f8;
+  /* Contrast checked: all text colours below pass 4.5:1 on the backgrounds they're used on. */
+
+  /* Brand */
+  --navy: #2f2440;              /* deep plum: the sidebar, the only strong colour block (backgrounds only) */
+  --ink: #2a2233;               /* strongest text: soft/outline buttons */
+  --indigo: #67479a;            /* plum, THE accent: buttons, links, selected tabs, checkboxes, focus (6.7:1 on cream) */
+  --indigo-hover: #563a84;
+  --on-indigo: #ffffff;         /* text on the plum button (7.1:1) */
+  --marker: #67479a;            /* labels and lines on the landing screenshot: plum in both themes (7.1:1 on white) */
+  --on-marker: #ffffff;         /* the white label pills and dot rings there */
+  --indigo-soft: #efe7f7;      /* lilac: selected tabs, today's highlight (plum text 5.9:1) */
+  --display-lavender: #765aa3;  /* big plum-lilac words (5.6:1 on white) */
+  --lavender-deep: #a994d6;     /* decoration only (the logo's lilac, Morning shift marks): never for text */
+  --label: #6b6274;             /* small uppercase labels (5.5:1 on cream) */
+  --apricot: #e08c6a;           /* tiny warm accent: notification dots and count badges (never for text) */
+  --on-apricot: #2a2233;        /* numbers on apricot badges (5.9:1) */
+  --apricot-text: #a4502f;      /* apricot words, e.g. "1 new" (5.0:1 on --apricot-soft) */
+  --apricot-soft: #fdf1ea;      /* warm background */
+  --apricot-line: #f6dccf;
+
+  /* The 10% warm accent (theme rule: 60% cream/white, 30% plum/lilac, 10% apricot) */
+  --accent: #e08c6a;            /* shapes only: dots, underlines, small bars, badges (never text on light backgrounds) */
+  --on-accent: #2a2233;         /* dark text on --accent badges */
+  --accent-text: #a9502f;       /* terracotta: small accent text on cream/white (5.1:1 on cream) */
+  --accent-on-dark: #f2b49b;    /* accent text on dark backgrounds: photos, the sidebar */
+  --accent-tint: #fcede5;       /* info/reminder boxes and the Morning shift chip */
+  --on-accent-tint: #8a3f22;    /* text on --accent-tint */
+
+  /* Shift chips (caregiver and admin schedules): background, text, and the small mark / bar */
+  --shift-morning-bg: var(--accent-tint);  --shift-morning-text: var(--on-accent-tint);  --shift-morning-mark: var(--accent);
+  --shift-noon-bg: #efe7f7;                --shift-noon-text: #4f3577;                    --shift-noon-mark: #a994d6;
+  --shift-night-bg: #2f2440;               --shift-night-text: #ffffff;                   --shift-night-mark: #2f2440;
+
+  /* Warm surfaces, lightest to strongest */
+  --bg: #fbf8f3;                /* cream: page background */
   --card: #ffffff;
-  --text: #2b2433;
-  --muted: #7a7285;
-  --border: #e2d9e8;
-  --ok: #2e7d4f;
-  --warn: #b7791f;
-  --danger: #c0392b;
+  --tint: #f4efe8;              /* linen: hover and soft backgrounds */
+  --lavender: #efe7f7;          /* lilac: soft buttons */
+  --lavender-strong: #e5d9f2;   /* hover on soft buttons */
+  --lavender-line: #ddd0ec;     /* dashed placeholder borders, quiet icons */
+  --border: #ece5dd;
+  --border-strong: #ddd3ca;     /* inputs and outline buttons */
+  --topbar: #fbf8f3;            /* top bar sits on the cream, with a thin bottom border */
+  --photo-bg: #e9e3de;          /* photo placeholders (warm) */
+  --photo-stripe: rgba(255, 255, 255, 0.45);
+
+  /* Text */
+  --text: #2a2233;              /* ink: main text (14.4:1 on cream) */
+  --muted: #6b6274;             /* secondary text (5.8:1 on white, 5.1:1 on linen) */
+  --faint: #6b6274;             /* days outside the month, quiet text */
+  --placeholder: #736a7c;       /* example text inside empty input boxes (5.2:1 on white, 4.5:1 on linen; typed text is far darker) */
+
+  /* Fonts: Inter for all text (the logo's lettering is drawn into the logo files) */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fs-small: 0.867rem;         /* 13px labels */
+  --fs-card-title: 1.133rem;    /* 17px */
+  --fs-page-title: 1.867rem;    /* 28px */
+  --fs-hero: 3.467rem;          /* 52px max */
+
+  /* On the deep plum sidebar */
+  --on-navy: #ffffff;           /* 14.5:1 */
+  --on-navy-muted: #b4a9cc;     /* group labels (TODAY, CARE) and small text: 6.6:1 */
+  --on-navy-hover: rgba(255, 255, 255, 0.08);
+  --on-navy-line: rgba(255, 255, 255, 0.12);
+  --on-topbar-hover: var(--tint);
+  --sidebar-active: #efe7f7;    /* the page you're on: lilac */
+  --on-sidebar-active: #2f2440; /* with dark plum text (12:1) */
+
+  /* Status (always paired with a text label) */
+  --completed-bg: #e3f2e8;  --completed-text: #2f6b45;  --completed-dot: #5ba777;
+  --pending-bg: #fbf1d9;    --pending-text: #7a5b12;    --pending-dot: #d9a93a;
+  --overdue-bg: #f9e1e1;    --overdue-text: #9a2c2c;    --overdue-dot: #d86a6a;
+  --skipped-bg: #eeebf0;    --skipped-text: #4f4d63;    --skipped-dot: #a3a0b8;
+  --overdue-tint: #fcf5f5;      /* light red row background */
+  --watch-bg: #fcede5;          /* resident "Watch closely" badge */
+  --watch-text: #8a3f22;        /* 7.4:1 on --watch-bg */
+
+  /* Other colours */
+  --danger: #b42318;
+  --danger-hover: #93180f;
+  --on-danger: #ffffff;         /* 6.5:1 on --danger */
+  --badge: var(--apricot);      /* notification dots and counts (counts use --on-apricot text) */
+  --overlay: rgba(36, 26, 48, 0.4);
+
+  /* Text over a darkened photo (Sign in and Register panels). The same in dark mode. */
+  --photo-overlay: rgba(20, 16, 26, 0.55);  /* neutral deep ink, the same as the landing hero */
+  --on-photo: #ffffff;
+  --on-photo-soft: var(--accent-on-dark);  /* the second, apricot line of the welcome text */
+
+  /* Shape and depth (soft plum shadows only; no glows, no coloured shadows) */
+  --radius: 14px;               /* cards */
+  --radius-sm: 10px;            /* inputs, buttons, tabs */
+  --radius-pill: 999px;         /* ONLY status labels and tags */
+  --shadow-sm: 0 1px 2px rgba(42, 34, 51, 0.04);
+  --shadow: 0 1px 3px rgba(42, 34, 51, 0.05);
+  --shadow-float: 0 6px 20px rgba(42, 34, 51, 0.08);  /* floating header, raised cards */
+  --shadow-lg: 0 12px 32px rgba(42, 34, 51, 0.12);
+  --shadow-btn: 0 6px 16px rgba(42, 34, 51, 0.18);  /* buttons on hover and keyboard focus */
+
+  /* Type: 400 body and menus, 500 buttons and labels, 600 titles and big numbers */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 600;
+
+  /* Motion: subtle, and switched off for "reduce motion" (see below) */
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  --tap: 44px;                  /* minimum height of anything clickable */
+  --sidebar-w: 240px;           /* full sidebar */
+  --rail-w: 72px;               /* collapsed icon rail */
+
+  color-scheme: light;
+}
+
+/* Dark mode: the same names with dark values. utils/theme.js sets data-theme="dark" on <html>
+   (from the Appearance choice, or the computer's setting when "System" is chosen).
+   Deep plum surfaces; the sidebar stays the strongest block. */
+:root[data-theme='dark'] {
+  --navy: #211a2e;              /* the sidebar */
+  --ink: #f1ebf6;
+  --indigo: #c2a8ec;            /* light plum, so links read on dark cards (8.2:1 on --card) */
+  --indigo-hover: #d2bdf2;
+  --on-indigo: #1d1626;         /* dark text on the light plum button (8.5:1) */
+  --indigo-soft: #33284a;       /* light plum text on it: 6.6:1 */
+  --display-lavender: #c2a8ec;
+  --lavender-deep: #b9a6e0;
+  --label: #b4aac0;
+  --apricot: #f0a98a;
+  --on-apricot: #2a2233;        /* 7.8:1 */
+  --apricot-text: #f3b89f;
+  --apricot-soft: #2c2129;
+  --apricot-line: #47363e;
+
+  --accent: #f0a98a;
+  --on-accent: #2a2233;
+  --accent-text: #f2b49b;       /* in dark mode all accent text is the light apricot */
+  --accent-on-dark: #f2b49b;
+  --accent-tint: #33241f;
+  --on-accent-tint: #f2b49b;
+
+  --shift-morning-bg: var(--accent-tint);  --shift-morning-text: var(--on-accent-tint);  --shift-morning-mark: var(--accent);
+  --shift-noon-bg: #33284a;                --shift-noon-text: #dccff5;                    --shift-noon-mark: #b9a6e0;
+  --shift-night-bg: #0f0b14;               --shift-night-text: #f1ebf6;                   --shift-night-mark: #8d79b8;
+
+  --bg: #15111b;
+  --card: #1f1928;
+  --tint: #271f31;
+  --lavender: #2f2640;
+  --lavender-strong: #3a2f4d;
+  --lavender-line: #4a3e5e;
+  --border: #2e2738;
+  --border-strong: #3e3449;
+  --topbar: #15111b;
+  --photo-bg: #2a2233;
+  --photo-stripe: rgba(255, 255, 255, 0.04);
+
+  --text: #f1ebf6;
+  --muted: #b4aac0;             /* 7.7:1 on the dark card */
+  --faint: #a99fb6;
+  --placeholder: #a59bb2;       /* 6.5:1 on the dark card */
+
+  --on-navy-muted: #b4a9cc;     /* 7.6:1 */
+  --on-navy-hover: rgba(255, 255, 255, 0.07);
+  --on-navy-line: rgba(255, 255, 255, 0.1);
+  --sidebar-active: #3b2f52;
+  --on-sidebar-active: #f1ebf6; /* 10.5:1 */
+
+  --completed-bg: #1c3527;  --completed-text: #93d6aa;  --completed-dot: #5ba777;
+  --pending-bg: #3a3014;    --pending-text: #ebcb73;    --pending-dot: #d9a93a;
+  --overdue-bg: #3f1f25;    --overdue-text: #f4a8a8;    --overdue-dot: #d86a6a;
+  --skipped-bg: #2c2636;    --skipped-text: #c7c5da;    --skipped-dot: #8d8aa6;
+  --overdue-tint: #261a24;
+  --watch-bg: #3e261c;
+  --watch-text: #f6bfa4;        /* 8.6:1 on --watch-bg */
+
+  --danger: #f28b82;
+  --danger-hover: #f6a39b;
+  --on-danger: #2a0f0c;         /* 8.4:1 on --danger */
+  --badge: var(--apricot);
+  --overlay: rgba(8, 5, 12, 0.65);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-btn: 0 6px 16px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;            /* dark scrollbars, date pickers and dropdown lists */
 }
 
 * { box-sizing: border-box; }
 
+/* 15px base: everything sized in rem follows this */
+html { font-size: 15px; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .btn:is(:hover, :focus-visible), .google-btn:is(:hover, :focus-visible) { transform: none !important; }
+}
+
+/* Motion: when a page opens, its header and cards fade in and rise 8px, one after another (40ms apart).
+   Turned off by the rule above when the computer asks for reduced motion. */
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } }
+.app-main .page-header,
+.app-main .card { animation: rise-in 0.2s var(--ease) both; }
+.app-main .card:nth-child(2) { animation-delay: 40ms; }
+.app-main .card:nth-child(3) { animation-delay: 80ms; }
+.app-main .card:nth-child(4) { animation-delay: 120ms; }
+.app-main .card:nth-child(5) { animation-delay: 160ms; }
+.app-main .card:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Soft hover on buttons and rows */
+.popover__item, .sidebar__link, .notif-item, .icon-btn, .text-btn, .link-btn,
+.tab, .segmented__btn, .chip, .convo, .day-task, .profile-task, .resident-card {
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+  font-weight: var(--fw-regular);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- Page container (all pages) ---------- */
-#root > div {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
-}
-
-h1 { color: var(--primary-dark); margin: 24px 0 8px; }
-h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+h1, h2, h3 { line-height: 1.25; color: var(--text); letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.55rem, 2.4vw, var(--fs-page-title)); font-weight: var(--fw-bold); margin: 0; }
+h2 { font-size: 1.05rem; font-weight: var(--fw-medium); margin: 0 0 8px; }
+h3 { font-weight: var(--fw-medium); }
+strong, b { font-weight: var(--fw-medium); }
 p { margin: 8px 0; }
-.error { color: var(--danger); font-size: .9rem; }
+a { color: inherit; }
+img { max-width: 100%; }
 
-/* ---------- Navbar (Dashboard, Tasks, Handover, Staff) ---------- */
-nav {
+button { font: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; }
+button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+.error { color: var(--danger); font-size: 0.9rem; }
+
+/* Hidden on screen but still read by screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Centered page width with 24px side space */
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .container { padding: 0 16px; } }
+
+/* =====================================================================
+   Shared building blocks
+   ===================================================================== */
+
+/* Form fields (label, input, error message) */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field__label { font-weight: var(--fw-medium); font-size: 0.9rem; color: var(--text); }
+.field__required { color: var(--danger); }
+.field__input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 9px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+/* Example text inside empty boxes: lighter than labels and typed text, so it doesn't compete with them */
+.field__input::placeholder { color: var(--placeholder); opacity: 1; }
+.field__input:hover { border-color: var(--lavender-line); }
+.field__input:focus { outline: none; border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-soft); }
+.field__input[aria-invalid='true'] { border-color: var(--danger); }
+textarea.field__input { resize: vertical; min-height: 96px; }
+.field__error { margin: 0; color: var(--danger); font-size: 0.85rem; }
+.field__hint { margin: 0; color: var(--muted); font-size: 0.85rem; }
+
+/* Two fields side by side (stack on phones) */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Phone number on laptops: the number as text + a small "Copy" button (PhoneNumber.jsx) */
+.phone-copy { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
+.phone-copy__number { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: var(--fw-medium); white-space: nowrap; }
+.phone-copy__btn { gap: 4px; font-size: 0.85rem; text-decoration: none; }
+.phone-copy__btn:hover { text-decoration: underline; }
+
+/* Welcome tour (Tour.jsx): the page dimmed, a highlight around one part, and a small card beside it.
+   Above everything else (pop-ups use 100). */
+.tour__backdrop { position: fixed; inset: 0; z-index: 200; background: var(--overlay); }
+.tour__backdrop.is-clear { background: transparent; }
+.tour__spot {
+  position: fixed;
+  z-index: 201;
+  border-radius: 14px;
+  box-shadow: 0 0 0 3px var(--indigo), 0 0 0 9999px var(--overlay);
+  pointer-events: none;
+  transition: left 0.2s var(--ease), top 0.2s var(--ease), width 0.2s var(--ease), height 0.2s var(--ease);
+}
+.tour__card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 202;
+  width: min(320px, calc(100vw - 32px));
+  padding: 18px 20px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  visibility: hidden;
+}
+.tour__card[data-ready='true'] { visibility: visible; }
+.tour__card.is-centered { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.tour__count { margin: 0 0 4px; color: var(--label); font-size: 0.75rem; font-weight: var(--fw-bold); letter-spacing: 0.5px; text-transform: uppercase; }
+.tour__title { margin: 0 0 6px; font-size: 1.1rem; font-weight: var(--fw-bold); }
+.tour__title:focus { outline: none; }
+.tour__title:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; border-radius: 4px; }
+.tour__text { margin: 0 0 12px; color: var(--muted); font-size: 0.93rem; line-height: 1.5; }
+.tour__actions { display: flex; align-items: center; gap: 8px; }
+.tour__skip { margin-left: -4px; }
+.tour__nav { display: flex; gap: 8px; margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .tour__spot { transition: none; } }
+
+/* "Copy" next to an email address (CopyButton.jsx) */
+.copy-btn { gap: 4px; font-size: 0.85rem; text-decoration: none; }
+.copy-btn:hover { text-decoration: underline; }
+
+/* A field with a small icon inside the box, on the left */
+.field__control { position: relative; }
+.field__icon { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.field__control .field__input { padding-left: 46px; }
+
+/* Password box with the eye button inside */
+.password-input { position: relative; }
+.password-input .field__input { padding-right: 52px; }
+.password-input__toggle {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+}
+.password-input__toggle:hover { background: var(--lavender); color: var(--ink); }
+
+/* Checkbox with its label (whole row is at least 44px tall) */
+.checkbox-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: var(--tap); }
+.checkbox-row input[type='checkbox'] { width: 18px; height: 18px; margin: 0; accent-color: var(--indigo); cursor: pointer; }
+/* The label is clickable too, and 44px tall, so box + label make one big tap area */
+.checkbox-row label { display: inline-flex; align-items: center; min-height: var(--tap); cursor: pointer; }
+.checkbox-row input[aria-invalid='true'] { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+/* Button that looks like a link */
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--indigo);
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+  text-decoration-color: var(--lavender-line);
+  text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--indigo-hover); text-decoration-color: currentColor; }
+
+/* Dropdown that matches the inputs (the arrow is drawn with two gradients) */
+.select {
+  appearance: none;
+  padding-right: 40px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 52%, calc(100% - 15px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+/* Search input with a magnifier icon */
+.search-box { position: relative; }
+.search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+.search-box .field__input { padding-left: 40px; }
+
+/* Two or more buttons joined together (only one is "on") */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+}
+.segmented__btn {
+  min-height: var(--tap);
+  padding: 0 18px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: var(--fw-medium);
+}
+.segmented__btn:hover { color: var(--text); }
+.segmented__btn[aria-pressed='true'] { background: var(--indigo-soft); color: var(--indigo); box-shadow: 0 0 0 1px var(--lavender-line); }
+/* Full-width version: every button gets an equal share of one row */
+.segmented--fill { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
+.segmented--fill .segmented__btn { padding: 0 4px; font-size: 0.9rem; white-space: nowrap; }
+
+/* Radio buttons shown as boxes (e.g. Completed / Pending / Skipped) */
+.choice-group { border: 0; margin: 0 0 18px; padding: 0; }
+.choice-group legend { margin-bottom: 8px; padding: 0; }
+.choice-group__options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--muted);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice:hover { border-color: var(--lavender-line); color: var(--text); }
+.choice:has(input:focus-visible) { outline: 2px solid var(--indigo); outline-offset: 2px; }
+.choice--completed:has(input:checked) { border-color: var(--completed-dot); background: var(--completed-bg); color: var(--completed-text); }
+.choice--pending:has(input:checked) { border-color: var(--pending-dot); background: var(--pending-bg); color: var(--pending-text); }
+.choice--skipped:has(input:checked) { border-color: var(--skipped-dot); background: var(--skipped-bg); color: var(--skipped-text); }
+.choice.is-disabled { opacity: 0.45; cursor: not-allowed; }
+@media (max-width: 480px) { .choice-group__options { grid-template-columns: minmax(0, 1fr); } }
+
+/* Small pill buttons for quick picks */
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.chip:hover { background: var(--tint); border-color: var(--border-strong); }
+.chip.is-active { border-color: var(--indigo); background: var(--indigo-soft); color: var(--indigo); font-weight: var(--fw-medium); }
+
+/* Small grey line explaining a temporary limitation */
+.local-note { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 4px; color: var(--muted); font-size: 0.82rem; }
+.local-note svg { flex-shrink: 0; margin-top: 2px; }
+
+/* Toast messages (bottom-right) */
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(400px, calc(100vw - 32px));
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 16px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 0.25s var(--ease);
+}
+.toast span { flex: 1; }
+.toast--success,
+.toast--info { background: var(--ink); color: var(--card); }
+.toast--success .icon-btn,
+.toast--info .icon-btn { color: var(--card); }
+.toast--success .icon-btn:hover,
+.toast--info .icon-btn:hover { background: var(--on-navy-hover); }
+.toast--error { background: var(--overdue-bg); color: var(--overdue-text); }
+.toast--error .icon-btn { color: var(--overdue-text); }
+@keyframes toast-in { from { opacity: 0; transform: translateX(24px); } }
+@media (max-width: 600px) { .toasts { left: 16px; right: 16px; bottom: 16px; max-width: none; } }
+
+/* Message boxes */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-bottom: 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.93rem;
+}
+.alert svg { flex-shrink: 0; margin-top: 2px; }
+.alert--error { background: var(--overdue-bg); color: var(--overdue-text); }
+.alert--success { background: var(--completed-bg); color: var(--completed-text); }
+.alert--info { background: var(--accent-tint); color: var(--on-accent-tint); }
+.alert--warning { background: var(--pending-bg); color: var(--pending-text); }
+
+/* Buttons
+   primary = the ONE main action on a page (solid plum)
+   soft    = everyday actions (light lilac)
+   outline = quiet secondary actions (white; fills plum on hover)
+   Every button: 200ms colour change, and on hover or keyboard focus it lifts 1px with a soft shadow
+   (no lift or transition when the computer asks for reduced motion). */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease),
+    transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.btn svg { flex-shrink: 0; } /* an icon never gets squeezed when the words are long */
+.btn:is(:hover, :focus-visible):not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-btn); }
+.btn--primary { background: var(--indigo); color: var(--on-indigo); }
+.btn--primary:hover:not(:disabled) { background: var(--indigo-hover); }
+.btn--soft { background: var(--lavender); color: var(--ink); }
+.btn--soft:hover:not(:disabled) { background: var(--lavender-strong); }
+.btn--outline { background: var(--card); border-color: var(--border-strong); color: var(--ink); }
+.btn--outline:hover:not(:disabled) { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
+/* Actions that take something away (deactivate, delete): red words on an outlined button */
+.btn--danger { background: var(--card); border-color: var(--border-strong); color: var(--danger); }
+.btn--danger:hover:not(:disabled) { background: var(--overdue-tint); border-color: var(--overdue-bg); }
+/* The final "yes, delete" in a confirm pop-up: solid red */
+.btn--danger-solid { background: var(--danger); color: var(--on-danger); }
+.btn--danger-solid:hover:not(:disabled) { background: var(--danger-hover); }
+.btn--sm { padding: 0 14px; font-size: 0.875rem; }
+/* The action button at the end of a list row (View, Remind, Assign…): every row's button is the same
+   width and height, so they line up in one column on the right */
+.btn--row { flex-shrink: 0; justify-content: center; min-width: 96px; min-height: var(--tap); margin-left: auto; }
+.btn--lg { min-height: 52px; padding: 0 30px; font-size: 1.05rem; }
+
+.text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--tap);
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--label);
+  font-size: 0.85rem;
+  font-weight: var(--fw-medium);
+}
+.text-btn:hover { background: var(--lavender); }
+
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+}
+.icon-btn:hover { background: var(--on-topbar-hover); }
+.icon-btn--sm:hover { background: var(--lavender); }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+/* Card title row */
+.card__header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 16px;
+}
+.card__title {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  background: var(--primary);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
+  margin: 0;
+  margin-right: auto;
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-medium);
 }
-nav b { margin-right: auto; font-size: 1.1rem; letter-spacing: 1px; }
-nav button { background: rgba(255,255,255,.15); margin: 0; }
-nav button:hover { background: rgba(255,255,255,.3); }
-
-/* ---------- Buttons ---------- */
-button {
-  background: var(--primary);
-  color: #fff;
-  border: 0;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: .95rem;
-  cursor: pointer;
-  margin: 4px 4px 4px 0;
+.card__meta { color: var(--muted); font-size: 0.85rem; }
+/* One quiet link per card, top-right ("All 9 tasks", "See all") */
+.card__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 4px;
+  margin: -12px -4px -12px 0;
+  border-radius: var(--radius-sm);
+  color: var(--indigo);
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+  text-decoration-color: var(--lavender-line);
+  text-underline-offset: 3px;
 }
-button:hover { background: var(--primary-dark); }
+.card__link:hover { text-decoration-color: currentColor; }
 
-/* ---------- Forms ---------- */
-form {
+/* Small uppercase purple label */
+.small-label {
+  margin: 0;
+  color: var(--label);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* Who submitted a handover note: "Submitted by Claire River (Morning shift) · 5:23 AM" */
+.submitted-line { margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+/* Round icon in front of a task, by category */
+.task-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Loading / error / empty messages */
+.state-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--muted);
+  text-align: center;
+}
+.state-msg svg { color: var(--lavender-line); }
+.state-msg--error,
+.state-msg--error svg { color: var(--overdue-text); }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Status labels: a small coloured dot + the word (never colour alone, no filled pill) */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+.status-pill::before { content: ''; flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.status-pill--completed { color: var(--completed-text); }
+.status-pill--pending   { color: var(--pending-text); }
+.status-pill--overdue   { color: var(--overdue-text); }
+.status-pill--skipped   { color: var(--skipped-text); }
+.status-pill--new       { color: var(--accent-text); }
+.status-pill--new::before { background: var(--accent); }
+/* Resident condition "Watch closely": a small apricot badge with an eye (tasks' "Pending" is an amber dot) */
+.status-pill--watch {
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--watch-bg);
+  color: var(--watch-text);
+  font-size: 0.8rem;
+}
+.status-pill--watch::before {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Image placeholders (until real pictures are added) */
+/* The AGAPAY logo (Logo.jsx): the white version replaces the dark one in dark mode */
+.logo { display: block; width: auto; max-width: 100%; }
+.logo--auto { display: inline-flex; }
+.logo__dark { display: none; }
+:root[data-theme='dark'] .logo__light { display: none; }
+:root[data-theme='dark'] .logo__dark { display: block; }
+
+.image-slot { display: block; object-fit: cover; border-radius: var(--radius-sm); }
+/* Photo placeholder until the real picture is added: warm box with faint stripes
+   and a small caption tag in the corner describing the photo to take */
+.image-slot--empty {
+  position: relative;
+  background-color: var(--photo-bg);
+  background-image: repeating-linear-gradient(135deg, transparent 0 26px, var(--photo-stripe) 26px 27px);
+}
+.image-slot--empty span {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
   background: var(--card);
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+/* Avatar */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--indigo-soft);  /* initials: lilac with plum letters */
+  color: var(--indigo);
+  font-weight: var(--fw-medium);
+  object-fit: cover;
+}
+
+/* Badges */
+.dot-badge {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--badge);
+  box-shadow: 0 0 0 2px var(--topbar);
+}
+/* Number on a top bar icon (e.g. unread messages on ✉) */
+/* Sits on the icon's top-right corner, with a 2px ring in the top bar colour so it never blends into the icon */
+.icon-count {
+  position: absolute;
+  top: 5px;
+  left: 26px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--badge);
+  box-shadow: 0 0 0 2px var(--topbar);
+  color: var(--on-apricot);
+  font-size: 0.68rem;
+  font-weight: var(--fw-medium);
+  line-height: 17px;
+  text-align: center;
+}
+/* "1 new" badges and counts: apricot with dark text */
+.count-badge.count-badge--new { background: var(--apricot); color: var(--on-apricot); }
+.count-badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--badge);
+  color: var(--on-apricot);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  text-align: center;
+}
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px;
+  margin-bottom: 20px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}
+.tab {
+  min-height: var(--tap);
+  padding: 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: var(--fw-medium);
+}
+.tab:hover { color: var(--text); background: var(--tint); }
+.tab[aria-selected='true'] { background: var(--indigo-soft); color: var(--indigo); }
+.tab__count {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--tint);
+  color: var(--label);
+  font-size: 0.75rem;
+}
+.tab[aria-selected='true'] .tab__count { background: var(--card); }
+/* Tabs inside a card (no outer pill border) */
+.tabs--flat { border: 0; padding: 0; margin: 0; background: transparent; }
+
+/* Page header */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.page-header__title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.page-header__subtitle { color: var(--muted); margin: 4px 0 0; }
+.page-header__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Empty state */
+.empty-state { text-align: center; color: var(--muted); padding: 48px 20px; }
+.empty-state svg { color: var(--lavender-line); }
+.empty-text { color: var(--muted); text-align: center; margin: 24px 0; }
+
+/* Modal (pop-up window) */
+.modal {
+  width: min(540px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+.modal--sm { width: min(420px, calc(100vw - 32px)); }
+.modal--lg { width: min(800px, calc(100vw - 32px)); }
+.modal::backdrop { background: var(--overlay); }
+.modal__box { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 14px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.modal__header h2 { margin: 0; font-size: 1.15rem; font-weight: var(--fw-bold); }
+.modal__body { padding: 20px 24px; overflow-y: auto; }
+.modal__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid var(--border);
+}
+/* Footer placed inside a form in the modal body */
+.modal__footer--inline { margin: 18px -24px -20px; }
+
+/* Popovers (small dropdown boxes) */
+.popover-anchor { position: relative; }
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+.popover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.popover__header-actions { display: flex; align-items: center; gap: 2px; }
+.popover__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  text-align: left;
+  text-decoration: none;
+}
+.popover__item:hover { background: var(--tint); }
+.popover__item--danger { color: var(--danger); }
+.popover__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap);
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  color: var(--label);
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+}
+.popover__footer:hover { background: var(--tint); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+
+/* On/off switch (a button with role="switch"; the button itself is the 44px tap area) */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 52px;
+  min-height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.switch__track {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--faint);
+  transition: background 0.15s;
+}
+.switch__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+}
+.switch[aria-checked='true'] .switch__track { background: var(--indigo); }
+.switch[aria-checked='true'] .switch__track::after { transform: translateX(18px); }
+.switch:focus-visible { outline: none; }
+.switch:focus-visible .switch__track { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+/* "Allow notifications" (PushToggle.jsx): bell dropdown + Notifications page */
+.push-toggle { display: flex; flex-direction: column; gap: 12px; }
+.push-toggle .alert { margin: 0; }
+.push-toggle__row { display: flex; align-items: center; gap: 12px; }
+.push-toggle__icon { flex-shrink: 0; color: var(--label); }
+.push-toggle__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.push-toggle__label { font-weight: var(--fw-medium); }
+.push-toggle__status { color: var(--muted); font-size: 0.85rem; }
+.push-toggle__status--success { color: var(--completed-text); }
+.push-toggle__status--info { color: var(--label); }
+.push-toggle__status--warning,
+.push-toggle__status--error { color: var(--pending-text); }
+.push-toggle__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+.push-toggle__privacy { margin: 0; padding-left: 52px; }
+/* Full version: on narrow screens the test button and switch drop to a second line, on the right */
+.push-toggle > .push-toggle__row { flex-wrap: wrap; }
+.push-toggle > .push-toggle__row .push-toggle__text { flex-basis: 220px; }
+.push-toggle > .push-toggle__row .btn { margin-left: auto; }
+@media (max-width: 600px) {
+  .push-toggle > .push-toggle__row .push-toggle__text { flex-basis: calc(100% - 52px); }
+  .push-toggle > .push-toggle__row .btn { margin-left: 52px; }
+  .push-toggle > .push-toggle__row .switch { margin-left: auto; }
+}
+.push-toggle--compact { padding: 6px 8px 8px 10px; border-bottom: 1px solid var(--border); }
+.push-toggle--compact .push-toggle__row { align-items: flex-start; }
+.push-toggle--compact .push-toggle__icon { margin-top: 2px; }
+.push-toggle--compact .switch { margin-top: -10px; margin-bottom: -10px; }
+
+/* Notifications (bell dropdown + page) */
+.notif-settings { margin-bottom: 20px; }
+/* Notifications blocked in the browser: a light apricot box with the steps to allow them */
+.push-blocked { margin-top: 8px; padding: 12px 16px; border-radius: var(--radius-sm); background: var(--accent-tint); color: var(--on-accent-tint); font-size: 0.9rem; }
+.push-blocked strong { display: block; margin-bottom: 4px; font-weight: var(--fw-bold); }
+.push-blocked ol { margin: 0; padding-left: 20px; }
+.push-blocked li + li { margin-top: 2px; }
+
+/* "Turn on reminders" card at the top of both dashboards */
+.card.push-prompt { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 20px; padding: 18px 20px; }
+.push-prompt__badge { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--indigo-soft); color: var(--indigo); }
+.push-prompt__text { flex: 1 1 280px; min-width: 0; }
+.push-prompt__text h2 { margin: 0; font-size: var(--fs-card-title); }
+.push-prompt__text p { margin: 2px 0 0; color: var(--muted); }
+.push-prompt__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.push-prompt .alert { flex-basis: 100%; margin: 0; }
+@media (max-width: 600px) {
+  .push-prompt__actions { width: 100%; }
+  .push-prompt__actions .btn { flex: 1; }
+}
+.notif-popover { width: 350px; max-width: calc(100vw - 24px); }
+.notif-list { list-style: none; margin: 0; padding: 4px 0; }
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+.notif-item:hover { background: var(--tint); }
+/* Unread: a small indigo dot and a bolder title (no coloured row) */
+.notif-item .unread-dot { margin-top: 7px; background: var(--indigo); }
+.notif-item .unread-dot--space { background: transparent; }
+.notif-item__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.notif-item__text strong { font-size: 0.92rem; font-weight: var(--fw-regular); }
+.notif-item.is-unread .notif-item__text strong { font-weight: var(--fw-bold); }
+.notif-item__text small { color: var(--muted); font-size: 0.82rem; }
+/* "TASK · 2 hr ago" above the title */
+.notif-item__meta { display: flex; align-items: center; gap: 6px; margin-bottom: 1px; color: var(--label); font-size: 0.75rem; }
+.notif-item__type { font-weight: var(--fw-bold); letter-spacing: 0.5px; text-transform: uppercase; }
+.notif-item__text .notif-item__due { margin-top: 2px; color: var(--text); }
+.notif-item__text .notif-item__due.is-passed { color: var(--overdue-text); font-weight: var(--fw-medium); }
+.notif-list--page { padding: 0; }
+.notif-list--page .notif-item { gap: 14px; padding: 14px 20px; border-radius: 0; }
+.notif-list--page li { border-top: 1px solid var(--border); }
+
+/* Notifications page: one card with the All / Unread tabs on top */
+.card.notif-card { padding: 0; overflow: hidden; }
+.notif-card__tabs { padding: 10px 14px; }
+.notif-card .empty-text { margin: 0; padding: 32px 20px; border-top: 1px solid var(--border); }
+
+.notif-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--indigo-soft);
+  color: var(--indigo);
+}
+.notif-popover .notif-icon { width: 36px; height: 36px; }
+
+/* "View all (N)" / "Show all N tasks" under a shortened list */
+.card-more { margin-top: 6px; font-size: 0.9rem; }
+
+/* Help dropdown ("?" in the top bar) */
+.help-popover { width: 240px; max-width: calc(100vw - 24px); }
+
+/* Account dropdown (top-right avatar) */
+.account-popover { width: 280px; max-width: calc(100vw - 24px); }
+.account-popover__head { display: flex; align-items: center; gap: 12px; padding: 8px; }
+.account-popover__head div { display: flex; flex-direction: column; min-width: 0; }
+.account-popover__head small { color: var(--muted); overflow-wrap: anywhere; }
+.account-popover__id {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 10px 8px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.account-popover__id strong { color: var(--text); }
+
+.popover__check { margin-left: auto; color: var(--indigo); }
+
+/* Light / Dark switch in the top bar (ThemeToggle.jsx): a soft pill with a white circle on the chosen one.
+   Each button is 44px; the visible circle is smaller (padding + content-box background). */
+.theme-toggle { display: inline-flex; margin-right: 8px; border-radius: var(--radius-pill); background: var(--tint); }
+.theme-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  background-clip: content-box;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.theme-toggle__btn:hover { color: var(--text); }
+.theme-toggle__btn[aria-pressed='true'] { background-color: var(--card); color: var(--ink); box-shadow: inset 0 0 0 5px var(--tint), inset 0 0 0 6px var(--border); }
+
+/* =====================================================================
+   App layout: sidebar + top bar + page
+   ===================================================================== */
+.app-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-body { display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--topbar);
+}
+.topbar__actions { display: flex; align-items: center; gap: 4px; }
+.topbar__avatar .avatar { box-shadow: 0 0 0 1px var(--border); }
+
+.app-main { flex: 1; padding: 32px 36px 64px; }
+
+/* Sidebar (Sidebar.jsx): 240px wide, or a 72px icon rail when collapsed (laptops) */
+/* z-index: above the page and the top bar (30), so the profile menu, which opens to the right
+   of the collapsed rail, is drawn on top of page titles and cards */
+.sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-w);
+  height: 100vh;
+  padding: 10px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;             /* only on very short screens (see .sidebar__nav) */
+  scrollbar-width: none;        /* scrollbars stay hidden until the pointer is over the menu */
+  background: var(--navy);
+  color: var(--on-navy);
+  transition: width 0.22s var(--ease); /* 220ms, the same as SLIDE_MS in Sidebar.jsx */
+}
+.sidebar__top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 6px; }
+/* 44px tall tap area; the negative margins keep the logo where it was */
+.sidebar__logo { display: inline-flex; flex-shrink: 0; align-items: center; min-height: var(--tap); margin-block: -6px; border-radius: var(--radius-sm); text-decoration: none; }
+/* Both logos always keep their own size: never squeezed when the sidebar narrows (the edge cuts them off) */
+.sidebar__logo img { flex-shrink: 0; max-width: none; }
+.sidebar__mark { display: block; height: 34px; width: auto; }
+.sidebar__close { display: none; color: var(--on-navy); }
+
+/* Profile card: photo + name + role · shift; the whole card opens the profile menu */
+.sidebar__menu { position: relative; margin: 8px 0 6px; }
+.sidebar__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--on-navy-hover);
+  color: var(--on-navy);
+  text-align: left;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+/* A link to My profile; stays highlighted while you're on that page */
+.sidebar__profile:hover,
+.sidebar__profile.active { background: var(--on-navy-line); }
+.sidebar__who { display: flex; flex-direction: column; min-width: 0; }
+.sidebar__who strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar__who small { overflow: hidden; color: var(--on-navy-muted); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tight spacing so the admin menu (12 links) fits a 768px-tall window. Messages, Notifications and Sign out
+   are pinned at the bottom: if the window is shorter, only this middle part scrolls (scrollbar shown on hover).
+   Below about 230px for the middle, the whole sidebar scrolls instead. */
+.sidebar__nav { flex: 1; min-height: 132px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.sidebar:hover,
+.sidebar__nav:hover,
+.sidebar__nav:focus-within { scrollbar-width: thin; scrollbar-color: var(--on-navy-line) transparent; }
+.sidebar__group { margin-bottom: 0; }
+.sidebar__group-title {
+  margin: 8px 12px 3px;
+  color: var(--on-navy-muted);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  line-height: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sidebar__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 12px;
+  margin-bottom: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--on-navy);
+  font-size: 0.95rem;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sidebar__link svg { flex-shrink: 0; opacity: 0.85; }
+.sidebar__link:hover { background: var(--on-navy-hover); }
+/* The page you are on: lilac with dark plum text (dark mode: a lighter plum with light text) */
+.sidebar__link.active { background: var(--sidebar-active); color: var(--on-sidebar-active); font-weight: var(--fw-medium); }
+/* ...with a small 3px apricot marker on its left edge */
+.sidebar__link.active::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+.sidebar__link.active svg { opacity: 1; }
+.sidebar__bottom { flex-shrink: 0; padding-top: 4px; border-top: 1px solid var(--on-navy-line); }
+
+/* Collapsed icon rail (laptops only; the phone drawer always shows the full menu).
+   Sidebar.jsx changes it in two steps so nothing flashes or jumps while it slides:
+   - .is-collapsing (220ms): the width slides. Words and the full logo fade out fast, stay on one line and
+     are clipped by the sidebar; icons and the photo glide to their new place (padding transitions).
+   - .is-expanding (220ms): the same in reverse, and the words fade in right away (150ms) during the slide.
+     The layout stays the same height, so nothing moves up or down.
+   - .is-rail (after the slide): labels become tooltips, shown only on hover once the mouse has moved
+     over the menu (.tips-ready), or on keyboard focus. */
+@media (min-width: 901px) {
+  .sidebar__link,
+  .sidebar__profile { transition: padding 0.22s var(--ease), background-color 0.15s; }
+  .sidebar__label,
+  .sidebar__who,
+  .sidebar__group-title,
+  .sidebar__link .count-badge { transition: opacity 0.15s; }
+
+  /* Rail width, and the rail's padding (so icons and the photo are centred in the 72px rail) */
+  .sidebar.is-collapsing,
+  .sidebar.is-rail { width: var(--rail-w); }
+  .sidebar:is(.is-collapsing, .is-rail) .sidebar__link { padding-left: 15px; }  /* icon centred: 12 + 15 + 9 = 36 */
+  .sidebar:is(.is-collapsing, .is-rail) .sidebar__profile { padding-left: 4px; padding-right: 4px; background: transparent; }
+  .sidebar__profile .avatar { flex-shrink: 0; } /* the photo never gets squeezed while the card narrows */
+  .sidebar.is-rail .sidebar__profile:hover,
+  .sidebar.is-rail .sidebar__profile.active { background: var(--on-navy-hover); }
+  .sidebar__profile { overflow: hidden; }
+
+  /* While sliding (and in the rail): words faded out, still on one line and in place */
+  .sidebar:is(.is-collapsing, .is-rail) :is(.sidebar__label, .sidebar__who, .sidebar__group-title),
+  .sidebar.is-collapsing .sidebar__link .count-badge { opacity: 0; }
+  .sidebar.is-collapsing :is(.sidebar__label, .sidebar__who, .sidebar__group-title, .count-badge) { transition-duration: 0.1s; }
+  .sidebar__logo img { transition: opacity 0.1s; }
+  .sidebar.is-collapsing .sidebar__logo img { opacity: 0; } /* the full logo fades out; the "A" fades in after */
+  .sidebar.is-rail .sidebar__group-title { visibility: hidden; }  /* keeps its height: icons don't move */
+  .sidebar.is-rail .sidebar__who { visibility: hidden; }
+
+  /* The finished rail */
+  .sidebar.is-rail { overflow: visible; }
+  .sidebar.is-rail .sidebar__top { justify-content: center; padding: 0; }
+  .sidebar.is-rail .sidebar__nav { overflow: visible; }  /* the tooltips stick out to the right */
+  .sidebar__logo > * { animation: sidebar-fade 0.15s var(--ease); } /* the logo swap fades in */
+
+  /* The label becomes a tooltip next to the icon. It sits clear of the sidebar's edge, with a border
+     and shadow, so it never blends into the navy rail. It only fades in on hover, never on its own. */
+  .sidebar.is-rail .sidebar__label {
+    position: absolute;
+    left: calc(100% + 22px);
+    top: 50%;
+    z-index: 80;
+    padding: 7px 12px;
+    border: 1px solid var(--lavender-line);
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    box-shadow: var(--shadow-float);
+    color: var(--card);
+    font-size: 0.9rem;
+    font-weight: var(--fw-medium);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition: none;
+  }
+  .sidebar.is-rail.tips-ready .sidebar__link:hover .sidebar__label,
+  .sidebar.is-rail .sidebar__link:focus-visible .sidebar__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  /* Badges shrink to a small dot on the icon */
+  .sidebar.is-rail .count-badge {
+    position: absolute;
+    top: 9px;
+    left: 28px;
+    min-width: 0;
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--navy);
+    font-size: 0;
+  }
+  .sidebar.is-rail .sidebar__link.active .count-badge { box-shadow: 0 0 0 2px var(--sidebar-active); }
+}
+@keyframes sidebar-fade { from { opacity: 0; } }
+
+.sidebar-backdrop { display: none; }
+
+/* Tablets and phones: the sidebar slides in from the left */
+@media (max-width: 900px) {
+  .app-layout { grid-template-columns: minmax(0, 1fr); }
+  .app-layout .sidebar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 70;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+  .app-layout.is-mobile-open .sidebar { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .sidebar__close { display: inline-flex; }
+  .sidebar__close:hover { background: var(--on-navy-hover); }
+  .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 65; background: var(--overlay); }
+  .app-main { padding: 24px 16px 48px; }
+}
+
+@media (max-width: 600px) {
+  .topbar { padding: 0 8px; }
+  .popover.notif-popover,
+  .popover.help-popover,
+  .popover.account-popover { position: fixed; top: 60px; left: 12px; right: 12px; width: auto; max-width: none; }
+}
+
+/* =====================================================================
+   OLD PAGE STYLES — kept so pages not redesigned yet still look okay.
+   Each block is removed when its page is rebuilt in a later phase.
+   (They only touch plain elements without a class.)
+   ===================================================================== */
+.app-main button:not([class]) {
+  min-height: var(--tap);
+  padding: 0 18px;
+  margin: 4px 4px 4px 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--lavender);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.app-main button:not([class]):hover { background: var(--lavender-strong); }
+
+.app-main form:not([class]) {
   padding: 16px;
   margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
 }
-label { font-size: .9rem; color: var(--muted); }
-input, select, textarea {
+.app-main label:not([class]) { font-size: 0.9rem; color: var(--muted); }
+.app-main :is(input:not([type='checkbox'], [type='radio']), select, textarea):not([class]) {
   width: 100%;
   max-width: 420px;
-  padding: 8px 10px;
+  min-height: var(--tap);
+  padding: 8px 12px;
   margin: 4px 0 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
   font: inherit;
-  background: #fff;
 }
-input:focus, select:focus, textarea:focus {
-  outline: 2px solid var(--primary);
-  border-color: transparent;
-}
-textarea { max-width: 100%; }
+.app-main textarea:not([class]) { max-width: 100%; }
 
-/* ---------- Landing page ---------- */
-#root > .landing {
-  max-width: 640px;
-  margin-top: 10vh;
-  text-align: center;
-  background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #fff;
-  border-radius: 16px;
-  padding: 48px 24px;
-}
-.landing h1 { color: #fff; font-size: 3rem; letter-spacing: 4px; margin: 0 0 12px; }
-.landing p { opacity: .9; margin-bottom: 28px; }
-.landing button { background: #fff; color: var(--primary-dark); font-weight: 600; padding: 10px 22px; margin: 4px; }
-.landing button:hover { background: var(--primary-light); }
+.app-main > div > h1 { margin-bottom: 12px; }
+.app-main > div > h2 { margin-top: 24px; }
 
-/* ---------- Login & Register ---------- */
-#root > .auth-card {
-  max-width: 420px;
-  margin-top: 8vh;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 32px 28px;
-  box-shadow: 0 6px 20px rgba(96, 58, 116, .08);
-}
-.auth-card h1 { margin-top: 0; text-align: center; }
-.auth-card form { border: 0; padding: 0; margin: 0 0 12px; }
-.auth-card input, .auth-card select { max-width: 100%; }
-.auth-card form button { width: 100%; padding: 10px; margin: 8px 0 0; }
-.auth-card > button {
+/* Staff table (rebuilt with the Admin side) */
+.app-main table:not([class]) {
   width: 100%;
-  background: none;
-  color: var(--primary);
-  margin: 4px 0 0;
-}
-.auth-card > button:hover { background: var(--primary-light); }
-
-/* ---------- Dashboard / Handover summary cards ---------- */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin: 16px 0;
-}
-.stat {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-top: 4px solid var(--primary);
-  border-radius: 10px;
-  padding: 16px;
-  text-align: center;
-}
-.stat span { display: block; font-size: 2rem; font-weight: 700; }
-.stat small { color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-.stat.pending { border-top-color: var(--warn); }
-.stat.done { border-top-color: var(--ok); }
-.stat.overdue { border-top-color: var(--danger); }
-
-/* ---------- Task & handover lists ---------- */
-ul { list-style: none; padding: 0; margin: 12px 0; }
-li {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-}
-.task-form input { max-width: 200px; display: inline-block; margin-right: 6px; }
-.handover-item { border-left: 4px solid var(--primary); }
-.ack { color: var(--ok); font-size: .9rem; font-weight: 600; }
-
-/* Status badges */
-.status {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: .75rem;
-  color: #fff;
-}
-.status.done { background: var(--ok); }
-.status.pending { background: var(--warn); }
-.status.overdue { background: var(--danger); }
-
-/* ---------- Table (Manage Staff) ---------- */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
   overflow: hidden;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
 }
-th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-th { background: var(--primary-light); }
-
-/* ---------- Phones ---------- */
-@media (max-width: 600px) {
-  nav b { width: 100%; }
-  input, select { max-width: 100%; }
-  .task-form input { max-width: 100%; display: block; }
-  .landing h1 { font-size: 2.2rem; }
-}
+.app-main table:not([class]) :is(th, td) { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.app-main table:not([class]) th { background: var(--lavender); font-weight: var(--fw-medium); }

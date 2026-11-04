@@ -1,0 +1,193 @@
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import useTasks from '../hooks/useTasks';
+import useShifts from '../hooks/useShifts';
+import useNow from '../hooks/useNow';
+import { useToast } from '../context/ToastContext';
+import { SHIFTS, TASK_CATEGORIES } from '../constants';
+import { addDays, addMonths, dayKey, monthTitle, weekTitle, sameDay, startOfWeek } from '../utils/calendar';
+import { shiftOfTime } from '../utils/shift';
+import { savedText } from '../utils/tasks';
+import PageHeader from '../components/PageHeader';
+import MonthView from '../components/schedule/MonthView';
+import WeekView from '../components/schedule/WeekView';
+import DayPanel from '../components/schedule/DayPanel';
+import TaskDetailModal from '../components/tasks/TaskDetailModal';
+import { LoadingState, ErrorState } from '../components/StateMessage';
+import '../styles/schedule.css';
+import { searchTerm, matchesSearch } from '../utils/search';
+
+const STATUS_FILTERS = [
+  { id: 'pending', label: 'Pending' },
+  { id: 'completed', label: 'Completed' },
+  { id: 'overdue', label: 'Overdue' },
+  { id: 'skipped', label: 'Skipped' },
+];
+
+export default function Schedule() {
+  const tasksQuery = useTasks();
+  const { tasks, updateTask } = tasksQuery;
+  const showToast = useToast();
+  const today = useNow();
+  const [searchParams] = useSearchParams();
+  const [view, setView] = useState(searchParams.get('view') === 'week' ? 'week' : 'month');
+  const [selected, setSelected] = useState(() => new Date());
+
+  // My shifts from the roster, for the 6 weeks a month page shows
+  // (the week view always falls inside them too)
+  const gridStart = startOfWeek(new Date(selected.getFullYear(), selected.getMonth(), 1));
+  const shiftsQuery = useShifts(gridStart, addDays(gridStart, 41));
+  const { shiftOn } = shiftsQuery;
+
+  // The page waits for both; a failed load offers "Try again" for whichever failed
+  const failed = [tasksQuery, shiftsQuery].find((q) => q.status === 'error');
+  const status = failed ? 'error' : tasksQuery.status === 'ready' && shiftsQuery.status === 'ready' ? 'ready' : 'loading';
+  const error = failed?.error;
+  const reload = () => failed?.reload();
+  const [statuses, setStatuses] = useState(STATUS_FILTERS.map((s) => s.id));
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  // The side panel's shift buttons start on my own shift that day (All day on a day off).
+  // A pick only lasts for the day it was made on.
+  const [shiftPick, setShiftPick] = useState({ day: null, id: '' });
+  const [openTaskId, setOpenTaskId] = useState(null);
+
+  const toggleStatus = (id) =>
+    setStatuses((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
+
+  // Filters shared by the calendar and the side panel
+  const query = searchTerm(search);
+  const visible = tasks
+    .filter((t) => statuses.includes(t.status))
+    .filter((t) => !category || t.category === category)
+    .filter((t) => matchesSearch(query, t.task, t.resident, t.room))
+    .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+
+  const tasksByDay = {};
+  visible.forEach((t) => {
+    (tasksByDay[dayKey(t.dueAt)] ??= []).push(t);
+  });
+
+  const selectedKey = dayKey(selected);
+  const shiftFilter = shiftPick.day === selectedKey ? shiftPick.id : shiftOn(selected)?.id ?? '';
+  const setShiftFilter = (id) => setShiftPick({ day: selectedKey, id });
+  const allDayTasks = tasksByDay[selectedKey] ?? [];
+  const dayTasks = allDayTasks.filter((t) => !shiftFilter || shiftOfTime(SHIFTS, t.dueAt)?.id === shiftFilter);
+
+  // Days with tasks for me but no shift on the roster (all my tasks, whatever the filters)
+  const taskDays = new Set(tasks.map((t) => dayKey(t.dueAt)));
+  const noShiftWarning = (day) => taskDays.has(dayKey(day)) && !shiftOn(day);
+
+  // ‹ › move one month or one week; the selected day moves with it
+  const move = (step) => {
+    if (view === 'week') return setSelected((d) => addDays(d, 7 * step));
+    const target = addMonths(selected, step);
+    setSelected(target.getMonth() === today.getMonth() && target.getFullYear() === today.getFullYear() ? today : target);
+  };
+
+  const openTask = tasks.find((t) => t._id === openTaskId) ?? null;
+  const handleSave = async (task, changes) => {
+    await updateTask(task, changes);
+    setOpenTaskId(null);
+    showToast(savedText(task, changes));
+  };
+
+  return (
+    <div>
+      <PageHeader title={view === 'month' ? monthTitle(selected) : weekTitle(selected)} subtitle="Your shifts and care tasks.">
+        <div className="segmented" role="group" aria-label="Calendar view">
+          <button type="button" className="segmented__btn" aria-pressed={view === 'month'} onClick={() => setView('month')}>Month</button>
+          <button type="button" className="segmented__btn" aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
+        </div>
+      </PageHeader>
+
+      <div className="card schedule-toolbar">
+        <div className="date-nav">
+          <button type="button" className="icon-btn icon-btn--sm" onClick={() => move(-1)} aria-label={view === 'month' ? 'Previous month' : 'Previous week'}>
+            <ChevronLeft size={18} />
+          </button>
+          <button type="button" className="btn btn--outline btn--sm" onClick={() => setSelected(new Date())} disabled={sameDay(selected, today)}>
+            Today
+          </button>
+          <button type="button" className="icon-btn icon-btn--sm" onClick={() => move(1)} aria-label={view === 'month' ? 'Next month' : 'Next week'}>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+
+        <fieldset className="status-filters">
+          <legend className="sr-only">Show tasks that are</legend>
+          {STATUS_FILTERS.map(({ id, label }) => (
+            <label key={id} className="status-filter">
+              <input type="checkbox" checked={statuses.includes(id)} onChange={() => toggleStatus(id)} />
+              <span className={`dot dot--${id}`} aria-hidden="true" />
+              {label}
+            </label>
+          ))}
+        </fieldset>
+
+        <div className="schedule-toolbar__filters">
+          <div className="search-box">
+            <Search size={18} aria-hidden="true" />
+            <label htmlFor="schedule-search" className="sr-only">Search task, resident or room</label>
+            <input
+              id="schedule-search"
+              type="search"
+              className="field__input"
+              placeholder="Search tasks or residents"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <label htmlFor="schedule-category" className="sr-only">Filter by category</label>
+          <select id="schedule-category" className="field__input select" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">All categories</option>
+            {TASK_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {status === 'loading' && <div className="card"><LoadingState label="Loading your schedule…" /></div>}
+      {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
+
+      {status === 'ready' && (
+        <div className={`schedule-layout schedule-layout--${view}`}>
+          <div className="card schedule-calendar">
+            {view === 'month' ? (
+              <MonthView selected={selected} today={today} tasksByDay={tasksByDay} shiftOn={shiftOn} noShiftWarning={noShiftWarning} onSelect={setSelected} />
+            ) : (
+              <WeekView
+                selected={selected}
+                today={today}
+                tasksByDay={tasksByDay}
+                shiftOn={shiftOn}
+                noShiftWarning={noShiftWarning}
+                onSelect={setSelected}
+                onOpenTask={(t) => setOpenTaskId(t._id)}
+              />
+            )}
+            {/* What the coloured bars mean */}
+            <ul className="shift-legend" aria-label="Shift colours">
+              {SHIFTS.map((s) => (
+                <li key={s.id}><span className={`shift-bar shift-bar--${s.id}`} aria-hidden="true" /> {s.label} shift</li>
+              ))}
+            </ul>
+          </div>
+
+          <DayPanel
+            date={selected}
+            shift={shiftOn(selected)}
+            tasks={dayTasks}
+            hiddenCount={allDayTasks.length - dayTasks.length}
+            noShiftWarning={noShiftWarning(selected)}
+            shiftFilter={shiftFilter}
+            onShiftFilter={setShiftFilter}
+            onOpenTask={(t) => setOpenTaskId(t._id)}
+          />
+        </div>
+      )}
+
+      <TaskDetailModal task={openTask} onSave={handleSave} onClose={() => setOpenTaskId(null)} />
+    </div>
+  );
+}

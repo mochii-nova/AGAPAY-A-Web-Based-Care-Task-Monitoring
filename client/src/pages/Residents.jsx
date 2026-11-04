@@ -1,0 +1,190 @@
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Users } from 'lucide-react';
+import useTasks from '../hooks/useTasks';
+import useResidents from '../hooks/useResidents';
+import useMediaQuery from '../hooks/useMediaQuery';
+import { useToast } from '../context/ToastContext';
+import { TASK_CATEGORIES, shiftLabel } from '../constants';
+import { useHandovers } from '../context/HandoverContext';
+import { useProfile } from '../context/ProfileContext';
+import { RESIDENT_STATUS, updateFor } from '../utils/handover';
+import { isToday, savedText, normalizeTasks } from '../utils/tasks';
+import useApiData from '../hooks/useApiData';
+import { isoDay } from '../hooks/useShifts';
+import { searchTerm, matchesSearch } from '../utils/search';
+import PageHeader from '../components/PageHeader';
+import Modal from '../components/Modal';
+import ResidentCard from '../components/residents/ResidentCard';
+import ResidentProfile from '../components/residents/ResidentProfile';
+import TaskDetailModal from '../components/tasks/TaskDetailModal';
+import { EmptyState, LoadingState, ErrorState, NoMatchState } from '../components/StateMessage';
+import '../styles/residents.css';
+
+// Notes from caregivers about this resident: their update in each handover (or, for older plain-text
+// handovers, any handover that mentions their first name), plus caregivers' task notes and skip reasons.
+// (The admin's instructions are not notes: they show under each of today's tasks instead.)
+function notesFor(resident, handovers, tasks) {
+  const firstName = resident.name.split(' ')[0].toLowerCase();
+  const fromHandovers = handovers.flatMap((h) => {
+    const base = { id: `h${h._id}`, source: `${shiftLabel(h.shift)} shift handover`, author: h.author?.name, time: h.createdAt };
+    if (h.data) {
+      const update = updateFor(h, resident);
+      if (!update || update.status === 'normal') return [];
+      return [{ ...base, text: `${RESIDENT_STATUS[update.status].label}. ${update.note}` }];
+    }
+    return h.text.toLowerCase().includes(firstName) ? [{ ...base, text: h.text }] : [];
+  });
+  const fromTasks = tasks
+    .filter((t) => t.residentId === resident.id && (t.note || t.skipReason))
+    .map((t) => ({
+      id: `t${t._id}`,
+      source: t.task,
+      time: t.dueAt,
+      text: t.skipReason ? `Skipped: ${t.skipReason}${t.note ? `. ${t.note}` : ''}` : t.note,
+    }));
+  // The same text only once (e.g. a daily task with the same note every day): the newest one
+  const seen = new Set();
+  return [...fromHandovers, ...fromTasks]
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .filter((n) => {
+      const key = n.text.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
+}
+
+export default function Residents() {
+  const { tasks, status: tasksStatus, updateTask } = useTasks();
+  const { residents, status, error, reload } = useResidents();
+  const { handovers } = useHandovers();
+  const { profile: { id: profileId } } = useProfile();
+  const showToast = useToast();
+  const isNarrow = useMediaQuery('(max-width: 1100px)');
+  const isPhone = useMediaQuery('(max-width: 600px)');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState('');
+  const [need, setNeed] = useState('');
+  const [openTaskId, setOpenTaskId] = useState(null);
+  const today = isoDay(new Date());
+  const dayQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, live: true });
+
+  const query = searchTerm(search);
+  const shown = residents
+    .filter((r) => !need || r.careNeeds.includes(need))
+    .filter((r) => matchesSearch(query, r.name, r.room, r.residentCode));
+
+  // ?open=<resident code, e.g. RP-2020-001> picks a resident (the Dashboard links here like that).
+  // Laptops always show a profile (the first resident until you pick one);
+  // tablets and phones only open the pop-up when you tap a card.
+  const openCode = searchParams.get('open');
+  const selected = residents.find((r) => r.residentCode === openCode) ?? (isNarrow ? null : shown[0] ?? null);
+
+  const selectResident = (code) => setSearchParams({ open: code });
+  const closePopup = () => setSearchParams({}, { replace: true });
+
+  const tasksOf = (r) => tasks.filter((t) => t.residentId === r.id && isToday(t.dueAt));
+  // Everyone's tasks for the resident today (other shifts too), for the "Today" line
+  const dayOf = (r) => (dayQuery.data ?? []).filter((t) => t.residentId === r.id);
+  // "Watch closely" / "Urgent" from the latest handover another caregiver wrote
+  const latestReceived = handovers.find((h) => h.author?._id !== profileId);
+  const statusOf = (r) => updateFor(latestReceived, r)?.status;
+  const profile = selected && (
+    <ResidentProfile
+      resident={selected}
+      status={statusOf(selected)}
+      tasks={tasksOf(selected)}
+      dayTasks={dayOf(selected)}
+      tasksLoading={tasksStatus === 'loading'}
+      notes={notesFor(selected, handovers, tasks)}
+      onOpenTask={(t) => setOpenTaskId(t._id)}
+      showName={!isNarrow}
+    />
+  );
+
+  const openTask = tasks.find((t) => t._id === openTaskId) ?? null;
+  const handleSave = async (task, changes) => {
+    await updateTask(task, changes);
+    dayQuery.reload({ silent: true });
+    setOpenTaskId(null);
+    showToast(savedText(task, changes));
+  };
+
+  return (
+    <div>
+      <PageHeader title="My residents" subtitle="Choose a resident to see their care needs, tasks and notes." />
+
+      {status === 'loading' && <div className="card"><LoadingState label="Loading your residents…" /></div>}
+      {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
+
+      {status === 'ready' && (
+        <div className="residents-layout">
+          <section className="residents-main" aria-label="Residents">
+            <div className="residents-toolbar">
+              <div className="search-box">
+                <Search size={18} aria-hidden="true" />
+                <label htmlFor="resident-search" className="sr-only">Search name, room or resident ID</label>
+                <input
+                  id="resident-search"
+                  type="search"
+                  className="field__input"
+                  placeholder="Search name, room or ID"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <label htmlFor="resident-need" className="sr-only">Filter by care need</label>
+              <select id="resident-need" className="field__input select" value={need} onChange={(e) => setNeed(e.target.value)}>
+                <option value="">All care needs</option>
+                {TASK_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+
+            {shown.length === 0 ? (
+              <div className="card">
+                {residents.length > 0 && search.trim() ? (
+                  <NoMatchState icon={Users} what="residents" query={search} onClear={() => setSearch('')} />
+                ) : (
+                  <EmptyState icon={Users}>
+                    {residents.length === 0 ? 'No residents are assigned to you yet.' : 'No residents match your filters.'}
+                  </EmptyState>
+                )}
+              </div>
+            ) : (
+              <ul className="resident-list">
+                {shown.map((r) => (
+                  <li key={r.id}>
+                    <ResidentCard
+                      resident={r}
+                      status={statusOf(r)}
+                      todayTasks={dayOf(r)}
+                      selected={selected?.id === r.id}
+                      maxNeeds={isPhone ? 2 : 3}
+                      onSelect={selectResident}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {!isNarrow && (
+            <aside className="card resident-panel" aria-label={selected ? `Profile of ${selected.name}` : 'Resident profile'}>
+              {profile ?? <EmptyState icon={Users}>No resident selected.</EmptyState>}
+            </aside>
+          )}
+        </div>
+      )}
+
+      {isNarrow && (
+        <Modal open={!!selected} onClose={closePopup} title={selected?.name ?? ''} size="lg">
+          {profile}
+        </Modal>
+      )}
+
+      <TaskDetailModal task={openTask} onSave={handleSave} onClose={() => setOpenTaskId(null)} />
+    </div>
+  );
+}

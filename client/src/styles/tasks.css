@@ -1,0 +1,129 @@
+/* =====================================================================
+   My Tasks (Tasks.jsx + components/tasks/)
+   Colours come only from the variables in main.css.
+   ===================================================================== */
+/* One card: status tabs and filters on one row, then the table */
+.card.tasks-card { padding: 0; overflow: hidden; }
+.tasks-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* never wider than the card */
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.tasks-toolbar .tabs { flex-wrap: nowrap; }
+.tasks-toolbar .tab { white-space: nowrap; }
+.tasks-toolbar__filters { display: flex; flex-shrink: 0; gap: 10px; }
+.tasks-toolbar .search-box { width: 270px; } /* wide enough for "Search tasks or residents" */
+.tasks-toolbar .select { width: 190px; }
+
+.tasks-panel { padding: 0 8px 4px; }
+
+/* Table: white rows, a soft hover, status as a dot + word */
+.task-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.task-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--label);
+  font-size: 0.72rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.task-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background-color 0.15s; }
+.task-table tr:last-child td { border-bottom: 0; }
+.task-table__row:hover td { background: var(--tint); }
+.task-table__row.is-clickable { cursor: pointer; }
+
+.cell-flex { display: flex; align-items: center; gap: 10px; }
+.task-table small { color: var(--muted); font-size: 0.82rem; }
+.task-table__time { width: 110px; color: var(--muted); white-space: nowrap; }
+.task-table__time small { display: block; }
+.task-table__task strong { display: block; font-weight: var(--fw-medium); }
+.task-table__task small { display: block; }
+.task-table__resident .avatar { font-size: 0.72rem; }
+.task-table__status { width: 140px; }
+.task-table__action { width: 1%; text-align: right; }
+
+.note-flag { display: inline-flex !important; align-items: center; gap: 4px; color: var(--label) !important; }
+
+/* Task pop-up */
+.task-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+}
+.task-detail__main { flex: 1; min-width: 0; }
+.task-detail__main p { margin: 0; }
+.task-detail__resident { margin-top: 2px !important; font-size: 1.05rem; font-weight: var(--fw-medium); }
+.task-detail__resident span { color: var(--muted); font-weight: var(--fw-regular); }
+.task-detail__time { color: var(--muted); }
+.task-detail__done { color: var(--completed-text); }
+/* The admin's instructions, read-only, above the status choices (caregiver pop-up) */
+.task-note-current {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: -6px 0 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--indigo);
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+.task-note-current svg { flex-shrink: 0; margin-top: 2px; color: var(--indigo); }
+.task-note-current p { margin: 0; overflow-wrap: anywhere; }
+.task-note-current__label { font-weight: var(--fw-medium); }
+/* Admin task details: Instructions (admin) and Caregiver note, as two separate parts */
+.task-texts { display: grid; gap: 10px; margin-top: 16px; }
+.task-text { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.task-text--instructions { border-left: 3px solid var(--indigo); }
+.task-text__title { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font-size: 0.9rem; font-weight: var(--fw-medium); }
+.task-text__title svg { color: var(--indigo); }
+.task-text__title small { color: var(--muted); font-size: 0.8rem; font-weight: var(--fw-regular); }
+.task-text p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+
+/* Laptops and tablets: filters go under the tabs (one row only fits on wide screens) */
+@media (max-width: 1440px) {
+  .tasks-toolbar { flex-wrap: wrap; }
+  .tasks-toolbar .tabs { overflow-x: auto; }
+  .tasks-toolbar__filters { width: 100%; }
+  .tasks-toolbar .search-box { flex: 1; width: auto; min-width: 200px; }
+}
+
+/* Phones: each row becomes a small card */
+@media (max-width: 760px) {
+  .card.tasks-card { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+  .tasks-toolbar { padding: 0 0 14px; border: 0; }
+  .tasks-panel { padding: 0; }
+  .task-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .task-table,
+  .task-table tbody { display: block; }
+  .task-table__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+  .task-table td { display: block; width: auto; padding: 0; border: 0; background: transparent !important; }
+  .task-table__task { grid-column: 1 / -1; grid-row: 1; }
+  .task-table__resident { grid-column: 1 / -1; }
+  .task-table__time { align-self: center; }
+  .task-table__status { justify-self: end; align-self: center; }
+  .task-table__action { grid-column: 1 / -1; text-align: left; }
+  .task-table__action .btn { width: 100%; }
+  .tasks-toolbar .select,
+  .tasks-toolbar .search-box { width: 100%; }
+  .tasks-toolbar__filters { flex-direction: column; }
+}

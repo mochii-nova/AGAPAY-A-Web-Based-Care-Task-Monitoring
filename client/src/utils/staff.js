@@ -1,0 +1,31 @@
+// Helpers for staff accounts (admin pages)
+
+export const roleLabel = (person) => (person.role === 'admin' ? 'Administrator' : 'Caregiver');
+
+// Account status as a label + status-pill tone
+export const STATUS_LABEL = {
+  active: { label: 'Active', tone: 'completed' },
+  pending: { label: 'Pending approval', tone: 'pending' },
+  inactive: { label: 'Deactivated', tone: 'skipped' },
+};
+
+// Approved caregivers who can still sign in, A–Z: the people every picker and filter lists.
+// Pending, declined and deactivated accounts are left out.
+export const activeCaregivers = (staff) =>
+  staff.filter((u) => u.role === 'caregiver' && u.status === 'active').sort((a, b) => a.name.localeCompare(b.name));
+
+// The residents none of whose active caregivers works `shift` (by each caregiver's usual shift in
+// Manage Staff, the same way the resident's "Assigned caregivers" list shows it)
+export const residentsWithoutShift = (residents, caregivers, shift) =>
+  residents.filter(
+    (r) => !r.caregivers.some((c) => caregivers.some((u) => u.id === c.id && u.assignedShift === shift.apiValue))
+  );
+
+// "Oct 24"
+export const shortDate = (value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+// "2024-06-03" -> "June 3, 2024" (a calendar date, not a moment in time)
+export function longDate(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}

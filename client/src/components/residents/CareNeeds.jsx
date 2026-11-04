@@ -1,0 +1,25 @@
+import { getCategory } from '../../constants';
+
+// Small text tags for a resident's care needs (uses the 6 task categories).
+// With `max` (list cards), only the first few are shown in short words, followed by "+2".
+export default function CareNeeds({ needs, max }) {
+  const known = needs.filter(getCategory);
+  const shown = max ? known.slice(0, max) : known;
+  const hidden = known.length - shown.length;
+
+  return (
+    <ul
+      className={`care-needs ${max ? 'care-needs--one-row' : ''}`}
+      aria-label={`Care needs: ${known.map((id) => getCategory(id).label).join(', ')}`}
+    >
+      {shown.map((id) => (
+        <li key={id} className="care-need" aria-hidden={max ? 'true' : undefined}>
+          {max ? getCategory(id).short : getCategory(id).label}
+        </li>
+      ))}
+      {hidden > 0 && (
+        <li className="care-need care-need--more" aria-hidden="true">+{hidden}</li>
+      )}
+    </ul>
+  );
+}
