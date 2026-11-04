@@ -8,7 +8,7 @@ import { SHIFTS } from '../constants';
 // names = [] means the route works and nobody is scheduled.
 export default function useNextShift(current) {
   const path = current ? `/shifts/next?shift=${current.shift.apiValue}&shiftDate=${current.shiftDate}` : null;
-  const { data, status } = useApiData(path, { refreshEvery: 5 * 60 * 1000 });
+  const { data, status } = useApiData(path, { live: true });
   const shift = SHIFTS.find((s) => s.apiValue === data?.shift); // "Afternoon" -> Noon
   if (status !== 'ready' || !shift || !Array.isArray(data.staff)) return null;
   return { shift, shiftDate: data.shiftDate, names: data.staff.map((p) => p.name) };

@@ -505,9 +505,12 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   animation: toast-in 0.25s var(--ease);
 }
 .toast span { flex: 1; }
-.toast--success { background: var(--ink); color: var(--card); }
-.toast--success .icon-btn { color: var(--card); }
-.toast--success .icon-btn:hover { background: var(--on-navy-hover); }
+.toast--success,
+.toast--info { background: var(--ink); color: var(--card); }
+.toast--success .icon-btn,
+.toast--info .icon-btn { color: var(--card); }
+.toast--success .icon-btn:hover,
+.toast--info .icon-btn:hover { background: var(--on-navy-hover); }
 .toast--error { background: var(--overdue-bg); color: var(--overdue-text); }
 .toast--error .icon-btn { color: var(--overdue-text); }
 @keyframes toast-in { from { opacity: 0; transform: translateX(24px); } }

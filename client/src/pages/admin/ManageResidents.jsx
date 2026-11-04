@@ -44,7 +44,7 @@ export default function ManageResidents() {
   const showToast = useToast();
   const today = isoDay(new Date());
   // Today's tasks, for the "Today" line on each resident (refreshes as caregivers tick tasks off)
-  const tasksQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
+  const tasksQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, live: true });
   const isNarrow = useMediaQuery('(max-width: 1100px)');
   const isPhone = useMediaQuery('(max-width: 600px)');
   const [searchParams, setSearchParams] = useSearchParams();

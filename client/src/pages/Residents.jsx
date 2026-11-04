@@ -69,7 +69,7 @@ export default function Residents() {
   const [need, setNeed] = useState('');
   const [openTaskId, setOpenTaskId] = useState(null);
   const today = isoDay(new Date());
-  const dayQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
+  const dayQuery = useApiData(`/tasks?from=${today}&to=${today}`, { transform: normalizeTasks, live: true });
 
   const query = searchTerm(search);
   const shown = residents

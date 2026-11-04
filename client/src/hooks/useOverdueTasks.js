@@ -6,6 +6,6 @@ import { normalizeTasks } from '../utils/tasks';
 const byDue = (list) => normalizeTasks(list).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
 export default function useOverdueTasks() {
-  const query = useApiData('/tasks?status=overdue', { transform: byDue, refreshEvery: 60 * 1000 });
+  const query = useApiData('/tasks?status=overdue', { transform: byDue, live: true });
   return { ...query, overdue: query.data ?? [] };
 }

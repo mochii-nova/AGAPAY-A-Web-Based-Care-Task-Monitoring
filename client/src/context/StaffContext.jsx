@@ -4,13 +4,12 @@ import useApiData from '../hooks/useApiData';
 
 const StaffContext = createContext(null);
 
-const REFRESH = 60 * 1000; // new sign-ups show up within a minute
 
 // Every account (admins only), shared by the sidebar badge ("2 waiting for approval")
 // and the Manage Staff page, so approving someone updates both at once.
 // Each action saves to the backend, then puts the saved account in the list.
 export function StaffProvider({ children }) {
-  const query = useApiData('/users', { refreshEvery: REFRESH });
+  const query = useApiData('/users', { live: true }); // new sign-ups show up within 15 s
   const staff = query.data ?? [];
 
   const put = (saved) =>

@@ -8,8 +8,6 @@ import useApiData from '../../hooks/useApiData';
 import { formatTime, jobTitle } from '../../utils/format';
 import useSaving from '../../hooks/useSaving';
 
-const REFRESH = 15 * 1000; // replies show up while the chat is open
-
 // "Today", "Yesterday" or "Fri, Oct 23"
 function dayLabel(iso) {
   const day = new Date(iso).toDateString();
@@ -30,8 +28,8 @@ const sameGroup = (a, b) =>
 export default function ChatView({ conversation, initialDraft = '', onSent, onBack }) {
   const { myId, send, markRead } = useMessages();
   const { user } = conversation;
-  // A chat opened before shows straight away, then refreshes quietly
-  const query = useApiData(`/messages/${user.id}`, { refreshEvery: REFRESH, cache: true });
+  // A chat opened before shows straight away, then refreshes quietly (replies show up within 15 s)
+  const query = useApiData(`/messages/${user.id}`, { live: true, cache: true });
   const messages = query.data ?? [];
   const [draft, setDraft] = useState(initialDraft);
   const [error, setError] = useState('');

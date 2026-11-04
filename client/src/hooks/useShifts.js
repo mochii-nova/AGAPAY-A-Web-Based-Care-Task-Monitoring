@@ -16,7 +16,7 @@ export const isoDay = (date) => {
 // (For currentShift, load from yesterday: useShifts(addDays(now, -1), now).)
 // upcomingShift(now) gives my next shift that hasn't started yet (load a few days ahead for it).
 export default function useShifts(from, to) {
-  const query = useApiData(`/shifts?from=${isoDay(from)}&to=${isoDay(to)}`);
+  const query = useApiData(`/shifts?from=${isoDay(from)}&to=${isoDay(to)}`, { live: true });
   const list = query.data;
 
   const shiftOn = useCallback(

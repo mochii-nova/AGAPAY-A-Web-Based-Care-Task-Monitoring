@@ -5,7 +5,8 @@ import { normalizeTask, normalizeTasks } from '../utils/tasks';
 // The tasks assigned to me, from the backend.
 // Used by the Dashboard, My Tasks, My Schedule and Handover so they always agree.
 export default function useTasks() {
-  const query = useApiData('/tasks?mine=1', { transform: normalizeTasks });
+  // Live: tasks the admin adds or changes show up within 15 s
+  const query = useApiData('/tasks?mine=1', { transform: normalizeTasks, live: true });
 
   // What the task pop-up calls when you press Save: complete, skip (with a reason),
   // undo (back to pending) and the note. Only what changed is sent.

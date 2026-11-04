@@ -45,7 +45,7 @@ function gmailReplyLink(m, subject, body) {
 
 // Messages sent from the website's "Get in touch" form. Reply by email, then mark them handled.
 export default function ContactMessages() {
-  const query = useApiData('/contact', { refreshEvery: 60 * 1000 });
+  const query = useApiData('/contact', { live: true });
   const messages = query.data ?? [];
   const showToast = useToast();
   const [tab, setTab] = useState('new');

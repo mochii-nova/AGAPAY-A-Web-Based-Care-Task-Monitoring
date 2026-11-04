@@ -6,7 +6,6 @@ import { useAuth } from './AuthContext';
 const MessagesContext = createContext();
 
 export const MAX_MESSAGE = 1000;
-const REFRESH = 30 * 1000; // new messages and unread counts show up within half a minute
 
 // [{ user, lastMessage, unreadCount }] from the backend -> [{ user, last, unread }]
 const toConversations = (list) => list.map((c) => ({ user: c.user, last: c.lastMessage, unread: c.unreadCount }));
@@ -15,7 +14,7 @@ const toConversations = (list) => list.map((c) => ({ user: c.user, last: c.lastM
 // Messages page, the sidebar badge and the ✉ icon. The messages themselves load in ChatView.
 export function MessagesProvider({ children }) {
   const { user } = useAuth();
-  const query = useApiData('/messages/conversations', { transform: toConversations, refreshEvery: REFRESH });
+  const query = useApiData('/messages/conversations', { transform: toConversations, live: true }); // within 15 s
   const conversations = query.data ?? [];
   const unreadCount = conversations.reduce((sum, c) => sum + c.unread, 0);
 

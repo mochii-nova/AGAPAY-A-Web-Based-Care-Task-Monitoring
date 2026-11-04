@@ -42,9 +42,9 @@ export default function HandoverMonitor() {
 
   const from = addDays(today, -(days - 1));
   const transform = useMemo(() => (list) => parseHandovers(list, user.id), [user.id]);
-  const handoversQuery = useApiData('/handovers?limit=500', { transform, refreshEvery: 60 * 1000 });
+  const handoversQuery = useApiData('/handovers?limit=500', { transform, live: true });
   // One day more than shown, for who takes over after tonight's Night shift (tomorrow's Morning)
-  const rosterQuery = useApiData(`/shifts?from=${from}&to=${addDays(today, 1)}`);
+  const rosterQuery = useApiData(`/shifts?from=${from}&to=${addDays(today, 1)}`, { live: true });
 
   const loading = handoversQuery.status === 'loading' || rosterQuery.status === 'loading';
   const failed = [handoversQuery, rosterQuery].find((q) => q.status === 'error');

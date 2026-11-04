@@ -106,6 +106,34 @@ export function mergeScheduleChanges(list) {
   return [...list.filter((n) => !dayOf(n)), ...merged];
 }
 
+// Each notification ID once (a safety net: the list must never show the same notification twice)
+export const uniqueById = (list) => [...new Map(list.map((n) => [n.id, n])).values()];
+
+// Message notifications: one line per person (the server makes one notification per message, so
+// without this "New message from Veronica Abalos" would show once for every message she sent).
+// The line is the newest one. With several unread: "3 new messages from Veronica Abalos".
+// `mergedIds` holds all of them, so opening the line marks them all read; it's read when all are.
+export function groupMessages(list) {
+  const groups = new Map();
+  list.forEach((n) => {
+    if (n.type === 'message') groups.set(n.link, [...(groups.get(n.link) ?? []), n]);
+  });
+  const grouped = [...groups.values()].filter((g) => g.length > 1);
+  const inGroup = new Set(grouped.flat().map((n) => n.id));
+  return [
+    ...list.filter((n) => !inGroup.has(n.id)),
+    ...grouped.map((g) => {
+      const [newest] = [...g].sort((a, b) => new Date(b.time) - new Date(a.time));
+      const unread = g.filter((n) => !n.read);
+      const name = newest.title.match(/^New message from (.+)$/)?.[1];
+      const title = unread.length > 1
+        ? (name ? `${unread.length} new messages from ${name}` : `${unread.length} new messages`)
+        : name ? `New message from ${name}` : newest.title;
+      return { ...newest, title, read: unread.length === 0, mergedIds: g.map((n) => n.id) };
+    }),
+  ];
+}
+
 // Pending sign-ups, shown to administrators as notifications (the server doesn't send these yet)
 export const signupNotifications = (staff, readIds) =>
   staff

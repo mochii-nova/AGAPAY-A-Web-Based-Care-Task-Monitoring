@@ -50,7 +50,7 @@ export default function TasksCare() {
   const today = isoDay(new Date());
   // ?date=2026-10-27 (default today), ?q= fills the search (Manage Residents links here like that)
   const day = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') ?? '') ? searchParams.get('date') : today;
-  const query = useApiData(`/tasks?from=${day}&to=${day}`, { transform: normalizeTasks });
+  const query = useApiData(`/tasks?from=${day}&to=${day}`, { transform: normalizeTasks, live: true });
   const tasks = query.data ?? [];
   const { overdue: allOverdue, reload: reloadOverdue } = useOverdueTasks();
   // ?tab=overdue (the Dashboard's "Overdue tasks" card) opens that tab
@@ -77,7 +77,7 @@ export default function TasksCare() {
   const caregivers = activeCaregivers(staff);
   // The Schedule for this day (and the evening before: a Night shift's tasks after midnight belong to it),
   // to warn about tasks given to someone who isn't working that shift
-  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${day}`);
+  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${day}`, { live: true });
   const offShift = new Set(rosterQuery.status === 'ready' ? offShiftTasks(tasks, rosterQuery.data).map((t) => t.id) : []);
   const openSchedule = (t) => {
     const { shift, shiftDate } = shiftOfDue(t.dueAt);

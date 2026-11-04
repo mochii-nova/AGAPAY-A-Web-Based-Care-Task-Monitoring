@@ -60,9 +60,9 @@ export default function AdminDashboard() {
 
   const current = currentShift(now);
   const day = current.shiftDate; // "today" for shifts: until 6:00 AM that's still yesterday's Night shift
-  const tasksQuery = useApiData(`/tasks?from=${day}&to=${addDays(day, 1)}`, { transform: normalizeTasks, refreshEvery: 60 * 1000 });
-  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${addDays(day, 6)}`, { refreshEvery: 60 * 1000 });
-  const contactQuery = useApiData('/contact');
+  const tasksQuery = useApiData(`/tasks?from=${day}&to=${addDays(day, 1)}`, { transform: normalizeTasks, live: true });
+  const rosterQuery = useApiData(`/shifts?from=${addDays(day, -1)}&to=${addDays(day, 6)}`, { live: true });
+  const contactQuery = useApiData('/contact', { live: true });
   // Getting started, "Create the first task": any task in the 60 days around today. Loaded even while
   // the card is hidden, so the Help menu knows whether there is anything left to show.
   const anyTaskQuery = useApiData(`/tasks?from=${addDays(day, -60)}&to=${addDays(day, 60)}`);

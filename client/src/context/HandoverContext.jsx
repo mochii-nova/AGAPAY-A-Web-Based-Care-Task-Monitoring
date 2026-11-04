@@ -12,9 +12,9 @@ export function HandoverProvider({ children }) {
   const { user } = useAuth();
   const myId = user?.id;
   const transform = useMemo(() => (list) => parseHandovers(list, myId), [myId]);
-  // Refreshed every minute (and when you come back to the window), so a handover another caregiver
-  // just submitted shows up on the admin dashboard and the Handover pages without reloading
-  const query = useApiData('/handovers', { transform, refreshEvery: 60 * 1000 });
+  // Live (every 15 s and when you come back to the window), so a handover another caregiver
+  // just submitted shows up on the dashboards and the Handover pages without reloading
+  const query = useApiData('/handovers', { transform, live: true });
 
   // Adds my read receipt; the answer is the updated handover
   const acknowledge = async (id) => {

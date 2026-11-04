@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '../api';
+import { onLiveRefresh } from '../utils/liveRefresh';
 
 const OFFLINE_MESSAGE = "Can't reach the server. Please check that the backend is running.";
 const SLOW_MESSAGE = 'The server is taking too long to answer. Please try again.';
@@ -16,17 +17,20 @@ const cacheKey = (path) => `${localStorage.getItem('token') ?? ''} ${path}`;
 
 // Loads data from a backend route and tracks loading / error.
 // `transform` must be defined outside the component (or memoized).
-// `refreshEvery` (ms): also refresh quietly on a timer and when you come back to the window,
-// e.g. for notifications and messages.
+// `live`: also refresh quietly with the app's one shared timer (every 15 s, and when you come back
+// to the tab or window; paused while the tab is hidden). See utils/liveRefresh.js.
+// A refresh that brings the same data changes nothing on screen (no new render), and it never
+// shows "Loading…", so typing and open pop-ups are never reset.
 // `cache`: show the copy loaded earlier straight away (then refresh it quietly).
 // A `path` of null loads nothing (data stays null).
-export default function useApiData(path, { transform = asIs, refreshEvery, cache: useCache = false } = {}) {
+export default function useApiData(path, { transform = asIs, live = false, cache: useCache = false } = {}) {
   const [state, setState] = useState(() =>
     useCache && cache.has(cacheKey(path))
       ? { data: cache.get(cacheKey(path)), status: 'ready', error: '' }
       : { data: null, status: 'loading', error: '' }
   );
   const [reloadKey, setReloadKey] = useState(0);
+  const lastAnswer = useRef(null); // the last answer as text, to skip refreshes that bring nothing new
 
   useEffect(() => {
     if (!path) return undefined; // nothing to load (yet)
@@ -36,7 +40,15 @@ export default function useApiData(path, { transform = asIs, refreshEvery, cache
 
     api
       .get(path, { signal: controller.signal, timeout: TIME_LIMIT })
-      .then(({ data }) => setState({ data: transform(data), status: 'ready', error: '' }))
+      .then(({ data }) => {
+        const text = JSON.stringify(data);
+        if (text === lastAnswer.current) {
+          setState((s) => (s.status === 'ready' ? s : { ...s, status: 'ready', error: '' }));
+          return;
+        }
+        lastAnswer.current = text;
+        setState({ data: transform(data), status: 'ready', error: '' });
+      })
       .catch((err) => {
         if (controller.signal.aborted) return;
         const error = err.code === 'ECONNABORTED'
@@ -57,17 +69,9 @@ export default function useApiData(path, { transform = asIs, refreshEvery, cache
   }, [useCache, path, state]);
 
   useEffect(() => {
-    if (!refreshEvery) return undefined;
-    const refresh = () => {
-      if (document.visibilityState === 'visible') setReloadKey((k) => k + 1);
-    };
-    const timer = setInterval(refresh, refreshEvery);
-    window.addEventListener('focus', refresh);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', refresh);
-    };
-  }, [refreshEvery]);
+    if (!live || !path) return undefined;
+    return onLiveRefresh(() => setReloadKey((k) => k + 1));
+  }, [live, path]);
 
   // reload() shows "Loading…" again; reload({ silent: true }) refreshes quietly in the background
   const reload = ({ silent = false } = {}) => {
@@ -76,7 +80,11 @@ export default function useApiData(path, { transform = asIs, refreshEvery, cache
   };
 
   // Change the loaded data in place, e.g. to show a saved item right away: setData((list) => ...)
-  const setData = (update) => setState((s) => (s.data ? { ...s, data: update(s.data) } : s));
+  // (The next answer from the server is then always shown, even if it's the same as the last one.)
+  const setData = (update) => {
+    lastAnswer.current = null;
+    setState((s) => (s.data ? { ...s, data: update(s.data) } : s));
+  };
 
   return { ...state, reload, setData };
 }
