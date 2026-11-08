@@ -9,6 +9,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
+  ssl: process.env.DB_SSL ? { rejectUnauthorized: true } : undefined,
   // DATE columns (birth_date, shift_date, date_hired) come back as plain
   // 'YYYY-MM-DD' text, so they never shift by a day because of time zones.
   dateStrings: ['DATE'],
