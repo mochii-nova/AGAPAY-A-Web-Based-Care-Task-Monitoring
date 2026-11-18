@@ -183,7 +183,18 @@ export default function TasksCare() {
               <ChevronLeft size={18} />
             </button>
             <label htmlFor="tasks-day" className="sr-only">Day</label>
-            <input id="tasks-day" type="date" className="field__input day-picker__input" value={day} onChange={(e) => e.target.value && goTo(e.target.value)} />
+            <span className="day-picker__field">
+              <input
+                id="tasks-day"
+                type="date"
+                className="field__input day-picker__input"
+                value={day}
+                onChange={(e) => e.target.value && goTo(e.target.value)}
+                onClick={(e) => e.currentTarget.showPicker?.()}
+              />
+              {/* What you see: "Sun, Nov 8" instead of the computer's 08/11/2026 */}
+              <span className="day-picker__text" aria-hidden="true">{dayLabel(day)}</span>
+            </span>
             <button type="button" className="icon-btn icon-btn--sm" onClick={() => goTo(addDays(day, 1))} aria-label="Next day">
               <ChevronRight size={18} />
             </button>

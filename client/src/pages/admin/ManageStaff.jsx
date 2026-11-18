@@ -239,7 +239,7 @@ export default function ManageStaff() {
             {shown.length === 0 ? (
               <EmptyState icon={Users}>No staff match your search.</EmptyState>
             ) : (
-              <table className="data-table">
+              <table className="data-table staff-table">
                 <thead>
                   <tr>
                     <th scope="col">Name</th>

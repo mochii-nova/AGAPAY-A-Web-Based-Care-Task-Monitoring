@@ -15,6 +15,7 @@ import { homeFor } from '../utils/roles';
 import { newHandovers } from '../utils/handover';
 import Avatar from './Avatar';
 import Logo from './Logo';
+import ThemeToggle from './ThemeToggle';
 import markWhite from '../assets/images/agapay-mark-white.svg';
 
 // Menu groups for caregivers
@@ -180,6 +181,11 @@ export default function Sidebar({ collapsed, onClose }) {
       </nav>
 
       <div className="sidebar__bottom">
+        {/* Phones: the light/dark switch lives here instead of the crowded top bar */}
+        <div className="sidebar__theme">
+          <span>Theme</span>
+          <ThemeToggle />
+        </div>
         <SideLink
           to="/messages"
           label="Messages"

@@ -115,11 +115,14 @@ export default function FeaturesSection() {
       <div className="shot-diagram">
         <div className="browser">
           <div className="browser__bar" aria-hidden="true"><span /><span /><span /></div>
-          <ImageSlot
-            image={images.featuresLaptop}
-            alt="The AGAPAY caregiver dashboard: the menu, a Start here card, today's progress, the shift, the handover from the last shift, the next tasks and residents to watch"
-            className="browser__shot"
-          />
+          {/* Tap or click to open the picture full size (handy on phones, where it is small) */}
+          <a href={images.featuresLaptop.src} target="_blank" rel="noopener noreferrer" className="browser__open">
+            <ImageSlot
+              image={images.featuresLaptop}
+              alt="The AGAPAY caregiver dashboard: the menu, a Start here card, today's progress, the shift, the handover from the last shift, the next tasks and residents to watch. Opens full size."
+              className="browser__shot"
+            />
+          </a>
         </div>
 
         {/* Lines, dots and labels share one layer the size of the picture (so % stay right as it scales) */}

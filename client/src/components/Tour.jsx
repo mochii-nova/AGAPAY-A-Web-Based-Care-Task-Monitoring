@@ -64,7 +64,13 @@ export default function Tour({ steps, onClose }) {
       if (!el && Date.now() - started < WAIT) return false;
       if (el) {
         const r = el.getBoundingClientRect();
-        if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'center' });
+        if (window.innerWidth < 640) {
+          // Phones: the card goes below (or above) the highlighted part, never over it. Put the part
+          // near the top, under the top bar, so there is room for the card underneath.
+          if (r.top < 72 || r.bottom > window.innerHeight * 0.55) window.scrollBy({ top: r.top - 80, behavior: 'instant' });
+        } else if (r.top < 0 || r.bottom > window.innerHeight) {
+          el.scrollIntoView({ block: 'center' });
+        }
       }
       setRect(el ? el.getBoundingClientRect() : null);
       setReady(true);

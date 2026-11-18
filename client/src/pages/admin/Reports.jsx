@@ -43,11 +43,11 @@ const rangeText = (from, to) => {
 function TaskCells({ s }) {
   return (
     <>
-      <td className="num">{s.total}</td>
-      <td className="num">{s.completed}</td>
-      <td className="num">{s.skipped}</td>
-      <td className="num">{s.notDone}</td>
-      <td className="num"><strong>{percent(s.rate)}</strong></td>
+      <td className="num" data-label="Tasks">{s.total}</td>
+      <td className="num" data-label="Completed">{s.completed}</td>
+      <td className="num" data-label="Skipped">{s.skipped}</td>
+      <td className="num" data-label="Not done">{s.notDone}</td>
+      <td className="num" data-label="Completion"><strong>{percent(s.rate)}</strong></td>
     </>
   );
 }
@@ -225,8 +225,8 @@ export default function Reports() {
                       <tr key={c.id}>
                         <th scope="row">{c.name}</th>
                         <TaskCells s={taskStats(tasks.filter((t) => t.assignedTo === c.id))} />
-                        <td className="num">{h.submitted} of {h.owed}</td>
-                        <td className="num">{h.missing}</td>
+                        <td className="num" data-label="Handovers">{h.submitted} of {h.owed}</td>
+                        <td className="num" data-label="Missing">{h.missing}</td>
                       </tr>
                     );
                   })}
@@ -234,16 +234,16 @@ export default function Reports() {
                     <tr>
                       <th scope="row" className="data-table__muted">No longer active</th>
                       <TaskCells s={taskStats(formerTasks)} />
-                      <td className="num">–</td>
-                      <td className="num">–</td>
+                      <td className="num" data-label="Handovers">–</td>
+                      <td className="num" data-label="Missing">–</td>
                     </tr>
                   )}
                   {unassigned.length > 0 && (
                     <tr>
                       <th scope="row" className="data-table__muted">Not assigned</th>
                       <TaskCells s={taskStats(unassigned)} />
-                      <td className="num">–</td>
-                      <td className="num">–</td>
+                      <td className="num" data-label="Handovers">–</td>
+                      <td className="num" data-label="Missing">–</td>
                     </tr>
                   )}
                 </tbody>
@@ -268,7 +268,7 @@ export default function Reports() {
                       <tr key={r.id}>
                         <th scope="row">{r.name} <small className="data-table__muted">· Room {r.room}</small></th>
                         <TaskCells s={taskStats(tasks.filter((t) => t.residentId === r.id))} />
-                        <td className="num">{[f.urgent && `${f.urgent} urgent`, f.watch && `${f.watch} watch`].filter(Boolean).join(', ') || '–'}</td>
+                        <td className="num" data-label="Flagged">{[f.urgent && `${f.urgent} urgent`, f.watch && `${f.watch} watch`].filter(Boolean).join(', ') || '–'}</td>
                       </tr>
                     );
                   })}
@@ -292,12 +292,12 @@ export default function Reports() {
                     return (
                       <tr key={ymd}>
                         <th scope="row">{dayLabel(ymd)}</th>
-                        <td className="num">{h.owed}</td>
-                        <td className="num">{h.submitted}</td>
-                        <td className="num">{h.onTime}</td>
-                        <td className="num">{h.late}</td>
-                        <td className="num">{h.missing}</td>
-                        <td className="num">{h.read}</td>
+                        <td className="num" data-label="Shifts ended">{h.owed}</td>
+                        <td className="num" data-label="Submitted">{h.submitted}</td>
+                        <td className="num" data-label="On time">{h.onTime}</td>
+                        <td className="num" data-label="Late">{h.late}</td>
+                        <td className="num" data-label="Missing">{h.missing}</td>
+                        <td className="num" data-label="Read">{h.read}</td>
                       </tr>
                     );
                   })}
@@ -305,7 +305,9 @@ export default function Reports() {
                 <tfoot>
                   <tr>
                     <th scope="row">Total</th>
-                    {[ho.owed, ho.submitted, ho.onTime, ho.late, ho.missing, ho.read].map((v, i) => <td key={i} className="num"><strong>{v}</strong></td>)}
+                    {[ho.owed, ho.submitted, ho.onTime, ho.late, ho.missing, ho.read].map((v, i) => (
+                      <td key={i} className="num" data-label={['Shifts ended', 'Submitted', 'On time', 'Late', 'Missing', 'Read'][i]}><strong>{v}</strong></td>
+                    ))}
                   </tr>
                 </tfoot>
               </table>

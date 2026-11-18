@@ -1,0 +1,164 @@
+/* =====================================================================
+   Phone and tablet fixes (loaded last, after main.css). Grouped by page.
+   Laptop and desktop layouts are not changed, except the two small
+   fixes at the top that apply everywhere.
+   ===================================================================== */
+
+/* Everywhere: the "Today" button that's already on today looks like the current choice, not
+   like a greyed-out button that's broken */
+.date-nav .btn:disabled,
+.day-picker .btn:disabled {
+  border-color: transparent;
+  background: var(--indigo-soft);
+  color: var(--indigo);
+  opacity: 1;
+  cursor: default;
+}
+
+/* Everywhere: the landing page's dashboard picture opens full size when tapped or clicked */
+.browser__open { display: block; cursor: zoom-in; }
+.browser__open:focus-visible { outline: 3px solid var(--indigo); outline-offset: -3px; }
+
+/* The light/dark switch inside the slide-in menu, and the small top-bar logo (phones only, below) */
+.sidebar__theme,
+.topbar__logo { display: none; }
+
+/* ---------------------------------------------------------------------
+   Phones and tablets (900px and narrower)
+   --------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  /* Text is never smaller than 13px (labels, badges, hints, table headings, status pills, times).
+     !important because many pages set these sizes with more specific rules; this is only a floor. */
+  :is(.small-label, .status-pill, .tab__count, .field__hint, .care-need, .today-line__label, .today-line__name,
+      .note-flag, .day-task__note, .stat-card__note, .eyebrow, .auth__credit, .auth__privacy, .auth__note,
+      .auth__footer, .auth__divider, .notif-item__type, .notif-item__due, .convo__time, .convo__preview,
+      .log-item__type, .log-item__time, .log-dates, .roster-head__weekday, .roster-gap, .roster-count,
+      .bar-chart__value, .bar-chart__axis span, .reports__hint, .offshift__text, .push-toggle__status,
+      .sample-tasks__time, .admin-schedule__gcal, .count-badge, .tour__count, .copy-btn, .contact-item__meta,
+      .month__head span, .shift-legend, .data-table th, .task-table th, .offshift .link-btn,
+      .task-row__main span, .no-shift-chip) {
+    font-size: 13px !important;
+  }
+  small,
+  time { font-size: max(13px, 0.85em) !important; }
+  /* Initials in small avatars (never makes big ones smaller) */
+  .avatar > span { font-size: max(13px, 1em); }
+  /* Chart day names may wrap instead of being cut */
+  .bar-chart__axis span { white-space: normal; overflow: visible; line-height: 1.25; }
+  /* The compact Google Calendar button's text */
+  .gcal__actions .btn { font-size: 13px; }
+
+  /* Nothing cut off with "…": resident card details (ID · room · caregivers) and dashboard alert notes wrap */
+  .resident-card__ellipsis,
+  .alerts-card__text small { overflow: visible; white-space: normal; text-overflow: clip; }
+  .resident-card__line:has(.resident-card__ellipsis) { white-space: normal; }
+  /* The count bubble on the top-bar icons grows a little to fit 13px numbers */
+  .icon-count { top: 2px; left: 24px; min-width: 20px; height: 20px; padding: 0 5px; font-size: 13px; line-height: 20px; }
+
+  /* Buttons are at least 44px tall (the compact Google Calendar button too) */
+  .gcal__actions .btn { min-height: var(--tap); }
+
+  /* Pop-ups: fit the screen; Save and Cancel stay visible at the bottom while the form scrolls */
+  .modal { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .modal--sm,
+  .modal--lg { width: calc(100vw - 16px); }
+  .modal__box { max-height: calc(100dvh - 16px); }
+  .modal__footer--inline { position: sticky; bottom: -20px; z-index: 2; background: var(--card); }
+
+  /* Sign in / Register banner: the headline wraps, never gets cut off */
+  .auth__panel { height: auto; min-height: 220px; }
+  .auth__panel-title { overflow-wrap: break-word; }
+}
+
+/* ---------------------------------------------------------------------
+   Phones (640px and narrower)
+   --------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  /* Status tabs (My Tasks, Tasks & Care): they wrap onto a second row, so all five are always
+     visible (nothing hidden off the edge, no "Sk…") */
+  .tasks-toolbar .tabs { flex-wrap: wrap; overflow: visible; row-gap: 4px; }
+
+  /* Pages with a Month / Week switch (My Schedule): the switch goes under the title */
+  .page-header:has(.segmented) { flex-direction: column; align-items: stretch; }
+
+  /* Header filters (Handover monitoring): their grid uses the full width */
+  .page-header__actions:has(.admin-handover__filters) { width: 100%; }
+
+  /* Handover → Write: Normal / Watch closely / Urgent each on one line */
+  .status-choice__opt { padding: 0 6px; font-size: 13px; white-space: nowrap; }
+
+  /* ----- Wide tables become stacked cards (Manage Staff, Handover monitoring, Reports) ----- */
+  :is(.staff-table, .hm-table, .report-table) thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  :is(.staff-table, .hm-table, .report-table),
+  :is(.staff-table, .hm-table, .report-table) :is(tbody, tfoot) { display: block; width: 100%; }
+  :is(.staff-table, .hm-table, .report-table) tr { display: grid; gap: 6px 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  :is(.staff-table, .hm-table, .report-table) tr:last-child { border-bottom: 0; }
+  :is(.staff-table, .hm-table, .report-table) :is(td, th) { display: block; height: auto; min-width: 0; padding: 0; border: 0; background: none; }
+  :is(.staff-table, .hm-table) .data-table__row.is-selected { background: var(--indigo-soft); }
+  :is(.staff-table, .hm-table, .report-table) :is(.data-table__wide-only, .data-table__xwide-only) { display: none; }
+
+  /* Manage Staff: name and ID on top, status and button below */
+  .staff-table tr { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'name name' 'id id' 'status action'; align-items: center; }
+  .staff-table td:nth-child(1) { grid-area: name; }
+  .staff-table td:nth-child(2) { grid-area: id; padding-left: 46px; }
+  .staff-table td:nth-child(5) { grid-area: status; padding-left: 46px; }
+  .staff-table td.data-table__action { grid-area: action; width: auto; }
+  .staff-table .cell-person > span { white-space: normal; }
+
+  /* Handover monitoring: caregiver (→ next) on top, then the shift, then status and button */
+  .hm-table { table-layout: auto; }
+  .hm-table tr { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'who who' 'shift shift' 'status action'; align-items: center; }
+  .hm-table td:nth-child(1) { grid-area: shift; }
+  .hm-table td:nth-child(2) { grid-area: who; }
+  .hm-table td:nth-child(4) { grid-area: status; }
+  .hm-table td.data-table__action { grid-area: action; width: auto; }
+  .hm-table :is(.hm-main, .hm-sub) { overflow: visible; white-space: normal; text-overflow: clip; }
+  .hm-table td:nth-child(1) :is(.hm-main, .hm-sub) { display: inline; }
+  .hm-table td:nth-child(1) .hm-sub::before { content: ' · '; }
+  .hm-table .status-pill { overflow: visible; white-space: nowrap; }
+
+  /* Reports: the row name on top, then each number with its label, two per line */
+  .report-table tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-table tr > th[scope='row'] { grid-column: 1 / -1; padding: 0 0 2px; border: 0; color: var(--text); font-size: 15px !important; font-weight: var(--fw-medium); text-transform: none; letter-spacing: 0; white-space: normal; }
+  .report-table td.num { display: flex; justify-content: space-between; gap: 8px; text-align: left; }
+  .report-table td.num::before { content: attr(data-label); color: var(--muted); }
+  .report-table tfoot tr { background: var(--tint); }
+
+  /* ----- Messages: the open chat uses the whole screen ----- */
+  .app-main:has(.card.chat.has-chat) .page-header { display: none; }
+  .card.chat.has-chat { height: calc(100dvh - 60px - 32px); min-height: 360px; }
+  .composer__row { gap: 6px; }
+  .composer textarea.composer__input { max-height: calc(4 * 1.5em + 20px); } /* grows to at most 4 lines */
+  /* Send: a round icon button (the word stays for screen readers) */
+  .composer__send { flex-shrink: 0; width: var(--tap); padding: 0; border-radius: 50%; }
+  .composer__send span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ----- Top bar: the small logo next to the menu button; the light/dark switch moves into the menu ----- */
+  .topbar__logo { display: inline-flex; align-items: center; min-height: var(--tap); margin-right: auto; padding: 0 6px; border-radius: var(--radius-sm); }
+  .topbar .theme-toggle { display: none; }
+  .sidebar__theme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 12px;
+    color: var(--on-navy);
+    font-size: 0.95rem;
+  }
+  .sidebar__theme .theme-toggle { margin: 0; background: var(--on-navy-hover); }
+  .sidebar__theme .theme-toggle__btn { color: var(--on-navy); }
+  .sidebar__theme .theme-toggle__btn[aria-pressed='true'] { color: var(--ink); }
+}
+
+/* Touch screens: no "Enter sends, Shift + Enter" hint (there's no Shift key to press) */
+@media (hover: none) and (pointer: coarse) {
+  .composer__note { display: none; }
+}
+
+/* Very small phones: the three resident statuses stack instead of squeezing */
+@media (max-width: 360px) {
+  .status-choice { flex-direction: column; }
+  .status-choice__opt { justify-content: flex-start; padding: 0 14px; }
+}

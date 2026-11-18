@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, Mail, LogOut, CheckCheck, IdCard, UserRound, UserPen, Camera, Monitor, Check, CircleHelp, Compass, ListChecks } from 'lucide-react';
 import { useTour } from '../context/TourContext';
-import { isAdmin } from '../utils/roles';
+import { isAdmin, homeFor } from '../utils/roles';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -10,6 +10,7 @@ import usePopover from '../hooks/usePopover';
 import Avatar from './Avatar';
 import NotificationItem from './NotificationItem';
 import ThemeToggle from './ThemeToggle';
+import Logo from './Logo';
 import { setTheme, useShownTheme, useTheme } from '../utils/theme';
 
 // Top bar: menu button, then light/dark switch, notifications, messages and the small profile menu
@@ -38,6 +39,10 @@ export default function Navbar({ onMenuClick, menuExpanded }) {
       <button type="button" className="icon-btn" onClick={onMenuClick} aria-label="Show or hide menu" aria-expanded={menuExpanded}>
         <Menu size={20} />
       </button>
+      {/* Phones: the small logo next to the menu button (hidden on bigger screens) */}
+      <Link to={homeFor(user)} className="topbar__logo" aria-label="AGAPAY home">
+        <Logo height={22} />
+      </Link>
 
       <div className="topbar__actions">
         {/* Help: replay the welcome tour; administrators can also bring back a hidden "Getting started" */}

@@ -133,7 +133,7 @@ export default function Register() {
           {field('lastName', 'Last name', { placeholder: 'e.g. Villanueva', autoComplete: 'family-name', icon: UserRound })}
         </div>
         <div className="form-grid">
-          {field('email', 'Email', { type: 'email', placeholder: 'e.g. paolo.villanueva@example.com', autoComplete: 'email', icon: Mail })}
+          {field('email', 'Email', { type: 'email', placeholder: 'e.g. paolo@example.com', autoComplete: 'email', icon: Mail })}
           {field('phone', 'Phone number', { type: 'tel', placeholder: 'e.g. 0917 123 4567', autoComplete: 'tel', icon: Phone })}
         </div>
         {field('employeeId', 'Employee ID', {
