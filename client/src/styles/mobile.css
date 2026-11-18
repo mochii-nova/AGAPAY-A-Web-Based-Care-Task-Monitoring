@@ -45,8 +45,6 @@
   .avatar > span { font-size: max(13px, 1em); }
   /* Chart day names may wrap instead of being cut */
   .bar-chart__axis span { white-space: normal; overflow: visible; line-height: 1.25; }
-  /* The compact Google Calendar button's text */
-  .gcal__actions .btn { font-size: 13px; }
 
   /* Nothing cut off with "…": resident card details (ID · room · caregivers) and dashboard alert notes wrap */
   .resident-card__ellipsis,
@@ -54,9 +52,6 @@
   .resident-card__line:has(.resident-card__ellipsis) { white-space: normal; }
   /* The count bubble on the top-bar icons grows a little to fit 13px numbers */
   .icon-count { top: 2px; left: 24px; min-width: 20px; height: 20px; padding: 0 5px; font-size: 13px; line-height: 20px; }
-
-  /* Buttons are at least 44px tall (the compact Google Calendar button too) */
-  .gcal__actions .btn { min-height: var(--tap); }
 
   /* Pop-ups: fit the screen; Save and Cancel stay visible at the bottom while the form scrolls */
   .modal { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }

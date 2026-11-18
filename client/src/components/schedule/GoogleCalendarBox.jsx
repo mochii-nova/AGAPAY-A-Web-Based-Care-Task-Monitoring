@@ -1,12 +1,14 @@
 import { useEffect, useEffectEvent, useState } from 'react';
-import { CircleAlert, ExternalLink, Globe, Unlink } from 'lucide-react';
+import { CalendarCheck, CalendarDays, CalendarPlus, CircleAlert, ExternalLink, Globe, Unlink } from 'lucide-react';
 import useGoogleCalendar from '../../hooks/useGoogleCalendar';
 import { useToast } from '../../context/ToastContext';
 import { googleCalendarLink } from '../../utils/shift';
 import { sameOffsetAsManila, shiftStartIn, utcOffset } from '../../utils/googleCalendar';
 
-// Google Calendar in the day panel: one line "Google Calendar · Connected", with the action that
-// fits (Connect / Reconnect / Add shift / Added) underneath. Problems show below only when they happen.
+// Google Calendar in the day panel: a header (icon + "Google Calendar", and a "Connected" pill), one
+// short line, then the buttons in one row: "Add this shift" (or "Added", which opens it) and
+// "Disconnect"; when not connected, one full-width "Connect Google Calendar". Problems show below only
+// when they happen.
 // `shift` is null on a day off (then only the connection is shown).
 export default function GoogleCalendarBox({ shift, date }) {
   const gcal = useGoogleCalendar();
@@ -53,74 +55,80 @@ export default function GoogleCalendarBox({ shift, date }) {
 
   const connected = gcal.status === 'connected';
   const privacy = 'Only your shift name and times are sent to Google, never resident details.';
+  const account = gcal.email || 'your Google account';
 
-  // "Google Calendar · Connected" and the one action that fits right now
-  let status;
-  let action = null;
+  // The pill on the right of the header, and the buttons that fit right now
+  let pill = null; // { text, tone }
+  let main = null;
   if (!gcal.configured) {
     // No Client ID in client/.env: the simple "open Google Calendar" link
-    status = 'Add your shift';
     if (shift) {
-      action = (
-        <a className="btn btn--soft btn--sm" href={googleCalendarLink(shift, date)} target="_blank" rel="noopener noreferrer">
-          Add<span className="sr-only"> this shift to Google Calendar (opens in a new tab)</span>
+      main = (
+        <a className="btn btn--primary" href={googleCalendarLink(shift, date)} target="_blank" rel="noopener noreferrer">
+          <CalendarPlus size={18} aria-hidden="true" /> Add this shift<span className="sr-only"> to Google Calendar (opens in a new tab)</span>
         </a>
       );
     }
   } else if (connected) {
-    status = 'Connected';
+    pill = { text: 'Connected', tone: 'on' };
     if (shift && saved) {
-      action = (
-        <a className="btn btn--outline btn--sm" href={saved.htmlLink} target="_blank" rel="noopener noreferrer">
-          Added<span className="sr-only">. Open it in Google Calendar (opens in a new tab)</span>
+      main = (
+        <a className="btn btn--outline" href={saved.htmlLink} target="_blank" rel="noopener noreferrer" title="Open this shift in Google Calendar">
+          <CalendarCheck size={18} aria-hidden="true" /> Added<span className="sr-only">. Open it in Google Calendar (opens in a new tab)</span>
           <ExternalLink size={14} aria-hidden="true" />
         </a>
       );
     } else if (shift) {
-      action = (
-        <button type="button" className="btn btn--soft btn--sm" onClick={add} disabled={busy === 'add' || saved === undefined}>
-          {busy === 'add' ? 'Adding…' : saved === undefined ? 'Checking…' : 'Add shift'}
+      main = (
+        <button type="button" className="btn btn--primary" onClick={add} disabled={busy === 'add' || saved === undefined}>
+          <CalendarPlus size={18} aria-hidden="true" /> {busy === 'add' ? 'Adding…' : saved === undefined ? 'Checking…' : 'Add this shift'}
         </button>
       );
     }
   } else {
-    status = gcal.status === 'expired' ? 'Disconnected' : 'Not connected';
-    action = (
-      <button type="button" className="btn btn--soft btn--sm" onClick={connect} disabled={!gcal.ready || busy === 'connect'} aria-describedby="gcal-privacy">
-        {busy === 'connect' ? 'Waiting…' : !gcal.ready && !gcal.loadError ? 'Loading…' : gcal.status === 'expired' ? 'Reconnect' : 'Connect'}
+    pill = { text: gcal.status === 'expired' ? 'Disconnected' : 'Not connected', tone: 'off' };
+    // One full-width button
+    main = (
+      <button type="button" className="btn btn--primary" onClick={connect} disabled={!gcal.ready || busy === 'connect'} aria-describedby="gcal-privacy">
+        <CalendarDays size={18} aria-hidden="true" />
+        {busy === 'connect'
+          ? 'Waiting…'
+          : !gcal.ready && !gcal.loadError
+            ? 'Loading…'
+            : gcal.status === 'expired' ? 'Reconnect Google Calendar' : 'Connect Google Calendar'}
       </button>
     );
   }
 
   return (
-    <div className="gcal">
-      {/* Status on the left, a compact text-only button on the right; if they don't fit side by
-          side, the button wraps underneath, starting at the same left edge */}
-      <div className="gcal__line" title={connected ? `Connected as ${gcal.email || 'your Google account'}. ${privacy}` : privacy}>
-        <p className="gcal__status" aria-live="polite">
-          <strong>Google Calendar</strong>
-          <span className="gcal__sep"> · </span>
-          <span className={`gcal__state ${connected ? 'is-on' : ''}`}>{status}</span>
-        </p>
-        <span id="gcal-privacy" hidden>{privacy}</span>
-
-        {(action || connected) && (
-          <span className="gcal__actions">
-            {action}
-            {connected && (
-              <button
-                type="button"
-                className="icon-btn icon-btn--sm"
-                onClick={() => { gcal.disconnect(); setError(''); }}
-                aria-label={`Disconnect Google Calendar (${gcal.email || 'your Google account'})`}
-                title="Disconnect"
-              >
-                <Unlink size={16} />
-              </button>
-            )}
-          </span>
-        )}
+    <div className="gcal" title={connected ? `Connected as ${account}. ${privacy}` : privacy}>
+      {/* Header: icon + name on the left, the connection pill on the right */}
+      <div className="gcal__head">
+        <h3 className="gcal__title">
+          <CalendarDays size={18} aria-hidden="true" /> Google Calendar
+        </h3>
+        {pill && <span className={`gcal__pill gcal__pill--${pill.tone}`} aria-live="polite">{pill.text}</span>}
       </div>
+      <p className="gcal__intro">Add your shifts to your Google Calendar.</p>
+      <span id="gcal-privacy" hidden>{privacy}</span>
+
+      {/* Buttons in one row, sharing the width evenly */}
+      {(main || connected) && (
+        <div className="gcal__actions">
+          {main}
+          {connected && (
+            <button
+              type="button"
+              className="btn btn--outline"
+              onClick={() => { gcal.disconnect(); setError(''); }}
+              aria-label={`Disconnect Google Calendar (${account})`}
+              title={`Disconnect Google Calendar (${account})`}
+            >
+              <Unlink size={18} aria-hidden="true" /> Disconnect
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Only when there is something to fix */}
       {connected && shift && !sameOffsetAsManila(gcal.calendarTz) && (
