@@ -154,44 +154,49 @@ html:has(.site) { scroll-padding-top: 104px; }
   object-fit: cover;
   transform: scaleX(-1);   /* mirrored */
   /* The fade. The mask is drawn before the mirroring, so "towards the left" here ends up on the right:
-     on screen the photo's left edge is see-through and it eases in over the first 35% of its width
-     (fully visible before 39%, where the first face starts). */
-  --hero-fade: transparent 0%, rgba(0, 0, 0, 0.03) 4%, rgba(0, 0, 0, 0.1) 8%, rgba(0, 0, 0, 0.21) 12%,
-    rgba(0, 0, 0, 0.35) 16%, rgba(0, 0, 0, 0.5) 19.5%, rgba(0, 0, 0, 0.65) 23%, rgba(0, 0, 0, 0.79) 27%,
-    rgba(0, 0, 0, 0.9) 31%, #000 35%;
+     on screen the photo's left edge is see-through and it eases in over the first half of its width,
+     into the blurred copy lined up right behind it. */
+  --hero-fade: transparent 0%, rgba(0, 0, 0, 0.15) 12%, rgba(0, 0, 0, 0.45) 25%, rgba(0, 0, 0, 0.8) 38%, #000 50%;
   -webkit-mask-image: linear-gradient(270deg, var(--hero-fade));
   mask-image: linear-gradient(270deg, var(--hero-fade));
 }
-/* The blurred copy: across the whole hero, mirrored like the photo, a bit larger so its blurry edges
-   stay off screen, at about 58% brightness */
+/* The blurred copy, at full brightness (all the darkening is in the text shade below). The main copy has
+   exactly the sharp photo's size, place and mirroring, so shapes and colours continue across the fade.
+   The extra copy sits to its left, flipped back, so the two meet like a reflection (no jump) and fill
+   the rest of the screen. The blur is on the pair together, so there's no seam between them either. */
 .hero__backdrop {
   position: absolute;
   z-index: -3;
-  inset: 0;
-  width: 100%;
-  max-width: none;
+  top: 0;
+  right: 0;
   height: 100%;
-  object-fit: cover;
-  filter: blur(40px) brightness(0.58);
-  transform: scaleX(-1) scale(1.15);
+  display: flex;
+  flex-direction: row-reverse;
+  filter: blur(40px);
 }
-/* The warm shade behind the text only: it ends just after the text, before the faces */
+.hero__backdrop img { flex: none; width: auto; max-width: none; height: 100%; }
+.hero__backdrop-main { transform: scaleX(-1); }
+/* All the darkening is here, never on the faces. (1) A wide warm gradient: darkest on the far left,
+   gone by 45% of the width. */
 .hero::before {
   content: '';
   position: absolute;
   z-index: -1;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: calc(max(24px, 50vw - 576px) + var(--hero-room) + 80px);
-  /* lighter at the screen edge, strongest under the end of the text lines (where the sharp photo's light
-     wall and shirt are), then gone in the gap before the faces... */
-  background: linear-gradient(90deg, rgba(30, 22, 18, 0.45) 0%, rgba(30, 22, 18, 0.62) 40%,
-    rgba(30, 22, 18, 0.78) calc(100% - 120px), rgba(30, 22, 18, 0.74) calc(100% - 80px),
-    rgba(30, 22, 18, 0.45) calc(100% - 45px), rgba(30, 22, 18, 0.15) calc(100% - 15px), rgba(30, 22, 18, 0) 100%);
-  /* ...and soft at the top and bottom too, so it is a soft patch behind the text, not a long edge */
-  -webkit-mask-image: linear-gradient(180deg, transparent 4%, rgba(0, 0, 0, 0.5) 16%, #000 28%, #000 78%, rgba(0, 0, 0, 0.5) 88%, transparent 98%);
-  mask-image: linear-gradient(180deg, transparent 4%, rgba(0, 0, 0, 0.5) 16%, #000 28%, #000 78%, rgba(0, 0, 0, 0.5) 88%, transparent 98%);
+  inset: 0;
+  background: linear-gradient(90deg, rgba(25, 18, 14, 0.65) 0%, rgba(25, 18, 14, 0.55) 18%,
+    rgba(25, 18, 14, 0.3) 32%, rgba(25, 18, 14, 0.1) 40%, rgba(25, 18, 14, 0) 45%);
+}
+/* (2) A soft warm shadow shaped around the text block itself (a blurred rounded shape, so it has no
+   straight edges), so the ends of the lines stay readable where the photo is light */
+.hero__content { position: relative; }
+.hero__content::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -90px -30px -60px -140px;
+  border-radius: 40%;
+  background: rgba(25, 18, 14, 0.8);
+  filter: blur(60px);
 }
 /* Where the text must end: 31% across the photo. The photo is 1.4 × the hero's height wide, so that is
    100vw − 96.5vh, minus where the text starts (the logo line). */
@@ -460,9 +465,10 @@ html:has(.site) { scroll-padding-top: 104px; }
     -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   }
-  /* (the blurred copy and the side shade are for the laptop layout only) */
+  /* (the blurred copy and the shades are for the laptop layout only) */
   .hero__backdrop,
-  .hero::before { display: none; }
+  .hero::before,
+  .hero__content::before { display: none; }
   .hero__content { max-width: 640px; margin-inline: auto; }
   .hero__title { font-size: clamp(2.2rem, 7vw, calc(40rem / 15)); }
   .hero__body { max-width: 540px; margin-inline: auto; }

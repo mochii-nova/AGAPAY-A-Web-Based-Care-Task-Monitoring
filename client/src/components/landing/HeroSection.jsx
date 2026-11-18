@@ -8,8 +8,12 @@ import heroPhoto from '../../assets/images/hero-home.webp';
 export default function HeroSection() {
   return (
     <section id="home" className="hero">
-      {/* a blurred, darker copy of the same photo behind everything (decoration only) */}
-      <img className="hero__backdrop" src={heroPhoto} alt="" aria-hidden="true" />
+      {/* a blurred copy of the same photo behind everything (decoration only): one copy lined up exactly
+          behind the sharp photo, and one flipped back to its left, so the colours continue edge to edge */}
+      <div className="hero__backdrop" aria-hidden="true">
+        <img className="hero__backdrop-main" src={heroPhoto} alt="" />
+        <img className="hero__backdrop-extra" src={heroPhoto} alt="" />
+      </div>
       <img className="hero__photo" src={heroPhoto} alt="A smiling nurse hugging a happy older woman" />
       <div className="container hero__inner">
         <div className="hero__content">
