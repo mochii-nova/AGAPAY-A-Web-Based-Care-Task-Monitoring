@@ -44,7 +44,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 /* ---------- Header ----------
    It floats over the top of the page as the white rounded bar with dark text (dark in dark mode),
    readable over the light hero. (The see-through .is-clear look is no longer used.) */
-.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 16px 0 12px; background: var(--bg); pointer-events: none; }
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 16px 0 12px; background: var(--bg); pointer-events: none; transition: background-color 0.2s var(--ease); }
+/* Over the full-screen hero photo the band behind the bar is see-through, so the photo reaches the top edge */
+.site-header.is-over-hero { background: transparent; }
 /* Laptops: the bar reaches out by its own inner padding, so the logo starts on the container's left line
    (like the section headings and the hero text) and "Create account" ends on its right line (like the photo) */
 @media (min-width: 901px) {
@@ -122,51 +124,55 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site-header.is-clear :focus-visible,
 .hero :focus-visible { outline-color: var(--site-white); }
 
-/* ---------- Hero: the photo is the whole background ----------
-   Laptops: a rounded box in the same container as the navbar and the sections, filling the first screen
-   (the 92px header band included). The photo covers it (never stretched). Its two people are in the
-   middle of the picture, so the photo is drawn 150% as wide as the box, anchored on the left: that puts
-   both faces on the right half, clear of the text. Only a soft neutral black gradient from the left sits
-   behind the text; the faces are untouched. */
-.hero { display: flex; min-height: 100vh; padding: 92px 0 24px; }
-.hero__frame { display: flex; }
-.hero__box {
+/* ---------- Hero: full screen, photo on the right ----------
+   Laptops: the hero fills the first screen, with the floating navbar on top. The photo is mirrored (so
+   the two people sit further right), as tall as the hero (never stretched or zoomed) and anchored to the
+   right edge. The left side is a dark fill, and the photo's left part melts into it through a wide soft
+   fade (a mask on the photo, so there's no line and no dark layer on the faces). The text block starts
+   on the navbar logo's line and is centred vertically, on the dark side. */
+.hero {
   position: relative;
   isolation: isolate;
-  flex: 1;
   display: flex;
   align-items: center;
+  min-height: 100vh;
+  padding: 92px 0 24px;    /* room for the navbar on top (the block is centred in the space below it) */
   overflow: hidden;
-  padding: 48px clamp(28px, 4vw, 56px);
-  border-radius: 24px;
-  background: #17141b;   /* only seen for a moment while the photo loads */
+  background: var(--hero-fill);
   color: #ffffff;
+  --hero-fill: #1a1816;    /* the dark fill on the left */
 }
 .hero__photo {
   position: absolute;
   z-index: -2;
   top: 0;
-  left: 0;
-  width: 150%;
-  max-width: none;   /* the global img rule would cap it at 100% */
+  right: 0;
+  width: auto;
+  max-width: none;
   height: 100%;
   object-fit: cover;
-  object-position: 0% 40%;
+  transform: scaleX(-1);   /* mirrored */
+  /* The fade. The mask is drawn before the mirroring, so "towards the left" here ends up on the right:
+     on screen the photo's left edge is see-through, it stays faint behind the text (up to 31% across it)
+     and is fully visible from 39%, where the first face starts. */
+  -webkit-mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.12) 18%, rgba(0, 0, 0, 0.22) 31%, #000 39%);
+  mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.12) 18%, rgba(0, 0, 0, 0.22) 31%, #000 39%);
 }
-.hero__box::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.68) 36%, rgba(0, 0, 0, 0.32) 47%, rgba(0, 0, 0, 0) 57%);
-}
-.hero__content { max-width: 440px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
-/* (colour set here too: a shared heading style would otherwise change it) */
-.hero__title { margin: 0; color: #ffffff; font-size: clamp(2.2rem, 3.4vw, calc(46rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+/* Where the text must end: 31% across the photo. The photo is 1.4 × the hero's height wide, so that is
+   100vw − 96.5vh, minus where the text starts (the logo line). */
+.hero { --hero-room: calc(100vw - 96.5vh - max(24px, 50vw - 576px)); }
+.hero__inner { width: 100%; }
+.hero__content { max-width: 600px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
+/* Three lines: "Making caregiving" / "easier," / "one shift at a time." Up to 64px; smaller when the
+   faces are closer ("Making caregiving" is about 8.6 × the font size wide, so it fits in --hero-room).
+   (colour set here too: a shared heading style would otherwise change it) */
+.hero__title { margin: 0; color: #ffffff; font-size: clamp(calc(44rem / 15), min(4.4vw, var(--hero-room) / 8.6), calc(64rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
 .hero__line { display: block; }
 .hero__line--soft { color: var(--site-on-photo-soft); }
-.hero__body { max-width: 36em; margin: 24px 0 0; color: #ffffff; font-size: 1.15rem; line-height: 1.6; }
-.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; text-shadow: none; }
+/* 18px, 2–3 lines; headline → 20px → paragraph → 28px → buttons */
+/* (narrower when the faces are closer) */
+.hero__body { max-width: min(540px, var(--hero-room)); margin: 20px 0 0; color: #ffffff; font-size: calc(18rem / 15); line-height: 1.6; }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px; margin-top: 28px; text-shadow: none; }
 /* "Sign in" = solid plum; "See how it works" = solid white with plum text. Both are plum with white text on hover. */
 .hero__signin { background: var(--site-plum); color: var(--site-white); }
 .hero__signin:hover { background: var(--site-plum-hover); }
@@ -407,11 +413,11 @@ html:has(.site) { scroll-padding-top: 104px; }
   html:has(.site) { scroll-padding-top: 88px; }
   /* The dropdown is a white card, so its links are always dark */
   .site-header.is-solid .site-nav__link { color: var(--muted); }
-  /* Phones and tablets: the photo stays the background. It fills the top part of the box (faces in
-     view, cover, never stretched) and the text sits at the bottom, over a dark gradient from the bottom. */
-  .hero { min-height: 0; padding: 92px 0 24px; }
-  .hero__box { flex-direction: column; justify-content: flex-end; align-items: stretch; min-height: 760px; padding: 28px 24px; border-radius: 20px; background: #0b0a0c; text-align: center; }
+  /* Phones and tablets: still full screen. The photo (mirrored too) fills the top part, full width (faces
+     in view, cover, never stretched); the text sits below it on the dark background. */
+  .hero { align-items: flex-end; min-height: max(100vh, 760px); padding: 92px 0 32px; --hero-fill: #0b0a0c; text-align: center; }
   .hero__photo {
+    left: 0;
     width: 100%;
     height: 60%;
     object-position: 47% 30%;
@@ -419,9 +425,9 @@ html:has(.site) { scroll-padding-top: 104px; }
     -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   }
-  .hero__box::before { background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 0, 0, 0.55) 58%, rgba(0, 0, 0, 0) 70%); }
   .hero__content { max-width: 640px; margin-inline: auto; }
-  .hero__body { margin-inline: auto; }
+  .hero__title { font-size: clamp(2.2rem, 7vw, calc(40rem / 15)); }
+  .hero__body { max-width: 540px; margin-inline: auto; }
   .hero__actions { justify-content: center; }
   .site-header .site-header__toggle { display: inline-flex; }
   .site-header__menu {
@@ -475,8 +481,7 @@ html:has(.site) { scroll-padding-top: 104px; }
 }
 
 @media (max-width: 600px) {
-  .hero { padding: 88px 0 20px; }
-  .hero__box { min-height: 700px; padding: 24px 16px; }
+  .hero { min-height: max(100vh, 700px); padding: 88px 0 24px; }
   .hero__photo { height: 56%; }
   .hero__body { font-size: 1.05rem; }
   .hero__actions .btn { flex: 1 1 100%; }

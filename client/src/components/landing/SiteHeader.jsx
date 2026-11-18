@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -11,8 +11,20 @@ import { homeFor } from '../../utils/roles';
 export default function SiteHeader({ sections, active }) {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [overHero, setOverHero] = useState(true);
   const close = () => setMenuOpen(false);
-  const solid = true; // always the solid bar now that the hero is light
+  const solid = true; // the bar itself is always the solid white (dark) bar
+
+  // While the hero photo is under the header, the band behind the bar is see-through
+  useEffect(() => {
+    const hero = document.getElementById('home');
+    if (!hero) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setOverHero(entry.isIntersecting), {
+      rootMargin: '0px 0px -100% 0px', // only the very top line of the screen counts
+    });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   // The logo is a real link to "/"; on this page it glides back to the top instead of reloading
   const toTop = (e) => {
@@ -24,7 +36,7 @@ export default function SiteHeader({ sections, active }) {
   };
 
   return (
-    <header className={`site-header ${solid ? 'is-solid' : 'is-clear'}`}>
+    <header className={`site-header ${solid ? 'is-solid' : 'is-clear'}${overHero ? ' is-over-hero' : ''}`}>
       <div className="container">
         <div className="site-header__bar">
           <a href="/" className="site-header__logo" aria-label="AGAPAY home" onClick={toTop}>
