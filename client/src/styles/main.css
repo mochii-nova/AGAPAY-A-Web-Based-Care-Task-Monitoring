@@ -647,6 +647,8 @@ textarea.field__input { resize: vertical; min-height: 96px; }
   text-underline-offset: 3px;
 }
 .card__link:hover { text-decoration-color: currentColor; }
+/* The same link as a button (e.g. "View all (12)" that opens the rest of a list in place) */
+.card__link:is(button) { border: 0; background: none; font-family: inherit; cursor: pointer; }
 
 /* Small uppercase purple label */
 .small-label {

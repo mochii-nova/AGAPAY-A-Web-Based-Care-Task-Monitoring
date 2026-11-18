@@ -133,7 +133,7 @@
 .last-shift__btn { width: 100%; margin-top: 12px; }
 .last-shift__read { display: flex; align-items: center; gap: 6px; margin: 12px 0 0; color: var(--completed-text); font-size: 0.88rem; }
 
-.card__link:is(button) { border: 0; background: none; cursor: pointer; }
+/* (.card__link as a button is styled in main.css, for every card) */
 
 .recent-handovers { list-style: none; margin: 0; padding: 0; }
 .recent-handovers li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }

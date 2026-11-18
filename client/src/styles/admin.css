@@ -663,4 +663,9 @@
   .log-item__time { margin-left: 0; flex-basis: 100%; }
   .log-dates { flex: 1 1 100%; }
   .log-dates .field__input { flex: 1 1 0; width: auto; min-width: 0; }
+  /* Contact messages: "Reply by email" and "Copy email" side by side (half each), "Mark as handled"
+     full width below; all 44px tall and nothing cut off */
+  .contact-item__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contact-item__actions .btn { min-width: 0; min-height: var(--tap); padding: 0 10px; }
+  .contact-item__actions .btn:nth-child(3) { grid-column: 1 / -1; }
 }

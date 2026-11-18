@@ -127,7 +127,7 @@ export default function AdminDashboard() {
   const residentsOf = (userId) => residents.filter((r) => r.caregivers.some((c) => c.id === userId)).map((r) => r.name.split(' ')[0]);
 
   // Needs attention, most urgent first: overdue tasks, missing handovers, shifts or residents with no
-  // caregiver, residents to watch, sign-ups, website messages. The first 4 show; "View all (N)" the rest.
+  // caregiver, residents to watch, sign-ups, website messages. The first 4 show; "View all (N)" (top-right) the rest.
   const attention = [];
   overdue.forEach((t) => {
     // Earlier days say which day; Tasks & Care opens on the day the task is on
@@ -432,11 +432,23 @@ export default function AdminDashboard() {
           <div className="dash-grid">
             <div className="span-8">
               <section className="card">
-                <CardHeader title="Needs attention" />
+                <CardHeader title="Needs attention">
+                  {/* "View all" sits top-right like on the other cards; it opens the rest in place */}
+                  {attention.length > 4 && (
+                    <button
+                      type="button"
+                      className="card__link"
+                      aria-expanded={allAttention}
+                      aria-controls="attention-list"
+                      onClick={() => setAllAttention(!allAttention)}
+                    >
+                      {allAttention ? 'Show less' : `View all (${attention.length})`}
+                    </button>
+                  )}
+                </CardHeader>
                 {attention.length === 0 ? (
                   <p className="admin-dash__clear"><CircleCheck size={18} aria-hidden="true" /> Nothing needs your attention right now.</p>
                 ) : (
-                  <>
                   <ul className="attention-list" id="attention-list">
                     {(allAttention ? attention : attention.slice(0, 4)).map((a) => (
                       <li key={a.key}>
@@ -451,18 +463,6 @@ export default function AdminDashboard() {
                       </li>
                     ))}
                   </ul>
-                  {attention.length > 4 && (
-                    <button
-                      type="button"
-                      className="link-btn card-more"
-                      aria-expanded={allAttention}
-                      aria-controls="attention-list"
-                      onClick={() => setAllAttention(!allAttention)}
-                    >
-                      {allAttention ? 'Show less' : `View all (${attention.length})`}
-                    </button>
-                  )}
-                  </>
                 )}
               </section>
             </div>

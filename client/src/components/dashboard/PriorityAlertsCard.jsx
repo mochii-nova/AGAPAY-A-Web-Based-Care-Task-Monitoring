@@ -9,7 +9,7 @@ const MAX = 4;
 
 // What needs attention first, most urgent on top: today's overdue tasks, one line for tasks still
 // open from earlier days, then residents marked Urgent / Watch closely in the latest handovers.
-// The 4 most urgent show; "View all (N)" opens the rest in place.
+// The 4 most urgent show; "View all (N)" (top-right) opens the rest in place.
 // `flagged`: [{ resident, status, note }] (urgent first); `overdueToday`: earliest first;
 // `earlierOverdue`: how many (the same number Today's progress shows)
 export default function PriorityAlertsCard({ flagged, overdueToday, earlierOverdue }) {
@@ -46,13 +46,19 @@ export default function PriorityAlertsCard({ flagged, overdueToday, earlierOverd
 
   return (
     <section className="card alerts-card">
-      <CardHeader title="Priority alerts" />
+      <CardHeader title="Priority alerts">
+        {/* "View all" sits top-right like on the other cards; it opens the rest in place */}
+        {alerts.length > MAX && (
+          <button type="button" className="card__link" aria-expanded={all} aria-controls="priority-alerts-list" onClick={() => setAll(!all)}>
+            {all ? 'Show less' : `View all (${alerts.length})`}
+          </button>
+        )}
+      </CardHeader>
       {alerts.length === 0 ? (
         <p className="alerts-card__clear">
           <CircleCheck size={18} aria-hidden="true" /> Nothing urgent. No residents to watch and no overdue tasks.
         </p>
       ) : (
-        <>
           <ul className="alerts-card__list" id="priority-alerts-list">
             {shown.map((a) => (
               <li key={a.key}>
@@ -66,12 +72,6 @@ export default function PriorityAlertsCard({ flagged, overdueToday, earlierOverd
               </li>
             ))}
           </ul>
-          {alerts.length > MAX && (
-            <button type="button" className="link-btn card-more" aria-expanded={all} aria-controls="priority-alerts-list" onClick={() => setAll(!all)}>
-              {all ? 'Show less' : `View all (${alerts.length})`}
-            </button>
-          )}
-        </>
       )}
     </section>
   );
