@@ -37,6 +37,11 @@ export function StaffProvider({ children }) {
     return data;
   };
 
+  const remove = async (id) => {
+    await api.delete(`/users/${id}`);
+    query.setData((list) => list.filter((u) => u.id !== id));
+  };
+
   // Resolves to the temporary password to give to the person
   const resetPassword = async (id) => (await api.post(`/users/${id}/reset-password`)).data.temporaryPassword;
 
@@ -50,6 +55,7 @@ export function StaffProvider({ children }) {
         update,
         setStatus,
         resetPassword,
+        remove,
       }}
     >
       {children}

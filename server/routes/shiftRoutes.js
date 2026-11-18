@@ -78,8 +78,9 @@ router.put('/', allowRoles('admin'), async (req, res) => {
   if (shift !== null && shift !== undefined && shift !== '' && !isShift(shift)) {
     return res.status(400).json({ message: 'Shift must be Morning, Afternoon, Night or null (day off).' });
   }
-  const [[user]] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
+   const [[user]] = await pool.query("SELECT id, status FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
   if (!user) return res.status(404).json({ message: 'Caregiver not found' });
+  if (user.status !== 'active') return res.status(400).json({ message: 'This caregiver is inactive. Reactivate their account first.' });
 
   const [[before]] = await pool.query('SELECT shift FROM shifts WHERE user_id = ? AND shift_date = ?', [user.id, shiftDate]);
 
@@ -125,8 +126,9 @@ router.post('/bulk', allowRoles('admin'), async (req, res) => {
   if (!isDate(from) || !isDate(to) || to < from) return res.status(400).json({ message: 'Give a valid from / to date.' });
   if (Date.parse(to) - Date.parse(from) > 92 * 86400000) return res.status(400).json({ message: 'At most 3 months at a time.' });
   if (!isShift(shift)) return res.status(400).json({ message: 'Shift must be Morning, Afternoon or Night.' });
-  const [[user]] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
+  const [[user]] = await pool.query("SELECT id, status FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
   if (!user) return res.status(404).json({ message: 'Caregiver not found' });
+  if (user.status !== 'active') return res.status(400).json({ message: 'This caregiver is inactive. Reactivate their account first.' });
 
   const rows = [];
   for (let d = from; d <= to; d = addDays(d, 1)) {

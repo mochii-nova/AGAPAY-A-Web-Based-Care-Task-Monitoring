@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleAlert, RefreshCw } from 'lucide-react';
+import { CircleAlert, RefreshCw, Trash2 } from 'lucide-react';
 import Modal from '../Modal';
 import FormField from '../FormField';
 import SelectField from '../SelectField';
@@ -42,7 +42,7 @@ function validate(form, adding) {
 }
 
 // The form inside the pop-up: a new account (`person` empty) or the admin-set details of one
-function StaffForm({ person, isMe, onClose }) {
+function StaffForm({ person, isMe, onClose, onDelete }) {
   const adding = !person;
   const { create, update } = useStaff();
   const showToast = useToast();
@@ -171,6 +171,11 @@ function StaffForm({ person, isMe, onClose }) {
       )}
 
       <div className="modal__footer modal__footer--inline">
+        {!adding && !isMe && onDelete && (
+          <button type="button" className="btn btn--danger" style={{ marginRight: 'auto' }} onClick={onDelete}>
+            <Trash2 size={16} aria-hidden="true" /> Delete account
+          </button>
+        )}
         <button type="button" className="btn btn--outline" onClick={() => onClose(false)}>Cancel</button>
         <button type="submit" className="btn btn--primary" disabled={saving}>
           {saving ? 'Saving…' : adding ? 'Create account' : 'Save changes'}
@@ -182,10 +187,10 @@ function StaffForm({ person, isMe, onClose }) {
 
 // Pop-up for "Add staff" (no `person`) and "Edit" (usual shift, date hired, title, role).
 // onClose(saved, shiftChangedFor): shiftChangedFor is the saved account when its usual shift was set or changed.
-export default function StaffFormModal({ open, person, isMe, onClose }) {
+export default function StaffFormModal({ open, person, isMe, onClose, onDelete }) {
   return (
     <Modal open={open} onClose={() => onClose(false)} title={person ? `Edit ${person.name}` : 'Add staff'} size="lg">
-      {open && <StaffForm key={person?.id ?? 'new'} person={person} isMe={isMe} onClose={onClose} />}
+      {open && <StaffForm key={person?.id ?? 'new'} person={person} isMe={isMe} onClose={onClose} onDelete={onDelete} />}
     </Modal>
   );
 }

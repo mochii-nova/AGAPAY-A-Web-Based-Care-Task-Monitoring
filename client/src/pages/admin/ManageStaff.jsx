@@ -54,7 +54,7 @@ const ACTION_TEXT = {
 
 // Add caregivers, approve new sign-ups, set shifts and look after accounts
 export default function ManageStaff() {
-  const { staff, status, error, reload, pendingCount, setStatus } = useStaff();
+  const { staff, status, error, reload, pendingCount, setStatus, remove } = useStaff();
   const { user } = useAuth();
   const showToast = useToast();
   const now = useNow();
@@ -78,6 +78,9 @@ export default function ManageStaff() {
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmError, setConfirmError] = useState('');
   const [rejectReason, setRejectReason] = useState(''); // for Reject
+  const [deleteFor, setDeleteFor] = useState(null); // the account to delete for good
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   // After a caregiver's usual shift is set or changed: offer to put them on this month's Schedule
   const [fillAsk, setFillAsk] = useState(null); // the saved account
   const fillShift = SHIFTS.find((s) => s.apiValue === fillAsk?.assignedShift);
@@ -117,6 +120,26 @@ export default function ManageStaff() {
     const { start, end } = shiftOnDate(shift, now);
     if (now < start) return `Starts ${shift.start}`;
     return now < end ? 'On shift now' : 'Shift ended';
+  };
+
+  const askDelete = (person) => {
+    setDeleteError('');
+    setDeleteFor(person);
+  };
+
+  const doDelete = async () => {
+    setDeleteBusy(true);
+    setDeleteError('');
+    try {
+      await remove(deleteFor.id);
+      showToast(`${deleteFor.name}'s account was deleted.`);
+      setDeleteFor(null);
+      if (searchParams.get('open') === deleteFor.employeeId) setSearchParams({}, { replace: true });
+    } catch (err) {
+      setDeleteError(err.response ? err.response.data?.message || "Couldn't delete. Please try again." : "Can't reach the server. Please try again.");
+    } finally {
+      setDeleteBusy(false);
+    }
   };
 
   const askStatus = (person, newStatus) => {
@@ -161,6 +184,7 @@ export default function ManageStaff() {
       onReset={() => setResetFor(selected)}
       offThisWeek={offThisWeek(selected)}
       onStatus={(s) => askStatus(selected, s)}
+      onDelete={() => askDelete(selected)}
       showName={!isNarrow}
     />
   );
@@ -289,6 +313,10 @@ export default function ManageStaff() {
         open={!!form}
         person={form?.person}
         isMe={form?.person?.id === user.id}
+        onDelete={() => {
+          askDelete(form.person);
+          setForm(null);
+        }}
         onClose={(saved, shiftChangedFor) => {
           setForm(null);
           if (shiftChangedFor?.role === 'caregiver' && shiftChangedFor.status === 'active') setFillAsk(shiftChangedFor);
@@ -346,6 +374,24 @@ export default function ManageStaff() {
               onChange={(e) => setRejectReason(e.target.value)}
             />
           </div>
+        )}
+      </ConfirmModal>
+      <ConfirmModal
+        open={!!deleteFor}
+        title={deleteFor ? `Delete ${deleteFor.name}?` : ''}
+        confirmLabel="Delete for good"
+        danger
+        busy={deleteBusy}
+        error={deleteError}
+        onConfirm={doDelete}
+        onClose={() => setDeleteFor(null)}
+      >
+        {deleteFor && (
+          <p>
+            {deleteFor.name}'s account is removed and can't be brought back. Their schedule, resident list and messages go with it.
+            Tasks and handovers they already did stay in the records as "Former staff". If they're only on leave, use Deactivate
+            instead.
+          </p>
         )}
       </ConfirmModal>
     </div>

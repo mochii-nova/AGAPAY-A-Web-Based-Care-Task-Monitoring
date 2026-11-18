@@ -12,9 +12,9 @@ router.use(protect);
 const RESIDENT_STATUSES = ['normal', 'watch', 'urgent'];
 
 const SELECT_HANDOVERS = `
-  SELECT h.*, ${NAME_SQL('a')} AS author_name, a.role AS author_role, ${NAME_SQL('k')} AS ack_name
+  SELECT h.*, IF(a.id IS NULL, 'Former staff', ${NAME_SQL('a')}) AS author_name, a.role AS author_role, ${NAME_SQL('k')} AS ack_name
   FROM handovers h
-  JOIN users a      ON a.id = h.author_id
+  LEFT JOIN users a ON a.id = h.author_id
   LEFT JOIN users k ON k.id = h.acknowledged_by
 `;
 
@@ -27,10 +27,11 @@ async function toHandovers(rows, me) {
   if (rows.length === 0) return [];
   const ids = rows.map((r) => r.id);
 
-  const [residents] = await pool.query(
+    const [residents] = await pool.query(
     `SELECT u.*, r.name, ${ROOM_LABEL} AS room, r.resident_code FROM handover_resident_updates u
      JOIN residents r ON r.id = u.resident_id ${ROOM_JOIN('r')}
      WHERE u.handover_id IN (?) ORDER BY rm.room_number, bd.bed_code, r.name`,
+    [ids]
   );
   const [tasks] = await pool.query(
     `SELECT c.*, t.task, t.resident, t.due_at, t.status AS task_status FROM handover_carried_tasks c

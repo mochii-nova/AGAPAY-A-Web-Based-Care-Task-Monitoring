@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, Trash2 } from 'lucide-react';
 import Modal from '../Modal';
 import FormField from '../FormField';
 import SelectField from '../SelectField';
@@ -33,7 +33,7 @@ function validate(form, today, room) {
 }
 
 // The form inside the pop-up: a new resident (`resident` empty) or changes to one
-function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose }) {
+function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelete }) {
   const adding = !resident;
   const today = isoDay(new Date());
   const contact = resident?.emergencyContact ?? {};
@@ -203,6 +203,11 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose }) {
       {field('contactPhone', 'Phone number', { type: 'tel', required: false, placeholder: 'e.g. 0917 123 4567', autoComplete: 'off' })}
 
       <div className="modal__footer modal__footer--inline">
+        {!adding && onDelete && (
+          <button type="button" className="btn btn--danger" style={{ marginRight: 'auto' }} onClick={onDelete}>
+            <Trash2 size={16} aria-hidden="true" /> Delete resident
+          </button>
+        )}
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
         <button type="submit" className="btn btn--primary" disabled={saving}>
           {saving ? 'Saving…' : adding ? 'Add resident' : 'Save changes'}
@@ -214,10 +219,10 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose }) {
 
 // Pop-up for "Add resident" (no `resident`) and "Edit".
 // onSave(fields) saves to the backend and throws if it fails.
-export default function ResidentFormModal({ open, resident, suggestedCode, rooms = [], onSave, onClose }) {
+export default function ResidentFormModal({ open, resident, suggestedCode, rooms = [], onSave, onClose, onDelete }) {
   return (
     <Modal open={open} onClose={onClose} title={resident ? `Edit ${resident.name}` : 'Add resident'} size="lg">
-      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} suggestedCode={suggestedCode} rooms={rooms} onSave={onSave} onClose={onClose} />}
+      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} suggestedCode={suggestedCode} rooms={rooms} onSave={onSave} onClose={onClose} onDelete={onDelete} />}
     </Modal>
   );
 }

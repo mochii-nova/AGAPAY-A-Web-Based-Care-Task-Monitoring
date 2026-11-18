@@ -7,8 +7,8 @@ import SelectField from '../SelectField';
 import useSaving from '../../hooks/useSaving';
 
 const TYPE_OPTIONS = [
-  { value: 'private', label: 'Private (1 resident)' },
-  { value: 'ward', label: 'Ward (several residents, by bed)' },
+  { value: 'private', label: 'Private' },
+  { value: 'ward', label: 'Ward' },
 ];
 
 const errorText = (err) =>

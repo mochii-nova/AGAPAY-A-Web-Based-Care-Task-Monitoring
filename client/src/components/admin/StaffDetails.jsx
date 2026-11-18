@@ -15,7 +15,7 @@ const TODAY_TONES = [
 // Everything about one account, with the admin's actions.
 // Used in the side panel (laptops) and in a pop-up (tablets and phones).
 // `offThisWeek`: an active caregiver with no shift on this week's Schedule.
-export default function StaffDetails({ person, isMe, todayTasks, residents, offThisWeek, onEdit, onReset, onStatus, showName = true }) {
+export default function StaffDetails({ person, isMe, todayTasks, residents, offThisWeek, onEdit, onReset, onStatus, onDelete, showName = true }) {
   const shift = SHIFTS.find((s) => s.apiValue === person.assignedShift);
   const contact = person.emergencyContact ?? {};
   const status = STATUS_LABEL[person.status];
@@ -124,6 +124,7 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, offT
             <button type="button" className="btn btn--primary" onClick={() => onStatus('active')}>
               <UserCheck size={18} aria-hidden="true" /> Approve after all
             </button>
+            <button type="button" className="btn btn--danger" onClick={onDelete}>Delete sign-up</button>
           </div>
         </div>
       )}

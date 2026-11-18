@@ -262,6 +262,10 @@ export default function ManageResidents() {
         suggestedCode={nextResidentCode(residents)}
         rooms={roomsQuery.rooms}
         onSave={saveResident}
+        onDelete={() => {
+          askDelete(form.resident);
+          setForm(null);
+        }}
         onClose={() => setForm(null)}
       />
        <RoomsModal

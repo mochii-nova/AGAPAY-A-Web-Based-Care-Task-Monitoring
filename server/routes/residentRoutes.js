@@ -50,7 +50,7 @@ async function withCaregivers(rows) {
   if (rows.length === 0) return [];
   const [links] = await pool.query(
     `SELECT ra.resident_id, u.id, ${NAME_SQL('u')} AS name FROM resident_assignments ra
-     JOIN users u ON u.id = ra.user_id WHERE ra.resident_id IN (?) ORDER BY ${NAME_ORDER('u')}`,
+    JOIN users u ON u.id = ra.user_id AND u.status = 'active' WHERE ra.resident_id IN (?) ORDER BY ${NAME_ORDER('u')}`,
     [rows.map((r) => r.id)]
   );
   return rows.map((r) =>

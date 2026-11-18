@@ -7,7 +7,7 @@ const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { photoUpload, looksLikeImage, PHOTO_DIR } = require('../middleware/upload');
 const { publicUser, fullUser, displayName, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
-const { isShift, isDate } = require('../utils/shifts');
+const { isShift, isDate, shiftAt } = require('../utils/shifts');
 
 const router = express.Router();
 router.use(protect);
@@ -233,6 +233,9 @@ router.patch('/:id/status', allowRoles('admin'), async (req, res) => {
   }
 
   await pool.query('UPDATE users SET status = ?, rejection_reason = ? WHERE id = ?', [status, reason, user.id]);
+  if (status === 'inactive') {
+    await pool.query('DELETE FROM shifts WHERE user_id = ? AND shift_date > ?', [user.id, shiftAt().shiftDate]);
+  }
   res.json(fullUser(await getUser(user.id), req));
 });
 
