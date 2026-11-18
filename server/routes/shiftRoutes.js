@@ -2,151 +2,268 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
-const { NAME_SQL, NAME_ORDER } = require('../utils/users');
-const { SHIFT_LABEL, isShift, isDate, addDays, shiftTimes, shiftAt, nextShift } = require('../utils/shifts');
+const { clean, NAME_SQL } = require('../utils/users');
+const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 router.use(protect);
 
-const toShift = (r) => ({
+const CATEGORIES = ['hygiene', 'mobility', 'meal', 'medical', 'rest', 'recreation'];
+
+const SELECT_TASKS = `
+  SELECT t.*, r.resident_code, ${ROOM_LABEL} AS room, r.name AS resident_name,
+        ${NAME_SQL('a')} AS assigned_name, ${NAME_SQL('c')} AS completed_name
+  FROM tasks t
+  LEFT JOIN residents r ON r.id = t.resident_id ${ROOM_JOIN('r')}
+  LEFT JOIN users a     ON a.id = t.assigned_to
+  LEFT JOIN users c     ON c.id = t.completed_by
+`;
+
+// pending + past due = overdue (calculated, never stored)
+const statusOf = (r) => (r.status === 'pending' && new Date(r.due_at) < new Date() ? 'overdue' : r.status);
+
+// Convert a DB row to the shape the React pages use
+const toTask = (r) => ({
   _id: r.id,
   id: r.id,
-  userId: r.user_id,
-  userName: r.user_name,
-  shiftDate: r.shift_date, // 'YYYY-MM-DD'
-  shift: r.shift, // 'Morning' | 'Afternoon' | 'Night'  (shown as Morning / Noon / Night)
-  ...shiftTimes(r.shift_date, r.shift), // startsAt / endsAt as ISO times
+  task: r.task,
+  resident: r.resident_name ?? r.resident, // the name (kept until the frontend uses residentId)
+  residentId: r.resident_id,
+  residentCode: r.resident_code ?? null,
+  room: r.room ?? null,
+  category: r.category,
+  dueAt: r.due_at,
+  assignedTo: r.assigned_to,
+  assignedToName: r.assigned_name ?? null,
+  status: statusOf(r), // 'pending' | 'completed' | 'skipped' | 'overdue'
+  skipReason: r.skip_reason,
+  instructions: r.instructions, // written by the admin
+  note: r.note, // written by the caregiver
+  done: r.status === 'completed',
+  doneAt: r.done_at,
+  completedBy: r.completed_by ? { _id: r.completed_by, id: r.completed_by, name: r.completed_name } : null,
+  createdBy: r.created_by,
+  createdAt: r.created_at,
 });
 
-// "Mon, Oct 27"
-const prettyDate = (ymd) =>
-  new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+const findTask = async (id) => (await pool.query(`${SELECT_TASKS} WHERE t.id = ?`, [id]))[0][0];
 
-const tellSchedule = (userId, shiftDate, text) =>
-  notifyLater([userId], {
-    type: 'schedule',
-    title: 'Your schedule changed',
-    body: `${prettyDate(shiftDate)}: ${text}`,
-    link: '/schedule',
-    tag: `schedule-${shiftDate}`,
+// A caregiver may only change tasks given to them (or not given to anyone yet). Admins: any.
+const canWork = (user, task) => user.role === 'admin' || task.assigned_to === null || task.assigned_to === user.id;
+
+// Checks resident / caregiver / category / due date sent by the admin.
+// Returns { error } or the clean values.
+async function readTaskFields(b, existing = null) {
+  const has = (key) => Object.prototype.hasOwnProperty.call(b, key);
+  const out = {};
+
+  if (!existing || has('task')) {
+    out.task = clean(b.task, 120);
+    if (!out.task) return { error: 'Task name is required.' };
+  }
+  if (!existing || has('dueAt')) {
+    if (!b.dueAt || isNaN(new Date(b.dueAt))) return { error: 'A valid due date is required.' };
+    out.due_at = new Date(b.dueAt);
+  }
+
+  // Resident: by id (new way) or by name (old way, still accepted)
+  if (has('residentId') && b.residentId) {
+    const [[r]] = await pool.query('SELECT id, name FROM residents WHERE id = ?', [b.residentId]);
+    if (!r) return { error: 'Resident not found.' };
+    out.resident_id = r.id;
+    out.resident = r.name;
+  } else if (has('resident')) {
+    out.resident = clean(b.resident, 80);
+    if (!out.resident) return { error: 'Resident is required.' };
+    const [[r]] = await pool.query('SELECT id FROM residents WHERE name = ? LIMIT 1', [out.resident]);
+    out.resident_id = r?.id ?? null;
+  } else if (!existing) {
+    return { error: 'Resident is required.' };
+  }
+
+  if (has('category')) {
+    if (b.category && !CATEGORIES.includes(b.category)) return { error: `Category must be one of: ${CATEGORIES.join(', ')}.` };
+    out.category = b.category || null;
+  }
+  if (has('assignedTo')) {
+    if (b.assignedTo) {
+      const [[u]] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'caregiver' AND status = 'active'", [b.assignedTo]);
+      if (!u) return { error: 'That caregiver was not found or is not active.' };
+      out.assigned_to = u.id;
+    } else {
+      out.assigned_to = null;
+    }
+  }
+  if (has('instructions')) out.instructions = clean(b.instructions, 2000);
+  else if (has('note')) out.instructions = clean(b.note, 2000);
+  return { values: out };
+}
+
+// Tell a caregiver they have a new task (task name only, no resident details)
+const tellAssigned = (task) =>
+  task.assigned_to &&
+  notifyLater([task.assigned_to], {
+    type: 'task',
+    title: `New task: ${task.task}`,
+    body: 'Open AGAPAY to see the details.',
+    link: `/tasks?open=${task.id}`,
+    tag: `task-${task.id}`,
   });
 
-// GET /api/shifts?from=YYYY-MM-DD&to=YYYY-MM-DD
-// Caregiver: my shifts. Admin: everyone's (or ?userId=5 for one person).
-// Without dates: from today for 2 weeks.
-router.get('/', async (req, res) => {
-  const today = shiftAt().shiftDate;
-  const from = req.query.from ?? today;
-  const to = req.query.to ?? addDays(from, 13);
-  if (!isDate(from) || !isDate(to)) return res.status(400).json({ message: 'Dates must look like 2026-10-31.' });
-  if (to < from) return res.status(400).json({ message: '`to` must be on or after `from`.' });
-  if (Date.parse(to) - Date.parse(from) > 366 * 86400000) return res.status(400).json({ message: 'Please ask for at most one year.' });
+// =====================================================================
 
-  const params = [from, to];
-  let who = '';
-  if (req.user.role !== 'admin') {
-    who = 'AND s.user_id = ?';
+// GET /api/tasks?mine=1&from=2026-10-01&to=2026-10-31&residentId=3&status=pending
+// mine=1 -> only tasks assigned to me. from/to are dates (Philippine time) or full ISO times.
+router.get('/', async (req, res) => {
+  const where = [];
+  const params = [];
+  const q = req.query;
+
+  if (q.mine === '1' || q.mine === 'true') {
+    where.push('t.assigned_to = ?');
     params.push(req.user.id);
-  } else if (req.query.userId) {
-    who = 'AND s.user_id = ?';
-    params.push(req.query.userId);
+  } else if (q.assignedTo && req.user.role === 'admin') {
+    where.push('t.assigned_to = ?');
+    params.push(q.assignedTo);
+  }
+
+  // A date alone means the whole day in Philippine time
+  const toMoment = (value, endOfDay) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00'}+08:00`);
+    }
+    return new Date(value);
+  };
+  if (q.from) {
+    const from = toMoment(q.from, false);
+    if (isNaN(from)) return res.status(400).json({ message: '`from` is not a valid date.' });
+    where.push('t.due_at >= ?');
+    params.push(from);
+  }
+  if (q.to) {
+    const to = toMoment(q.to, true);
+    if (isNaN(to)) return res.status(400).json({ message: '`to` is not a valid date.' });
+    where.push('t.due_at <= ?');
+    params.push(to);
+  }
+  if (q.residentId) {
+    where.push('t.resident_id = ?');
+    params.push(q.residentId);
+  }
+  if (q.status === 'overdue') {
+    where.push("t.status = 'pending' AND t.due_at < NOW()");
+  } else if (['pending', 'completed', 'skipped'].includes(q.status)) {
+    where.push('t.status = ?');
+    params.push(q.status);
   }
 
   const [rows] = await pool.query(
-    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id
-     WHERE s.shift_date BETWEEN ? AND ? ${who} ORDER BY s.shift_date, FIELD(s.shift, 'Morning', 'Afternoon', 'Night'), ${NAME_ORDER('u')}`,
+    `${SELECT_TASKS} ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY t.due_at ASC, t.id ASC`,
     params
   );
-  res.json(rows.map(toShift));
+  res.json(rows.map(toTask));
 });
 
-// GET /api/shifts/current  ->  the shift happening right now and who's on it
-router.get('/current', async (req, res) => {
-  const now = shiftAt();
-  const [rows] = await pool.query(
-    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.shift_date = ? AND s.shift = ?`,
-    [now.shiftDate, now.shift]
-  );
-  res.json({ ...now, ...shiftTimes(now.shiftDate, now.shift), staff: rows.map(toShift) });
+// GET /api/tasks/:id
+router.get('/:id', async (req, res) => {
+  const task = await findTask(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+  res.json(toTask(task));
 });
 
-// PUT /api/shifts  (admin)  { userId, shiftDate, shift }   shift null = day off
-// Sets (or changes) one person's shift on one day.
-router.put('/', allowRoles('admin'), async (req, res) => {
-  const { userId, shiftDate, shift } = req.body;
-  if (!isDate(shiftDate)) return res.status(400).json({ message: 'shiftDate must look like 2026-10-31.' });
-  if (shift !== null && shift !== undefined && shift !== '' && !isShift(shift)) {
-    return res.status(400).json({ message: 'Shift must be Morning, Afternoon, Night or null (day off).' });
-  }
-   const [[user]] = await pool.query("SELECT id, status FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
-  if (!user) return res.status(404).json({ message: 'Caregiver not found' });
-  if (user.status !== 'active') return res.status(400).json({ message: 'This caregiver is inactive. Reactivate their account first.' });
+// " for Maria Santos (Room 101), assigned to Rosa Lim" for the admin log
+const taskFor = (t) =>
+  `${t.resident_name || t.resident ? ` for ${t.resident_name || t.resident}${t.room ? ` (Room ${t.room})` : ''}` : ''}${t.assigned_name ? `, assigned to ${t.assigned_name}` : ''}`;
 
-  const [[before]] = await pool.query('SELECT shift FROM shifts WHERE user_id = ? AND shift_date = ?', [user.id, shiftDate]);
+// POST /api/tasks  (admin)  { task, dueAt, residentId or resident, category, assignedTo, note }
+router.post('/', allowRoles('admin'), async (req, res) => {
+  const { error, values } = await readTaskFields(req.body);
+  if (error) return res.status(400).json({ message: error });
 
-  if (!shift) {
-    await pool.query('DELETE FROM shifts WHERE user_id = ? AND shift_date = ?', [user.id, shiftDate]);
-    if (before) tellSchedule(user.id, shiftDate, 'now a day off');
-    return res.json({ message: 'Day off saved', userId: user.id, shiftDate, shift: null });
+  const [result] = await pool.query('INSERT INTO tasks SET ?', [{ ...values, created_by: req.user.id }]);
+  const task = await findTask(result.insertId);
+  tellAssigned(task);
+  await logAdmin(req, 'create', 'task', task.id, `Added task "${task.task}"${taskFor(task)}`);
+  res.status(201).json(toTask(task));
+});
+
+// PUT /api/tasks/:id  (admin)  change any of: task, dueAt, residentId/resident, category, assignedTo, note
+router.put('/:id', allowRoles('admin'), async (req, res) => {
+  const before = await findTask(req.params.id);
+  if (!before) return res.status(404).json({ message: 'Task not found' });
+
+  const { error, values } = await readTaskFields(req.body, before);
+  if (error) return res.status(400).json({ message: error });
+  if (Object.keys(values).length === 0) return res.json(toTask(before));
+
+  // A new due date in the future may become overdue again later, so allow a new alert
+  if (values.due_at && values.due_at > new Date()) values.overdue_notified_at = null;
+
+  await pool.query('UPDATE tasks SET ? WHERE id = ?', [values, before.id]);
+  const task = await findTask(before.id);
+  if (values.assigned_to && values.assigned_to !== before.assigned_to) tellAssigned(task);
+  const fields = Object.keys(values).filter((k) => k !== 'overdue_notified_at').map((k) => k.replace(/_(id|to|at)$/, '').replace(/_/g, ' '));
+  await logAdmin(req, 'update', 'task', task.id, `Edited task "${task.task}"${taskFor(task)}: ${fields.join(', ')}`);
+  res.json(toTask(task));
+});
+
+// PATCH /api/tasks/:id  { status, reason, note }
+// status: 'completed' | 'skipped' (reason required) | 'pending' (undo). note can be sent alone.
+router.patch('/:id', async (req, res) => {
+  const task = await findTask(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+  if (!canWork(req.user, task)) return res.status(403).json({ message: 'This task is assigned to someone else.' });
+
+  const { status } = req.body;
+  const changes = {};
+
+  if (status !== undefined) {
+    if (status === 'completed') {
+      Object.assign(changes, { status, done: true, done_at: new Date(), completed_by: req.user.id, skip_reason: null });
+    } else if (status === 'skipped') {
+      const reason = clean(req.body.reason, 200);
+      if (!reason) return res.status(400).json({ message: 'Please give a reason for skipping this task.' });
+      Object.assign(changes, { status, done: false, done_at: new Date(), completed_by: req.user.id, skip_reason: reason });
+    } else if (status === 'pending') {
+      Object.assign(changes, { status, done: false, done_at: null, completed_by: null, skip_reason: null });
+    } else {
+      return res.status(400).json({ message: 'Status must be completed, skipped or pending.' });
+    }
   }
+  if (Object.prototype.hasOwnProperty.call(req.body, 'note')) changes.note = clean(req.body.note, 2000);
+  if (Object.keys(changes).length === 0) return res.status(400).json({ message: 'Nothing to change.' });
+
+  await pool.query('UPDATE tasks SET ? WHERE id = ?', [changes, task.id]);
+  if (status !== undefined) {
+    await logAdmin(req, 'update', 'task', task.id, `Marked task "${task.task}"${taskFor(task)} as ${status}${changes.skip_reason ? `: ${changes.skip_reason}` : ''}`);
+  }
+  res.json(toTask(await findTask(task.id)));
+});
+
+// PATCH /api/tasks/:id/done  (old route, still works: same as status 'completed')
+router.patch('/:id/done', async (req, res) => {
+  const task = await findTask(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+  if (!canWork(req.user, task)) return res.status(403).json({ message: 'This task is assigned to someone else.' });
 
   await pool.query(
-    'INSERT INTO shifts (user_id, shift_date, shift) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE shift = VALUES(shift)',
-    [user.id, shiftDate, shift]
+    "UPDATE tasks SET status = 'completed', done = TRUE, done_at = NOW(), completed_by = ?, skip_reason = NULL WHERE id = ?",
+    [req.user.id, task.id]
   );
-  if (before?.shift !== shift) tellSchedule(user.id, shiftDate, `${SHIFT_LABEL[shift]} shift`);
-
-  const [[row]] = await pool.query(
-    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.user_id = ? AND s.shift_date = ?`,
-    [user.id, shiftDate]
-  );
-  res.json(toShift(row));
+  res.json(toTask(await findTask(task.id)));
 });
 
-router.get('/next', async (req, res) => {
-  const base = req.query.shift ? { shift: req.query.shift, shiftDate: req.query.shiftDate } : shiftAt();
-  if (!isShift(base.shift) || !isDate(base.shiftDate)) {
-    return res.status(400).json({ message: 'Give shift (Morning, Afternoon or Night) and shiftDate like 2026-10-31.' });
+// DELETE /api/tasks/:id  (admins, or the person who created the task)
+router.delete('/:id', async (req, res) => {
+  const task = await findTask(req.params.id);
+  if (!task) return res.status(404).json({ message: 'Task not found' });
+  if (req.user.role !== 'admin' && task.created_by !== req.user.id) {
+    return res.status(403).json({ message: 'Only an administrator can delete this task.' });
   }
-  const next = nextShift(base.shift, base.shiftDate);
-  const [rows] = await pool.query(
-    `SELECT s.user_id, ${NAME_SQL('u')} AS name FROM shifts s JOIN users u ON u.id = s.user_id
-     WHERE s.shift_date = ? AND s.shift = ? AND u.status = 'active' ORDER BY ${NAME_ORDER('u')}`,
-    [next.shiftDate, next.shift]
-  );
-  res.json({ ...next, ...shiftTimes(next.shiftDate, next.shift), staff: rows.map((r) => ({ userId: r.user_id, name: r.name })) });
-});
-
-// POST /api/shifts/bulk  (admin)  { userId, from, to, shift, skipWeekdays: [3] }
-// Fills a date range in one go, e.g. "Morning every day in November except Wednesdays".
-// No notifications for bulk fills (it would be one per day).
-router.post('/bulk', allowRoles('admin'), async (req, res) => {
-  const { userId, from, to, shift } = req.body;
-  const skip = Array.isArray(req.body.skipWeekdays) ? req.body.skipWeekdays.map(Number) : [];
-  if (!isDate(from) || !isDate(to) || to < from) return res.status(400).json({ message: 'Give a valid from / to date.' });
-  if (Date.parse(to) - Date.parse(from) > 92 * 86400000) return res.status(400).json({ message: 'At most 3 months at a time.' });
-  if (!isShift(shift)) return res.status(400).json({ message: 'Shift must be Morning, Afternoon or Night.' });
-  const [[user]] = await pool.query("SELECT id, status FROM users WHERE id = ? AND role = 'caregiver'", [userId]);
-  if (!user) return res.status(404).json({ message: 'Caregiver not found' });
-  if (user.status !== 'active') return res.status(400).json({ message: 'This caregiver is inactive. Reactivate their account first.' });
-
-  const rows = [];
-  for (let d = from; d <= to; d = addDays(d, 1)) {
-    if (!skip.includes(new Date(`${d}T00:00:00Z`).getUTCDay())) rows.push([user.id, d, shift]);
-  }
-  if (rows.length) {
-    await pool.query('INSERT INTO shifts (user_id, shift_date, shift) VALUES ? ON DUPLICATE KEY UPDATE shift = VALUES(shift)', [rows]);
-  }
-  res.json({ message: `${rows.length} shifts saved`, count: rows.length });
-});
-
-// DELETE /api/shifts/:id  (admin)
-router.delete('/:id', allowRoles('admin'), async (req, res) => {
-  const [[row]] = await pool.query('SELECT * FROM shifts WHERE id = ?', [req.params.id]);
-  if (!row) return res.status(404).json({ message: 'Shift not found' });
-  await pool.query('DELETE FROM shifts WHERE id = ?', [row.id]);
-  tellSchedule(row.user_id, row.shift_date, 'now a day off');
-  res.json({ message: 'Shift removed' });
+  await pool.query('DELETE FROM tasks WHERE id = ?', [task.id]);
+  await logAdmin(req, 'delete', 'task', task.id, `Deleted task "${task.task}"${taskFor(task)}`);
+  res.json({ message: 'Task deleted' });
 });
 
 module.exports = router;

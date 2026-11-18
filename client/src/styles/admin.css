@@ -638,3 +638,21 @@
 .rooms-list__beds { margin-top: 10px; }
 .rooms-list__remove-bed { margin-left: 6px; padding: 0 4px; border: 0; background: none; color: var(--muted); font-size: 1rem; line-height: 1; cursor: pointer; }
 .rooms-list__remove-bed:hover:not(:disabled) { color: var(--danger, #c0392b); }
+
+/* Activity log (who did what) */
+.admin-toolbar .select.log-admin { flex-basis: 210px; width: 210px; }
+.log-dates { display: flex; align-items: center; gap: 8px; color: var(--label); font-size: 0.85rem; }
+.log-dates .field__input { width: 150px; }
+.log-list { list-style: none; margin: 0; padding: 0; }
+.log-item { padding: 14px 20px; }
+.log-item + .log-item { border-top: 1px solid var(--border); }
+.log-item__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.log-item__type { color: var(--label); font-size: 0.82rem; }
+.log-item__time { margin-left: auto; color: var(--label); font-size: 0.82rem; }
+.log-item__details { margin: 6px 0 0; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .log-item { padding: 12px 14px; }
+  .log-item__time { margin-left: 0; flex-basis: 100%; }
+  .log-dates { flex: 1 1 100%; }
+  .log-dates .field__input { flex: 1 1 0; width: auto; min-width: 0; }
+}

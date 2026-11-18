@@ -8,6 +8,7 @@ const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { photoUpload, looksLikeImage, PHOTO_DIR } = require('../middleware/upload');
 const { publicUser, fullUser, displayName, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
 const { isShift, isDate, shiftAt } = require('../utils/shifts');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 router.use(protect);
@@ -165,12 +166,14 @@ router.post('/', allowRoles('admin'), async (req, res) => {
   if (email && (await emailTaken(email, 0))) return res.status(409).json({ message: 'This email already has an account.' });
 
   const [result] = await pool.query(
-    `INSERT INTO users ((first_name, middle_name, last_name, username, password, role, status, email, phone, assigned_shift, date_hired, title)
+    `INSERT INTO users (first_name, middle_name, last_name, username, password, role, status, email, phone, assigned_shift, date_hired, title)
      VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)`,
     [first, middle, last, username, await bcrypt.hash(b.password, 10), role, email, clean(b.phone, 20),
      b.assignedShift || null, b.dateHired || null, clean(b.title, 60)]
   );
-  res.status(201).json(fullUser(await getUser(result.insertId), req));
+  const created = await getUser(result.insertId);
+  await logAdmin(req, 'create', 'staff', created.id, `Added ${displayName(created)} (${created.username}) as ${created.role}`);
+  res.status(201).json(fullUser(created, req));
 });
 
 // GET /api/users/:id
@@ -207,7 +210,17 @@ router.patch('/:id', allowRoles('admin'), async (req, res) => {
     has('role') ? b.role : user.role,
     user.id,
   ]);
-  res.json(fullUser(await getUser(user.id), req));
+  const after = await getUser(user.id);
+  const changed = [
+    ['assigned_shift', 'usual shift'],
+    ['date_hired', 'date hired'],
+    ['title', 'job title'],
+    ['role', 'role'],
+  ]
+    .filter(([col]) => String(user[col] ?? '') !== String(after[col] ?? ''))
+    .map(([col, label]) => `${label} ${user[col] || 'none'} → ${after[col] || 'none'}`);
+  if (changed.length) await logAdmin(req, 'update', 'staff', user.id, `Edited ${displayName(user)}: ${changed.join(', ')}`);
+  res.json(fullUser(after, req));
 });
 
 // PATCH /api/users/:id/status  { status: 'active' | 'inactive' | 'pending' }  (approve / deactivate)
@@ -233,9 +246,9 @@ router.patch('/:id/status', allowRoles('admin'), async (req, res) => {
   }
 
   await pool.query('UPDATE users SET status = ?, rejection_reason = ? WHERE id = ?', [status, reason, user.id]);
-  if (status === 'inactive') {
-    await pool.query('DELETE FROM shifts WHERE user_id = ? AND shift_date > ?', [user.id, shiftAt().shiftDate]);
-  }
+  const action = status === 'rejected' ? 'reject' : status === 'inactive' ? 'deactivate' : user.status === 'inactive' ? 'reactivate' : 'approve';
+  const verb = { reject: 'Rejected', deactivate: 'Deactivated', reactivate: 'Reactivated', approve: 'Approved' }[action];
+  await logAdmin(req, action, 'staff', user.id, `${verb} ${displayName(user)} (${user.username})${reason ? `: ${reason}` : ''}`);
   res.json(fullUser(await getUser(user.id), req));
 });
 
@@ -254,6 +267,7 @@ router.post('/:id/reset-password', allowRoles('admin'), async (req, res) => {
   const temporaryPassword = `agapay-${chars.sort(() => crypto.randomInt(3) - 1).join('')}`;
 
   await pool.query('UPDATE users SET password = ? WHERE id = ?', [await bcrypt.hash(temporaryPassword, 10), user.id]);
+  await logAdmin(req, 'reset_password', 'staff', user.id, `Reset the password of ${displayName(user)} (${user.username})`);
   res.json({ message: `Temporary password set for ${displayName(user)}.`, temporaryPassword });
 });
 
@@ -265,6 +279,7 @@ router.delete('/:id', allowRoles('admin'), async (req, res) => {
   const user = await getUser(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
   await pool.query('DELETE FROM users WHERE id = ?', [user.id]);
+  await logAdmin(req, 'delete', 'staff', user.id, `Deleted the account of ${displayName(user)} (${user.username})`);
   if (user.photo_url?.startsWith('/uploads/photos/')) {
     fs.unlink(path.join(PHOTO_DIR, path.basename(user.photo_url)), () => {});
   }

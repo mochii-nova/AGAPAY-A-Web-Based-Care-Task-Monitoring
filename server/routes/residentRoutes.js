@@ -158,6 +158,7 @@ router.post('/', allowRoles('admin'), async (req, res) => {
   if (Array.isArray(req.body.caregiverIds)) await setCaregivers(result.insertId, req.body.caregiverIds);
 
   const row = await findResident(result.insertId);
+  await logAdmin(req, 'create', 'resident', row.id, `Added resident ${row.name} (${row.resident_code}) in room ${row.room}`);
   res.status(201).json((await withCaregivers([row]))[0]);
 });
 
@@ -190,6 +191,8 @@ router.put('/:id', allowRoles('admin'), async (req, res) => {
   if (Array.isArray(req.body.caregiverIds)) await setCaregivers(before.id, req.body.caregiverIds);
 
   const row = await findResident(before.id);
+  const fields = Object.keys(values).map((k) => k.replace(/_id$/, '').replace(/_/g, ' '));
+  if (fields.length) await logAdmin(req, 'update', 'resident', row.id, `Edited ${row.name} (${row.resident_code}): ${fields.join(', ')}`);
   res.json((await withCaregivers([row]))[0]);
 });
 
@@ -199,13 +202,18 @@ router.put('/:id/caregivers', allowRoles('admin'), async (req, res) => {
   if (!row) return res.status(404).json({ message: 'Resident not found' });
   if (!Array.isArray(req.body.caregiverIds)) return res.status(400).json({ message: 'caregiverIds must be a list.' });
   await setCaregivers(row.id, req.body.caregiverIds);
-  res.json((await withCaregivers([row]))[0]);
+  const [saved] = await withCaregivers([row]);
+  const names = saved.caregivers?.map((c) => c.name).join(', ') || 'no one';
+  await logAdmin(req, 'assign', 'resident', row.id, `Set the caregivers of ${row.name} (${row.resident_code}): ${names}`);
+  res.json(saved);
 });
 
 // DELETE /api/residents/:id  (admin)
 router.delete('/:id', allowRoles('admin'), async (req, res) => {
-  const [result] = await pool.query('DELETE FROM residents WHERE id = ?', [req.params.id]);
-  if (result.affectedRows === 0) return res.status(404).json({ message: 'Resident not found' });
+  const row = await findResident(req.params.id);
+  if (!row) return res.status(404).json({ message: 'Resident not found' });
+  await pool.query('DELETE FROM residents WHERE id = ?', [row.id]);
+  await logAdmin(req, 'delete', 'resident', row.id, `Removed resident ${row.name} (${row.resident_code}) from room ${row.room}`);
   res.json({ message: 'Resident removed' });
 });
 

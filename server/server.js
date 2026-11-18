@@ -44,6 +44,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/residents', require('./routes/residentRoutes'));
 app.use('/api/rooms', require('./routes/roomRoutes'));
+app.use('/api/admin-logs', require('./routes/adminLogRoutes'));
 app.use('/api/shifts', require('./routes/shiftRoutes'));
 app.use('/api/handovers', require('./routes/handoverRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));

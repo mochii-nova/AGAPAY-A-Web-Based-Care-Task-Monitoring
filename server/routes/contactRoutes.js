@@ -51,6 +51,8 @@ router.get('/', protect, allowRoles('admin'), async (req, res) => {
 router.patch('/:id/handled', protect, allowRoles('admin'), async (req, res) => {
   const [result] = await pool.query('UPDATE contact_messages SET handled_at = COALESCE(handled_at, NOW()) WHERE id = ?', [req.params.id]);
   if (result.affectedRows === 0) return res.status(404).json({ message: 'Message not found' });
+  const [[m]] = await pool.query('SELECT name, email FROM contact_messages WHERE id = ?', [req.params.id]);
+  await logAdmin(req, 'handled', 'contact', Number(req.params.id), `Marked the message from ${m.name} (${m.email}) as handled`);
   res.json({ message: 'Marked as handled' });
 });
 

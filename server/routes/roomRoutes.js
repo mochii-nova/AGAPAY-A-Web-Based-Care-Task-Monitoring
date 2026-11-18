@@ -69,6 +69,8 @@ router.post('/', allowRoles('admin'), async (req, res) => {
     const [result] = await conn.query('INSERT INTO rooms (room_number, room_type) VALUES (?, ?)', [roomNumber, roomType]);
     if (roomType === 'ward') await conn.query('INSERT INTO beds (room_id, bed_code) VALUES ?', [bedRows(result.insertId, 1, bedCount)]);
     await conn.commit();
+    await logAdmin(req, 'create', 'room', result.insertId,
+      `Added room ${roomNumber} (${roomType === 'ward' ? `ward, ${bedCount} beds` : 'private'})`);
     res.status(201).json(await loadRoom(result.insertId));
   } catch (err) {
     await conn.rollback();
@@ -87,6 +89,7 @@ router.patch('/:id', allowRoles('admin'), async (req, res) => {
   const [taken] = await pool.query('SELECT id FROM rooms WHERE room_number = ? AND id <> ?', [roomNumber, room.id]);
   if (taken.length) return res.status(409).json({ message: `Room ${roomNumber} already exists.` });
   await pool.query('UPDATE rooms SET room_number = ? WHERE id = ?', [roomNumber, room.id]);
+  if (roomNumber !== room.roomNumber) await logAdmin(req, 'update', 'room', room.id, `Renamed room ${room.roomNumber} to ${roomNumber}`);
   res.json(await loadRoom(room.id));
 });
 
@@ -98,6 +101,7 @@ router.delete('/:id', allowRoles('admin'), async (req, res) => {
     return res.status(409).json({ message: `Room ${room.roomNumber} still has residents. Move them to another room first.` });
   }
   await pool.query('DELETE FROM rooms WHERE id = ?', [room.id]);
+  await logAdmin(req, 'delete', 'room', room.id, `Removed room ${room.roomNumber} (${room.roomType})`);
   res.json({ message: `Room ${room.roomNumber} removed` });
 });
 
@@ -108,7 +112,8 @@ router.post('/:id/beds', allowRoles('admin'), async (req, res) => {
   if (room.roomType !== 'ward') return res.status(400).json({ message: 'Only a ward has beds.' });
   if (room.beds.length >= MAX_BEDS) return res.status(400).json({ message: `A ward can have at most ${MAX_BEDS} beds.` });
   const next = Math.max(0, ...room.beds.map((b) => Number(b.bedCode.replace(/\D/g, '')) || 0)) + 1;
-  await pool.query('INSERT INTO beds (room_id, bed_code) VALUES ?', [bedRows(room.id, next, 1)]);
+  const [added] = await pool.query('INSERT INTO beds (room_id, bed_code) VALUES ?', [bedRows(room.id, next, 1)]);
+  await logAdmin(req, 'create', 'bed', added.insertId, `Added bed B${next} to room ${room.roomNumber}`);
   res.status(201).json(await loadRoom(room.id));
 });
 
@@ -121,6 +126,7 @@ router.delete('/:id/beds/:bedId', allowRoles('admin'), async (req, res) => {
   if (bed.resident) return res.status(409).json({ message: `${bed.resident.name} is in bed ${bed.bedCode}. Move them first.` });
   if (room.beds.length <= 2) return res.status(400).json({ message: 'A ward needs at least 2 beds.' });
   await pool.query('DELETE FROM beds WHERE id = ?', [bed.id]);
+  await logAdmin(req, 'delete', 'bed', bed.id, `Removed bed ${bed.bedCode} from room ${room.roomNumber}`);
   res.json(await loadRoom(room.id));
 });
 

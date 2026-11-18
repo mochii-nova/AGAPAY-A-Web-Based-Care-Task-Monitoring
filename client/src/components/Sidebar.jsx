@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   House, ClipboardList, CalendarDays, UserRound, FileText, Users,
-  Bell, Mail, LogOut, X, Inbox, ChartColumn,
+  Bell, Mail, LogOut, X, Inbox, ChartColumn, ScrollText,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -59,7 +59,10 @@ const ADMIN_GROUPS = [
   },
   {
     title: 'Insights',
-    items: [{ to: '/admin/reports', label: 'Reports', icon: ChartColumn }],
+    items: [
+      { to: '/admin/reports', label: 'Reports', icon: ChartColumn },
+      { to: '/admin/activity', label: 'Activity log', icon: ScrollText },
+    ],
   },
   {
     title: 'Website',

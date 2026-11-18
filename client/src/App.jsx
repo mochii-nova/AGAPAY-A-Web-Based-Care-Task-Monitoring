@@ -16,6 +16,7 @@ import TasksCare from './pages/admin/TasksCare';
 import AdminSchedule from './pages/admin/AdminSchedule';
 import HandoverMonitor from './pages/admin/HandoverMonitor';
 import ContactMessages from './pages/admin/ContactMessages';
+import ActivityLog from './pages/admin/ActivityLog';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Reports from './pages/admin/Reports';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="schedule" element={<AdminSchedule />} />
           <Route path="handover" element={<HandoverMonitor />} />
           <Route path="contact" element={<ContactMessages />} />
+          <Route path="activity" element={<ActivityLog />} />
           <Route path="reports" element={<Reports />} />
         </Route>
       </Route>
