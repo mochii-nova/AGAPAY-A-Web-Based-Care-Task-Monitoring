@@ -1,31 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../Logo';
 import { homeFor } from '../../utils/roles';
 
-// Top menu of the website. Over the hero photo it is see-through with white text;
-// once the hero has scrolled away it becomes the white floating bar.
+// Top menu of the website: the white floating bar with dark text (dark in dark mode), readable over
+// the light hero and the rest of the page.
 // Links jump to each section of the page.
 export default function SiteHeader({ sections, active }) {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const close = () => setMenuOpen(false);
-  // Solid white bar after the hero, and while the phone menu is open (so it stays readable)
-  const solid = scrolled || menuOpen;
-
-  // Watch the hero: once it has scrolled up under the header, switch to the white bar
-  useEffect(() => {
-    const hero = document.getElementById('home');
-    if (!hero) return;
-    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting), {
-      rootMargin: '-96px 0px 0px 0px',
-    });
-    observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
+  const solid = true; // always the solid bar now that the hero is light
 
   // The logo is a real link to "/"; on this page it glides back to the top instead of reloading
   const toTop = (e) => {

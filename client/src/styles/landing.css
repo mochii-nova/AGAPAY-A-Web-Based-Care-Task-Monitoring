@@ -2,13 +2,10 @@
    Public website (Landing.jsx): header, hero, How it works, Features, About, Contact, footer
 
    Colours and the Inter font come from main.css, the same as every page of the app.
-   Only the colours that sit on the hero photo are the website's own: they stay the same in dark mode,
-   because the photo under them does too.
+   The hero is light (cream) in light mode and dark in dark mode, like the rest of the page.
    ===================================================================== */
 .site {
-  --site-on-photo-soft: var(--accent-on-dark);  /* warm apricot "one shift at a time." over the shaded part of the photo */
-  --site-shade: 33, 26, 43;                     /* deep plum-ink (as r, g, b) for the hero's gradients */
-  --site-plum: #67479a;         /* buttons on the photo */
+  --site-plum: #67479a;         /* the hero's Sign in button */
   --site-plum-hover: #563a84;
   --site-white: #ffffff;
 
@@ -43,8 +40,8 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site .btn { font-weight: 600; }
 
 /* ---------- Header ----------
-   It floats over the top of the page. Over the hero photo: see-through, white text and logo.
-   After the hero (and while the phone menu is open): the white rounded bar with dark text. */
+   It floats over the top of the page as the white rounded bar with dark text (dark in dark mode),
+   readable over the light hero. (The see-through .is-clear look is no longer used.) */
 .site-header { position: fixed; top: 16px; left: 0; right: 0; z-index: 40; pointer-events: none; }
 .site-header__bar {
   position: relative;
@@ -118,46 +115,45 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site-header.is-clear :focus-visible,
 .hero :focus-visible { outline-color: var(--site-white); }
 
-/* ---------- Hero: one big rounded photo, bright, only shaded behind the text ----------
-   Laptops: the text on the left over a left-side gradient. The photo is as tall as the hero and moved
-   to the right (the faces are left of its middle), so both faces sit on the right, clear of the text;
-   the space it leaves on the left is the same deep ink as the gradient. */
+/* ---------- Hero: light and warm ----------
+   Laptops: the text on the left, on the page background (cream; dark in dark mode), and the photo on the
+   right half. The photo is never darkened or filtered: only its left edge fades into the background (a
+   mask, so there's no hard line). Both faces stay fully in view. */
 .hero {
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-height: 760px;
+  align-items: center;
+  min-height: 600px;
   margin: 16px;
-  padding: 140px clamp(24px, 5vw, 72px) 56px;   /* room for the header on top */
+  padding: 120px clamp(24px, 5vw, 72px) 48px;   /* room for the header on top */
   overflow: hidden;
   border-radius: 24px;
-  background: var(--hero-photo) max(0px, calc(48vw - 500px)) 0 / auto 100% no-repeat rgb(var(--site-shade));
-  color: #ffffff;
-  text-align: left;
+  background: var(--bg);
+  color: var(--text);
 }
-/* Shade only where it's needed: behind the text on the left, and a little at the top for the header */
-.hero::before {
-  content: '';
+.hero__photo {
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(var(--site-shade), 0.8) 0, rgba(var(--site-shade), 0.62) 90px, rgba(var(--site-shade), 0) 180px),
-    linear-gradient(90deg, rgb(var(--site-shade)) 0%, rgba(var(--site-shade), 0.9) 44%, rgba(var(--site-shade), 0) 60%);
+  top: 0;
+  right: 0;
+  width: 56%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 28% 40%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 20%);
 }
-.hero__content { position: relative; max-width: 560px; margin-block: auto; }
-/* (colour set here too: a shared heading style would otherwise make the first line dark) */
-.hero__title { margin: 0; color: #ffffff; font-size: clamp(2.4rem, 5.6vw, calc(64rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+.hero__content { position: relative; max-width: 520px; }
+/* (colour set here too: a shared heading style would otherwise change it) */
+.hero__title { margin: 0; color: var(--text); font-size: clamp(2.4rem, 4.4vw, calc(60rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
 .hero__line { display: block; }
-.hero__line--soft { color: var(--site-on-photo-soft); }
-.hero__body { max-width: 36em; margin: 24px 0 0; color: rgba(255, 255, 255, 0.94); font-size: 1.2rem; line-height: 1.6; }
-.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
-/* "Sign in" = solid plum; "See how it works" = solid white with plum text. Both are plum with white text on hover. */
+.hero__line--soft { color: var(--accent-text); }   /* terracotta on cream (5.1:1); light apricot in dark mode */
+.hero__body { max-width: 36em; margin: 24px 0 0; color: var(--text); font-size: 1.15rem; line-height: 1.6; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+/* "Sign in" = solid plum; "See how it works" = white with plum text. Both are plum with white text on hover. */
 .hero__signin { background: var(--site-plum); color: var(--site-white); }
 .hero__signin:hover { background: var(--site-plum-hover); }
-.hero .hero__white { border-color: var(--site-white); background: var(--site-white); color: var(--site-plum); }
+.hero .hero__white { border-color: var(--border-strong); background: var(--site-white); color: var(--site-plum); }
 .hero .hero__white:hover { border-color: var(--site-plum); background: var(--site-plum); color: var(--site-white); }
-
 
 /* ---------- About: photo on the left, text and three facts on the right ---------- */
 .section.about { padding: 128px 0 64px; }
@@ -393,23 +389,10 @@ html:has(.site) { scroll-padding-top: 104px; }
   html:has(.site) { scroll-padding-top: 88px; }
   /* The dropdown is a white card, so its links are always dark */
   .site-header.is-solid .site-nav__link { color: var(--muted); }
-  /* Phones and tablets: the photo fills the top (faces in view) and fades into deep ink at the bottom,
-     where the text sits, centred */
-  .hero {
-    align-items: center;
-    min-height: 760px;
-    margin: 10px;
-    padding: 120px 20px 32px;
-    border-radius: 20px;
-    background: var(--hero-photo) 60% 0 / auto 58% no-repeat rgb(var(--site-shade));
-    text-align: center;
-  }
-  .hero::before {
-    background:
-      linear-gradient(180deg, rgba(var(--site-shade), 0.72) 0, rgba(var(--site-shade), 0.4) 80px, rgba(var(--site-shade), 0) 150px),
-      linear-gradient(0deg, rgb(var(--site-shade)) 0%, rgb(var(--site-shade)) 44%, rgba(var(--site-shade), 0.6) 50%, rgba(var(--site-shade), 0) 66%);
-  }
-  .hero__content { max-width: 640px; margin-block: auto 0; }
+  /* Phones and tablets: the photo on top (full width, faces in view), the text below, centred */
+  .hero { flex-direction: column; align-items: stretch; min-height: 0; margin: 10px; padding: 96px 16px 32px; border-radius: 20px; text-align: center; }
+  .hero__photo { position: static; width: 100%; height: auto; aspect-ratio: 612 / 323; margin-bottom: 28px; border-radius: 16px; -webkit-mask-image: none; mask-image: none; }
+  .hero__content { max-width: 640px; margin-inline: auto; }
   .hero__body { margin-inline: auto; }
   .hero__actions { justify-content: center; }
   .site-header .site-header__toggle { display: inline-flex; }
@@ -464,12 +447,8 @@ html:has(.site) { scroll-padding-top: 104px; }
 }
 
 @media (max-width: 600px) {
-  .hero { min-height: 740px; padding: 108px 16px 24px; background-size: auto 46%; }
-  .hero::before {
-    background:
-      linear-gradient(180deg, rgba(var(--site-shade), 0.72) 0, rgba(var(--site-shade), 0.4) 80px, rgba(var(--site-shade), 0) 140px),
-      linear-gradient(0deg, rgb(var(--site-shade)) 0%, rgb(var(--site-shade)) 54%, rgba(var(--site-shade), 0.6) 58%, rgba(var(--site-shade), 0) 66%);
-  }
+  .hero { padding: 92px 12px 24px; }
+  .hero__photo { margin-bottom: 22px; }
   .hero__body { font-size: 1.05rem; }
   .hero__actions .btn { flex: 1 1 100%; }
 

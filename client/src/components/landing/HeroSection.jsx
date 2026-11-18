@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
-import heroPhoto from '../../assets/images/hero-warm.webp';
+import heroPhoto from '../../assets/images/hero-photo.webp';
 
-// The hero: one big rounded photo, kept bright. It is only darkened behind the text:
-// on laptops a gradient on the left (the faces are on the right), on phones and tablets the photo sits
-// at the top and fades into a deep ink colour at the bottom, where the text is.
-// (hero-warm.webp is a web-sized copy of hero_new.png, which is not committed.)
+// The hero, light and warm: the text on the page background (cream, or dark in dark mode) and the photo
+// beside it, never darkened or filtered. Laptops: photo on the right, its left edge fading into the
+// background. Phones and tablets: photo on top, text below.
+// (hero-photo.webp is hero-new.jpg at its own size, 612 × 323; the .jpg is not committed.)
 export default function HeroSection() {
   return (
-    <section id="home" className="hero" style={{ '--hero-photo': `url(${heroPhoto})` }}>
+    <section id="home" className="hero">
+      <img className="hero__photo" src={heroPhoto} alt="A smiling caregiver hugging a happy older woman" />
       <div className="hero__content">
         <h1 className="hero__title">
           <span className="hero__line">Making caregiving easier,</span>{' '}
