@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom';
-import heroPhoto from '../../assets/images/hero-bg.webp';
+import heroPhoto from '../../assets/images/hero-warm.webp';
 
-// Three short facts in a row at the bottom of the hero photo (stacked on phones)
-const FACTS = ['Morning, Noon and Night handovers', 'Synced with Google Calendar', 'Reminders even when the tab is closed'];
-
-// The hero: one big rounded photo with an even dark layer over it, and everything centred on top.
-// (hero-bg.webp is a web-sized copy of the original hero-bg.png, which is kept in design-reference/:
-// about 52 KB instead of 4 MB, with the PNG's transparent border trimmed off so no frame shows.)
+// The hero: one big rounded photo, kept bright. It is only darkened behind the text:
+// on laptops a gradient on the left (the faces are on the right), on phones and tablets the photo sits
+// at the top and fades into a deep ink colour at the bottom, where the text is.
+// (hero-warm.webp is a web-sized copy of hero_new.png, which is not committed.)
 export default function HeroSection() {
   return (
     <section id="home" className="hero" style={{ '--hero-photo': `url(${heroPhoto})` }}>
@@ -23,10 +21,6 @@ export default function HeroSection() {
           <a href="#how" className="btn btn--lg hero__white">See how it works</a>
         </div>
       </div>
-
-      <ul className="hero__facts">
-        {FACTS.map((fact) => <li key={fact}>{fact}</li>)}
-      </ul>
     </section>
   );
 }
