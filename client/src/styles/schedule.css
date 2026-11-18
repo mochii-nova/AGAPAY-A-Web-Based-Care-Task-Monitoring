@@ -38,6 +38,24 @@
 .status-filter:has(input:not(:checked)) { color: var(--faint); }
 .status-filter:has(input:not(:checked)) .dot { opacity: 0.35; }
 
+/* "Filters" (phones only) and the wrapper it opens: on laptops the wrapper takes no space of its own,
+   so the checkboxes, search and category sit in the toolbar row exactly as before */
+.schedule-toolbar .schedule-toolbar__toggle { display: none; }
+.schedule-toolbar__more { display: contents; }
+.schedule-toolbar__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--indigo);
+  color: var(--on-indigo);
+  font-size: 13px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
 .schedule-toolbar__filters { display: flex; flex: 1 1 auto; justify-content: flex-end; gap: 8px; min-width: 0; }
 .schedule-toolbar .search-box { flex: 0 1 250px; min-width: 240px; } /* fits "Search tasks or residents" */
 .schedule-toolbar .select { flex: 0 0 165px; width: 165px; }
@@ -271,9 +289,18 @@
   .dots { gap: 2px; }
   .dots .dot { width: 6px; height: 6px; }
   .month__head span { font-size: 0.75rem; }
-  /* Phones: checkboxes in a 2 × 2 grid, search and category stacked */
+}
+/* Phones: one compact row (‹ Today › on the left, "Filters" on the right). "Filters" opens the
+   checkboxes (2 × 2), search and category underneath, inside the same card. */
+@media (max-width: 640px) {
+  .card.schedule-toolbar { flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 8px 10px; }
+  .schedule-toolbar .schedule-toolbar__toggle { display: inline-flex; gap: 6px; min-height: var(--tap); }
+  .schedule-toolbar__more { display: none; flex-basis: 100%; flex-direction: column; gap: 10px; padding: 6px 0 4px; border-top: 1px solid var(--border); }
+  .schedule-toolbar__more.is-open { display: flex; }
   .status-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .schedule-toolbar__filters { flex-direction: column; }
   .schedule-toolbar .search-box,
   .schedule-toolbar .select { flex: none; width: 100%; }
+  /* Google Calendar box: "Add this shift" full width, "Disconnect" full width under it */
+  .gcal__actions { grid-auto-flow: row; }
 }

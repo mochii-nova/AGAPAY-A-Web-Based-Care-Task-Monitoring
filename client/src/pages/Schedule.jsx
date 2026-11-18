@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
 import useTasks from '../hooks/useTasks';
 import useShifts from '../hooks/useShifts';
 import useNow from '../hooks/useNow';
@@ -53,6 +53,11 @@ export default function Schedule() {
   const [shiftPick, setShiftPick] = useState({ day: null, id: '' });
   const [openTaskId, setOpenTaskId] = useState(null);
 
+  // Phones: whether the folded filters are open, and how many filters are in use (a status turned
+  // off, a search, a category)
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersInUse = STATUS_FILTERS.length - statuses.length + (search.trim() ? 1 : 0) + (category ? 1 : 0);
+
   const toggleStatus = (id) =>
     setStatuses((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
 
@@ -96,7 +101,7 @@ export default function Schedule() {
   return (
     <div>
       <PageHeader title={view === 'month' ? monthTitle(selected) : weekTitle(selected)} subtitle="Your shifts and care tasks.">
-        <div className="segmented" role="group" aria-label="Calendar view">
+        <div className="segmented schedule-view" role="group" aria-label="Calendar view">
           <button type="button" className="segmented__btn" aria-pressed={view === 'month'} onClick={() => setView('month')}>Month</button>
           <button type="button" className="segmented__btn" aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
         </div>
@@ -115,6 +120,24 @@ export default function Schedule() {
           </button>
         </div>
 
+        {/* Phones only: the filters fold away behind this button (a badge counts the ones in use) */}
+        <button
+          type="button"
+          className="btn btn--outline btn--sm schedule-toolbar__toggle"
+          aria-expanded={filtersOpen}
+          aria-controls="schedule-filters"
+          onClick={() => setFiltersOpen((o) => !o)}
+        >
+          <SlidersHorizontal size={16} aria-hidden="true" /> Filters
+          {filtersInUse > 0 && (
+            <span className="schedule-toolbar__badge">
+              {filtersInUse}<span className="sr-only"> in use</span>
+            </span>
+          )}
+        </button>
+
+        {/* (on laptops this wrapper takes no space of its own: its parts sit in the toolbar row as before) */}
+        <div id="schedule-filters" className={`schedule-toolbar__more ${filtersOpen ? 'is-open' : ''}`}>
         <fieldset className="status-filters">
           <legend className="sr-only">Show tasks that are</legend>
           {STATUS_FILTERS.map(({ id, label }) => (
@@ -144,6 +167,7 @@ export default function Schedule() {
             <option value="">All categories</option>
             {TASK_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
+        </div>
         </div>
       </div>
 
