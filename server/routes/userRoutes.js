@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { photoUpload, looksLikeImage, PHOTO_DIR } = require('../middleware/upload');
-const { publicUser, fullUser, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
+const { publicUser, fullUser, displayName, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
 const { isShift, isDate } = require('../utils/shifts');
 
 const router = express.Router();
@@ -35,11 +35,11 @@ router.patch('/me', async (req, res) => {
   const has = (key) => Object.prototype.hasOwnProperty.call(b, key);
 
   const first = has('firstName') ? clean(b.firstName, 40) : me.first_name;
+  const middle = has('middleName') ? clean(b.middleName, 40) : me.middle_name;
   const last = has('lastName') ? clean(b.lastName, 40) : me.last_name;
   if ((has('firstName') || has('lastName')) && (!first || !last)) {
     return res.status(400).json({ message: 'First and last name are required.' });
   }
-  const name = has('firstName') || has('lastName') ? `${first} ${last}`.slice(0, 80) : me.name;
 
   let email = me.email;
   if (has('email')) {
@@ -52,12 +52,12 @@ router.patch('/me', async (req, res) => {
   const ecHas = (key) => b.emergencyContact && Object.prototype.hasOwnProperty.call(ec, key);
 
   await pool.query(
-    `UPDATE users SET name = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
+    `UPDATE users SET first_name = ?, middle_name = ?, last_name = ?, email = ?, phone = ?,
        emergency_name = ?, emergency_relationship = ?, emergency_phone = ?
      WHERE id = ?`,
     [
-      name,
       first,
+      middle,
       last,
       email,
       has('phone') ? clean(b.phone, 20) : me.phone,
@@ -125,7 +125,7 @@ router.patch('/me/password', async (req, res) => {
 router.get('/', allowRoles('admin'), async (req, res) => {
   const where = [];
   const params = [];
-  if (['pending', 'active', 'inactive'].includes(req.query.status)) {
+  if (['pending', 'active', 'inactive', 'rejected'].includes(req.query.status)) {
     where.push('status = ?');
     params.push(req.query.status);
   }
@@ -134,7 +134,7 @@ router.get('/', allowRoles('admin'), async (req, res) => {
     params.push(req.query.role);
   }
   const [rows] = await pool.query(
-    `SELECT * FROM users ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY name ASC`,
+    `SELECT * FROM users ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY first_name, last_name ASC`,
     params
   );
   res.json(rows.map((u) => fullUser(u, req)));
@@ -145,13 +145,15 @@ router.get('/', allowRoles('admin'), async (req, res) => {
 router.post('/', allowRoles('admin'), async (req, res) => {
   const b = req.body;
   const first = clean(b.firstName, 40);
+  const middle = clean(b.middleName, 40);
   const last = clean(b.lastName, 40);
-  const name = clean(b.name, 80) ?? clean([first, last].filter(Boolean).join(' '), 80);
   const username = clean(b.username, 30)?.toUpperCase();
   const role = b.role === 'admin' ? 'admin' : 'caregiver';
   const email = clean(b.email, 120)?.toLowerCase() ?? null;
 
-  if (!name || !username || !b.password) return res.status(400).json({ message: 'Name, Employee ID and password are required.' });
+  if (!first || !last || !username || !b.password) {
+    return res.status(400).json({ message: 'First name, last name, Employee ID and password are required.' });
+  }
   if (!strongPassword(b.password)) return res.status(400).json({ message: PASSWORD_RULE });
   if (email && !validEmail(email)) return res.status(400).json({ message: 'Please enter a valid email address.' });
   if (b.assignedShift && !isShift(b.assignedShift)) return res.status(400).json({ message: 'Shift must be Morning, Afternoon or Night.' });
@@ -163,9 +165,9 @@ router.post('/', allowRoles('admin'), async (req, res) => {
   if (email && (await emailTaken(email, 0))) return res.status(409).json({ message: 'This email already has an account.' });
 
   const [result] = await pool.query(
-    `INSERT INTO users (name, first_name, last_name, username, password, role, status, email, phone, assigned_shift, date_hired, title)
+    `INSERT INTO users ((first_name, middle_name, last_name, username, password, role, status, email, phone, assigned_shift, date_hired, title)
      VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)`,
-    [name, first, last, username, await bcrypt.hash(b.password, 10), role, email, clean(b.phone, 20),
+    [first, middle, last, username, await bcrypt.hash(b.password, 10), role, email, clean(b.phone, 20),
      b.assignedShift || null, b.dateHired || null, clean(b.title, 60)]
   );
   res.status(201).json(fullUser(await getUser(result.insertId), req));
@@ -211,8 +213,8 @@ router.patch('/:id', allowRoles('admin'), async (req, res) => {
 // PATCH /api/users/:id/status  { status: 'active' | 'inactive' | 'pending' }  (approve / deactivate)
 router.patch('/:id/status', allowRoles('admin'), async (req, res) => {
   const { status } = req.body;
-  if (!['pending', 'active', 'inactive'].includes(status)) {
-    return res.status(400).json({ message: 'Status must be pending, active or inactive.' });
+  if (!['active', 'inactive', 'rejected'].includes(status)) {
+    return res.status(400).json({ message: 'Status must be active, inactive or rejected.' });
   }
   if (Number(req.params.id) === req.user.id) {
     return res.status(400).json({ message: 'You cannot change your own status.' });
@@ -220,8 +222,18 @@ router.patch('/:id/status', allowRoles('admin'), async (req, res) => {
   const user = await getUser(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  await pool.query('UPDATE users SET status = ? WHERE id = ?', [status, user.id]);
-  res.json(fullUser({ ...user, status }, req));
+  let reason = null;
+  if (status === 'rejected') {
+    if (user.status !== 'pending') return res.status(400).json({ message: 'Only a pending sign-up can be rejected.' });
+    reason = clean(req.body.reason, 255);
+    if (!reason) return res.status(400).json({ message: 'Please give a reason for rejecting this sign-up.' });
+  }
+  if (status === 'inactive' && user.status !== 'active') {
+    return res.status(400).json({ message: 'Only an approved account can be deactivated. Reject a pending sign-up instead.' });
+  }
+
+  await pool.query('UPDATE users SET status = ?, rejection_reason = ? WHERE id = ?', [status, reason, user.id]);
+  res.json(fullUser(await getUser(user.id), req));
 });
 
 // POST /api/users/:id/reset-password  ->  { temporaryPassword }
@@ -239,7 +251,7 @@ router.post('/:id/reset-password', allowRoles('admin'), async (req, res) => {
   const temporaryPassword = `agapay-${chars.sort(() => crypto.randomInt(3) - 1).join('')}`;
 
   await pool.query('UPDATE users SET password = ? WHERE id = ?', [await bcrypt.hash(temporaryPassword, 10), user.id]);
-  res.json({ message: `Temporary password set for ${user.name}.`, temporaryPassword });
+  res.json({ message: `Temporary password set for ${displayName(user)}.`, temporaryPassword });
 });
 
 // DELETE /api/users/:id
@@ -259,7 +271,7 @@ router.delete('/:id', allowRoles('admin'), async (req, res) => {
 // Short list of staff for pickers (e.g. "assign task to"). Admin only.
 // GET /api/users/list/caregivers
 router.get('/list/caregivers', allowRoles('admin'), async (req, res) => {
-  const [rows] = await pool.query("SELECT * FROM users WHERE role = 'caregiver' AND status = 'active' ORDER BY name");
+  const [rows] = await pool.query("SELECT * FROM users WHERE role = 'caregiver' AND status = 'active' ORDER BY first_name, last_name");
   res.json(rows.map((u) => publicUser(u, req)));
 });
 

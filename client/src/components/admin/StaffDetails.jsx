@@ -42,7 +42,7 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, offT
             <button type="button" className="btn btn--primary" onClick={() => onStatus('active')}>
               <UserCheck size={18} aria-hidden="true" /> Approve
             </button>
-            <button type="button" className="btn btn--danger" onClick={() => onStatus('inactive')}>Decline</button>
+            <button type="button" className="btn btn--danger" onClick={() => onStatus('rejected')}>Reject</button>
           </div>
         </div>
       )}
@@ -78,7 +78,7 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, offT
         </div>
       </dl>
 
-      {person.role === 'caregiver' && person.status !== 'pending' && (
+      {person.role === 'caregiver' && (person.status === 'active' || person.status === 'inactive') && (
         <>
           <section className="staff-details__section">
             <h3 className="small-label">Assigned residents</h3>
@@ -103,7 +103,7 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, offT
         </>
       )}
 
-      {person.status !== 'pending' && (
+      {(person.status === 'active' || person.status === 'inactive') && (
         <div className="staff-details__actions staff-details__actions--grid">
           <button type="button" className="btn btn--soft" onClick={onEdit}>Edit</button>
           {!isMe && <button type="button" className="btn btn--outline" onClick={onReset}>Reset password</button>}
@@ -113,6 +113,18 @@ export default function StaffDetails({ person, isMe, todayTasks, residents, offT
           {!isMe && person.status === 'inactive' && (
             <button type="button" className="btn btn--outline staff-details__wide" onClick={() => onStatus('active')}>Reactivate account</button>
           )}
+        </div>
+      )}
+       {person.status === 'rejected' && (
+        <div className="staff-details__pending">
+          <p>
+            Sign-up rejected. Reason: <strong>{person.rejectionReason || 'none given'}</strong>
+          </p>
+          <div className="staff-details__actions">
+            <button type="button" className="btn btn--primary" onClick={() => onStatus('active')}>
+              <UserCheck size={18} aria-hidden="true" /> Approve after all
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -2,7 +2,8 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
-const { clean } = require('../utils/users');
+const { clean, NAME_SQL } = require('../utils/users');
+const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
 
 const router = express.Router();
 router.use(protect);
@@ -10,10 +11,10 @@ router.use(protect);
 const CATEGORIES = ['hygiene', 'mobility', 'meal', 'medical', 'rest', 'recreation'];
 
 const SELECT_TASKS = `
-  SELECT t.*, r.resident_code, r.room, r.name AS resident_name,
-         a.name AS assigned_name, c.name AS completed_name
+  SELECT t.*, r.resident_code, ${ROOM_LABEL} AS room, r.name AS resident_name,
+        ${NAME_SQL('a')} AS assigned_name, ${NAME_SQL('c')} AS completed_name
   FROM tasks t
-  LEFT JOIN residents r ON r.id = t.resident_id
+  LEFT JOIN residents r ON r.id = t.resident_id ${ROOM_JOIN('r')}
   LEFT JOIN users a     ON a.id = t.assigned_to
   LEFT JOIN users c     ON c.id = t.completed_by
 `;

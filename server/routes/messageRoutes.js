@@ -6,6 +6,7 @@ const express = require('express');
 const pool = require('../db');
 const { protect } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
+const { NAME_SQL } = require('../utils/users');
 
 const router = express.Router();
 router.use(protect);
@@ -25,7 +26,7 @@ const toMessage = (m) => ({
 // Caregivers may only talk to admins; admins may talk to anyone
 async function canTalkTo(me, otherId) {
   if (Number(otherId) === me.id) return null;
-  const [[other]] = await pool.query("SELECT id, name, role, title FROM users WHERE id = ? AND status = 'active'", [otherId]);
+  const [[other]] = await pool.query(`SELECT id, ${NAME_SQL('users')} AS name, role, title FROM users WHERE id = ? AND status = 'active'`, [otherId]);
   if (!other) return null;
   if (me.role !== 'admin' && other.role !== 'admin') return null;
   return other;
@@ -38,11 +39,11 @@ router.get('/conversations', async (req, res) => {
   const [people] =
     me.role === 'admin'
       ? await pool.query(
-          `SELECT DISTINCT u.id, u.name, u.role, u.title FROM users u
+          `SELECT DISTINCT u.id, ${NAME_SQL('u')} AS name, u.role, u.title FROM users u
            JOIN messages m ON (m.sender_id = u.id AND m.recipient_id = ?) OR (m.recipient_id = u.id AND m.sender_id = ?)`,
           [me.id, me.id]
         )
-      : await pool.query("SELECT id, name, role, title FROM users WHERE role = 'admin' AND status = 'active' AND id <> ?", [me.id]);
+      : await pool.query(`SELECT id, ${NAME_SQL('users')} AS name, role, title FROM users WHERE role = 'admin' AND status = 'active' AND id <> ?`, [me.id]);
 
   const result = await Promise.all(
     people.map(async (u) => {

@@ -30,23 +30,24 @@ const STATUS_FILTERS = [
   { value: 'active', label: 'Active' },
   { value: 'pending', label: 'Pending approval' },
   { value: 'inactive', label: 'Deactivated' },
+  { value: 'rejected', label: 'Rejected' },
 ];
 const SHIFT_FILTERS = [{ value: '', label: 'Any usual shift' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: s.label })), { value: 'none', label: 'Not set' }];
 
 // Waiting for approval first, then active, then deactivated; by name within each
-const ORDER = { pending: 0, active: 1, inactive: 2 };
+const ORDER = { pending: 0, active: 1, inactive: 2, rejected: 3 };
 const byStatusThenName = (a, b) => ORDER[a.status] - ORDER[b.status] || a.name.localeCompare(b.name);
 
 // What each status change is called, for the confirm pop-up and the message after
 const STATUS_ACTIONS = {
   approve: { title: 'Approve this account?', button: 'Approve', done: (n) => `${n} is approved and can sign in now.` },
-  decline: { title: 'Decline this sign-up?', button: 'Decline', danger: true, done: (n) => `${n}'s sign-up was declined.` },
+  reject: { title: 'Reject this sign-up?', button: 'Reject', danger: true, done: (n) => `${n}'s sign-up was rejected.` },
   deactivate: { title: 'Deactivate this account?', button: 'Deactivate', danger: true, done: (n) => `${n}'s account is deactivated.` },
   reactivate: { title: 'Reactivate this account?', button: 'Reactivate', done: (n) => `${n}'s account is active again.` },
 };
 const ACTION_TEXT = {
   approve: (n) => `${n} will be able to sign in and will see the tasks and residents assigned to them.`,
-  decline: (n) => `${n} won't be able to sign in. You can reactivate the account later if this was a mistake.`,
+  reject: (n) => `${n} can't sign in, and sees your reason when they try. The sign-up stays under Rejected, so you can still approve it later.`,
   deactivate: (n) => `${n} is signed out straight away and can't sign in until you reactivate the account. Their tasks and handovers are kept.`,
   reactivate: (n) => `${n} will be able to sign in again.`,
 };
@@ -76,6 +77,7 @@ export default function ManageStaff() {
   const [confirm, setConfirm] = useState(null); // { person, action, status }
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmError, setConfirmError] = useState('');
+  const [rejectReason, setRejectReason] = useState(''); // for Reject
   // After a caregiver's usual shift is set or changed: offer to put them on this month's Schedule
   const [fillAsk, setFillAsk] = useState(null); // the saved account
   const fillShift = SHIFTS.find((s) => s.apiValue === fillAsk?.assignedShift);
@@ -118,17 +120,22 @@ export default function ManageStaff() {
   };
 
   const askStatus = (person, newStatus) => {
-    const action =
-      newStatus === 'active' ? (person.status === 'pending' ? 'approve' : 'reactivate') : person.status === 'pending' ? 'decline' : 'deactivate';
+     const action =
+      newStatus === 'active' ? (person.status === 'inactive' ? 'reactivate' : 'approve') : newStatus === 'rejected' ? 'reject' : 'deactivate';
     setConfirmError('');
+    setRejectReason('');
     setConfirm({ person, action, status: newStatus });
   };
 
   const doStatus = async () => {
+    if (confirm.action === 'reject' && !rejectReason.trim()) {
+      setConfirmError('Please write the reason. The applicant will see it.');
+      return;
+    }
     setConfirmBusy(true);
     setConfirmError('');
     try {
-      await setStatus(confirm.person.id, confirm.status);
+      await setStatus(confirm.person.id, confirm.status, confirm.action === 'reject' ? rejectReason.trim() : undefined);
       showToast(STATUS_ACTIONS[confirm.action].done(confirm.person.name));
       setConfirm(null);
     } catch (err) {
@@ -324,6 +331,22 @@ export default function ManageStaff() {
         onClose={() => setConfirm(null)}
       >
         {confirm && <p>{ACTION_TEXT[confirm.action](confirm.person.name)}</p>}
+        {confirm?.action === 'reject' && (
+          <div className="field">
+            <label htmlFor="reject-reason" className="field__label">
+              Reason<span className="field__required" aria-hidden="true"> *</span>
+            </label>
+            <textarea
+              id="reject-reason"
+              className="field__input"
+              rows={3}
+              maxLength={255}
+              placeholder="e.g. Incomplete requirements. Please submit your NBI clearance."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
+        )}
       </ConfirmModal>
     </div>
   );

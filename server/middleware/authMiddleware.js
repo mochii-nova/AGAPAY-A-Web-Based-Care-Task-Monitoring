@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const { displayName, blockedMessage } = require('../utils/users');
 
 // Must be logged in with an active account.
 // The account is looked up on every request, so if an admin deactivates someone
@@ -17,15 +18,15 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 
-  const [[user]] = await pool.query('SELECT id, name, role, status FROM users WHERE id = ?', [payload.id]);
+    const [[user]] = await pool.query(
+    'SELECT id, first_name, middle_name, last_name, role, status, rejection_reason FROM users WHERE id = ?',
+    [payload.id]
+  );
   if (!user) return res.status(401).json({ message: 'This account no longer exists.' });
-  if (user.status !== 'active') {
-    return res.status(401).json({
-      message: user.status === 'pending' ? 'Your account is waiting for approval.' : 'Your account is inactive.',
-    });
-  }
+  const blocked = blockedMessage(user);
+  if (blocked) return res.status(401).json({ message: blocked });
 
-  req.user = { id: user.id, name: user.name, role: user.role };
+  req.user = { id: user.id, name: displayName(user), role: user.role };
   next();
 };
 

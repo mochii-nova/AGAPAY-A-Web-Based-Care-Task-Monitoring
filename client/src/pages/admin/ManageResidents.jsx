@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Search, Users, UserPlus } from 'lucide-react';
+import { Search, Users, UserPlus, BedDouble } from 'lucide-react';
 import api from '../../api';
 import { useStaff } from '../../context/StaffContext';
 import { useHandovers } from '../../context/HandoverContext';
 import { useToast } from '../../context/ToastContext';
 import useApiData from '../../hooks/useApiData';
 import useResidents from '../../hooks/useResidents';
+import useRooms from '../../hooks/useRooms';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { isoDay } from '../../hooks/useShifts';
 import { SHIFTS, TASK_CATEGORIES } from '../../constants';
@@ -23,6 +24,7 @@ import TodayLine from '../../components/residents/TodayLine';
 import ResidentDetails from '../../components/admin/ResidentDetails';
 import ResidentFormModal, { nextResidentCode } from '../../components/admin/ResidentFormModal';
 import AssignCaregiversModal from '../../components/admin/AssignCaregiversModal';
+import RoomsModal from '../../components/admin/RoomsModal';
 import TaskFormModal from '../../components/admin/TaskFormModal';
 import { LoadingState, ErrorState, EmptyState, NoMatchState } from '../../components/StateMessage';
 import '../../styles/residents.css';
@@ -39,6 +41,8 @@ const STATUS_FILTERS = [
 // Add residents, keep their details up to date and choose who looks after them
 export default function ManageResidents() {
   const { residents, status, error, reload, setData } = useResidents();
+  const roomsQuery = useRooms(); // rooms and beds, for the resident form and "Rooms & beds"
+  const [roomsOpen, setRoomsOpen] = useState(false);
   const { staff } = useStaff();
   const { handovers } = useHandovers();
   const showToast = useToast();
@@ -92,6 +96,7 @@ export default function ManageResidents() {
     const editing = form?.resident;
     const { data } = editing ? await api.put(`/residents/${editing.id}`, fields) : await api.post('/residents', fields);
     put(data);
+    roomsQuery.reload({ silent: true }); // a bed or private room is now taken (or free)
     if (editing) {
       showToast(`Saved ${data.name}'s details.`);
       if (editing.residentCode !== data.residentCode && openCode) setSearchParams({ open: data.residentCode }, { replace: true });
@@ -118,6 +123,7 @@ export default function ManageResidents() {
     try {
       await api.delete(`/residents/${deleteFor.id}`);
       setData((list) => list.filter((r) => r.id !== deleteFor.id));
+      roomsQuery.reload({ silent: true }); // their room or bed is free again
       showToast(`${deleteFor.name} was removed.`);
       setDeleteFor(null);
       closePopup();
@@ -151,6 +157,9 @@ export default function ManageResidents() {
         title="Manage Residents"
         subtitle={status === 'ready' ? `${count} ${count === 1 ? 'resident' : 'residents'} · choose one to see and edit their details.` : 'Residents, their care needs and their caregivers.'}
       >
+        <button type="button" className="btn btn--outline" onClick={() => setRoomsOpen(true)}>
+          <BedDouble size={18} aria-hidden="true" /> Rooms & beds
+        </button>
         <button type="button" className="btn btn--primary" onClick={() => setForm({})}>
           <UserPlus size={18} aria-hidden="true" /> Add resident
         </button>
@@ -251,8 +260,18 @@ export default function ManageResidents() {
         open={!!form}
         resident={form?.resident}
         suggestedCode={nextResidentCode(residents)}
+        rooms={roomsQuery.rooms}
         onSave={saveResident}
         onClose={() => setForm(null)}
+      />
+       <RoomsModal
+        open={roomsOpen}
+        rooms={roomsQuery.rooms}
+        onChanged={() => {
+          roomsQuery.reload({ silent: true });
+          reload({ silent: true }); // a renamed room shows on the residents too
+        }}
+        onClose={() => setRoomsOpen(false)}
       />
       <AssignCaregiversModal
         resident={assignFor}
@@ -297,6 +316,7 @@ export default function ManageResidents() {
           </p>
         )}
       </ConfirmModal>
+      
     </div>
   );
 }

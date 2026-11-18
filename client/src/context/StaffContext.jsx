@@ -29,9 +29,10 @@ export function StaffProvider({ children }) {
     return data;
   };
 
-  // 'active' (approve / reactivate) | 'inactive' (deactivate / decline)
-  const setStatus = async (id, status) => {
-    const { data } = await api.patch(`/users/${id}/status`, { status });
+  // 'active' (approve / reactivate) | 'inactive' (deactivate an approved account)
+  // | 'rejected' (reject a pending sign-up; `reason` is required and the applicant sees it)
+  const setStatus = async (id, status, reason) => {
+    const { data } = await api.patch(`/users/${id}/status`, { status, reason });
     put(data);
     return data;
   };

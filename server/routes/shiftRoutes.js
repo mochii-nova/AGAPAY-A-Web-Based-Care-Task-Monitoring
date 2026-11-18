@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
+const { NAME_SQL, NAME_ORDER } = require('../utils/users');
 const { SHIFT_LABEL, isShift, isDate, addDays, shiftTimes, shiftAt, nextShift } = require('../utils/shifts');
 
 const router = express.Router();
@@ -52,8 +53,8 @@ router.get('/', async (req, res) => {
   }
 
   const [rows] = await pool.query(
-    `SELECT s.*, u.name AS user_name FROM shifts s JOIN users u ON u.id = s.user_id
-     WHERE s.shift_date BETWEEN ? AND ? ${who} ORDER BY s.shift_date, FIELD(s.shift, 'Morning', 'Afternoon', 'Night'), u.name`,
+    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id
+     WHERE s.shift_date BETWEEN ? AND ? ${who} ORDER BY s.shift_date, FIELD(s.shift, 'Morning', 'Afternoon', 'Night'), ${NAME_ORDER('u')}`,
     params
   );
   res.json(rows.map(toShift));
@@ -63,7 +64,7 @@ router.get('/', async (req, res) => {
 router.get('/current', async (req, res) => {
   const now = shiftAt();
   const [rows] = await pool.query(
-    'SELECT s.*, u.name AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.shift_date = ? AND s.shift = ?',
+    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.shift_date = ? AND s.shift = ?`,
     [now.shiftDate, now.shift]
   );
   res.json({ ...now, ...shiftTimes(now.shiftDate, now.shift), staff: rows.map(toShift) });
@@ -95,7 +96,7 @@ router.put('/', allowRoles('admin'), async (req, res) => {
   if (before?.shift !== shift) tellSchedule(user.id, shiftDate, `${SHIFT_LABEL[shift]} shift`);
 
   const [[row]] = await pool.query(
-    'SELECT s.*, u.name AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.user_id = ? AND s.shift_date = ?',
+    `SELECT s.*, ${NAME_SQL('u')} AS user_name FROM shifts s JOIN users u ON u.id = s.user_id WHERE s.user_id = ? AND s.shift_date = ?`,
     [user.id, shiftDate]
   );
   res.json(toShift(row));
@@ -108,8 +109,8 @@ router.get('/next', async (req, res) => {
   }
   const next = nextShift(base.shift, base.shiftDate);
   const [rows] = await pool.query(
-    `SELECT s.user_id, u.name FROM shifts s JOIN users u ON u.id = s.user_id
-     WHERE s.shift_date = ? AND s.shift = ? AND u.status = 'active' ORDER BY u.name`,
+    `SELECT s.user_id, ${NAME_SQL('u')} AS name FROM shifts s JOIN users u ON u.id = s.user_id
+     WHERE s.shift_date = ? AND s.shift = ? AND u.status = 'active' ORDER BY ${NAME_ORDER('u')}`,
     [next.shiftDate, next.shift]
   );
   res.json({ ...next, ...shiftTimes(next.shiftDate, next.shift), staff: rows.map((r) => ({ userId: r.user_id, name: r.name })) });

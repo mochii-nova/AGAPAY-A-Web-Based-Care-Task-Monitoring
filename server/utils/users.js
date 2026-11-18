@@ -1,12 +1,27 @@
 // The shape the React app gets for a user. `_id` and `id` are both kept.
 // Never includes the password hash.
 
-// First / last name: the saved columns, or a best guess from the full name
-// for accounts made before those columns existed.
-function splitName(u) {
-  if (u.first_name || u.last_name) return { firstName: u.first_name ?? '', lastName: u.last_name ?? '' };
-  const parts = String(u.name ?? '').trim().split(/\s+/);
-  return { firstName: parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '', lastName: parts.length > 1 ? parts.at(-1) : '' };
+function displayName(u) {
+  const middle = u.middle_name ? `${u.middle_name.trim()[0]}.` : '';
+  return [u.first_name, middle, u.last_name].filter(Boolean).join(' ');
+}
+
+// The same full name, built inside a SQL query. `t` is the users table's alias, e.g. NAME_SQL('u')
+const NAME_SQL = (t) =>
+  `CONCAT_WS(' ', ${t}.first_name, IF(${t}.middle_name IS NULL OR ${t}.middle_name = '', NULL, CONCAT(LEFT(${t}.middle_name, 1), '.')), NULLIF(${t}.last_name, ''))`;
+
+// Sorting people A-Z in SQL
+const NAME_ORDER = (t) => `${t}.first_name, ${t}.last_name`;
+
+// Why an account can't sign in, or null if it can
+function blockedMessage(u) {
+  if (u.status === 'pending') return 'Your account is waiting for approval.';
+  if (u.status === 'rejected') {
+    const reason = u.rejection_reason ? `: ${u.rejection_reason.replace(/[.!?]*$/, '.')}` : '.';
+    return `Your sign-up was not approved${reason} Please contact the administrator.`;
+  }
+  if (u.status !== 'active') return 'Your account is inactive.';
+  return null;
 }
 
 // Photos are saved as /uploads/photos/x.jpg. The frontend runs on another port,
@@ -22,7 +37,7 @@ function photoAddress(req, path) {
 const publicUser = (u, req) => ({
   _id: u.id,
   id: u.id,
-  name: u.name,
+  name: displayName(u),
   username: u.username,
   role: u.role,
   status: u.status,
@@ -33,7 +48,10 @@ const publicUser = (u, req) => ({
 // Everything: My Profile and the admin's staff details
 const fullUser = (u, req) => ({
   ...publicUser(u, req),
-  ...splitName(u),
+  firstName: u.first_name ?? '',
+  middleName: u.middle_name ?? '',
+  lastName: u.last_name ?? '',
+  rejectionReason: u.rejection_reason ?? null,
   employeeId: u.username,
   email: u.email ?? null,
   phone: u.phone ?? null,
@@ -60,4 +78,4 @@ const clean = (value, max) => {
   return s ? s.slice(0, max) : null;
 };
 
-module.exports = { publicUser, fullUser, photoAddress, strongPassword, PASSWORD_RULE, validEmail, clean };
+module.exports = { displayName, NAME_SQL, NAME_ORDER, blockedMessage, publicUser, fullUser, photoAddress, strongPassword, PASSWORD_RULE, validEmail, clean };

@@ -7,6 +7,7 @@ export const STATUS_LABEL = {
   active: { label: 'Active', tone: 'completed' },
   pending: { label: 'Pending approval', tone: 'pending' },
   inactive: { label: 'Deactivated', tone: 'skipped' },
+  rejected: { label: 'Rejected', tone: 'overdue' },
 };
 
 // Approved caregivers who can still sign in, A–Z: the people every picker and filter lists.

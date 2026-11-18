@@ -2,7 +2,8 @@ const express = require('express');
 const pool = require('../db');
 const { protect } = require('../middleware/authMiddleware');
 const { notifyLater, idsWithRole } = require('../utils/notify');
-const { clean } = require('../utils/users');
+const { clean, NAME_SQL } = require('../utils/users');
+const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
 const { SHIFT_LABEL, isShift, isDate, shiftAt, nextShift } = require('../utils/shifts');
 
 const router = express.Router();
@@ -11,7 +12,7 @@ router.use(protect);
 const RESIDENT_STATUSES = ['normal', 'watch', 'urgent'];
 
 const SELECT_HANDOVERS = `
-  SELECT h.*, a.name AS author_name, a.role AS author_role, k.name AS ack_name
+  SELECT h.*, ${NAME_SQL('a')} AS author_name, a.role AS author_role, ${NAME_SQL('k')} AS ack_name
   FROM handovers h
   JOIN users a      ON a.id = h.author_id
   LEFT JOIN users k ON k.id = h.acknowledged_by
@@ -27,9 +28,9 @@ async function toHandovers(rows, me) {
   const ids = rows.map((r) => r.id);
 
   const [residents] = await pool.query(
-    `SELECT u.*, r.name, r.room, r.resident_code FROM handover_resident_updates u
-     JOIN residents r ON r.id = u.resident_id WHERE u.handover_id IN (?) ORDER BY r.room, r.name`,
-    [ids]
+    `SELECT u.*, r.name, ${ROOM_LABEL} AS room, r.resident_code FROM handover_resident_updates u
+     JOIN residents r ON r.id = u.resident_id ${ROOM_JOIN('r')}
+     WHERE u.handover_id IN (?) ORDER BY rm.room_number, bd.bed_code, r.name`,
   );
   const [tasks] = await pool.query(
     `SELECT c.*, t.task, t.resident, t.due_at, t.status AS task_status FROM handover_carried_tasks c
@@ -37,7 +38,7 @@ async function toHandovers(rows, me) {
     [ids]
   );
   const [reads] = await pool.query(
-    `SELECT hr.*, u.name FROM handover_reads hr JOIN users u ON u.id = hr.user_id
+    `SELECT hr.*, ${NAME_SQL('u')} AS name FROM handover_reads hr JOIN users u ON u.id = hr.user_id
      WHERE hr.handover_id IN (?) ORDER BY hr.read_at`,
     [ids]
   );

@@ -21,25 +21,27 @@ export function nextResidentCode(residents, year = new Date().getFullYear()) {
   return `RP-${year}-${String(Math.max(0, ...used) + 1).padStart(3, '0')}`;
 }
 
-function validate(form, today) {
+function validate(form, today, room) {
   const errors = {};
   if (!form.name.trim()) errors.name = 'Please enter the full name.';
   if (!/^[A-Za-z0-9-]{3,20}$/.test(form.residentCode.trim())) errors.residentCode = 'Use only letters, numbers and dashes, like RP-2026-001.';
-  if (!form.room.trim()) errors.room = 'Please enter the room.';
+  if (!room) errors.roomId = 'Please choose a room.';
+  else if (room.roomType === 'ward' && !form.bedId) errors.bedId = `Room ${room.roomNumber} is a ward. Please choose a bed.`;
   if (form.birthDate && form.birthDate > today) errors.birthDate = "The birth date can't be in the future.";
   if (form.contactPhone.trim() && !PHONE.test(form.contactPhone.replace(/[\s-]/g, ''))) errors.contactPhone = 'Use 11 digits starting with 09.';
   return errors;
 }
 
 // The form inside the pop-up: a new resident (`resident` empty) or changes to one
-function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
+function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose }) {
   const adding = !resident;
   const today = isoDay(new Date());
   const contact = resident?.emergencyContact ?? {};
   const [form, setForm] = useState({
     name: resident?.name ?? '',
     residentCode: resident?.residentCode ?? suggestedCode,
-    room: resident?.room ?? '',
+    roomId: resident?.roomId ? String(resident.roomId) : '',
+    bedId: resident?.bedId ? String(resident.bedId) : '',
     birthDate: resident?.birthDate ?? '',
     gender: resident?.gender ?? '',
     careNeeds: resident?.careNeeds ?? [],
@@ -53,16 +55,37 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
   const [saving, setSaving, startSaving] = useSaving();
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: undefined });
+    const { name, value } = e.target;
+    // A different room: choose the bed again
+    setForm({ ...form, [name]: value, ...(name === 'roomId' && { bedId: '' }) });
+    setErrors({ ...errors, [name]: undefined, ...(name === 'roomId' && { bedId: undefined }) });
   };
+
+  // Rooms with space (and this resident's own room). A ward shows how many beds are free.
+  const room = rooms.find((r) => String(r.id) === form.roomId);
+  const roomOptions = [
+    { value: '', label: rooms.length ? 'Choose a room' : 'No rooms yet: add one in Rooms & beds' },
+    ...rooms
+      .filter((r) => r.free > 0 || r.id === resident?.roomId)
+      .map((r) => ({
+        value: String(r.id),
+        label: r.roomType === 'ward' ? `${r.roomNumber} · Ward (${r.free} of ${r.capacity} beds free)` : `${r.roomNumber} · Private room`,
+      })),
+  ];
+  // Free beds in the chosen ward (and this resident's own bed)
+  const bedOptions = [
+    { value: '', label: 'Choose a bed' },
+    ...(room?.beds ?? [])
+      .filter((b) => !b.resident || b.resident.id === resident?.id)
+      .map((b) => ({ value: String(b.id), label: `Bed ${b.bedCode}` })),
+  ];
 
   const toggleNeed = (id) =>
     setForm({ ...form, careNeeds: form.careNeeds.includes(id) ? form.careNeeds.filter((n) => n !== id) : [...form.careNeeds, id] });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const found = validate(form, today);
+    const found = validate(form, today, room);
     setErrors(found);
     const first = Object.keys(found)[0];
     if (first) {
@@ -75,7 +98,8 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
       await onSave({
         name: form.name.trim(),
         residentCode: form.residentCode.trim().toUpperCase(),
-        room: form.room.trim(),
+        roomId: Number(form.roomId),
+        bedId: room?.roomType === 'ward' ? Number(form.bedId) : null, // a private room has no bed
         birthDate: form.birthDate || null,
         gender: form.gender || null,
         // Same order as everywhere else
@@ -117,8 +141,21 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
       {field('name', 'Full name', { placeholder: 'e.g. Lourdes Bautista', autoComplete: 'off' })}
       <div className="form-grid">
         {field('residentCode', 'Resident ID', { placeholder: 'e.g. RP-2026-001', autoComplete: 'off' })}
-        {field('room', 'Room', { placeholder: 'e.g. 215', autoComplete: 'off' })}
+        <SelectField
+          id="resident-roomId"
+          name="roomId"
+          label="Room"
+          required
+          value={form.roomId}
+          onChange={handleChange}
+          options={roomOptions}
+          error={errors.roomId}
+          hint="Private: one resident. Ward: several residents, each in a bed."
+        />
       </div>
+      {room?.roomType === 'ward' && (
+        <SelectField id="resident-bedId" name="bedId" label="Bed" required value={form.bedId} onChange={handleChange} options={bedOptions} error={errors.bedId} />
+      )}
       <div className="form-grid">
         {field('birthDate', 'Birth date', { type: 'date', required: false, max: today })}
         <SelectField id="resident-gender" name="gender" label="Gender" value={form.gender} onChange={handleChange} options={GENDER_OPTIONS} />
@@ -177,10 +214,10 @@ function ResidentForm({ resident, suggestedCode, onSave, onClose }) {
 
 // Pop-up for "Add resident" (no `resident`) and "Edit".
 // onSave(fields) saves to the backend and throws if it fails.
-export default function ResidentFormModal({ open, resident, suggestedCode, onSave, onClose }) {
+export default function ResidentFormModal({ open, resident, suggestedCode, rooms = [], onSave, onClose }) {
   return (
     <Modal open={open} onClose={onClose} title={resident ? `Edit ${resident.name}` : 'Add resident'} size="lg">
-      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} suggestedCode={suggestedCode} onSave={onSave} onClose={onClose} />}
+      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} suggestedCode={suggestedCode} rooms={rooms} onSave={onSave} onClose={onClose} />}
     </Modal>
   );
 }

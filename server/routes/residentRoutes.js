@@ -1,13 +1,19 @@
 const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
-const { clean } = require('../utils/users');
+const { clean, NAME_SQL, NAME_ORDER } = require('../utils/users');
+const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
 const { isDate } = require('../utils/shifts');
 
 const router = express.Router();
 router.use(protect);
 
 const CARE_NEEDS = ['hygiene', 'mobility', 'meal', 'medical', 'rest', 'recreation'];
+const SELECT_RESIDENTS = `
+  SELECT r.*, ${ROOM_LABEL} AS room, rm.room_number, rm.room_type, bd.bed_code
+  FROM residents r ${ROOM_JOIN('r')}`;
+const ROOM_ORDER = 'rm.room_number, bd.bed_code, r.name';
+const findResident = async (id) => (await pool.query(`${SELECT_RESIDENTS} WHERE r.id = ?`, [id]))[0][0];
 
 // Age today, from the birth date
 function ageFrom(birthDate) {
@@ -24,7 +30,12 @@ const toResident = (r, caregivers = []) => ({
   id: r.id,
   residentCode: r.resident_code, // e.g. RP-2020-001 (the sample data used this as `id`)
   name: r.name,
-  room: r.room,
+  room: r.room, // "101" (private) or "201 · Bed B2" (ward)
+  roomId: r.room_id,
+  roomNumber: r.room_number,
+  roomType: r.room_type, // 'private' | 'ward'
+  bedId: r.bed_id, // null in a private room
+  bedCode: r.bed_code,
   birthDate: r.birth_date,
   age: ageFrom(r.birth_date),
   gender: r.gender,
@@ -38,8 +49,8 @@ const toResident = (r, caregivers = []) => ({
 async function withCaregivers(rows) {
   if (rows.length === 0) return [];
   const [links] = await pool.query(
-    `SELECT ra.resident_id, u.id, u.name FROM resident_assignments ra
-     JOIN users u ON u.id = ra.user_id WHERE ra.resident_id IN (?) ORDER BY u.name`,
+    `SELECT ra.resident_id, u.id, ${NAME_SQL('u')} AS name FROM resident_assignments ra
+     JOIN users u ON u.id = ra.user_id WHERE ra.resident_id IN (?) ORDER BY ${NAME_ORDER('u')}`,
     [rows.map((r) => r.id)]
   );
   return rows.map((r) =>
@@ -67,10 +78,6 @@ function readFields(b, isNew) {
     v.name = clean(b.name, 80);
     if (!v.name) return { error: 'Name is required.' };
   }
-  if (isNew || has('room')) {
-    v.room = clean(b.room, 10);
-    if (!v.room) return { error: 'Room is required.' };
-  }
   if (has('birthDate')) {
     if (b.birthDate && !isDate(b.birthDate)) return { error: 'Birth date must look like 1950-01-31.' };
     v.birth_date = b.birthDate || null;
@@ -94,14 +101,33 @@ function readFields(b, isNew) {
   return { values: v };
 }
 
+async function checkPlacement(roomId, bedId, residentId = 0) {
+  const [[room]] = await pool.query('SELECT * FROM rooms WHERE id = ?', [roomId || 0]);
+  if (!room) return { error: 'Please choose a room.' };
+
+  if (room.room_type === 'private') {
+    if (bedId) return { error: `Room ${room.room_number} is a private room, so it has no beds. Leave the bed empty.` };
+    const [[other]] = await pool.query('SELECT name FROM residents WHERE room_id = ? AND id <> ? LIMIT 1', [room.id, residentId]);
+    if (other) return { error: `Room ${room.room_number} is a private room and ${other.name} already stays there.` };
+    return { values: { room_id: room.id, bed_id: null } };
+  }
+
+  if (!bedId) return { error: `Room ${room.room_number} is a ward. Please choose a bed.` };
+  const [[bed]] = await pool.query('SELECT * FROM beds WHERE id = ? AND room_id = ?', [bedId, room.id]);
+  if (!bed) return { error: `That bed is not in room ${room.room_number}.` };
+  const [[other]] = await pool.query('SELECT name FROM residents WHERE bed_id = ? AND id <> ? LIMIT 1', [bed.id, residentId]);
+  if (other) return { error: `Bed ${bed.bed_code} in room ${room.room_number} is already taken by ${other.name}.` };
+  return { values: { room_id: room.id, bed_id: bed.id } };
+}
+
 // GET /api/residents  (caregiver: my assigned residents; admin: all)
 router.get('/', async (req, res) => {
   const [rows] =
     req.user.role === 'admin'
-      ? await pool.query('SELECT * FROM residents ORDER BY room, name')
+      ? await pool.query(`${SELECT_RESIDENTS} ORDER BY ${ROOM_ORDER}`)
       : await pool.query(
-          `SELECT r.* FROM residents r JOIN resident_assignments ra ON ra.resident_id = r.id
-           WHERE ra.user_id = ? ORDER BY r.room, r.name`,
+          `${SELECT_RESIDENTS} JOIN resident_assignments ra ON ra.resident_id = r.id
+           WHERE ra.user_id = ? ORDER BY ${ROOM_ORDER}`,
           [req.user.id]
         );
   res.json(await withCaregivers(rows));
@@ -109,7 +135,7 @@ router.get('/', async (req, res) => {
 
 // GET /api/residents/:id
 router.get('/:id', async (req, res) => {
-  const [[row]] = await pool.query('SELECT * FROM residents WHERE id = ?', [req.params.id]);
+  const row = await findResident(req.params.id);
   // Same answer for "doesn't exist" and "not yours", so caregivers can't probe other residents
   if (!row || !(await canSee(req.user, row.id))) return res.status(404).json({ message: 'Resident not found' });
   res.json((await withCaregivers([row]))[0]);
@@ -123,12 +149,15 @@ router.post('/', allowRoles('admin'), async (req, res) => {
   const [taken] = await pool.query('SELECT id FROM residents WHERE resident_code = ?', [values.resident_code]);
   if (taken.length) return res.status(409).json({ message: 'This Resident ID is already used.' });
 
-  const [result] = await pool.query('INSERT INTO residents SET ?', [values]);
+  const place = await checkPlacement(req.body.roomId, req.body.bedId);
+  if (place.error) return res.status(400).json({ message: place.error });
+
+  const [result] = await pool.query('INSERT INTO residents SET ?', [{ ...values, ...place.values }]);
   // Link old tasks that were saved with this resident's name
   await pool.query('UPDATE tasks SET resident_id = ? WHERE resident_id IS NULL AND resident = ?', [result.insertId, values.name]);
   if (Array.isArray(req.body.caregiverIds)) await setCaregivers(result.insertId, req.body.caregiverIds);
 
-  const [[row]] = await pool.query('SELECT * FROM residents WHERE id = ?', [result.insertId]);
+  const row = await findResident(result.insertId);
   res.status(201).json((await withCaregivers([row]))[0]);
 });
 
@@ -144,18 +173,29 @@ router.put('/:id', allowRoles('admin'), async (req, res) => {
     if (taken.length) return res.status(409).json({ message: 'This Resident ID is already used.' });
   }
 
+  const has = (key) => Object.prototype.hasOwnProperty.call(req.body, key);
+  if (has('roomId') || has('bedId')) {
+    const place = await checkPlacement(
+      has('roomId') ? req.body.roomId : before.room_id,
+      has('bedId') ? req.body.bedId : before.bed_id,
+      before.id
+    );
+    if (place.error) return res.status(400).json({ message: place.error });
+    Object.assign(values, place.values);
+  }
+
   if (Object.keys(values).length) await pool.query('UPDATE residents SET ? WHERE id = ?', [values, before.id]);
   // Keep the old name column on tasks in step while the frontend still reads it
   if (values.name) await pool.query('UPDATE tasks SET resident = ? WHERE resident_id = ?', [values.name, before.id]);
   if (Array.isArray(req.body.caregiverIds)) await setCaregivers(before.id, req.body.caregiverIds);
 
-  const [[row]] = await pool.query('SELECT * FROM residents WHERE id = ?', [before.id]);
+  const row = await findResident(before.id);
   res.json((await withCaregivers([row]))[0]);
 });
 
 // PUT /api/residents/:id/caregivers  (admin)  { caregiverIds: [1, 2] }  replaces the list
 router.put('/:id/caregivers', allowRoles('admin'), async (req, res) => {
-  const [[row]] = await pool.query('SELECT * FROM residents WHERE id = ?', [req.params.id]);
+  const row = await findResident(req.params.id);
   if (!row) return res.status(404).json({ message: 'Resident not found' });
   if (!Array.isArray(req.body.caregiverIds)) return res.status(400).json({ message: 'caregiverIds must be a list.' });
   await setCaregivers(row.id, req.body.caregiverIds);

@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const { notifyLater, idsWithRole } = require('../utils/notify');
 const pool = require('../db');
-const { fullUser, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
-
+const { fullUser, displayName, blockedMessage, strongPassword, PASSWORD_RULE, validEmail, clean } = require('../utils/users');
 const router = express.Router();
 
 const GOOGLE_NOT_LINKED =
@@ -14,7 +13,7 @@ const GOOGLE_NOT_LINKED =
 // Global session handler for both standard login and Google auth
 function sendSession(req, res, user) {
   const token = jwt.sign(
-    { id: user.id, role: user.role, name: user.name },
+    { id: user.id, role: user.role, name: displayName(user) },
     process.env.JWT_SECRET,
     { expiresIn: '1d' }
   );
@@ -23,15 +22,15 @@ function sendSession(req, res, user) {
 
 // REGISTER
 router.post('/register', async (req, res) => {
-  const { name, firstName, lastName, username, password } = req.body;
-  const first = clean(firstName, 40);
-  const last = clean(lastName, 40);
-  const fullName = clean(name, 80) ?? clean([first, last].filter(Boolean).join(' '), 80);
+  const { username, password } = req.body;
+  const first = clean(req.body.firstName, 40);
+  const middle = clean(req.body.middleName, 40);
+  const last = clean(req.body.lastName, 40);
   const employeeId = clean(username, 30)?.toUpperCase();
   const email = clean(req.body.email, 120)?.toLowerCase() ?? null;
   const phone = clean(req.body.phone, 20);
 
-  if (!fullName || !employeeId || !password) {
+  if (!first || !last || !employeeId || !password) {
     return res.status(400).json({ message: 'Please fill in all fields.' });
   }
   if (!strongPassword(password)) return res.status(400).json({ message: PASSWORD_RULE });
@@ -48,9 +47,9 @@ router.post('/register', async (req, res) => {
 
   const hashed = await bcrypt.hash(password, 10);
   const [result] = await pool.query(
-    `INSERT INTO users (name, first_name, last_name, username, password, role, status, email, phone)
+    `INSERT INTO users (first_name, middle_name, last_name, username, password, role, status, email, phone)
      VALUES (?, ?, ?, ?, ?, 'caregiver', 'pending', ?, ?)`,
-    [fullName, first, last, employeeId, hashed, email, phone]
+    [first, middle, last, employeeId, hashed, email, phone]
   );
 
   notifyLater(idsWithRole('admin'), {
@@ -83,8 +82,8 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ message: 'Invalid Employee ID or password.' });
   }
 
-  if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
-  if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
+  const blocked = blockedMessage(user);
+  if (blocked) return res.status(403).json({ message: blocked });
 
   sendSession(req, res, user);
 });
@@ -120,8 +119,8 @@ router.post('/google', async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [info.email.toLowerCase()]);
   const user = rows[0];
   if (!user) return res.status(403).json({ message: GOOGLE_NOT_LINKED });
-  if (user.status === 'pending') return res.status(403).json({ message: 'Your account is waiting for approval.' });
-  if (user.status !== 'active') return res.status(403).json({ message: 'Your account is inactive.' });
+  const blocked = blockedMessage(user);
+  if (blocked) return res.status(403).json({ message: blocked });
 
   sendSession(req, res, user);
 });
