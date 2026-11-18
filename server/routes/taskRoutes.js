@@ -4,6 +4,7 @@ const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { notifyLater } = require('../utils/notify');
 const { clean, NAME_SQL } = require('../utils/users');
 const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 router.use(protect);
@@ -171,6 +172,10 @@ router.get('/:id', async (req, res) => {
   res.json(toTask(task));
 });
 
+// " for Maria Santos (Room 101), assigned to Rosa Lim" for the admin log
+const taskFor = (t) =>
+  `${t.resident_name || t.resident ? ` for ${t.resident_name || t.resident}${t.room ? ` (Room ${t.room})` : ''}` : ''}${t.assigned_name ? `, assigned to ${t.assigned_name}` : ''}`;
+
 // POST /api/tasks  (admin)  { task, dueAt, residentId or resident, category, assignedTo, note }
 router.post('/', allowRoles('admin'), async (req, res) => {
   const { error, values } = await readTaskFields(req.body);
@@ -179,6 +184,7 @@ router.post('/', allowRoles('admin'), async (req, res) => {
   const [result] = await pool.query('INSERT INTO tasks SET ?', [{ ...values, created_by: req.user.id }]);
   const task = await findTask(result.insertId);
   tellAssigned(task);
+  await logAdmin(req, 'create', 'task', task.id, `Added task "${task.task}"${taskFor(task)}`);
   res.status(201).json(toTask(task));
 });
 
@@ -197,6 +203,8 @@ router.put('/:id', allowRoles('admin'), async (req, res) => {
   await pool.query('UPDATE tasks SET ? WHERE id = ?', [values, before.id]);
   const task = await findTask(before.id);
   if (values.assigned_to && values.assigned_to !== before.assigned_to) tellAssigned(task);
+  const fields = Object.keys(values).filter((k) => k !== 'overdue_notified_at').map((k) => k.replace(/_(id|to|at)$/, '').replace(/_/g, ' '));
+  await logAdmin(req, 'update', 'task', task.id, `Edited task "${task.task}"${taskFor(task)}: ${fields.join(', ')}`);
   res.json(toTask(task));
 });
 
@@ -227,6 +235,9 @@ router.patch('/:id', async (req, res) => {
   if (Object.keys(changes).length === 0) return res.status(400).json({ message: 'Nothing to change.' });
 
   await pool.query('UPDATE tasks SET ? WHERE id = ?', [changes, task.id]);
+  if (status !== undefined) {
+    await logAdmin(req, 'update', 'task', task.id, `Marked task "${task.task}"${taskFor(task)} as ${status}${changes.skip_reason ? `: ${changes.skip_reason}` : ''}`);
+  }
   res.json(toTask(await findTask(task.id)));
 });
 
@@ -251,6 +262,7 @@ router.delete('/:id', async (req, res) => {
     return res.status(403).json({ message: 'Only an administrator can delete this task.' });
   }
   await pool.query('DELETE FROM tasks WHERE id = ?', [task.id]);
+  await logAdmin(req, 'delete', 'task', task.id, `Deleted task "${task.task}"${taskFor(task)}`);
   res.json({ message: 'Task deleted' });
 });
 
