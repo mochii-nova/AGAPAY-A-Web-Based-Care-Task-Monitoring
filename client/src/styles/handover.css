@@ -5,7 +5,8 @@
 /* Write / Received · 1 / History, shown like the other page switches */
 .tabs.tabs--header { gap: 2px; margin-bottom: 0; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--tint); }
 .tabs--header .tab { min-height: var(--tap); padding: 0 16px; border-radius: 7px; }
-.tabs--header .tab[aria-selected='true'] { background: var(--card); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border); }
+/* The open section: the same lilac + plum as the other switches (Today / Month), so it clearly stands out */
+.tabs--header .tab[aria-selected='true'] { background: var(--indigo-soft); color: var(--indigo); box-shadow: 0 0 0 1px var(--lavender-line); }
 .tabs__new { color: var(--accent-text); }
 
 /* Shift strip under the title */
@@ -204,7 +205,7 @@
   .handover-submit__actions .btn { flex: 1; }
   .page-header__actions:has(.tabs--header) { width: 100%; }
   .tabs--header { flex-wrap: nowrap; width: 100%; }
-  .tabs--header .tab { flex: 1; padding: 0 6px; white-space: nowrap; }
+  .tabs--header .tab { flex: 1 1 0; min-width: 0; padding: 0 6px; white-space: nowrap; } /* three equal parts */
 }
 @media (max-width: 480px) {
   .shift-strip { grid-template-columns: minmax(0, 1fr); }

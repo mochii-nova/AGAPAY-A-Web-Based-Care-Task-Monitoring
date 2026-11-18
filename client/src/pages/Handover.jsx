@@ -203,7 +203,10 @@ export default function Handover() {
               </div>
               <div>
                 <p className="small-label">Handing over to</p>
-                <p className="shift-strip__value">{next ? `${next.label} shift caregiver` : '—'}</p>
+                {/* The real name(s) when the server knows them: "Mark A. Dela Cruz · Night shift" */}
+                <p className="shift-strip__value">
+                  {!next ? '—' : nextUp?.names.length ? `${listNames(nextUp.names)} · ${nextUp.shift.label} shift` : `${next.label} shift caregiver`}
+                </p>
               </div>
               <span className={`status-pill status-pill--${statusPill.tone}`}>{statusPill.label}</span>
             </div>

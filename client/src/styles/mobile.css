@@ -69,17 +69,29 @@
    Phones (640px and narrower)
    --------------------------------------------------------------------- */
 @media (max-width: 640px) {
-  /* Status tabs (My Tasks, Tasks & Care): they wrap onto a second row, so all five are always
-     visible (nothing hidden off the edge, no "Sk…") */
-  .tasks-toolbar .tabs { flex-wrap: wrap; overflow: visible; row-gap: 4px; }
+  /* Status tabs (My Tasks, Tasks & Care): one row that scrolls sideways, with a small fade at the right
+     edge showing there's more. The empty space at the end lets the last tab scroll fully clear of it. */
+  .tasks-toolbar .tabs {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    padding-right: 28px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .tasks-toolbar .tabs::-webkit-scrollbar { display: none; }
+  .tasks-toolbar .tab { flex-shrink: 0; }
 
-  /* Pages with a Month / Week switch: the switch goes under the title... */
-  .page-header:has(.segmented) { flex-direction: column; align-items: stretch; }
-  /* ...except My Schedule: title on the left, Month / Week on the right, on one row (saves space) */
-  .page-header:has(.schedule-view) { flex-direction: row; flex-wrap: nowrap; align-items: flex-start; gap: 12px; }
-  .page-header:has(.schedule-view) > div:first-child { min-width: 0; }
-  .page-header__actions:has(.schedule-view) { flex-shrink: 0; }
-  .schedule-view .segmented__btn { padding: 0 14px; }
+  /* Switches (Today | All dates, Month | Week, Week | Month, shift pickers...): full width, equal
+     parts, under the page title */
+  .page-header:is(:has(.segmented), :has(.tabs--header)) { flex-direction: column; align-items: stretch; }
+  .page-header__actions:is(:has(.segmented), :has(.tabs--header)) { width: 100%; }
+  .segmented { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
+  .segmented .segmented__btn { min-width: 0; padding: 0 6px; white-space: nowrap; }
+  /* Handover's Write | Received | History: the same, three equal parts */
+  .tabs.tabs--header { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; width: 100%; }
+  .tabs--header .tab { min-width: 0; padding: 0 6px; white-space: nowrap; }
 
   /* Header filters (Handover monitoring): their grid uses the full width */
   .page-header__actions:has(.admin-handover__filters) { width: 100%; }
