@@ -127,9 +127,10 @@ html:has(.site) { scroll-padding-top: 104px; }
 /* ---------- Hero: full screen, photo on the right ----------
    Laptops: the hero fills the first screen, with the floating navbar on top. The photo is mirrored (so
    the two people sit further right), as tall as the hero (never stretched or zoomed) and anchored to the
-   right edge. The left side is a dark fill, and the photo's left part melts into it through a wide soft
-   fade (a mask on the photo, so there's no line and no dark layer on the faces). The text block starts
-   on the navbar logo's line and is centred vertically, on the dark side. */
+   right edge. Behind everything, a blurred, darker copy of the same photo fills the whole hero, so the
+   left side has the photo's own warm colours. The sharp photo's left part fades into it gently (a mask
+   with an ease-in-out curve, so there's no line). A soft warm shade sits only behind the text. The faces
+   are never blurred or darkened. The text block starts on the navbar logo's line, centred vertically. */
 .hero {
   position: relative;
   isolation: isolate;
@@ -153,10 +154,44 @@ html:has(.site) { scroll-padding-top: 104px; }
   object-fit: cover;
   transform: scaleX(-1);   /* mirrored */
   /* The fade. The mask is drawn before the mirroring, so "towards the left" here ends up on the right:
-     on screen the photo's left edge is see-through, it stays faint behind the text (up to 31% across it)
-     and is fully visible from 39%, where the first face starts. */
-  -webkit-mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.12) 18%, rgba(0, 0, 0, 0.22) 31%, #000 39%);
-  mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.12) 18%, rgba(0, 0, 0, 0.22) 31%, #000 39%);
+     on screen the photo's left edge is see-through and it eases in over the first 35% of its width
+     (fully visible before 39%, where the first face starts). */
+  --hero-fade: transparent 0%, rgba(0, 0, 0, 0.03) 4%, rgba(0, 0, 0, 0.1) 8%, rgba(0, 0, 0, 0.21) 12%,
+    rgba(0, 0, 0, 0.35) 16%, rgba(0, 0, 0, 0.5) 19.5%, rgba(0, 0, 0, 0.65) 23%, rgba(0, 0, 0, 0.79) 27%,
+    rgba(0, 0, 0, 0.9) 31%, #000 35%;
+  -webkit-mask-image: linear-gradient(270deg, var(--hero-fade));
+  mask-image: linear-gradient(270deg, var(--hero-fade));
+}
+/* The blurred copy: across the whole hero, mirrored like the photo, a bit larger so its blurry edges
+   stay off screen, at about 58% brightness */
+.hero__backdrop {
+  position: absolute;
+  z-index: -3;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(40px) brightness(0.58);
+  transform: scaleX(-1) scale(1.15);
+}
+/* The warm shade behind the text only: it ends just after the text, before the faces */
+.hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(max(24px, 50vw - 576px) + var(--hero-room) + 80px);
+  /* lighter at the screen edge, strongest under the end of the text lines (where the sharp photo's light
+     wall and shirt are), then gone in the gap before the faces... */
+  background: linear-gradient(90deg, rgba(30, 22, 18, 0.45) 0%, rgba(30, 22, 18, 0.62) 40%,
+    rgba(30, 22, 18, 0.78) calc(100% - 120px), rgba(30, 22, 18, 0.74) calc(100% - 80px),
+    rgba(30, 22, 18, 0.45) calc(100% - 45px), rgba(30, 22, 18, 0.15) calc(100% - 15px), rgba(30, 22, 18, 0) 100%);
+  /* ...and soft at the top and bottom too, so it is a soft patch behind the text, not a long edge */
+  -webkit-mask-image: linear-gradient(180deg, transparent 4%, rgba(0, 0, 0, 0.5) 16%, #000 28%, #000 78%, rgba(0, 0, 0, 0.5) 88%, transparent 98%);
+  mask-image: linear-gradient(180deg, transparent 4%, rgba(0, 0, 0, 0.5) 16%, #000 28%, #000 78%, rgba(0, 0, 0, 0.5) 88%, transparent 98%);
 }
 /* Where the text must end: 31% across the photo. The photo is 1.4 × the hero's height wide, so that is
    100vw − 96.5vh, minus where the text starts (the logo line). */
@@ -425,6 +460,9 @@ html:has(.site) { scroll-padding-top: 104px; }
     -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   }
+  /* (the blurred copy and the side shade are for the laptop layout only) */
+  .hero__backdrop,
+  .hero::before { display: none; }
   .hero__content { max-width: 640px; margin-inline: auto; }
   .hero__title { font-size: clamp(2.2rem, 7vw, calc(40rem / 15)); }
   .hero__body { max-width: 540px; margin-inline: auto; }

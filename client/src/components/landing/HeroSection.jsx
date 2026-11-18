@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 import heroPhoto from '../../assets/images/hero-home.webp';
 
-// The hero: the photo covers the whole first screen, edge to edge, with the floating navbar on top.
-// The photo is never filtered or zoomed; only a soft neutral black gradient sits behind the text
-// (from the left on laptops, from the bottom on phones). The text column starts on the navbar logo's line.
+// The hero: full screen, with the floating navbar on top. The sharp photo (mirrored) is on the right and
+// fades gently into a blurred copy of itself that fills the rest; a soft warm shade sits only behind the
+// text. The faces are never blurred or darkened. The text column starts on the navbar logo's line.
 // (hero-home.webp is home-new.png with its see-through side bars cropped off, at its own size, 1075 × 767.)
 export default function HeroSection() {
   return (
     <section id="home" className="hero">
+      {/* a blurred, darker copy of the same photo behind everything (decoration only) */}
+      <img className="hero__backdrop" src={heroPhoto} alt="" aria-hidden="true" />
       <img className="hero__photo" src={heroPhoto} alt="A smiling nurse hugging a happy older woman" />
       <div className="container hero__inner">
         <div className="hero__content">
