@@ -391,7 +391,7 @@ html:has(.site) { scroll-padding-top: 104px; }
   .site-header.is-solid .site-nav__link { color: var(--muted); }
   /* Phones and tablets: the photo on top (full width, faces in view), the text below, centred */
   .hero { flex-direction: column; align-items: stretch; min-height: 0; margin: 10px; padding: 96px 16px 32px; border-radius: 20px; text-align: center; }
-  .hero__photo { position: static; width: 100%; height: auto; aspect-ratio: 612 / 323; margin-bottom: 28px; border-radius: 16px; -webkit-mask-image: none; mask-image: none; }
+  .hero__photo { position: static; width: 100%; height: auto; aspect-ratio: 1075 / 767; margin-bottom: 28px; border-radius: 16px; -webkit-mask-image: none; mask-image: none; }
   .hero__content { max-width: 640px; margin-inline: auto; }
   .hero__body { margin-inline: auto; }
   .hero__actions { justify-content: center; }
