@@ -2,9 +2,11 @@
    Public website (Landing.jsx): header, hero, How it works, Features, About, Contact, footer
 
    Colours and the Inter font come from main.css, the same as every page of the app.
-   The hero is light (cream) in light mode and dark in dark mode, like the rest of the page.
+   Only the colours on the hero photo are the website's own: they stay the same in dark mode,
+   because the photo under them does too.
    ===================================================================== */
 .site {
+  --site-on-photo-soft: #f2b49b;  /* light apricot "one shift at a time." on the photo */
   --site-plum: #67479a;         /* the hero's Sign in button */
   --site-plum-hover: #563a84;
   --site-white: #ffffff;
@@ -120,42 +122,55 @@ html:has(.site) { scroll-padding-top: 104px; }
 .site-header.is-clear :focus-visible,
 .hero :focus-visible { outline-color: var(--site-white); }
 
-/* ---------- Hero: light and warm ----------
-   Laptops: fills the first screen (the 92px header band included) inside the same container as the
-   navbar and the sections. Text on the left, vertically centred; the photo on the right half, as tall as
-   the hero, cropped from the sides if needed (cover, faces centred, never stretched). Only its left edge
-   fades into the background (a mask), so there's no hard line. Never darkened or filtered. */
-.hero { display: flex; min-height: 100vh; padding: 92px 0 24px; color: var(--text); }
-.hero__inner {
+/* ---------- Hero: the photo is the whole background ----------
+   Laptops: a rounded box in the same container as the navbar and the sections, filling the first screen
+   (the 92px header band included). The photo covers it (never stretched). Its two people are in the
+   middle of the picture, so the photo is drawn 150% as wide as the box, anchored on the left: that puts
+   both faces on the right half, clear of the text. Only a soft neutral black gradient from the left sits
+   behind the text; the faces are untouched. */
+.hero { display: flex; min-height: 100vh; padding: 92px 0 24px; }
+.hero__frame { display: flex; }
+.hero__box {
+  position: relative;
+  isolation: isolate;
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  gap: 48px;
-}
-.hero__content { max-width: 540px; }
-.hero__photo {
-  align-self: stretch;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  object-fit: cover;
-  object-position: 47% 40%;
+  overflow: hidden;
+  padding: 48px clamp(28px, 4vw, 56px);
   border-radius: 24px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 18%);
+  background: #17141b;   /* only seen for a moment while the photo loads */
+  color: #ffffff;
 }
+.hero__photo {
+  position: absolute;
+  z-index: -2;
+  top: 0;
+  left: 0;
+  width: 150%;
+  max-width: none;   /* the global img rule would cap it at 100% */
+  height: 100%;
+  object-fit: cover;
+  object-position: 0% 40%;
+}
+.hero__box::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.68) 36%, rgba(0, 0, 0, 0.32) 47%, rgba(0, 0, 0, 0) 57%);
+}
+.hero__content { max-width: 440px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
 /* (colour set here too: a shared heading style would otherwise change it) */
-.hero__title { margin: 0; color: var(--text); font-size: clamp(2.4rem, 4.4vw, calc(60rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+.hero__title { margin: 0; color: #ffffff; font-size: clamp(2.2rem, 3.4vw, calc(46rem / 15)); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
 .hero__line { display: block; }
-.hero__line--soft { color: var(--accent-text); }   /* terracotta on cream (5.1:1); light apricot in dark mode */
-.hero__body { max-width: 36em; margin: 24px 0 0; color: var(--text); font-size: 1.15rem; line-height: 1.6; }
-.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-/* "Sign in" = solid plum; "See how it works" = white with plum text. Both are plum with white text on hover. */
+.hero__line--soft { color: var(--site-on-photo-soft); }
+.hero__body { max-width: 36em; margin: 24px 0 0; color: #ffffff; font-size: 1.15rem; line-height: 1.6; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; text-shadow: none; }
+/* "Sign in" = solid plum; "See how it works" = solid white with plum text. Both are plum with white text on hover. */
 .hero__signin { background: var(--site-plum); color: var(--site-white); }
 .hero__signin:hover { background: var(--site-plum-hover); }
-.hero .hero__white { border-color: var(--border-strong); background: var(--site-white); color: var(--site-plum); }
+.hero .hero__white { border-color: var(--site-white); background: var(--site-white); color: var(--site-plum); }
 .hero .hero__white:hover { border-color: var(--site-plum); background: var(--site-plum); color: var(--site-white); }
 
 /* ---------- About: photo on the left, text and three facts on the right ---------- */
@@ -392,10 +407,19 @@ html:has(.site) { scroll-padding-top: 104px; }
   html:has(.site) { scroll-padding-top: 88px; }
   /* The dropdown is a white card, so its links are always dark */
   .site-header.is-solid .site-nav__link { color: var(--muted); }
-  /* Phones and tablets: shorter; the photo on top (full width, faces in view), the text below, centred */
-  .hero { min-height: 0; padding: 92px 0 32px; text-align: center; }
-  .hero__inner { display: flex; flex-direction: column; gap: 28px; }
-  .hero__photo { order: -1; height: auto; aspect-ratio: 1075 / 767; border-radius: 16px; -webkit-mask-image: none; mask-image: none; }
+  /* Phones and tablets: the photo stays the background. It fills the top part of the box (faces in
+     view, cover, never stretched) and the text sits at the bottom, over a dark gradient from the bottom. */
+  .hero { min-height: 0; padding: 92px 0 24px; }
+  .hero__box { flex-direction: column; justify-content: flex-end; align-items: stretch; min-height: 760px; padding: 28px 24px; border-radius: 20px; background: #0b0a0c; text-align: center; }
+  .hero__photo {
+    width: 100%;
+    height: 60%;
+    object-position: 47% 30%;
+    /* its bottom edge melts into the dark below (no hard line); the faces above are untouched */
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  }
+  .hero__box::before { background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 0, 0, 0.55) 58%, rgba(0, 0, 0, 0) 70%); }
   .hero__content { max-width: 640px; margin-inline: auto; }
   .hero__body { margin-inline: auto; }
   .hero__actions { justify-content: center; }
@@ -451,8 +475,9 @@ html:has(.site) { scroll-padding-top: 104px; }
 }
 
 @media (max-width: 600px) {
-  .hero { padding: 88px 0 24px; }
-  .hero__inner { gap: 22px; }
+  .hero { padding: 88px 0 20px; }
+  .hero__box { min-height: 700px; padding: 24px 16px; }
+  .hero__photo { height: 56%; }
   .hero__body { font-size: 1.05rem; }
   .hero__actions .btn { flex: 1 1 100%; }
 
