@@ -5,6 +5,7 @@ import useApiData from '../../hooks/useApiData';
 import { formatTime } from '../../utils/format';
 import { searchTerm, matchesSearch } from '../../utils/search';
 import PageHeader from '../../components/PageHeader';
+import DateFilter from '../../components/DateFilter';
 import { LoadingState, ErrorState, EmptyState } from '../../components/StateMessage';
 import '../../styles/admin.css';
 
@@ -93,11 +94,8 @@ export default function ActivityLog() {
             ))}
           </select>
           <div className="log-dates">
-            <label htmlFor="log-from" className="sr-only">From</label>
-            <input id="log-from" type="date" className="field__input" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} />
-            <span aria-hidden="true">to</span>
-            <label htmlFor="log-to" className="sr-only">To</label>
-            <input id="log-to" type="date" className="field__input" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} />
+            <DateFilter id="log-from" label="From" value={from} max={to} onChange={setFrom} />
+            <DateFilter id="log-to" label="To" value={to} min={from} onChange={setTo} />
           </div>
         </div>
 

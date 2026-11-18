@@ -32,7 +32,7 @@
   :is(.small-label, .status-pill, .tab__count, .field__hint, .care-need, .today-line__label, .today-line__name,
       .note-flag, .day-task__note, .stat-card__note, .eyebrow, .auth__credit, .auth__privacy, .auth__note,
       .auth__footer, .auth__divider, .notif-item__type, .notif-item__due, .convo__time, .convo__preview,
-      .log-item__type, .log-item__time, .log-dates, .roster-head__weekday, .roster-gap, .roster-count,
+      .log-item__type, .log-item__time, .date-filter__label, .roster-head__weekday, .roster-gap, .roster-count,
       .bar-chart__value, .bar-chart__axis span, .reports__hint, .offshift__text, .push-toggle__status,
       .sample-tasks__time, .admin-schedule__gcal, .count-badge, .tour__count, .copy-btn, .contact-item__meta,
       .month__head span, .shift-legend, .data-table th, .task-table th, .offshift .link-btn,

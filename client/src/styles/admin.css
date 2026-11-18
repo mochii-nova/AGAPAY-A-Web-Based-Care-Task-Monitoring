@@ -649,8 +649,10 @@
 
 /* Activity log (who did what) */
 .admin-toolbar .select.log-admin { flex-basis: 210px; width: 210px; }
-.log-dates { display: flex; align-items: center; gap: 8px; color: var(--label); font-size: 0.85rem; }
-.log-dates .field__input { width: 150px; }
+/* From / To (DateFilter) have a small label above them, so the other filters line up with their boxes */
+.admin-toolbar:has(.log-dates) { align-items: flex-end; }
+.log-dates { display: flex; gap: 8px; }
+.log-dates .date-filter { width: 170px; }
 .log-list { list-style: none; margin: 0; padding: 0; }
 .log-item { padding: 14px 20px; }
 .log-item + .log-item { border-top: 1px solid var(--border); }
@@ -661,8 +663,9 @@
 @media (max-width: 640px) {
   .log-item { padding: 12px 14px; }
   .log-item__time { margin-left: 0; flex-basis: 100%; }
-  .log-dates { flex: 1 1 100%; }
-  .log-dates .field__input { flex: 1 1 0; width: auto; min-width: 0; }
+  /* From and To side by side, half each */
+  .log-dates { display: grid; flex: 1 1 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .log-dates .date-filter { width: auto; }
   /* Contact messages: "Reply by email" and "Copy email" side by side (half each), "Mark as handled"
      full width below; all 44px tall and nothing cut off */
   .contact-item__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
