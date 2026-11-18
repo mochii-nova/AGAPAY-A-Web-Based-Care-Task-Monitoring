@@ -176,6 +176,15 @@ html:has(.site) { scroll-padding-top: 104px; }
 }
 .hero__backdrop img { flex: none; width: auto; max-width: none; height: 100%; }
 .hero__backdrop-main { transform: scaleX(-1); }
+/* A light cool tint on the blurred copy only (the sharp photo sits above it, so the people keep their
+   natural warm skin tones): a cool grey-blue background with warm people */
+.hero__backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(60, 90, 130, 0.22);
+  mix-blend-mode: color;
+}
 /* All the darkening is here, never on the faces. (1) A wide warm gradient: darkest on the far left,
    gone by 45% of the width. */
 .hero::before {
@@ -183,8 +192,8 @@ html:has(.site) { scroll-padding-top: 104px; }
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: linear-gradient(90deg, rgba(25, 18, 14, 0.65) 0%, rgba(25, 18, 14, 0.55) 18%,
-    rgba(25, 18, 14, 0.3) 32%, rgba(25, 18, 14, 0.1) 40%, rgba(25, 18, 14, 0) 45%);
+  background: linear-gradient(90deg, rgba(20, 28, 42, 0.68) 0%, rgba(20, 28, 42, 0.58) 18%,
+    rgba(20, 28, 42, 0.32) 32%, rgba(20, 28, 42, 0.1) 40%, rgba(20, 28, 42, 0) 45%);
 }
 /* (2) A soft warm shadow shaped around the text block itself (a blurred rounded shape, so it has no
    straight edges), so the ends of the lines stay readable where the photo is light */
@@ -195,7 +204,7 @@ html:has(.site) { scroll-padding-top: 104px; }
   z-index: -1;
   inset: -90px -30px -60px -140px;
   border-radius: 40%;
-  background: rgba(25, 18, 14, 0.8);
+  background: rgba(20, 28, 42, 0.8);
   filter: blur(60px);
 }
 /* Where the text must end: 31% across the photo. The photo is 1.4 × the hero's height wide, so that is
