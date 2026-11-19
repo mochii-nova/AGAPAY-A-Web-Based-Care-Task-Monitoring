@@ -5,6 +5,7 @@ const { protect, allowRoles } = require('../middleware/authMiddleware');
 const rateLimit = require('../utils/rateLimit');
 const { notifyLater, idsWithRole } = require('../utils/notify');
 const { validEmail, clean } = require('../utils/users');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 

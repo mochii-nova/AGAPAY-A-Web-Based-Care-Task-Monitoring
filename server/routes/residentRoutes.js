@@ -4,6 +4,7 @@ const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { clean, NAME_SQL, NAME_ORDER } = require('../utils/users');
 const { ROOM_JOIN, ROOM_LABEL } = require('../utils/rooms');
 const { isDate } = require('../utils/shifts');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 router.use(protect);

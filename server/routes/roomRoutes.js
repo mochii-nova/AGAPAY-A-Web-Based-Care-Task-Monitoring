@@ -5,6 +5,7 @@ const express = require('express');
 const pool = require('../db');
 const { protect, allowRoles } = require('../middleware/authMiddleware');
 const { clean } = require('../utils/users');
+const { logAdmin } = require('../utils/audit');
 
 const router = express.Router();
 router.use(protect);
