@@ -62,7 +62,7 @@ export default function Messages() {
         subtitle={staff ? 'Message caregivers and other administrators.' : 'Message the administrators. Their replies show up here.'}
       />
 
-      {status === 'loading' && <div className="card"><LoadingState label="Loading your messages…" /></div>}
+      {status === 'loading' && <div className="card"><LoadingState label="Loading your messages…" avatar /></div>}
       {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
       {status === 'ready' && people.length === 0 && conversations.length === 0 && (
         <div className="card">

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { CalendarCheck, CalendarDays, CalendarPlus, CircleAlert, ExternalLink, Globe, Unlink } from 'lucide-react';
 import useGoogleCalendar from '../../hooks/useGoogleCalendar';
 import { useToast } from '../../context/ToastContext';
@@ -29,7 +29,10 @@ export default function GoogleCalendarBox({ shift, date }) {
     if (needsCheck) check();
   }, [needsCheck, dayId]);
 
+  const running = useRef(false); // a second click while connecting or adding is ignored
   const run = async (kind, fn) => {
+    if (running.current) return;
+    running.current = true;
     setBusy(kind);
     setError('');
     try {
@@ -37,6 +40,7 @@ export default function GoogleCalendarBox({ shift, date }) {
     } catch (err) {
       setError(err.message);
     } finally {
+      running.current = false;
       setBusy('');
     }
   };
@@ -80,7 +84,7 @@ export default function GoogleCalendarBox({ shift, date }) {
       );
     } else if (shift) {
       main = (
-        <button type="button" className="btn btn--primary" onClick={add} disabled={busy === 'add' || saved === undefined}>
+        <button type="button" className="btn btn--primary" onClick={add} disabled={busy === 'add' || saved === undefined} aria-busy={busy === 'add'}>
           <CalendarPlus size={18} aria-hidden="true" /> {busy === 'add' ? 'Adding…' : saved === undefined ? 'Checking…' : 'Add this shift'}
         </button>
       );
@@ -89,7 +93,7 @@ export default function GoogleCalendarBox({ shift, date }) {
     pill = { text: gcal.status === 'expired' ? 'Disconnected' : 'Not connected', tone: 'off' };
     // One full-width button
     main = (
-      <button type="button" className="btn btn--primary" onClick={connect} disabled={!gcal.ready || busy === 'connect'} aria-describedby="gcal-privacy">
+      <button type="button" className="btn btn--primary" onClick={connect} disabled={!gcal.ready || busy === 'connect'} aria-busy={busy === 'connect'} aria-describedby="gcal-privacy">
         <CalendarDays size={18} aria-hidden="true" />
         {busy === 'connect'
           ? 'Waiting…'

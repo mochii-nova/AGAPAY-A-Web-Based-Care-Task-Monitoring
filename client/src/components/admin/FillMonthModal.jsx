@@ -134,7 +134,7 @@ function FillForm({ caregivers, startMonth, preset, onDone, onClose }) {
 
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving || workDays.length === 0 || existingQuery.status === 'loading'}>
+        <button type="submit" className="btn btn--primary" disabled={saving || workDays.length === 0 || existingQuery.status === 'loading'} aria-busy={saving}>
           {saving ? 'Saving…' : `Fill ${workDays.length} days`}
         </button>
       </div>

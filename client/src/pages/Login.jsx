@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { CircleAlert, CircleCheck, IdCard, Lock, LogIn } from 'lucide-react';
 import api from '../api';
@@ -42,6 +42,7 @@ export default function Login() {
   const [error, setError] = useState(null); // { tone, text }
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const signingIn = useRef(false); // a second click or Enter while signing in is ignored
 
   // Already signed in? Go straight to your Home (admins to the admin side).
   if (user) return <Navigate to={homeFor(user)} replace />;
@@ -69,6 +70,8 @@ export default function Login() {
 
   // Shared by both ways of signing in
   const signIn = async (request) => {
+    if (signingIn.current) return;
+    signingIn.current = true;
     setLoading(true);
     try {
       const { data } = await request();
@@ -87,6 +90,7 @@ export default function Login() {
           : "Can't reach the server. Please check that the backend is running.",
       });
     } finally {
+      signingIn.current = false;
       setLoading(false);
     }
   };
@@ -153,7 +157,7 @@ export default function Login() {
           </button>
         </div>
 
-        <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
+        <button type="submit" className="btn btn--primary auth__submit" disabled={loading} aria-busy={loading}>
           <LogIn size={18} aria-hidden="true" /> {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>

@@ -167,7 +167,7 @@ export default function AdminSchedule() {
 
       <div className="schedule-layout admin-schedule__layout">
         <div className="card schedule-calendar">
-          {rosterQuery.status === 'loading' && <LoadingState label="Loading the roster…" />}
+          {rosterQuery.status === 'loading' && <LoadingState label="Loading the roster…" shape="calendar" />}
           {rosterQuery.status === 'error' && <ErrorState message={rosterQuery.error} onRetry={rosterQuery.reload} />}
           {ready && (
             <>

@@ -69,7 +69,7 @@ export default function ResidentProfile({ resident, status, tasks, dayTasks = ta
           <Link to={`/tasks?q=${encodeURIComponent(resident.name)}`} className="card__link">Open in My Tasks</Link>
         </div>
         {tasksLoading ? (
-          <LoadingState label="Loading tasks…" />
+          <LoadingState label="Loading tasks…" rows={3} />
         ) : tasks.length === 0 ? (
           <EmptyState icon={ClipboardList}>No tasks for {firstName} today.</EmptyState>
         ) : (

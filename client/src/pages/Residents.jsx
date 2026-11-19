@@ -116,7 +116,7 @@ export default function Residents() {
     <div>
       <PageHeader title="My residents" subtitle="Choose a resident to see their care needs, tasks and notes." />
 
-      {status === 'loading' && <div className="card"><LoadingState label="Loading your residents…" /></div>}
+      {status === 'loading' && <LoadingState label="Loading your residents…" shape="cards" />}
       {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
 
       {status === 'ready' && (

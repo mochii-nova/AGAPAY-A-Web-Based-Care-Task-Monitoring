@@ -111,7 +111,7 @@ export default function ResidentDetails({ resident, staff, tasks, tasksLoading, 
           <Link to={`/admin/tasks?q=${encodeURIComponent(resident.name)}`} className="card__link">Open in Tasks & Care</Link>
         </div>
         {tasksLoading ? (
-          <LoadingState label="Loading tasks…" />
+          <LoadingState label="Loading tasks…" rows={3} />
         ) : tasks.length === 0 ? (
           <EmptyState icon={ClipboardList}>No tasks for {firstName} today.</EmptyState>
         ) : (

@@ -91,7 +91,7 @@ export default function ChangePasswordForm({ employeeId }) {
           {field('confirm', 'Confirm new password', { autoComplete: 'new-password', placeholder: 'Type it again' })}
         </div>
         <div className="password-form__actions">
-          <button type="submit" className="btn btn--primary" disabled={busy}>
+          <button type="submit" className="btn btn--primary" disabled={busy} aria-busy={busy}>
             {busy ? 'Saving…' : 'Update password'}
           </button>
         </div>

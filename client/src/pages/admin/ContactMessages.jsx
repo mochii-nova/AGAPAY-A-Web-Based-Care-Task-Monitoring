@@ -153,7 +153,7 @@ export default function ContactMessages() {
                         <span aria-live="polite">{copiedId === m.id ? 'Copied' : 'Copy email'}</span>
                       </button>
                       {!m.handled && (
-                        <button type="button" className="btn btn--outline btn--sm btn--row" disabled={busyId === m.id} onClick={() => markHandled(m)}>
+                        <button type="button" className="btn btn--outline btn--sm btn--row" disabled={busyId === m.id} aria-busy={busyId === m.id} onClick={() => markHandled(m)}>
                           <Check size={16} aria-hidden="true" /> {busyId === m.id ? 'Saving…' : 'Mark as handled'}
                         </button>
                       )}

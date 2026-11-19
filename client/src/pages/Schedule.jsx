@@ -171,7 +171,7 @@ export default function Schedule() {
         </div>
       </div>
 
-      {status === 'loading' && <div className="card"><LoadingState label="Loading your schedule…" /></div>}
+      {status === 'loading' && <div className="card"><LoadingState label="Loading your schedule…" shape="calendar" /></div>}
       {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
 
       {status === 'ready' && (

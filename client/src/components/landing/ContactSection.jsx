@@ -143,7 +143,7 @@ export default function ContactSection() {
               {field('message', 'Message', { as: 'textarea', placeholder: 'Write your message here', className: 'contact__message' })}
               <div className="contact__actions">
                 <p className="contact__hint">All fields are required.</p>
-                <button type="submit" className="btn btn--primary" disabled={sending}>
+                <button type="submit" className="btn btn--primary" disabled={sending} aria-busy={sending}>
                   <Send size={16} aria-hidden="true" /> {sending ? 'Sending…' : 'Send message'}
                 </button>
               </div>

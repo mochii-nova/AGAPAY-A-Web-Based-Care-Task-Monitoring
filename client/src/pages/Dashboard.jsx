@@ -158,7 +158,7 @@ export default function Dashboard() {
           ) : (
             <section className="card">
               {tasksQuery.status === 'loading' ? (
-                <LoadingState label="Loading today's tasks…" />
+                <LoadingState label="Loading today's tasks…" rows={3} />
               ) : (
                 <ErrorState message={tasksQuery.error} onRetry={tasksQuery.reload} />
               )}
@@ -171,7 +171,7 @@ export default function Dashboard() {
           ) : (
             <section className="card">
               {shiftsQuery.status === 'loading' ? (
-                <LoadingState label="Loading your shift…" />
+                <LoadingState label="Loading your shift…" rows={2} action={false} />
               ) : (
                 <ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} />
               )}
@@ -184,7 +184,7 @@ export default function Dashboard() {
           ) : (
             <section className="card">
               {handoversQuery.status === 'loading' ? (
-                <LoadingState label="Loading handovers…" />
+                <LoadingState label="Loading handovers…" rows={3} />
               ) : (
                 <ErrorState message={handoversQuery.error} onRetry={handoversQuery.reload} />
               )}

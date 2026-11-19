@@ -379,7 +379,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
               {draftState.status === 'saved' && `Draft saved${draftState.at ? ` · ${formatTime(draftState.at)}` : ''}`}
               {draftState.status === 'error' && "Couldn't save the draft"}
             </p>
-            <button type="button" className="btn btn--outline" onClick={handleSaveDraft} disabled={draftState.status === 'saving'}>
+            <button type="button" className="btn btn--outline" onClick={handleSaveDraft} disabled={draftState.status === 'saving'} aria-busy={draftState.status === 'saving'}>
               {draftState.status === 'saving' ? 'Saving…' : 'Save draft'}
             </button>
             <button type="submit" className="btn btn--primary">Submit handover</button>
@@ -395,7 +395,7 @@ export default function WriteHandover({ shift, shiftDate, next, shiftTasks, resi
         footer={
           <>
             <button type="button" className="btn btn--outline" onClick={() => setConfirmOpen(false)} disabled={sending}>Cancel</button>
-            <button type="button" className="btn btn--primary" onClick={sendHandover} disabled={sending}>
+            <button type="button" className="btn btn--primary" onClick={sendHandover} disabled={sending} aria-busy={sending}>
               {sending ? 'Submitting…' : 'Submit handover'}
             </button>
           </>

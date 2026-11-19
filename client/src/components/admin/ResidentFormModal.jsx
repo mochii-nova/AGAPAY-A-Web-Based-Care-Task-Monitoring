@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { CircleAlert, Trash2 } from 'lucide-react';
 import Modal from '../Modal';
 import FormField from '../FormField';
@@ -6,6 +6,8 @@ import SelectField from '../SelectField';
 import { TASK_CATEGORIES, relationshipOptions } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
 import useSaving from '../../hooks/useSaving';
+import { sameText } from '../../utils/duplicates';
+import DuplicateWarning from '../DuplicateWarning';
 
 const GENDER_OPTIONS = [
   { value: '', label: 'Choose…' },
@@ -33,7 +35,7 @@ function validate(form, today, room) {
 }
 
 // The form inside the pop-up: a new resident (`resident` empty) or changes to one
-function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelete }) {
+function ResidentForm({ resident, residents, suggestedCode, rooms, onSave, onClose, onDelete }) {
   const adding = !resident;
   const today = isoDay(new Date());
   const contact = resident?.emergencyContact ?? {};
@@ -83,15 +85,30 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelet
   const toggleNeed = (id) =>
     setForm({ ...form, careNeeds: form.careNeeds.includes(id) ? form.careNeeds.filter((n) => n !== id) : [...form.careNeeds, id] });
 
+  // Duplicates: a Resident ID already used shows under the field straight away; a resident with the same
+  // name asks first ("Add another one anyway?")
+  const others = residents.filter((r) => r.id !== resident?.id);
+  const codeOwner = others.find((r) => sameText(r.residentCode, form.residentCode));
+  const codeError = codeOwner ? `${codeOwner.residentCode} is already used by ${codeOwner.name}. Please use another ID.` : undefined;
+  const sameNamed = form.name.trim() && !sameText(form.name, resident?.name) ? others.find((r) => sameText(r.name, form.name)) : null;
+  const [dupAsked, setDupAsked] = useState(false); // the warning is showing
+  const dupOk = useRef(''); // the name "Add anyway" was pressed for
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     const found = validate(form, today, room);
+    if (codeError) found.residentCode = codeError;
     setErrors(found);
     const first = Object.keys(found)[0];
     if (first) {
       document.getElementById(`resident-${first}`)?.focus();
       return;
     }
+    if (sameNamed && !sameText(dupOk.current, form.name)) {
+      setDupAsked(true);
+      return;
+    }
+    setDupAsked(false);
     if (!startSaving()) return;
     setSaveError('');
     try {
@@ -125,8 +142,17 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelet
     }
   };
 
+  // (a Resident ID already in use shows its message as soon as it's typed)
   const field = (name, label, props = {}) => (
-    <FormField id={`resident-${name}`} name={name} label={label} value={form[name]} onChange={handleChange} error={errors[name]} {...props} />
+    <FormField
+      id={`resident-${name}`}
+      name={name}
+      label={label}
+      value={form[name]}
+      onChange={handleChange}
+      error={name === 'residentCode' ? codeError ?? errors.residentCode : errors[name]}
+      {...props}
+    />
   );
 
   return (
@@ -202,6 +228,20 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelet
       </div>
       {field('contactPhone', 'Phone number', { type: 'tel', required: false, placeholder: 'e.g. 0917 123 4567', autoComplete: 'off' })}
 
+      {dupAsked && sameNamed && (
+        <DuplicateWarning
+          confirmLabel={adding ? 'Add anyway' : 'Save anyway'}
+          onCancel={() => setDupAsked(false)}
+          onConfirm={() => {
+            dupOk.current = form.name.trim();
+            handleSubmit();
+          }}
+        >
+          A resident named <strong>{sameNamed.name}</strong> already exists ({sameNamed.residentCode}, Room {sameNamed.room}).{' '}
+          {adding ? 'Add another one anyway?' : 'Save with the same name anyway?'}
+        </DuplicateWarning>
+      )}
+
       <div className="modal__footer modal__footer--inline">
         {!adding && onDelete && (
           <button type="button" className="btn btn--danger" style={{ marginRight: 'auto' }} onClick={onDelete}>
@@ -209,7 +249,7 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelet
           </button>
         )}
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving}>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
           {saving ? 'Saving…' : adding ? 'Add resident' : 'Save changes'}
         </button>
       </div>
@@ -218,11 +258,12 @@ function ResidentForm({ resident, suggestedCode, rooms, onSave, onClose, onDelet
 }
 
 // Pop-up for "Add resident" (no `resident`) and "Edit".
-// onSave(fields) saves to the backend and throws if it fails.
-export default function ResidentFormModal({ open, resident, suggestedCode, rooms = [], onSave, onClose, onDelete }) {
+// onSave(fields) saves to the backend and throws if it fails. `residents`: everyone already loaded, to
+// spot a Resident ID or name that's already used.
+export default function ResidentFormModal({ open, resident, residents = [], suggestedCode, rooms = [], onSave, onClose, onDelete }) {
   return (
     <Modal open={open} onClose={onClose} title={resident ? `Edit ${resident.name}` : 'Add resident'} size="lg">
-      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} suggestedCode={suggestedCode} rooms={rooms} onSave={onSave} onClose={onClose} onDelete={onDelete} />}
+      {open && <ResidentForm key={resident?.id ?? 'new'} resident={resident} residents={residents} suggestedCode={suggestedCode} rooms={rooms} onSave={onSave} onClose={onClose} onDelete={onDelete} />}
     </Modal>
   );
 }

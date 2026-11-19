@@ -1,11 +1,17 @@
-import { LoaderCircle, CircleAlert, RefreshCw } from 'lucide-react';
+import { CircleAlert, RefreshCw } from 'lucide-react';
+import { SkeletonRows, SkeletonCards, SkeletonBubbles, SkeletonCalendar } from './Skeleton';
 
-// "Loading…" with a spinning icon
-export function LoadingState({ label = 'Loading…' }) {
+// While a page loads for the first time: grey placeholder shapes in the layout of what's coming
+// (`shape`: 'rows' for lists and tables, 'cards' for dashboards, 'bubbles' for a chat, 'calendar' for a
+// schedule). Screen readers hear `label`. Quiet live refreshes never show this again.
+export function LoadingState({ label = 'Loading…', shape = 'rows', rows, avatar, action }) {
   return (
-    <div className="state-msg" role="status">
-      <LoaderCircle size={20} className="spin" aria-hidden="true" />
-      <span>{label}</span>
+    <div className="skeleton-wrap" role="status" aria-busy="true">
+      <span className="sr-only">{label}</span>
+      {shape === 'cards' && <SkeletonCards />}
+      {shape === 'bubbles' && <SkeletonBubbles />}
+      {shape === 'calendar' && <SkeletonCalendar />}
+      {shape === 'rows' && <SkeletonRows rows={rows} avatar={avatar} action={action} />}
     </div>
   );
 }

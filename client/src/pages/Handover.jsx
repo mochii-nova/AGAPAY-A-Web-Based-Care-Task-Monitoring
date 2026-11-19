@@ -214,7 +214,7 @@ export default function Handover() {
             <div className="handover-layout">
               <div className="handover-main">
                 {shiftsQuery.status === 'loading' || draftQuery.status === 'loading' || residentsStatus === 'loading' ? (
-                  <div className="card"><LoadingState label="Loading your shift…" /></div>
+                  <div className="card"><LoadingState label="Loading your shift…" rows={3} /></div>
                 ) : shiftsQuery.status === 'error' ? (
                   <div className="card"><ErrorState message={shiftsQuery.error} onRetry={shiftsQuery.reload} /></div>
                 ) : !shift ? (

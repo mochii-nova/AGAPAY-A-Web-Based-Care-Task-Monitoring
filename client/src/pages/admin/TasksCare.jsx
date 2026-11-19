@@ -140,6 +140,7 @@ export default function TasksCare() {
     try {
       await api.delete(`/tasks/${deleteFor.id}`);
       query.setData((list) => list.filter((t) => t.id !== deleteFor.id));
+      query.reload({ silent: true }); // and fetch the list again quietly, so it matches the server
       reloadOverdue({ silent: true });
       showToast(`${deleteFor.task} was deleted.`);
       setDeleteFor(null);

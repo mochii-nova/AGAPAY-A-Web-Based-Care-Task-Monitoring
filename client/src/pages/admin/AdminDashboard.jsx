@@ -330,7 +330,7 @@ export default function AdminDashboard() {
       <PushPrompt />
 
       {failed && <div className="card"><ErrorState message={failed.error} onRetry={() => { tasksQuery.reload(); rosterQuery.reload(); }} /></div>}
-      {!ready && !failed && <div className="card"><LoadingState label="Loading today…" /></div>}
+      {!ready && !failed && <LoadingState label="Loading today…" shape="cards" />}
 
       {ready && (
         <>

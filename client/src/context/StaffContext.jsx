@@ -40,6 +40,7 @@ export function StaffProvider({ children }) {
   const remove = async (id) => {
     await api.delete(`/users/${id}`);
     query.setData((list) => list.filter((u) => u.id !== id));
+    query.reload({ silent: true }); // and fetch the list again quietly, so it matches the server
   };
 
   // Resolves to the temporary password to give to the person

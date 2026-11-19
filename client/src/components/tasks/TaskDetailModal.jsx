@@ -144,7 +144,7 @@ function TaskForm({ task, onSave, onCancel }) {
 
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving}>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
           {saving ? 'Saving…' : 'Save'}
         </button>
       </div>

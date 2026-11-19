@@ -77,7 +77,7 @@ function PhotoForm({ onClose }) {
           </button>
         )}
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="button" className="btn btn--primary" disabled={!preview || saving} onClick={() => save(preview, 'Profile photo saved.')}>
+        <button type="button" className="btn btn--primary" disabled={!preview || saving} aria-busy={saving} onClick={() => save(preview, 'Profile photo saved.')}>
           {saving ? 'Saving…' : 'Save photo'}
         </button>
       </div>

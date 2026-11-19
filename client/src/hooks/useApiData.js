@@ -4,7 +4,9 @@ import { onLiveRefresh } from '../utils/liveRefresh';
 
 const OFFLINE_MESSAGE = "Can't reach the server. Please check that the backend is running.";
 const SLOW_MESSAGE = 'The server is taking too long to answer. Please try again.';
-const TIME_LIMIT = 20 * 1000; // a request that hasn't answered by then counts as failed
+// A request that hasn't answered by then counts as failed. Generous, because the online server can take
+// up to a minute to wake up the first time.
+const TIME_LIMIT = 60 * 1000;
 
 // The default `transform`. It must be the same function on every render: a new one each time
 // would start a new request after every answer, forever.

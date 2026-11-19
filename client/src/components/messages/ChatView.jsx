@@ -113,7 +113,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
 
       <div className="chat-log" ref={listRef} role="log" aria-live="polite" aria-label="Messages" tabIndex={0}>
         {query.status === 'loading' ? (
-          <LoadingState label="Loading messages…" />
+          <LoadingState label="Loading messages…" shape="bubbles" />
         ) : query.status === 'error' ? (
           <ErrorState message={query.error} onRetry={query.reload} />
         ) : messages.length === 0 ? (
@@ -166,7 +166,7 @@ export default function ChatView({ conversation, initialDraft = '', onSent, onBa
             aria-invalid={error ? 'true' : undefined}
             aria-describedby="composer-note"
           />
-          <button type="submit" className="btn btn--primary composer__send" disabled={sending}>
+          <button type="submit" className="btn btn--primary composer__send" disabled={sending} aria-busy={sending}>
             <Send size={16} aria-hidden="true" /> <span>{sending ? 'Sending…' : 'Send'}</span>
           </button>
         </div>

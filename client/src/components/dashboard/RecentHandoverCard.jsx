@@ -45,7 +45,7 @@ export default function RecentHandoverCard({ handover, myId, onMarkRead, busy })
             <CheckCheck size={16} aria-hidden="true" /> You read it{myRead?.readAt && ` at ${formatTime(myRead.readAt)}`}
           </span>
         ) : (
-          <button type="button" className="btn btn--soft btn--sm" onClick={onMarkRead} disabled={busy}>
+          <button type="button" className="btn btn--soft btn--sm" onClick={onMarkRead} disabled={busy} aria-busy={busy}>
             {busy ? 'Marking…' : 'Mark as read'}
           </button>
         )}

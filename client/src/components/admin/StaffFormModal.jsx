@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { CircleAlert, RefreshCw, Trash2 } from 'lucide-react';
 import Modal from '../Modal';
 import FormField from '../FormField';
@@ -7,6 +7,8 @@ import { useStaff } from '../../context/StaffContext';
 import { useToast } from '../../context/ToastContext';
 import { SHIFTS } from '../../constants';
 import useSaving from '../../hooks/useSaving';
+import { sameText } from '../../utils/duplicates';
+import DuplicateWarning from '../DuplicateWarning';
 
 // Dropdowns start on "Choose…" (no value picked for you)
 const SHIFT_OPTIONS = [{ value: '', label: 'Choose…' }, ...SHIFTS.map((s) => ({ value: s.apiValue, label: `${s.label} · ${s.start} – ${s.end}` }))];
@@ -44,7 +46,7 @@ function validate(form, adding) {
 // The form inside the pop-up: a new account (`person` empty) or the admin-set details of one
 function StaffForm({ person, isMe, onClose, onDelete }) {
   const adding = !person;
-  const { create, update } = useStaff();
+  const { staff, create, update } = useStaff();
   const showToast = useToast();
   const [form, setForm] = useState({
     firstName: '',
@@ -67,15 +69,35 @@ function StaffForm({ person, isMe, onClose, onDelete }) {
     setErrors({ ...errors, [e.target.name]: undefined });
   };
 
+  // Duplicates (new accounts): an Employee ID or email already used shows under the field straight away
+  // (the server blocks those too); someone with the same name asks first ("Add another one anyway?")
+  const idOwner = adding && form.username.trim() ? staff.find((u) => sameText(u.employeeId ?? u.username, form.username)) : null;
+  const emailOwner = adding && form.email.trim() ? staff.find((u) => u.email && sameText(u.email, form.email)) : null;
+  const liveErrors = {
+    ...(idOwner && { username: `${idOwner.employeeId ?? idOwner.username} is already used by ${idOwner.name}. Please use another Employee ID.` }),
+    ...(emailOwner && { email: `${emailOwner.email} is already used by ${emailOwner.name}'s account.` }),
+  };
+  const fullName = `${form.firstName} ${form.lastName}`;
+  const sameNamed = adding && form.firstName.trim() && form.lastName.trim()
+    ? staff.find((u) => sameText(`${u.firstName ?? ''} ${u.lastName ?? ''}`, fullName) || sameText(u.name, fullName))
+    : null;
+  const [dupAsked, setDupAsked] = useState(false);
+  const dupOk = useRef(''); // the name "Add anyway" was pressed for
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const found = validate(form, adding);
+    e?.preventDefault();
+    const found = { ...validate(form, adding), ...liveErrors };
     setErrors(found);
     const first = Object.keys(found)[0];
     if (first) {
       document.getElementById(`staff-${first}`)?.focus();
       return;
     }
+    if (sameNamed && !sameText(dupOk.current, fullName)) {
+      setDupAsked(true);
+      return;
+    }
+    setDupAsked(false);
     if (!startSaving()) return;
     setSaveError('');
     const adminDetails = { assignedShift: form.assignedShift || null, dateHired: form.dateHired || null, title: form.title.trim() };
@@ -116,7 +138,7 @@ function StaffForm({ person, isMe, onClose, onDelete }) {
   };
 
   const field = (name, label, props = {}) => (
-    <FormField id={`staff-${name}`} name={name} label={label} value={form[name]} onChange={handleChange} error={errors[name]} {...props} />
+    <FormField id={`staff-${name}`} name={name} label={label} value={form[name]} onChange={handleChange} error={liveErrors[name] ?? errors[name]} {...props} />
   );
   const select = (name, label, options, props = {}) => (
     <SelectField id={`staff-${name}`} name={name} label={label} value={form[name]} onChange={handleChange} options={options} {...props} />
@@ -170,6 +192,19 @@ function StaffForm({ person, isMe, onClose, onDelete }) {
         </div>
       )}
 
+      {dupAsked && sameNamed && (
+        <DuplicateWarning
+          onCancel={() => setDupAsked(false)}
+          onConfirm={() => {
+            dupOk.current = fullName;
+            handleSubmit();
+          }}
+        >
+          A staff member named <strong>{sameNamed.name}</strong> already exists ({sameNamed.employeeId ?? sameNamed.username}
+          {sameNamed.status && sameNamed.status !== 'active' ? `, ${sameNamed.status}` : ''}). Add another one anyway?
+        </DuplicateWarning>
+      )}
+
       <div className="modal__footer modal__footer--inline">
         {!adding && !isMe && onDelete && (
           <button type="button" className="btn btn--danger" style={{ marginRight: 'auto' }} onClick={onDelete}>
@@ -177,7 +212,7 @@ function StaffForm({ person, isMe, onClose, onDelete }) {
           </button>
         )}
         <button type="button" className="btn btn--outline" onClick={() => onClose(false)}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving}>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
           {saving ? 'Saving…' : adding ? 'Create account' : 'Save changes'}
         </button>
       </div>

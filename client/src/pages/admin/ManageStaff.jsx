@@ -207,7 +207,7 @@ export default function ManageStaff() {
         </div>
       )}
 
-      {status === 'loading' && <div className="card"><LoadingState label="Loading staff…" /></div>}
+      {status === 'loading' && <div className="card"><LoadingState label="Loading staff…" avatar /></div>}
       {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
 
       {status === 'ready' && (

@@ -65,7 +65,7 @@ function ResetPassword({ person, onClose }) {
       </p>
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onClose} disabled={busy}>Cancel</button>
-        <button type="button" className="btn btn--primary" onClick={reset} disabled={busy}>
+        <button type="button" className="btn btn--primary" onClick={reset} disabled={busy} aria-busy={busy}>
           {busy ? 'Resetting…' : 'Reset password'}
         </button>
       </div>

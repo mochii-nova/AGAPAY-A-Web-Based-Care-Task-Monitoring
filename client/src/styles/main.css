@@ -584,6 +584,11 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .alert--success { background: var(--completed-bg); color: var(--completed-text); }
 .alert--info { background: var(--accent-tint); color: var(--on-accent-tint); }
 .alert--warning { background: var(--pending-bg); color: var(--pending-text); }
+/* "Already exists. Add another one anyway?" (DuplicateWarning.jsx) */
+.dup-warning__body { display: flex; flex: 1; flex-direction: column; gap: 10px; min-width: 0; }
+.dup-warning__body p { margin: 0; }
+.dup-warning__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.dup-warning__actions .btn { min-height: var(--tap); }
 
 /* Buttons
    primary = the ONE main action on a page (solid plum)
@@ -744,6 +749,76 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 .state-msg--error svg { color: var(--overdue-text); }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Skeletons (Skeleton.jsx): grey placeholder shapes while a page loads for the first time, with a soft
+   shimmer moving across (no shimmer for reduced motion: the rule at the top turns all animation off) */
+:root { --skeleton: #ece5dd; --skeleton-shine: rgba(255, 255, 255, 0.55); }
+:root[data-theme='dark'] { --skeleton: #2c2338; --skeleton-shine: rgba(255, 255, 255, 0.06); }
+.skeleton {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--skeleton) linear-gradient(90deg, transparent 0%, var(--skeleton-shine) 50%, transparent 100%) no-repeat;
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeleton--circle { border-radius: 50%; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.skeleton-wrap { padding: 4px 0; }
+/* Rows of a list or table */
+.skeleton-rows { list-style: none; margin: 0; padding: 0 4px; }
+.skeleton-row { display: flex; align-items: center; gap: 14px; padding: 16px 12px; }
+.skeleton-row + .skeleton-row { border-top: 1px solid var(--border); }
+.skeleton-row__text { display: flex; flex: 1; flex-direction: column; gap: 8px; min-width: 0; }
+/* Dashboard cards */
+.skeleton-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.card.skeleton-card { display: flex; flex-direction: column; gap: 12px; min-height: 150px; }
+.card.skeleton-card--tall { min-height: 230px; }
+/* Chat bubbles */
+.skeleton-bubbles { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.skeleton-bubbles .skeleton { max-width: 70%; }
+.skeleton-bubbles .skeleton.is-mine { align-self: flex-end; }
+/* Calendar days */
+.skeleton-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; padding: 12px; }
+.skeleton-calendar__head { justify-self: center; margin-bottom: 10px; }
+.skeleton-calendar__day { display: flex; flex-direction: column; gap: 10px; min-height: 84px; padding: 10px 8px; border-radius: 6px; background: var(--tint); }
+@media (max-width: 600px) {
+  .skeleton-calendar { padding: 8px; }
+  .skeleton-calendar__day { min-height: 56px; padding: 6px 4px; align-items: center; }
+  .skeleton-row { padding: 14px 8px; }
+}
+
+/* "Waking up the server…" (ServerWakeNote.jsx): a small note at the bottom of the screen */
+.wake-note-slot { position: fixed; left: 50%; bottom: 20px; z-index: 90; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
+.wake-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  font-size: 0.9rem;
+  animation: rise-in 0.2s var(--ease) both;
+}
+.wake-note svg { flex-shrink: 0; color: var(--indigo); }
+
+/* A save button while it waits for the server: a small spinner before "Saving…" (its own icon hides) */
+.btn[aria-busy='true'] { cursor: progress; }
+.btn[aria-busy='true'] > svg { display: none; }
+.btn[aria-busy='true']::before {
+  content: '';
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
 /* Status labels: a small coloured dot + the word (never colour alone, no filled pill) */
 .status-pill {

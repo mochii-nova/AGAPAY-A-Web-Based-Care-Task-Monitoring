@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { CircleAlert, TriangleAlert } from 'lucide-react';
 import api from '../../api';
 import Modal from '../Modal';
@@ -9,6 +9,8 @@ import { TASK_CATEGORIES, shiftTime } from '../../constants';
 import { isoDay } from '../../hooks/useShifts';
 import { addDays, dayLabel, dueFrom, timeOf, shiftOfDue, caregiversOnShift } from '../../utils/adminTasks';
 import useSaving from '../../hooks/useSaving';
+import { sameText } from '../../utils/duplicates';
+import DuplicateWarning from '../DuplicateWarning';
 
 const MAX_REPEAT = 31;
 
@@ -98,8 +100,19 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
     setErrors({ ...errors, [e.target.name]: undefined });
   };
 
+  // A new task with the same name, for the same resident, at the same date and time as one that already
+  // exists asks first ("Create it anyway?"). The server is asked for those days' tasks just before saving.
+  const [dup, setDup] = useState(null); // the existing task, while the warning shows
+  const dupOk = useRef(''); // the task "Create anyway" was pressed for
+  const dupKey = `${form.task.trim().toLowerCase()}|${form.residentId}|${form.date}|${form.time}|${days}`;
+  const findDuplicate = async () => {
+    const { data } = await api.get(`/tasks?from=${form.date}&to=${addDays(form.date, days - 1)}`);
+    const times = new Set(Array.from({ length: days }, (_, i) => dueFrom(addDays(form.date, i), form.time).getTime()));
+    return data.find((t) => String(t.residentId) === form.residentId && sameText(t.task, form.task) && times.has(new Date(t.dueAt).getTime())) ?? null;
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     const found = validate(form, chosenOk);
     setErrors(found);
     const first = Object.keys(found)[0];
@@ -109,6 +122,19 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
     }
     if (!startSaving()) return;
     setSaveError('');
+    setDup(null);
+    if (!editing && dupOk.current !== dupKey) {
+      try {
+        const existing = await findDuplicate();
+        if (existing) {
+          setDup(existing);
+          setSaving(false);
+          return;
+        }
+      } catch {
+        // Couldn't check: save anyway (the check is only a helpful warning)
+      }
+    }
     const fields = {
       task: form.task.trim(),
       category: form.category,
@@ -254,9 +280,23 @@ function TaskForm({ task, preset, residents, caregivers, onSaved, onResidentSave
         <p id="task-instructions-hint" className="field__hint">The caregiver sees this at the top when they open the task.</p>
       </div>
 
+      {dup && (
+        <DuplicateWarning
+          confirmLabel="Create anyway"
+          onCancel={() => setDup(null)}
+          onConfirm={() => {
+            dupOk.current = dupKey;
+            handleSubmit();
+          }}
+        >
+          <strong>{dup.task}</strong> for {dup.resident ?? resident?.name} on {dayLabel(isoDay(dup.dueAt))} at{' '}
+          {new Date(dup.dueAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} already exists. Create it anyway?
+        </DuplicateWarning>
+      )}
+
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving}>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
           {saving ? 'Saving…' : editing ? 'Save changes' : days > 1 ? `Create ${days} tasks` : 'Create task'}
         </button>
       </div>

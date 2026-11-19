@@ -172,7 +172,7 @@ export default function Register() {
         </div>
 
         <p className="auth__note">An administrator will review your account before you can sign in.</p>
-        <button type="submit" className="btn btn--primary auth__submit" disabled={loading}>
+        <button type="submit" className="btn btn--primary auth__submit" disabled={loading} aria-busy={loading}>
           {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>

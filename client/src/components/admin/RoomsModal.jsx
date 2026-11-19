@@ -83,7 +83,7 @@ export default function RoomsModal({ open, rooms, onChanged, onClose }) {
             hint="The beds are named B1, B2, B3… You can add or remove beds later."
           />
         )}
-        <button type="submit" className="btn btn--primary" disabled={saving}>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>
           <Plus size={18} aria-hidden="true" /> {saving ? 'Saving…' : 'Add room'}
         </button>
       </form>

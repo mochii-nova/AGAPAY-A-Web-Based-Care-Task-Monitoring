@@ -123,6 +123,7 @@ export default function ManageResidents() {
     try {
       await api.delete(`/residents/${deleteFor.id}`);
       setData((list) => list.filter((r) => r.id !== deleteFor.id));
+      reload({ silent: true }); // and fetch the list again quietly, so it matches the server
       roomsQuery.reload({ silent: true }); // their room or bed is free again
       showToast(`${deleteFor.name} was removed.`);
       setDeleteFor(null);
@@ -165,7 +166,7 @@ export default function ManageResidents() {
         </button>
       </PageHeader>
 
-      {status === 'loading' && <div className="card"><LoadingState label="Loading residents…" /></div>}
+      {status === 'loading' && <div className="card"><LoadingState label="Loading residents…" avatar /></div>}
       {status === 'error' && <div className="card"><ErrorState message={error} onRetry={reload} /></div>}
 
       {status === 'ready' && (
@@ -259,6 +260,7 @@ export default function ManageResidents() {
       <ResidentFormModal
         open={!!form}
         resident={form?.resident}
+        residents={residents}
         suggestedCode={nextResidentCode(residents)}
         rooms={roomsQuery.rooms}
         onSave={saveResident}

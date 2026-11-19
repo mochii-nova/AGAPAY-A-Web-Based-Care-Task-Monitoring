@@ -139,7 +139,7 @@ function EditProfileForm({ onClose }) {
 
       <div className="modal__footer modal__footer--inline">
         <button type="button" className="btn btn--outline" onClick={onClose}>Cancel</button>
-        <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
+        <button type="submit" className="btn btn--primary" disabled={saving} aria-busy={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
       </div>
     </form>
   );

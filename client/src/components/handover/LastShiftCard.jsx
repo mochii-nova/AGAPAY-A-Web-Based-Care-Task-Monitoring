@@ -65,7 +65,7 @@ export default function LastShiftCard({ handover, myId, onAcknowledge }) {
           {myRead?.readAt && ` at ${formatTime(myRead.readAt)}`}
         </p>
       ) : (
-        <button type="button" className="btn btn--soft last-shift__btn" onClick={markRead} disabled={busy}>
+        <button type="button" className="btn btn--soft last-shift__btn" onClick={markRead} disabled={busy} aria-busy={busy}>
           {busy ? 'Saving…' : 'Mark as read'}
         </button>
       )}

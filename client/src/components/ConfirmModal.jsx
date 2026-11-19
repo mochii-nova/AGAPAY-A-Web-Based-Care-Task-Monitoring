@@ -5,7 +5,10 @@ import Modal from './Modal';
 // "Are you sure?" pop-up. `danger` makes the confirm button red (for deactivate / delete).
 // `error` shows inside the pop-up if the action failed.
 // A second click while onConfirm is still running is ignored, so nothing is done twice.
-export default function ConfirmModal({ open, title, children, confirmLabel, danger = false, busy = false, error, onConfirm, onClose }) {
+// While it runs the button says "Deleting…" for a delete ("Delete task", "Delete for good"), otherwise
+// "Saving…" (or `busyLabel`).
+export default function ConfirmModal({ open, title, children, confirmLabel, busyLabel, danger = false, busy = false, error, onConfirm, onClose }) {
+  const busyText = busyLabel ?? (/^delete/i.test(String(confirmLabel)) ? 'Deleting…' : 'Saving…');
   const running = useRef(false);
   const confirm = async () => {
     if (running.current || busy) return;
@@ -26,8 +29,8 @@ export default function ConfirmModal({ open, title, children, confirmLabel, dang
       footer={
         <>
           <button type="button" className="btn btn--outline" onClick={onClose} disabled={busy}>Cancel</button>
-          <button type="button" className={`btn ${danger ? 'btn--danger-solid' : 'btn--primary'}`} onClick={confirm} disabled={busy}>
-            {busy ? 'Saving…' : confirmLabel}
+          <button type="button" className={`btn ${danger ? 'btn--danger-solid' : 'btn--primary'}`} onClick={confirm} disabled={busy} aria-busy={busy}>
+            {busy ? busyText : confirmLabel}
           </button>
         </>
       }
