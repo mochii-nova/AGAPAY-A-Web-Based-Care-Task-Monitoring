@@ -161,11 +161,12 @@
 
 /* Choose caregivers */
 .assign__intro { margin: 0 0 16px; color: var(--muted); }
-.assign__group { margin: 0 0 14px; padding: 0; border: 0; }
+/* Each caregiver is its own box, 6px apart, so two ticked people in one shift never run together */
+.assign__group { display: flex; flex-direction: column; gap: 6px; margin: 0 0 14px; padding: 0; border: 0; }
 .assign__group .small-label { margin-bottom: 6px; padding: 0; }
-.assign__option { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+.assign__option { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer; }
 .assign__option:hover { background: var(--tint); }
-.assign__option:has(input:checked) { background: var(--indigo-soft); }
+.assign__option:has(input:checked) { border-color: var(--lavender-line); background: var(--indigo-soft); }
 .assign__who { display: flex; flex-direction: column; min-width: 0; }
 .assign__who strong { font-weight: var(--fw-medium); }
 .assign__who small { color: var(--muted); font-size: 0.82rem; }
