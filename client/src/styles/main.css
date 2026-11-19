@@ -764,7 +764,9 @@ textarea.field__input { resize: vertical; min-height: 96px; }
 }
 .skeleton--circle { border-radius: 50%; }
 @keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
-.skeleton-wrap { padding: 4px 0; }
+.skeleton-wrap.is-shown { padding: 4px 0; }
+/* For the first half second nothing shows at all, not even an empty card around the skeleton */
+.card:has(> .skeleton-wrap:only-child:not(.is-shown)) { display: none; }
 /* Rows of a list or table */
 .skeleton-rows { list-style: none; margin: 0; padding: 0 4px; }
 .skeleton-row { display: flex; align-items: center; gap: 14px; padding: 16px 12px; }

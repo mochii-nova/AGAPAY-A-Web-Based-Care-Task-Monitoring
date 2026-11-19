@@ -12,27 +12,41 @@ const TIME_LIMIT = 60 * 1000;
 // would start a new request after every answer, forever.
 const asIs = (data) => data;
 
-// Data kept for { cache: true }, per signed-in person and route, so going back is instant.
-// It lives until the page is reloaded.
+// The last answer for each route, per signed-in person, so going back to a page shows its data straight
+// away (then it's refreshed quietly). The server's answer is kept as it came, and each page's own
+// `transform` is applied when it's read. It lives until the browser page is reloaded.
 const cache = new Map();
 const cacheKey = (path) => `${localStorage.getItem('token') ?? ''} ${path}`;
+const fromCache = (path, transform) => {
+  const key = cacheKey(path);
+  return path && cache.has(key) ? transform(cache.get(key)) : undefined;
+};
+const startState = (path, transform, useCache) => {
+  const cached = useCache ? fromCache(path, transform) : undefined;
+  return cached !== undefined
+    ? { path, data: cached, status: 'ready', error: '' }
+    : { path, data: null, status: 'loading', error: '' };
+};
 
 // Loads data from a backend route and tracks loading / error.
 // `transform` must be defined outside the component (or memoized).
 // `live`: also refresh quietly with the app's one shared timer (every 15 s, and when you come back
 // to the tab or window; paused while the tab is hidden). See utils/liveRefresh.js.
 // A refresh that brings the same data changes nothing on screen (no new render), and it never
-// shows "Loading…", so typing and open pop-ups are never reset.
-// `cache`: show the copy loaded earlier straight away (then refresh it quietly).
+// shows the loading skeleton, so typing and open pop-ups are never reset.
+// `cache` (on unless turned off): a route loaded before shows its data straight away, then refreshes quietly.
 // A `path` of null loads nothing (data stays null).
-export default function useApiData(path, { transform = asIs, live = false, cache: useCache = false } = {}) {
-  const [state, setState] = useState(() =>
-    useCache && cache.has(cacheKey(path))
-      ? { data: cache.get(cacheKey(path)), status: 'ready', error: '' }
-      : { data: null, status: 'loading', error: '' }
-  );
+export default function useApiData(path, { transform = asIs, live = false, cache: useCache = true } = {}) {
+  const [state, setState] = useState(() => startState(path, transform, useCache));
   const [reloadKey, setReloadKey] = useState(0);
   const lastAnswer = useRef(null); // the last answer as text, to skip refreshes that bring nothing new
+
+  // Another route (another day, another person): show its remembered data if there is some; otherwise
+  // what's on screen stays until the new answer arrives (as before)
+  if (state.path !== path) {
+    const cached = useCache ? fromCache(path, transform) : undefined;
+    setState(cached !== undefined ? { path, data: cached, status: 'ready', error: '' } : { ...state, path });
+  }
 
   useEffect(() => {
     if (!path) return undefined; // nothing to load (yet)
@@ -43,13 +57,14 @@ export default function useApiData(path, { transform = asIs, live = false, cache
     api
       .get(path, { signal: controller.signal, timeout: TIME_LIMIT })
       .then(({ data }) => {
+        if (useCache) cache.set(cacheKey(path), data);
         const text = JSON.stringify(data);
         if (text === lastAnswer.current) {
           setState((s) => (s.status === 'ready' ? s : { ...s, status: 'ready', error: '' }));
           return;
         }
         lastAnswer.current = text;
-        setState({ data: transform(data), status: 'ready', error: '' });
+        setState({ path, data: transform(data), status: 'ready', error: '' });
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
@@ -59,23 +74,18 @@ export default function useApiData(path, { transform = asIs, live = false, cache
             ? OFFLINE_MESSAGE
             : err.response.data?.message || 'Something went wrong. Please try again.';
         // A failed quiet refresh keeps what is already on screen
-        setState((s) => (s.status === 'ready' ? s : { data: null, status: 'error', error }));
+        setState((s) => (s.status === 'ready' ? s : { path, data: null, status: 'error', error }));
       });
 
     return () => controller.abort();
-  }, [path, reloadKey, transform]);
-
-  // Keep the cached copy up to date (also after setData)
-  useEffect(() => {
-    if (useCache && state.status === 'ready') cache.set(cacheKey(path), state.data);
-  }, [useCache, path, state]);
+  }, [path, reloadKey, transform, useCache]);
 
   useEffect(() => {
     if (!live || !path) return undefined;
     return onLiveRefresh(() => setReloadKey((k) => k + 1));
   }, [live, path]);
 
-  // reload() shows "Loading…" again; reload({ silent: true }) refreshes quietly in the background
+  // reload() shows the loading skeleton again; reload({ silent: true }) refreshes quietly in the background
   const reload = ({ silent = false } = {}) => {
     if (!silent) setState((s) => ({ ...s, status: 'loading' }));
     setReloadKey((k) => k + 1);
@@ -83,10 +93,13 @@ export default function useApiData(path, { transform = asIs, live = false, cache
 
   // Change the loaded data in place, e.g. to show a saved item right away: setData((list) => ...)
   // (The next answer from the server is then always shown, even if it's the same as the last one.)
+  // The remembered copy is dropped, so going back to the page never shows the older answer.
   const setData = (update) => {
     lastAnswer.current = null;
+    if (path) cache.delete(cacheKey(path));
     setState((s) => (s.data ? { ...s, data: update(s.data) } : s));
   };
 
-  return { ...state, reload, setData };
+  const { path: _ignored, ...shown } = state;
+  return { ...shown, reload, setData };
 }
